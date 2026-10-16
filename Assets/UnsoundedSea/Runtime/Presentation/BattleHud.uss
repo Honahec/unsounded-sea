@@ -1,0 +1,98 @@
+.battle-hud {
+    background-color: rgba(0, 0, 0, 0);
+    color: rgb(237, 232, 212);
+    font-size: 16px;
+}
+.battle-hud Label { white-space: normal; -unity-text-align: middle-left; }
+.battle-hud Button {
+    margin: 0;
+    padding: 9px 14px;
+    border-width: 1px;
+    border-color: rgb(113, 139, 141);
+    border-radius: 2px;
+    min-height: 40px;
+    background-color: rgba(31, 53, 62, 0.94);
+    color: rgb(237, 232, 212);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+.battle-hud Button:hover { border-color: rgb(235, 200, 133); background-color: rgb(55, 80, 86); }
+.battle-hud Button:focus { border-color: rgb(255, 221, 151); border-width: 2px; }
+.battle-hud Button:active { background-color: rgb(75, 97, 100); }
+.battle-hud Button:disabled { opacity: 0.5; }
+.vitals { position: absolute; top: 24px; left: 28px; flex-direction: row; }
+.vital { width: 146px; margin-right: 15px; padding: 9px 12px; background-color: rgba(22, 39, 48, 0.88); border-left-width: 2px; border-left-color: rgb(210, 142, 122); }
+.vital-title { font-size: 12px; color: rgb(206, 215, 207); }
+.vital-value { font-size: 21px; color: rgb(245, 232, 204); margin-top: 1px; }
+.vital-track { height: 3px; background-color: rgb(65, 80, 84); margin-top: 6px; }
+.vital-fill { height: 3px; background-color: rgb(215, 147, 127); }
+.sanity { border-left-color: rgb(133, 192, 185); }
+.sanity .vital-fill { background-color: rgb(133, 192, 185); }
+.encounter-heading { position: absolute; top: 22px; left: 35%; right: 26%; align-items: center; }
+.overline { font-size: 10px; color: rgb(199, 185, 150); letter-spacing: 2px; -unity-text-align: middle-center; }
+.encounter-name { font-size: 25px; color: rgb(245, 231, 198); margin-top: 4px; -unity-text-align: middle-center; }
+.objective { font-size: 13px; color: rgb(210, 224, 219); margin-top: 5px; -unity-text-align: middle-center; }
+.battle-hud .journal-toggle { position: absolute; top: 28px; right: 28px; min-width: 112px; font-size: 14px; background-color: rgba(28, 47, 56, 0.8); }
+.targets { position: absolute; top: 24%; left: 34%; right: 27%; align-items: center; }
+.battle-hud .target { padding: 6px 16px; min-height: 32px; margin-bottom: 6px; background-color: rgba(21, 36, 44, 0.72); border-width: 0; border-bottom-width: 1px; border-bottom-color: rgb(128, 151, 146); font-size: 14px; }
+.battle-hud .target.selected { border-bottom-color: rgb(231, 195, 124); color: rgb(245, 219, 166); }
+.intel { position: absolute; left: 28px; top: 30%; width: 225px; padding: 13px 15px; background-color: rgba(24, 43, 51, 0.87); border-left-width: 1px; border-left-color: rgb(190, 166, 111); }
+.section-label { font-size: 12px; color: rgb(211, 187, 137); margin-bottom: 7px; letter-spacing: 1px; }
+.clue { color: rgb(233, 235, 223); font-size: 15px; }
+.intent { border-top-width: 1px; border-top-color: rgb(78, 106, 112); padding-top: 9px; margin-top: 12px; }
+.intent-label { color: rgb(219, 194, 137); font-size: 11px; margin-bottom: 5px; }
+.intent-text { font-size: 14px; color: rgb(224, 230, 215); }
+.confirmed .intent-label { color: rgb(159, 219, 192); }
+.tools { position: absolute; top: 37%; right: 28px; width: 180px; }
+.battle-hud .tool { margin-bottom: 9px; padding: 11px 8px; font-size: 14px; min-height: 64px; background-color: rgba(30, 52, 61, 0.91); }
+.journal { position: absolute; top: 90px; right: 28px; bottom: 255px; width: 305px; padding: 18px; background-color: rgb(214, 205, 177); border-width: 1px; border-color: rgb(190, 171, 124); }
+.journal-title { font-size: 24px; color: rgb(37, 57, 59); margin-bottom: 14px; }
+.journal ScrollView { flex-grow: 1; }
+.journal .section-label { color: rgb(84, 85, 62); margin-top: 12px; }
+.evidence, .log-entry { color: rgb(42, 60, 60); font-size: 13px; border-bottom-width: 1px; border-bottom-color: rgb(168, 164, 138); padding: 8px 0; }
+.player-status { position: absolute; bottom: 38px; left: 28px; width: 168px; padding: 13px 14px; background-color: rgba(23, 43, 51, 0.9); border-top-width: 1px; border-top-color: rgb(188, 166, 109); }
+.player-status .section-label { margin-bottom: 1px; }
+.action-value { font-size: 44px; color: rgb(241, 211, 148); }
+.defense { font-size: 12px; color: rgb(208, 224, 214); margin-top: 6px; }
+.hand { position: absolute; left: 218px; right: 213px; bottom: 30px; height: 216px; }
+.hand .unity-scroll-view__content-container { padding: 10px 3px 4px; }
+.battle-hud .card { width: 148px; min-width: 148px; height: 192px; margin-right: 9px; padding: 12px 13px; background-color: rgb(223, 214, 185); border-color: rgb(174, 151, 102); border-top-width: 3px; border-top-color: rgb(207, 173, 107); align-items: stretch; }
+.battle-hud .card:hover { background-color: rgb(243, 231, 199); border-color: rgb(255, 222, 151); translate: 0 -7px; }
+.battle-hud .card:focus { border-width: 2px; border-color: rgb(255, 228, 167); }
+.battle-hud .card:disabled { opacity: 0.65; }
+.card-cost { width: 29px; height: 29px; border-radius: 15px; background-color: rgb(37, 69, 75); color: rgb(245, 224, 178); font-size: 21px; -unity-text-align: middle-center; margin-bottom: 9px; }
+.card-name { font-size: 20px; color: rgb(32, 52, 56); border-bottom-width: 1px; border-bottom-color: rgb(170, 155, 118); padding-bottom: 8px; margin-bottom: 9px; }
+.card-description { font-size: 14px; color: rgb(40, 59, 58); flex-grow: 1; }
+.card-price { font-size: 11px; color: rgb(107, 71, 58); margin-top: 5px; }
+.piles { position: absolute; bottom: 12px; left: 225px; font-size: 11px; color: rgb(195, 211, 202); }
+.turn-controls { position: absolute; bottom: 43px; right: 28px; width: 166px; }
+.battle-hud .end-turn { min-height: 58px; font-size: 21px; background-color: rgb(207, 181, 120); color: rgb(31, 49, 53); border-color: rgb(238, 210, 155); }
+.battle-hud .end-turn:hover { background-color: rgb(238, 211, 151); }
+.battle-hud .task { margin-bottom: 12px; font-size: 13px; min-height: 52px; }
+.notice { position: absolute; bottom: 251px; left: 31%; right: 26%; -unity-text-align: middle-center; color: rgb(244, 224, 180); font-size: 13px; }
+.outcome { position: absolute; top: 36%; left: 33%; right: 27%; padding: 25px; align-items: center; background-color: rgba(22, 42, 50, 0.96); border-top-width: 1px; border-bottom-width: 1px; border-color: rgb(193, 165, 105); }
+.outcome-title { color: rgb(244, 220, 164); font-size: 33px; -unity-text-align: middle-center; }
+.outcome-description { font-size: 15px; color: rgb(223, 232, 219); margin: 13px 0 20px; -unity-text-align: middle-center; }
+.error { padding: 20px; color: rgb(255, 190, 164); background-color: rgb(52, 37, 39); }
+.compact .vitals { left: 18px; top: 18px; }
+.compact .vital { width: 119px; padding: 7px 10px; margin-right: 9px; }
+.compact .vital-value { font-size: 19px; }
+.compact .encounter-heading { top: 17px; }
+.compact .encounter-name { font-size: 22px; }
+.compact .intel { width: 195px; left: 18px; padding: 10px 12px; }
+.compact .clue { font-size: 14px; }
+.compact .intent-text { font-size: 13px; }
+.compact .tools { width: 158px; right: 18px; }
+.compact .tool { font-size: 12px; min-height: 55px; }
+.compact .player-status { left: 18px; bottom: 32px; width: 141px; }
+.compact .action-value { font-size: 35px; }
+.compact .hand { left: 176px; right: 180px; bottom: 25px; height: 187px; }
+.compact .card { width: 130px; min-width: 130px; height: 166px; padding: 9px 10px; margin-right: 7px; }
+.compact .card-cost { width: 25px; height: 25px; font-size: 18px; margin-bottom: 6px; }
+.compact .card-name { font-size: 18px; padding-bottom: 6px; margin-bottom: 7px; }
+.compact .card-description { font-size: 13px; }
+.compact .turn-controls { right: 18px; width: 145px; bottom: 36px; }
+.compact .end-turn { font-size: 18px; min-height: 52px; }
+.compact .piles { left: 183px; bottom: 10px; }
+.compact .notice { bottom: 214px; }
+.compact .journal { bottom: 225px; }

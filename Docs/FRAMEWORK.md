@@ -5,14 +5,27 @@
 ## 快速运行
 
 1. 打开工程，等待脚本编译完成。
-2. 菜单 **Unsounded Sea → Create or Open Framework Sandbox**，或直接打开 `Assets/UnsoundedSea/Scenes/FrameworkSandbox.unity`。
-3. 点击 Play。选择公开意图、有限调查、封门目标、卡牌实验四种遭遇之一。
-4. 先选择目标，再点击卡牌或道具；点击「结束回合」结算。封门场景每回合提供一次「绘制封线」，四次即可完成，不需要击杀。
-5. 「保存 / 读取」验证战斗恢复；保存位置为 `Application.persistentDataPath/battle-{场景索引}.json`，覆盖时保留 `.bak`。重开不会删除存档。
+2. 菜单 **Unsounded Sea → Create or Open Battle Scene**，或直接打开 `Assets/UnsoundedSea/Scenes/Battle.unity`。
+3. 点击 Play。默认进入蒙面祷告者遭遇。其他遭遇通过 `BattleHud` Inspector 的 `Initial Encounter` 选择：0 公开意图、1 有限调查、2 封门、3 卡牌实验；游戏 HUD 不提供开发用场景切换。
+4. 点击目标名牌选择敌人，再点击底部手牌或右侧调查工具；右下角结束回合。封门遭遇提供独立的「绘制封线」，四次即可完成，不需要击杀。
+5. 右上角「调查档案」展开证据与行动记录，再次点击收起。回放与文件存档接口仍保留在底层；不在新游戏 HUD 中放置调试用保存、读取按钮。
 
-初始化菜单只创建缺失资产，不覆盖已有配置或场景。它会拒绝在 Play 模式或存在未保存场景修改时运行；首次生成后把验证场景加入 Build Settings 首位。验证场景为开发工具，不是最终游戏 UI。
+初始化菜单只创建缺失资产，不覆盖已有配置或场景。它会拒绝在 Play 模式或存在未保存场景修改时运行；首次生成后把战斗场景加入 Build Settings 首位。
 
-验证界面优先使用组件的 `Interface Font`（TextCore FontAsset），未指定时从本机已有中文字体创建动态 SDF 字体。正式发布应绑定带授权的中文字体资产，确保目标设备没有中文系统字体时仍能显示；本阶段不把操作系统字体复制进项目。
+界面使用 `Assets/Fonts/default_zh.ttf` 生成的动态 TextCore SDF 字体 `default_zh.asset`，通过 `Interface Font` 绑定，不依赖目标设备的中文系统字体。字体支持动态多图集；发布前需确认该字体的商用授权。
+
+## 战斗 HUD
+
+`BattleHud.cs` 与 `BattleHud.uss` 为全新游戏内界面，替代已删除的 `BattleSandbox` 测试面板：
+
+- 中央透明，不绘制全屏面板；空白区域不拦截指针，留给固定相机的真实 3D / 2.5D 场景。
+- 左上生命与理智，顶部遭遇名称、回合与目标，左侧简短征兆和可见意图，右侧调查工具。
+- 底部手牌与牌堆计数，左下行动与防护，右下回合/任务操作；卡牌多时横向滚动。
+- 档案默认关闭；胜负时才显示结算层。键盘焦点、禁用状态、悬停反馈均有明确样式。
+- 深海蓝灰作为半透明衬底，旧铜强调可交互信息，浅色纸张承载卡牌；重要信息使用文字，不只依赖颜色。
+
+HUD 只读取 `BattleView` 并提交 `BattleCommand`；不会读取敌人的真实隐藏意图。场景当前只有相机和 HUD，本次不生成敌人模型或 3D 美术；中央留白是相机内容，不是背景插画。接入模型时按下文通过 Hyper3D 和 Unity CLI 制作。
+
 
 ## 层级与依赖
 
@@ -36,7 +49,7 @@ UnsoundedSea.Tests.EditMode       NUnit 行为测试，引用 Core / Runtime
 - `IEncounterObjective`：击退、封门、存活目标；可注入其他目标实现。
 - `RunMap`：有向无环节点图，区分进入与完成节点，阻止跳点、回访、悬空连接和不可达节点。
 - `BattleReplay` / `IBattleSaveStore`：规则回放与存储介质分离。
-- `BattleSandbox`：本地组合入口和 UI Toolkit 验证界面，负责选择配置、创建 Session、提交命令和刷新快照。
+- `BattleHud`：游戏内 UI Toolkit 组合入口，创建 Session、提交操作并按快照刷新四周 HUD；遭遇配置在 Inspector 中选择。
 
 ## 保证的规则
 

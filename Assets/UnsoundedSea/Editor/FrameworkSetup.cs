@@ -13,7 +13,7 @@ namespace UnsoundedSea.Editor
     public static class FrameworkSetup
     {
         private const string Root = "Assets/UnsoundedSea";
-        public const string ScenePath = Root + "/Scenes/FrameworkSandbox.unity";
+        public const string ScenePath = Root + "/Scenes/Battle.unity";
         private static void Folder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
@@ -37,12 +37,12 @@ namespace UnsoundedSea.Editor
             });
         }
 
-        [MenuItem("Unsounded Sea/Create or Open Framework Sandbox")]
+        [MenuItem("Unsounded Sea/Create or Open Battle Scene")]
         public static string CreateOrOpen()
         {
             if (EditorApplication.isPlaying) throw new InvalidOperationException("Stop Play Mode before setup.");
             for (var i = 0; i < SceneManager.sceneCount; i++)
-                if (SceneManager.GetSceneAt(i).isDirty) throw new InvalidOperationException("Save current scene edits before opening the sandbox.");
+                if (SceneManager.GetSceneAt(i).isDirty) throw new InvalidOperationException("Save current scene edits before opening the battle scene.");
             var shot = Card("revolver", "左轮射击", "对目标造成 6 伤害。", 1, "damage", 6);
             var cover = Card("cover", "寻找掩体", "获得 10 格挡。", 1, "block", 10);
             var calm = Card("steady", "稳住心神", "获得 6 理智防护；不抵消主动支付。", 1, "ward", 6);
@@ -92,7 +92,7 @@ namespace UnsoundedSea.Editor
                 Encounter("effects", "04 / 卡牌实验", masked, ObjectiveKind.Defeat, new[] { shot, cover, calm, notes, reload, light, contradiction, intuition, interrupt, bandage })
             };
             foreach (var encounter in encounters) new BattleSession(encounter.Build(), 1);
-            var panel = Asset<PanelSettings>(Root + "/Settings", "SandboxPanel", p =>
+            Asset<PanelSettings>(Root + "/Settings", "BattlePanel", p =>
             { p.scaleMode = PanelScaleMode.ScaleWithScreenSize; p.referenceResolution = new Vector2Int(1440, 900); p.match = 0.5f; });
             AssetDatabase.SaveAssets();
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
@@ -101,17 +101,21 @@ namespace UnsoundedSea.Editor
                 var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
                 var cameraObject = new GameObject("Fixed Battle Camera");
                 var camera = cameraObject.AddComponent<Camera>(); camera.tag = "MainCamera";
-                camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = new Color(0.02f, 0.04f, 0.06f);
+                camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = new Color(0.11f, 0.18f, 0.21f);
                 cameraObject.transform.position = new Vector3(0, 3, -8); cameraObject.transform.LookAt(Vector3.zero);
                 var host = new GameObject("Battle Composition Root");
                 // NewScene can unload assets; resolve persistent references after switching scenes.
-                host.AddComponent<UIDocument>().panelSettings = AssetDatabase.LoadAssetAtPath<PanelSettings>(Root + "/Settings/SandboxPanel.asset");
-                var sandbox = host.AddComponent<BattleSandbox>();
-                var serialized = new SerializedObject(sandbox); var field = serialized.FindProperty("encounters");
+                host.AddComponent<UIDocument>().panelSettings = AssetDatabase.LoadAssetAtPath<PanelSettings>(Root + "/Settings/BattlePanel.asset");
+                var hud = host.AddComponent<BattleHud>();
+                var serialized = new SerializedObject(hud); var field = serialized.FindProperty("encounters");
                 field.arraySize = encounters.Length;
                 var ids = new[] { "ordinary", "unknown", "seal", "effects" };
                 for (var i = 0; i < ids.Length; i++) field.GetArrayElementAtIndex(i).objectReferenceValue =
                     AssetDatabase.LoadAssetAtPath<EncounterDefinition>(Root + "/Content/Encounters/" + ids[i] + ".asset");
+                serialized.FindProperty("interfaceFont").objectReferenceValue =
+                    AssetDatabase.LoadAssetAtPath<UnityEngine.TextCore.Text.FontAsset>("Assets/Fonts/default_zh.asset");
+                serialized.FindProperty("interfaceStyle").objectReferenceValue =
+                    AssetDatabase.LoadAssetAtPath<StyleSheet>(Root + "/Runtime/Presentation/BattleHud.uss");
                 serialized.ApplyModifiedPropertiesWithoutUndo();
                 EditorSceneManager.SaveScene(scene, ScenePath);
             }

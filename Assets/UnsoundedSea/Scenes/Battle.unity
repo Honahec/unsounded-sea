@@ -129,7 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1460217787}
   - component: {fileID: 1460217786}
-  - component: {fileID: 1460217785}
+  - component: {fileID: 1460217788}
   m_Layer: 0
   m_Name: Battle Composition Root
   m_TagString: Untagged
@@ -137,24 +137,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1460217785
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1460217784}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4213c6ef2ce954eb599c180d263717d4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.BattleSandbox
-  encounters:
-  - {fileID: 11400000, guid: b40eeee2e49ef43c487ece34f6e4743c, type: 2}
-  - {fileID: 11400000, guid: f9740c8bb99884119804f5f1525c1c5a, type: 2}
-  - {fileID: 11400000, guid: d5195ff1c5dbc4fc5a4eab211634e138, type: 2}
-  - {fileID: 11400000, guid: b9ea3d89e15644f04a7ba7efd4731723, type: 2}
-  seed: 20261016
 --- !u!114 &1460217786
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -193,6 +175,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1460217788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1460217784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4213c6ef2ce954eb599c180d263717d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.BattleHud
+  encounters:
+  - {fileID: 11400000, guid: b40eeee2e49ef43c487ece34f6e4743c, type: 2}
+  - {fileID: 11400000, guid: f9740c8bb99884119804f5f1525c1c5a, type: 2}
+  - {fileID: 11400000, guid: d5195ff1c5dbc4fc5a4eab211634e138, type: 2}
+  - {fileID: 11400000, guid: b9ea3d89e15644f04a7ba7efd4731723, type: 2}
+  initialEncounter: 1
+  seed: 20261016
+  interfaceFont: {fileID: 11400000, guid: d42cdd7f06ee0455aab49a65c2126337, type: 2}
+  interfaceStyle: {fileID: 7433441132597879392, guid: e52880fa4909d4f059975f6f759af8a6, type: 3}
 --- !u!1 &1849429766
 GameObject:
   m_ObjectHideFlags: 0
@@ -220,7 +223,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.02, g: 0.04, b: 0.06, a: 1}
+  m_BackGroundColor: {r: 0.11, g: 0.18, b: 0.21, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
