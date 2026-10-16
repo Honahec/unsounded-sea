@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
   id: intuition
   displayName: "\u76F4\u89C9\u9632\u62A4"
-  description: "\u83B7\u5F97 7 \u683C\u6321\u548C 3 \u7406\u667A\u9632\u62A4\u3002"
+  description: "\u83B7\u5F97 7 \u683C\u6321\u3002\n\u83B7\u5F97 3 \u7406\u667A\u9632\u62A4\u3002"
   actionCost: 1
   sanityCost: 0
   exhaust: 0

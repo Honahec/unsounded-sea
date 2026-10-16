@@ -168,6 +168,7 @@ namespace UnsoundedSea.Runtime
                 face.Add(new SeaUiArt(motif)); face.Add(Text(def.Name, "card-name")); face.Add(Text(def.Description, "card-description"));
                 if (def.SanityCost > 0 || def.Exhaust) face.Add(Text((def.SanityCost > 0 ? $"支付 {def.SanityCost} 理智 " : "") + (def.Exhaust ? "· 消耗" : ""), "fine-print"));
                 if (c.IsEncounter && !c.Enabled) face.Add(Text(c.DisabledReason, "fine-print"));
+                IllustratedCard.Apply(face, def);
                 b.Add(face); b.tooltip = def.Name + "：" + def.Description + (c.IsEncounter && !c.Enabled ? "\n" + c.DisabledReason : "");
                 b.SetEnabled(active && c.Enabled && def.Cost <= v.Actions && def.SanityCost < v.Sanity); fan.Add(b);
             }
