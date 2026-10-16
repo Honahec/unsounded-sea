@@ -13,9 +13,10 @@ namespace UnsoundedSea.Runtime
         public Renderer ocean;
         public AudioSource ambience;
         public AudioSource feedback;
-        public AudioClip sealCue, impactCue;
+        public AudioClip sealCue, impactCue, sanityCue;
         public Color fogColor = new Color(0.055f, 0.1f, 0.12f);
         public float fogDensity = 0.023f;
+        public float vesselHeave = 0.06f, vesselPitch = 0.35f, vesselRoll = 0.7f, cameraShake = 0.035f;
         public IReadOnlyList<BattleActorView> Actors => actors;
         private readonly List<BattleActorView> actors = new List<BattleActorView>();
         private BattleDirector director;
@@ -56,7 +57,12 @@ namespace UnsoundedSea.Runtime
             for (var i = 0; i < actors.Count; i++)
                 actors[i].Feedback(after.Enemies[i].Health < before.Enemies[i].Health,
                     command.kind == CommandKind.EndTurn && before.Enemies[i].Health > 0, after.Enemies[i].Health > 0);
-            if (after.Health < before.Health || after.Sanity < before.Sanity) { shake = 1; if (feedback != null && impactCue != null) feedback.PlayOneShot(impactCue); }
+            if (after.Health < before.Health || after.Sanity < before.Sanity)
+            {
+                shake = 1;
+                var cue = after.Sanity < before.Sanity && sanityCue != null ? sanityCue : impactCue;
+                if (feedback != null && cue != null) feedback.PlayOneShot(cue);
+            }
             if (after.ObjectiveProgress > before.ObjectiveProgress && feedback != null && sealCue != null) feedback.PlayOneShot(sealCue);
             RefreshSelection();
         }
@@ -68,14 +74,27 @@ namespace UnsoundedSea.Runtime
                 if (director.Paused && ambience.isPlaying) ambience.Pause();
                 else if (!director.Paused && !ambience.isPlaying) ambience.UnPause();
             }
+            if (feedback != null)
+            {
+                if (director.Paused && feedback.isPlaying) feedback.Pause();
+                else if (!director.Paused && !feedback.isPlaying) feedback.UnPause();
+            }
             if (director.Paused) return;
             age += Time.unscaledDeltaTime;
             var reduced = GameSettings.ReducedMotion;
-            vessel.localPosition = shipPosition + Vector3.up * (reduced ? 0 : Mathf.Sin(age * 0.55f) * 0.06f);
-            vessel.localRotation = shipRotation * Quaternion.Euler(reduced ? 0 : Mathf.Sin(age * 0.31f) * 0.35f, 0, reduced ? 0 : Mathf.Sin(age * 0.47f) * 0.7f);
+            vessel.localPosition = shipPosition + Vector3.up * (reduced ? 0 : Mathf.Sin(age * 0.55f) * vesselHeave);
+            vessel.localRotation = shipRotation * Quaternion.Euler(reduced ? 0 : Mathf.Sin(age * 0.31f) * vesselPitch, 0, reduced ? 0 : Mathf.Sin(age * 0.47f) * vesselRoll);
             shake = Mathf.MoveTowards(shake, 0, Time.unscaledDeltaTime * 1.8f);
-            battleCamera.transform.localPosition = cameraPosition + (reduced ? Vector3.zero : new Vector3(Mathf.Sin(age * 41), Mathf.Cos(age * 37), 0) * (shake * 0.035f));
-            if (ocean != null) { oceanProperties.SetFloat("_SeaTime", reduced ? age * 0.25f : age); ocean.SetPropertyBlock(oceanProperties); }
+            battleCamera.transform.localPosition = cameraPosition + (reduced ? Vector3.zero : new Vector3(Mathf.Sin(age * 41), Mathf.Cos(age * 37), 0) * (shake * cameraShake));
+            if (ocean != null)
+            {
+                oceanProperties.SetFloat("_SeaTime", reduced ? age * 0.25f : age);
+                var threat = Vector4.zero;
+                foreach (var actor in actors)
+                    if (actor.IsSeaActor && actor.Alive) { var p = actor.transform.position; threat = new Vector4(p.x, p.z, actor.WaterRadius, reduced ? 0 : shake); break; }
+                oceanProperties.SetVector("_Threat", threat);
+                ocean.SetPropertyBlock(oceanProperties);
+            }
         }
         private void OnDisable()
         {

@@ -12,6 +12,7 @@ namespace UnsoundedSea.Runtime
         [SerializeField] private FontAsset interfaceFont;
         [SerializeField] private StyleSheet menuStyle;
         [SerializeField] private string voyageScene = VoyageRuntime.VoyageScene;
+        [SerializeField] private string seaBossScene = "";
         private VisualElement root;
         private bool settingsOpen;
         private bool confirmingNewVoyage;
@@ -83,10 +84,13 @@ namespace UnsoundedSea.Runtime
                 entries.Add(Entry("menu-start", "01", "开始新航程", canStart ? "登船，前往不存在于海图上的坐标" : "航程场景未加入构建列表", StartGame, canStart));
                 if (VoyageRuntime.HasSavedVoyage)
                     entries.Add(Entry("menu-continue", "02", "继续航程", "恢复至上次海图进度；若在遭遇中，将从该遭遇开头继续", ContinueGame));
-                var settings = Entry("menu-settings", "03", "设置", "音量、显示与界面动效", () => { settingsOpen = true; error = null; Build(null); });
+                bool hasBoss = !string.IsNullOrWhiteSpace(seaBossScene);
+                if (hasBoss)
+                    entries.Add(Entry("menu-sea-boss", "03", "沉钟海域", "驶向外海，面对海面上的巨大身影", () => SceneManager.LoadScene(seaBossScene), Application.CanStreamedLevelBeLoaded(seaBossScene)));
+                var settings = Entry("menu-settings", hasBoss ? "04" : "03", "设置", "音量、显示与界面动效", () => { settingsOpen = true; error = null; Build(null); });
                 settings.EnableInClassList("open", settingsOpen);
                 entries.Add(settings);
-                entries.Add(Entry("menu-quit", "04", "退出", "离开调查船", Quit));
+                entries.Add(Entry("menu-quit", hasBoss ? "05" : "04", "退出", "离开调查船", Quit));
             }
             if (!string.IsNullOrEmpty(error)) entries.Add(Text(error, "menu-error"));
             else if (!string.IsNullOrEmpty(VoyageRuntime.EncounterSaveError))

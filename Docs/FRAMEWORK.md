@@ -4,9 +4,11 @@
 
 ## 快速运行
 
-打开 `Assets/UnsoundedSea/Scenes/MainMenu.unity`，Play 后选择「开始新航程」或「继续航程」，进入 `Voyage.unity` 选路；已有存档时新航程需确认覆盖。可直接打开 `OceanBattle.unity` 验证主线战斗。Editor 运行当前场景；pull 不会自动切换入口。`Battle.unity` 保留为旧规则样例，`ModelImportReview.unity` 仅供美术审阅。
+打开 `Assets/UnsoundedSea/Scenes/MainMenu.unity`，Play 后选择「开始新航程」或「继续航程」进入 `Voyage.unity` 选路，或选择主线保留的「沉钟海域」进入独立 Boss 样例；已有存档时新航程需确认覆盖。也可直接打开 `OceanBattle.unity` 或 `SeaBossBattle.unity` 验证主线战斗。Editor 运行当前场景；pull 不会自动切换入口。`Battle.unity` 保留为旧规则样例，`ModelImportReview.unity` 仅供美术审阅。
 
 首场「雾海来客」：调查船上同时出现祷告者和空潜水服。每回合 3 行动、抽 5 张牌，点击模型、投影名牌或左侧目标按钮选敌，点击手牌出牌。调查工具每场次数有限。每回合消耗 1 行动刻一段封线，累计 4 段获胜；敌人可以仍然存活。生命或理智归零失败。右上「航海日志」查看证据、暂停、设置或返回标题；终局可重开。
+
+第二场「沉钟海域」：船外约 60 m 处出现高 32 m 的「沉钟之母」，下部浸入海面。每轮公开巨浪（21 生命伤害）或钟鸣（11 理智冲击，可打断）；用格挡、理智防护或打断应对，撑过五轮后撤离。进度在敌方结算后推进，资源归零优先判败；不提供封线行动，伤害 Boss 不代替生存目标。
 
 ## 航海选路（局外）
 
@@ -33,18 +35,19 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 ```
 
 - **换场景**：复制或创建带 `BattleStage` 的 Prefab，配置 `battleCamera`、`vessel`（所有随船运动的物体父节点）、`actorAnchors` 和选中材质，再替换 Scenario 的 `stagePrefab`。海面与音响可选；当前舞台不支持角色移动/导航。
+- **甲板 / 海面锚点**：普通锚点保持甲板表现；海面锚点挂 `BattleAnchor` 并设为 `Sea`，必须放在船体 rig 之外，校验会拒绝错误挂载。设置独立位置、浸没深度、名牌高度/偏移、轻微升沉与扰流半径；海面角色通常关闭脚底选中环。碰撞范围按模型局部包围盒计算，锚点旋转/缩放不重复放大范围。
 - **换角色**：修改 Enemy 的 `presentationPrefab`，或在 Scenario 的 `actorOverrides` 按敌人槽位覆写。模型约定脚底 y=0、正面 +Z、真实米制；锚点决定位置和朝向。同种敌人可以重复引用，规则实例 ID 为 `id:槽位`。出生前校验相机、船体、锚点和模型引用。
 - **换遭遇**：Scenario 指向另一个 Encounter；牌组、资源、敌人意图和工具仍属于规则数据。UI 按快照更新，不依赖两只敌人的名字。新增敌人需增加相应舞台锚点并检查名牌排布。
-- **特殊战入口**：派生 `BattleRuleModule`，为每次会话创建新的 `EffectRegistry` / `IEncounterObjective`。`SealingRuleModule` 已用于雾海封线，不靠敌人全部死亡判胜。模块资产只存配置，不能共享可变进度。需要新命令、敌人阶段策略或即时玩法时仍需扩展 Core 与测试；当前入口不等于这些玩法已实现。
+- **特殊战入口**：派生 `BattleRuleModule`，为每次会话创建新的 `EffectRegistry` / `IEncounterObjective`。`SealingRuleModule` 用于雾海封线；`SurvivalRuleModule` 用于海面撤离，按已结算轮数计数。两者均不靠敌人全部死亡判胜。模块资产只存配置，不能共享可变进度。需要新命令、敌人阶段策略或即时玩法时仍需扩展 Core 与测试；当前入口不等于这些玩法已实现。
 - **反馈事件**：Director 的 `Resolved(before, after, command)` 通知舞台，`Changed` 通知 UI；短暂反馈期间拒绝连点，规则仍同步确定性结算。暂停冻结舞台运动与环境声；减少动效关闭船体摇晃、镜头震动和角色摆动。
 
-当前海面使用轻量顶点波浪与高光着色，场景雾、月光、暖色甲板灯、Bloom/Vignette 构成海洋氛围；音轨为项目脚本生成的原创合成底噪和动作提示。两只角色仍是无骨骼静态网格，待机、受击、前倾与倒下是整体变换反馈，不能替代正式战斗动画。
+当前海面使用轻量顶点波浪与高光着色，场景雾、月光、暖色甲板灯、Bloom/Vignette 构成海洋氛围；音轨为项目脚本生成的原创合成底噪和动作提示。三名角色仍是无骨骼静态网格，待机、受击、前倾与倒下是整体变换反馈，不能替代正式战斗动画。巨兽采用低频整体升沉及轻微受击反馈，不沿用人形前扑；海面扰流与钟声是表现，不影响规则随机数。
 
 `OceanBattlePanel` 参考 1600×900；USS 位于 `Runtime/Battle/OceanBattleHud.uss`。四周工具与手牌让出中心 3D 空间，名牌每帧按角色头顶坐标投影；中央指针通过相机射线选择角色。UI 只读取 `BattleView`，未知意图保持候选说明；历史调查保存在日志中。手牌横向滚动支持超过五张；字体使用项目现有 TextCore SDF。
 
 `MainMenu` 与 `SettingsPanel` 复用原菜单/设置；标题入口现由航海模块接管。`GameSettings` 的音量、全屏、垂直同步、减少动效属于设备偏好，不进入规则或回放。旧 `BattleHud` 仅服务 `Battle.unity`，不参与新战斗。
 
-场景已入库，无需生成脚本才能运行。需要有意重建本场样例时，用 Unity CLI 执行 `Tools/OceanBattleSetup.cs` 的 `OceanBattleSetup.Build`；它会覆盖本场场景与配置，但不再覆盖由航海模块管理的标题入口。运行前先保存改动，构建列表保留既有 Voyage 项。`Tools/ImportSurveyVessel.cs` 负责选定船体版本的归一化；模型制作和 LFS 规范见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
+场景已入库，无需生成脚本才能运行。需要有意重建本场样例时，用 Unity CLI 执行 `Tools/OceanBattleSetup.cs` 的 `OceanBattleSetup.Build`；它会覆盖本场场景与配置，但保留航海标题入口，运行前先保存改动。`Tools/SeaBossSetup.cs` 的 `ImportModel` / `Build` 分别归一化 Boss 并重建海面样例（同样会覆盖本场配置）；`Tools/ImportSurveyVessel.cs` 负责选定船体版本的归一化；模型制作和 LFS 规范见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
 
 ## 层级与依赖
 
