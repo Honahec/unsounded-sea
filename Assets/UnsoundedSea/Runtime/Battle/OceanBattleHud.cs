@@ -121,7 +121,10 @@ namespace UnsoundedSea.Runtime
             instruments.Add(Text($"格挡 {v.Block} · 防护 {v.Ward}\n牌库 {v.DrawCount} · 弃牌 {v.DiscardCount} · 消耗 {v.ExhaustCount}", "resource-note"));
 
             var hand = new ScrollView(ScrollViewMode.Horizontal); hand.name = "hand"; hand.AddToClassList("hand");
-            hand.pickingMode = PickingMode.Ignore; hand.contentViewport.pickingMode = PickingMode.Ignore; hand.contentContainer.pickingMode = PickingMode.Ignore;
+            // Ignore the full built-in scroll shell, including the content/vertical-scroll wrapper.
+            // Only the cards added below should intercept clicks over the 3D scene.
+            hand.pickingMode = PickingMode.Ignore;
+            hand.Query<VisualElement>().ForEach(element => element.pickingMode = PickingMode.Ignore);
             hand.horizontalScrollerVisibility = ScrollerVisibility.Hidden; hand.verticalScrollerVisibility = ScrollerVisibility.Hidden; root.Add(hand);
             var fan = Box("fan-track"); fan.style.width = Mathf.Max(620, 180 + Mathf.Max(0, v.Hand.Count - 1) * 110); hand.Add(fan);
             hand.RegisterCallback<GeometryChangedEvent>(_ => fan.style.marginLeft = Mathf.Max(0, (hand.contentViewport.resolvedStyle.width - fan.resolvedStyle.width) * .5f));

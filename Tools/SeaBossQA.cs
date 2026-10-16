@@ -34,7 +34,12 @@ public static class SeaBossQA
             Check(Vector3.Distance(cameraPosition,camera.transform.position)<0.001f&&Quaternion.Angle(cameraRotation,camera.transform.rotation)<0.001f,"Vessel moves camera");
         }
         finally {stage.vessel.localPosition=shipPosition;stage.vessel.localRotation=shipRotation;}
-        if(duringAttack)Click("battle-end-turn");
+        if(duringAttack)
+        {
+            Click("battle-end-turn");
+            // A new hand rebuilds the visual tree. Wait for UI Toolkit layout before panel picking.
+            await Task.Delay(100);
+        }
         float minX=1,maxX=0,minY=1,maxY=0;
         for(int frame=0;frame<30;frame++)
         {
