@@ -128,6 +128,7 @@ namespace UnsoundedSea.Runtime
             hand.horizontalScrollerVisibility = ScrollerVisibility.Hidden; hand.verticalScrollerVisibility = ScrollerVisibility.Hidden; root.Add(hand);
             var fan = Box("fan-track"); fan.style.width = Mathf.Max(620, 180 + Mathf.Max(0, v.Hand.Count - 1) * 110); hand.Add(fan);
             hand.RegisterCallback<GeometryChangedEvent>(_ => fan.style.marginLeft = Mathf.Max(0, (hand.contentViewport.resolvedStyle.width - fan.resolvedStyle.width) * .5f));
+            var cardPresentation = new HandCardPresentation(hand);
             var cardIndex = 0;
             foreach (var card in v.Hand)
             {
@@ -135,7 +136,7 @@ namespace UnsoundedSea.Runtime
                 var b = Button("card-" + c.InstanceId, "", () => director.Submit(BattleCommand.Play(c.InstanceId, director.SelectedEnemy)), "card-anchor");
                 b.tabIndex = cardIndex + 1; b.style.left = cardIndex * 110;
                 b.AddToClassList("fan-" + Mathf.Clamp(cardIndex++ - (v.Hand.Count - 1) / 2, -3, 3));
-                b.RegisterCallback<FocusInEvent>(_ => hand.ScrollTo(b));
+                cardPresentation.Add(b);
                 var face = Box("sea-card"); face.pickingMode = PickingMode.Position;
                 var motif = type.Contains("damage") ? "gun" : type == "block" ? "shield" : type == "ward" ? "eye" : type.Contains("investigate") ? "lantern" : "scroll";
                 var head = Box("card-head"); head.Add(Text(def.Cost.ToString(), "card-cost")); head.Add(Text(type.Contains("damage") ? "压制" : type == "block" ? "防御" : type == "ward" ? "镇定" : "调查", "card-type")); face.Add(head);

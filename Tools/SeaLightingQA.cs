@@ -102,16 +102,61 @@ public static class SeaLightingQA
         var turn=d.View.Turn;var actions=d.View.Actions;
         Click("battle-chart-toggle");await Task.Delay(100);
         Check(d.Paused&&root.Q(className:"battle-chart-overlay")!=null,"Chart did not pause battle");
-        float clock=d.Stage.water.SeaTime;await Task.Delay(150);
-        Check(clock==d.Stage.water.SeaTime,"Chart did not freeze ocean");
+        var water=d.Stage.water;float clock=water!=null?water.SeaTime:0;await Task.Delay(150);
+        Check(water==null||clock==water.SeaTime,"Chart did not freeze ocean");
         Click("battle-chart-close");Check(!d.Paused,"Chart did not resume battle");
         d.SetPaused(true);Click("battle-chart-toggle");Click("battle-chart-close");
         Check(d.Paused,"Chart lost prior pause state");d.SetPaused(false);await Task.Delay(150);
-        var cards=root.Query<Button>(className:"card-anchor").ToList();
-        var parent=cards[0].parent;var order=parent.Children().ToArray();
-        foreach(var card in cards){card.Focus();await Task.Delay(160);Check(order.SequenceEqual(parent.Children()),"Card focus changed stacking order");}
-        root.Focus();
+        var cards=root.Query<Button>(className:"card-anchor").ToList().OrderBy(c=>c.tabIndex).ToList();
+        var parent=cards[0].parent;
+        root.Focus(); await Task.Delay(200);
+        float minVisible=1,maxVisible=0,minGap=100,maxGap=0;
+        foreach(var card in cards)
+        {
+            var face=card.Q(className:"sea-card");
+            var rest=face.worldBound;
+            float visible=(root.worldBound.yMax-rest.yMin)/rest.height;
+            minVisible=Mathf.Min(minVisible,visible); maxVisible=Mathf.Max(maxVisible,visible);
+            Check(visible>0.4f&&visible<0.6f,"Resting card is not half hidden: "+visible);
+        }
+        foreach(var card in cards)
+        {
+            // Exercise the hover callback independently of keyboard focus.
+            using(var enter=PointerEnterEvent.GetPooled()){enter.target=card;card.SendEvent(enter);}
+            await Task.Delay(200);
+            Check(parent.Children().Last()==card,"Inspected card is covered by a neighbour");
+            var face=card.Q(className:"sea-card");var bounds=face.worldBound;
+            float gap=root.worldBound.yMax-bounds.yMax;
+            minGap=Mathf.Min(minGap,gap);maxGap=Mathf.Max(maxGap,gap);
+            Check(gap>=5&&gap<=45&&bounds.yMin>=0,"Inspected card clipped or raised too far: "+gap);
+            Check(Mathf.Abs(bounds.width/card.layout.width-1.1f)<0.01f,"Inspection did not enlarge card");
+            foreach(var point in new[]{new Vector2(bounds.xMin+8,bounds.yMin+8),new Vector2(bounds.xMax-8,bounds.yMax-8),bounds.center})
+            {
+                var hit=root.panel.Pick(point);
+                Check(hit==card||card.Contains(hit),"Expanded card is not fully clickable");
+            }
+            using(var leave=PointerLeaveEvent.GetPooled()){leave.target=card;card.SendEvent(leave);}
+            await Task.Delay(200);
+            Check(cards.SequenceEqual(parent.Children()),"Resting fan order was not restored");
+        }
+        cards[2].Focus();await Task.Delay(200);
+        Check(cards[2].ClassListContains("inspecting")&&parent.Children().Last()==cards[2],"Keyboard focus does not inspect card");
+        root.Focus();await Task.Delay(200);
+        Check(cards.SequenceEqual(parent.Children()),"Focus exit did not restore fan order");
+        // Unaffordable/disabled cards must still reveal their rules without becoming playable.
+        var disabled=cards[0];bool wasEnabled=disabled.enabledSelf;
+        try
+        {
+            disabled.SetEnabled(false);
+            using(var enter=PointerEnterEvent.GetPooled()){enter.target=disabled;disabled.SendEvent(enter);}
+            await Task.Delay(200);
+            Check(disabled.ClassListContains("inspecting"),"Disabled card cannot be inspected");
+            using(var submit=NavigationSubmitEvent.GetPooled()){submit.target=disabled;disabled.SendEvent(submit);}
+            Check(d.View.Hand.Count==cards.Count,"Disabled card became playable");
+            using(var leave=PointerLeaveEvent.GetPooled()){leave.target=disabled;disabled.SendEvent(leave);}
+        }
+        finally {disabled.SetEnabled(wasEnabled);}
         Check(d.View.Turn==turn&&d.View.Actions==actions,"UI inspection changed battle state");
-        return new{cards=cards.Count,chartFreezesOcean=true,priorPausePreserved=true,stackingPreserved=true,turn,actions};
+        return new{cards=cards.Count,chartFreezesOcean=water!=null,priorPausePreserved=true,restingOrderRestored=true,disabledCardPreview=true,minVisible,maxVisible,minGap,maxGap,turn,actions};
     }
 }
