@@ -1,113 +1,67 @@
-/* THE UNSOUNDED SEA - title menu, settings sheet and in-battle pause sheet.
-   Shares the battle HUD palette: deep ocean plates, ivory text, brass = available/selected,
-   paper sheets for the investigator's own records, rust = irreversible choices. */
-
+/* Ink, aged brass and ivory; the sea remains the title screen's dominant image. */
 .unity-label { white-space: normal; -unity-text-align: middle-left; margin: 0; padding: 0; }
-.game-menu { background-color: rgba(0, 0, 0, 0); color: rgb(240, 232, 210); font-size: 16px; }
-.game-menu Button, .settings Button, .pause Button {
-    margin: 0; padding: 0; border-width: 0; border-radius: 0;
-    background-color: rgba(0, 0, 0, 0); color: rgb(240, 232, 210);
-    -unity-text-align: middle-center;
-    transition-property: translate, background-color, border-color, opacity;
-    transition-duration: 0.12s; transition-timing-function: ease-out;
-}
+.game-menu { background-color: rgba(0,0,0,0); color: #eee4c9; font-size: 16px; }
+.game-menu Button, .settings Button, .pause Button { margin: 0; padding: 0; border-width: 0; border-radius: 0; background-color: rgba(0,0,0,0); color: #eee4c9; -unity-text-align: middle-center; transition-property: translate, background-color, border-color; transition-duration: 0.12s; }
 .reduced-motion Button { transition-duration: 0s; }
-.game-menu Button:disabled, .settings Button:disabled, .pause Button:disabled { opacity: 0.5; }
-
-/* Title screen - left third, the sea stays open on the right */
-.menu-column { position: absolute; left: 96px; top: 120px; width: 440px; }
-.menu-title-block { margin-bottom: 44px; }
-.menu-overline { font-size: 15px; color: rgb(214, 182, 118); letter-spacing: 6px; text-shadow: 0 1px 4px rgba(4, 10, 14, 0.9); }
-.menu-title { font-size: 72px; color: rgb(246, 236, 210); letter-spacing: 12px; margin-top: 6px; text-shadow: 0 3px 10px rgba(4, 10, 14, 0.9); }
-.menu-rule { width: 260px; height: 1px; margin: 14px 0 14px 0; background-color: rgba(198, 162, 96, 0.8); }
-.menu-tagline { font-size: 19px; color: rgb(206, 218, 214); letter-spacing: 2px; text-shadow: 0 1px 6px rgba(4, 10, 14, 0.95); }
-.menu-entries { width: 380px; }
-.game-menu .menu-entry {
-    flex-direction: row; align-items: center; justify-content: flex-start;
-    padding: 12px 18px 13px 16px; margin-bottom: 8px;
-    background-color: rgba(12, 26, 34, 0.62);
-    border-left-width: 3px; border-left-color: rgba(198, 162, 96, 0.35);
-}
-.entry-index { font-size: 15px; color: rgb(170, 186, 184); width: 44px; letter-spacing: 1px; }
+.game-menu Button:disabled, .settings Button:disabled, .pause Button:disabled { opacity: 0.45; }
+.menu-apparition { position: absolute; right: 8%; top: 12%; width: 620px; height: 620px; opacity: 0.22; rotate: -18deg; }
+.menu-column { position: absolute; left: 9%; top: 16%; width: 440px; }
+.menu-title-block { margin-bottom: 32px; }
+.menu-overline { font-size: 13px; color: #9e8755; letter-spacing: 5px; text-shadow: 0 2px 6px #081316; }
+.menu-title { font-size: 66px; color: #eee4c9; letter-spacing: 10px; margin-top: 8px; text-shadow: 0 3px 10px #081316; }
+.menu-rule { width: 178px; height: 1px; margin-top: 22px; background-color: #9e8755; rotate: -2deg; }
+.menu-entries { width: 320px; }
+.game-menu .menu-entry { flex-direction: row; align-items: center; justify-content: flex-start; min-height: 58px; padding: 0 12px 0 0; margin-bottom: 4px; border-width: 0; }
+.entry-mark { width: 46px; height: 46px; margin-right: 16px; opacity: 0.28; }
 .entry-text { flex-grow: 1; }
-.entry-title { font-size: 25px; color: rgb(240, 232, 210); letter-spacing: 4px; }
-.entry-note { font-size: 14px; color: rgb(170, 186, 184); margin-top: 3px; }
-.game-menu .menu-entry:hover { background-color: rgba(26, 46, 54, 0.86); border-left-color: rgb(236, 206, 140); translate: 6px 0; }
-.game-menu .menu-entry:hover .entry-index { color: rgb(236, 206, 140); }
-.game-menu .menu-entry:focus { background-color: rgba(26, 46, 54, 0.9); border-left-color: rgb(236, 206, 140); border-left-width: 6px; translate: 6px 0; }
-.game-menu .menu-entry:focus .entry-index,
-.game-menu .menu-entry:focus .entry-title { color: rgb(250, 228, 170); }
-.game-menu .menu-entry:active { background-color: rgba(198, 162, 96, 0.3); translate: 3px 0; }
-.game-menu .menu-entry.open { background-color: rgb(212, 198, 162); border-left-color: rgb(142, 58, 40); }
-.game-menu .menu-entry.open .entry-title { color: rgb(36, 44, 44); }
-.game-menu .menu-entry.open .entry-index,
-.game-menu .menu-entry.open .entry-note { color: rgb(84, 80, 62); }
-.menu-hint { font-size: 14px; color: rgb(170, 186, 184); margin-top: 18px; text-shadow: 0 1px 4px rgba(4, 10, 14, 0.9); }
-.menu-signal {
-    position: absolute; right: 64px; bottom: 64px; width: 340px;
-    padding: 12px 16px 14px 16px;
-    background-color: rgba(12, 26, 34, 0.6);
-    border-top-width: 1px; border-top-color: rgba(122, 186, 164, 0.7);
-}
-.signal-label { font-size: 13px; color: rgb(122, 186, 164); letter-spacing: 2px; }
-.signal-text { font-size: 15px; color: rgb(214, 224, 218); margin-top: 6px; }
-.menu-version { position: absolute; left: 96px; bottom: 40px; font-size: 13px; color: rgb(150, 166, 166); }
-.menu-error { padding: 20px; color: rgb(255, 190, 164); background-color: rgb(52, 37, 39); }
-
-/* Settings - an investigator's paper sheet */
-.settings {
-    position: absolute; left: 580px; top: 150px; width: 560px;
-    padding: 22px 26px 20px 28px;
-    background-color: rgb(222, 210, 178);
-    border-width: 1px; border-color: rgb(170, 150, 108);
-    border-left-width: 6px; border-left-color: rgb(142, 58, 40);
-    color: rgb(36, 44, 44);
-}
-.pause-scrim .settings { left: 479px; top: 170px; }
-.settings .settings-head { padding-bottom: 12px; margin-bottom: 4px; border-bottom-width: 1px; border-bottom-color: rgb(150, 132, 96); }
-.settings .settings-title { font-size: 28px; color: rgb(32, 42, 42); letter-spacing: 6px; }
-.settings .settings-subtitle { font-size: 14px; color: rgb(96, 88, 66); margin-top: 4px; }
-.settings .settings-row { flex-direction: row; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom-width: 1px; border-bottom-color: rgb(196, 182, 146); }
+.entry-title { font-size: 27px; color: #eee4c9; letter-spacing: 5px; text-shadow: 0 2px 5px #081316; }
+.game-menu .menu-entry:hover, .game-menu .menu-entry:focus, .game-menu .menu-entry.open { background-color: rgba(0,0,0,0); translate: 8px 0; }
+.game-menu .menu-entry:hover .entry-mark, .game-menu .menu-entry:focus .entry-mark, .game-menu .menu-entry.open .entry-mark { opacity: 1; }
+.game-menu .menu-entry:focus .entry-title, .game-menu .menu-entry:hover .entry-title { color: #ffe5a6; }
+.game-menu .menu-entry:active { translate: 4px 0; }
+.menu-settings-scrim { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(3,9,11,0.78); }
+.menu-settings-scrim .settings { left: 50%; top: 50%; translate: -50% -50%; }
+.menu-error { padding: 14px; color: #f2bc9d; background-color: #342527; font-size: 16px; }
+.settings { position: absolute; left: 50%; top: 25%; width: 560px; translate: -15% 0; padding: 32px 38px; background-color: rgba(8,19,22,0.97); border-width: 1px; border-color: #9e8755; border-top-width: 3px; border-top-left-radius: 28px; border-bottom-right-radius: 28px; color: #eee4c9; }
+.pause-scrim .settings { left: 50%; top: 25%; translate: -50% 0; }
+.settings .settings-head { padding-bottom: 20px; margin-bottom: 8px; border-bottom-width: 1px; border-bottom-color: rgba(158,135,85,0.45); }
+.settings .settings-title { font-size: 28px; color: #eee4c9; letter-spacing: 8px; }
+.settings .settings-row { flex-direction: row; justify-content: space-between; align-items: center; min-height: 66px; }
 .settings .settings-labels { flex-shrink: 1; margin-right: 16px; }
-.settings .settings-name { font-size: 18px; color: rgb(30, 40, 40); }
-.settings .settings-note { font-size: 13px; color: rgb(96, 88, 66); margin-top: 2px; }
+.settings .settings-name { font-size: 19px; color: #eee4c9; }
 .settings .choice { flex-direction: row; flex-shrink: 0; }
-.settings .choice-option {
-    padding: 6px 14px 7px 14px; margin-left: 6px; font-size: 16px;
-    color: rgb(52, 58, 56); border-width: 1px; border-color: rgb(150, 132, 96);
-}
-.settings .choice-option:hover { background-color: rgb(236, 226, 198); }
-.settings .choice-option.selected { background-color: rgb(36, 56, 60); color: rgb(246, 226, 176); border-color: rgb(36, 56, 60); }
-.settings .choice-option:focus { border-width: 2px; border-color: rgb(142, 58, 40); }
+.settings .choice-option { min-width: 74px; height: 38px; padding: 6px 14px; margin-left: 6px; font-size: 17px; color: #9faea6; border-bottom-width: 1px; border-color: #53645d; }
+.settings .choice-option:hover { background-color: #203631; }
+.settings .choice-option.selected { background-color: #263e36; color: #eee4c9; border-color: #c6ad71; }
+.settings .choice-option:focus { border-width: 2px; border-color: #e4cc92; }
 .settings .volume { flex-direction: row; align-items: center; flex-shrink: 0; }
-.settings .volume-step { width: 30px; height: 30px; font-size: 18px; color: rgb(36, 44, 44); border-width: 1px; border-color: rgb(150, 132, 96); }
-.settings .volume-step:hover { background-color: rgb(236, 226, 198); }
-.settings .volume-step:focus { border-width: 2px; border-color: rgb(142, 58, 40); }
+.settings .volume-step { width: 34px; height: 38px; font-size: 22px; color: #eee4c9; border-width: 1px; border-color: #9e8755; }
+.settings .volume-step:hover { background-color: #263e36; }
+.settings .volume-step:focus { border-width: 2px; border-color: #e4cc92; }
 .settings .volume-steps { flex-direction: row; margin: 0 8px; }
-.settings .volume-pip { width: 9px; height: 18px; margin: 0 2px; border-width: 1px; border-color: rgb(120, 104, 74); }
-.settings .volume-pip.filled { background-color: rgb(36, 56, 60); border-color: rgb(36, 56, 60); }
-.settings .volume-value { font-size: 15px; color: rgb(52, 58, 56); width: 46px; -unity-text-align: middle-right; }
-.settings .settings-foot { flex-direction: row; justify-content: flex-end; margin-top: 18px; }
-.settings .settings-secondary { padding: 8px 16px; font-size: 16px; color: rgb(52, 58, 56); border-width: 1px; border-color: rgb(150, 132, 96); margin-right: 10px; }
-.settings .settings-secondary:hover { background-color: rgb(236, 226, 198); }
-.settings .settings-primary { padding: 8px 20px; font-size: 16px; color: rgb(246, 226, 176); background-color: rgb(36, 56, 60); border-width: 1px; border-color: rgb(36, 56, 60); }
-.settings .settings-primary:hover { background-color: rgb(52, 78, 82); }
-.settings .settings-secondary:focus,
-.settings .settings-primary:focus { border-width: 2px; border-color: rgb(142, 58, 40); }
-
-/* In-battle pause - a scrim blocks scene and HUD input while open */
-.pause-scrim { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(6, 14, 18, 0.62); }
-.pause {
-    position: absolute; left: 559px; top: 230px; width: 400px;
-    padding: 24px 26px 22px 26px; align-items: stretch;
-    background-color: rgba(12, 26, 34, 0.94);
-    border-top-width: 1px; border-bottom-width: 1px; border-color: rgb(198, 162, 96);
-}
-.pause .pause-overline { font-size: 28px; color: rgb(246, 236, 210); letter-spacing: 8px; -unity-text-align: middle-center; }
-.pause .pause-note { font-size: 14px; color: rgb(170, 186, 184); margin: 8px 0 18px 0; -unity-text-align: middle-center; }
-.pause .pause-option { padding: 11px 16px; margin-top: 8px; font-size: 18px; letter-spacing: 2px; background-color: rgba(30, 50, 58, 0.8); border-width: 1px; border-color: rgba(198, 162, 96, 0.45); }
-.pause .pause-option:hover { background-color: rgba(46, 70, 78, 0.95); border-color: rgb(236, 206, 140); }
-.pause .pause-option:focus { border-width: 2px; border-color: rgb(250, 228, 170); }
-.pause .pause-option:active { background-color: rgba(198, 162, 96, 0.3); }
-.pause .pause-option.danger { color: rgb(240, 196, 180); border-color: rgba(196, 100, 76, 0.6); margin-top: 18px; }
-.pause .pause-option.danger:hover { background-color: rgba(110, 44, 32, 0.6); border-color: rgb(226, 140, 116); }
+.settings .volume-pip { width: 8px; height: 20px; margin: 0 2px; border-width: 1px; border-color: #53645d; }
+.settings .volume-pip.filled { background-color: #80b5a5; border-color: #80b5a5; }
+.settings .volume-value { font-size: 16px; color: #eee4c9; width: 46px; -unity-text-align: middle-right; }
+.settings .settings-foot { flex-direction: row; justify-content: flex-end; margin-top: 24px; }
+.settings .settings-secondary { padding: 10px 16px; font-size: 16px; color: #a9b6ad; margin-right: 12px; }
+.settings .settings-secondary:hover { color: #eee4c9; }
+.settings .settings-primary { padding: 10px 24px; font-size: 18px; color: #eee4c9; background-color: #263e36; border-width: 1px; border-color: #9e8755; }
+.settings .settings-primary:hover { background-color: #355248; }
+.settings .settings-secondary:focus, .settings .settings-primary:focus { border-width: 2px; border-color: #e4cc92; }
+.pause-scrim { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(3,9,11,0.72); }
+.pause { position: absolute; left: 50%; top: 25%; translate: -50% 0; width: 360px; padding: 26px; align-items: stretch; background-color: rgba(8,19,22,0.97); border-top-width: 2px; border-bottom-width: 1px; border-color: #9e8755; }
+.pause .pause-overline { font-size: 28px; color: #eee4c9; letter-spacing: 8px; -unity-text-align: middle-center; }
+.pause .pause-note { font-size: 14px; color: #a9b6ad; margin: 8px 0 18px; -unity-text-align: middle-center; }
+.pause .pause-option { padding: 12px 16px; margin-top: 8px; font-size: 19px; letter-spacing: 2px; border-bottom-width: 1px; border-color: rgba(158,135,85,0.35); }
+.pause .pause-option:hover { background-color: #263e36; }
+.pause .pause-option:focus { border-width: 2px; border-color: #e4cc92; }
+.pause .pause-option:active { background-color: #355248; }
+.pause .pause-option.danger { color: #e6b19b; margin-top: 18px; }
+.pause .pause-option.danger:hover { background-color: #49332c; }
+.enemy-details { width: 100%; margin-top: 6px; }
+.enemy-detail-heading { font-size: 12px; color: #a8b8a9; letter-spacing: 2px; margin-top: 9px; margin-bottom: 4px; -unity-text-align: middle-left; }
+.enemy-clue-lines { font-size: 15px; color: #eee4c9; white-space: normal; -unity-text-align: middle-left; }
+.enemy-intent-row { flex-direction: row; align-items: flex-start; padding: 6px 0; border-top-width: 1px; border-top-color: rgba(158,135,85,.3); }
+.enemy-intent-action { width: 70px; flex-shrink: 0; font-size: 16px; color: #d7bd82; -unity-text-align: upper-left; }
+.enemy-intent-effect { flex-grow: 1; flex-shrink: 1; font-size: 16px; color: #eee4c9; white-space: normal; -unity-text-align: upper-left; }
+.enemy-intent-row.confirmed .enemy-intent-effect { color: #a7dbca; }

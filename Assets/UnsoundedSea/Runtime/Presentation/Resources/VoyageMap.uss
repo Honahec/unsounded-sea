@@ -1,0 +1,44 @@
+.voyage-map-panel {
+    position: absolute;
+    left: 225px;
+    right: 165px;
+    top: 8px;
+    bottom: 0;
+    padding: 14px 20px 10px;
+    background-color: rgba(7, 24, 27, 0.97);
+    border-left-width: 3px;
+    border-right-width: 2px;
+    border-top-width: 1px;
+    border-bottom-width: 3px;
+    border-color: rgb(139, 112, 65);
+}
+.map-heading { height: 36px; padding: 0 8px; flex-direction: row; justify-content: space-between; align-items: center; border-bottom-width: 1px; border-bottom-color: rgba(185, 151, 89, 0.48); }
+.map-title { color: rgb(232, 214, 169); font-size: 18px; letter-spacing: 4px; }
+.map-note { color: rgb(111, 170, 153); font-size: 11px; letter-spacing: 1px; }
+.map-empty { flex-grow: 1; color: rgb(165, 174, 149); font-size: 15px; letter-spacing: 2px; -unity-text-align: middle-center; }
+.nautical-chart { flex-grow: 1; margin: 5px 0 3px; overflow: hidden; background-color: rgba(10, 36, 38, 0.76); }
+.voyage-map-panel .chart-node { position: absolute; width: 112px; height: 58px; padding: 0; translate: -50% -50%; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0); border-width: 0; }
+.voyage-map-panel .chart-node:disabled { opacity: 1; }
+.voyage-map-panel .chart-node:hover, .voyage-map-panel .chart-node:focus { background-color: rgba(20, 54, 51, 0.82); border-width: 1px; border-color: rgb(185, 151, 89); }
+.node-glyph { position: absolute; left: 50%; top: 50%; width: 38px; height: 38px; translate: -50% -50%; border-radius: 19px; background-color: rgb(11, 31, 33); }
+.node-name { position: absolute; left: -24px; right: -24px; padding: 3px 5px; color: rgb(222, 216, 188); background-color: rgba(7, 24, 27, 0.88); font-size: 16px; -unity-text-align: middle-center; }
+.node-name.label-above { bottom: 49px; }
+.node-name.label-below { top: 49px; }
+.chart-node.current .node-glyph { border-width: 2px; border-color: rgb(113, 188, 165); background-color: rgb(20, 61, 58); }
+.chart-node.available .node-glyph { border-width: 2px; border-color: rgb(224, 194, 121); }
+.chart-node.selected .node-glyph { border-width: 3px; border-color: rgb(232, 214, 169); background-color: rgb(111, 75, 34); }
+.chart-node.visited .node-glyph { border-width: 1px; border-color: rgb(85, 151, 131); }
+.chart-node.charted .node-glyph { opacity: 0.7; }
+.chart-node.current .node-name { color: rgb(143, 211, 189); }
+.chart-node.available .node-name, .chart-node.selected .node-name { color: rgb(239, 207, 132); }
+.chart-ship { position: absolute; width: 8px; height: 19px; translate: -50% -145%; rotate: 18deg; background-color: rgb(232, 214, 169); border-top-left-radius: 7px; border-top-right-radius: 7px; border-width: 2px; border-color: rgb(88, 55, 28); }
+.chart-compass { position: absolute; left: 18px; bottom: 15px; width: 74px; height: 74px; opacity: 0.68; }
+.chart-fog { position: absolute; right: 3%; top: 17%; bottom: 17%; width: 68px; padding-left: 17px; color: rgba(169, 188, 171, 0.58); border-left-width: 1px; border-left-color: rgba(147, 176, 163, 0.35); font-size: 12px; letter-spacing: 4px; white-space: normal; -unity-text-align: middle-center; }
+.map-legend { height: 29px; flex-direction: row; justify-content: center; align-items: center; border-top-width: 1px; border-top-color: rgba(185, 151, 89, 0.38); }
+.map-legend-item { margin: 0 7px; flex-direction: row; align-items: center; }
+.map-legend-mark { width: 9px; height: 9px; margin-right: 4px; border-radius: 5px; border-width: 1px; border-color: rgb(149, 157, 135); background-color: rgb(16, 44, 44); }
+.map-legend-mark.current { border-color: rgb(113, 188, 165); background-color: rgb(35, 91, 81); }
+.map-legend-mark.available { border-color: rgb(224, 194, 121); }
+.map-legend-mark.selected { border-color: rgb(232, 214, 169); background-color: rgb(111, 75, 34); }
+.map-legend-mark.visited { border-color: rgb(85, 151, 131); }
+.map-legend-label { color: rgb(190, 188, 163); font-size: 13px; }

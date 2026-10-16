@@ -28,6 +28,7 @@ namespace UnsoundedSea.Runtime
         private bool journalOpen;
         private bool menuOpen;
         private bool settingsOpen;
+        private bool chartOpen, chartWasMenuOpen, chartWasJournalOpen;
         private int[] previousHand = Array.Empty<int>();
         private readonly HashSet<string> revealed = new HashSet<string>();
         public BattleView CurrentView => session?.View;
@@ -55,6 +56,8 @@ namespace UnsoundedSea.Runtime
         private void Update() { RenderedFrames++; }
         private void OnDisable()
         {
+            chartOpen = false; chartWasMenuOpen = false; chartWasJournalOpen = false;
+            journalOpen = false; menuOpen = false; settingsOpen = false;
             root?.UnregisterCallback<GeometryChangedEvent>(Resize);
             root?.UnregisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
             root?.Clear();
@@ -62,8 +65,11 @@ namespace UnsoundedSea.Runtime
         private void Resize(GeometryChangedEvent evt) { root.EnableInClassList("compact", evt.newRect.width < 1200 || evt.newRect.height < 740); }
         private void OnKey(KeyDownEvent evt)
         {
-            if (session == null || settingsOpen) return;
-            if (evt.keyCode == KeyCode.Escape && menuOpen) ToggleMenu();
+            if (session == null) return;
+            if (evt.keyCode == KeyCode.Escape && chartOpen) CloseChart();
+            else if (evt.keyCode == KeyCode.M && !settingsOpen) ToggleChart();
+            else if (settingsOpen) return;
+            else if (evt.keyCode == KeyCode.Escape && menuOpen) ToggleMenu();
             else if (menuOpen) return;
             else if (evt.keyCode == KeyCode.J) ToggleJournal();
             else if (evt.keyCode == KeyCode.Escape && journalOpen) ToggleJournal();
@@ -71,6 +77,20 @@ namespace UnsoundedSea.Runtime
             else return;
             evt.StopPropagation();
         }
+        private void ToggleChart()
+        {
+            if (chartOpen) { CloseChart(); return; }
+            chartWasMenuOpen = menuOpen; chartWasJournalOpen = journalOpen;
+            chartOpen = true; menuOpen = false; journalOpen = false;
+            Refresh("battle-chart-close");
+        }
+        private void CloseChart()
+        {
+            chartOpen = false; menuOpen = chartWasMenuOpen; journalOpen = chartWasJournalOpen;
+            chartWasMenuOpen = false; chartWasJournalOpen = false;
+            Refresh(menuOpen ? "pause-resume" : journalOpen ? "journal-close" : "battle-chart-toggle");
+        }
+
         private void ToggleJournal()
         {
             journalOpen = !journalOpen;
@@ -94,6 +114,7 @@ namespace UnsoundedSea.Runtime
             message = "";
             journalOpen = false;
             menuOpen = false; settingsOpen = false;
+            chartOpen = false; chartWasMenuOpen = false; chartWasJournalOpen = false;
             previousHand = Array.Empty<int>();
             revealed.Clear();
             Refresh();
@@ -187,7 +208,7 @@ namespace UnsoundedSea.Runtime
             var focusIndex = -1;
             if (focused != null && focused.StartsWith("card-") && int.TryParse(focused.Substring(5), out var focusedCard))
                 focusIndex = Array.IndexOf(previousHand, focusedCard);
-            var playing = view.Phase == BattlePhase.PlayerTurn;
+            var playing = view.Phase == BattlePhase.PlayerTurn && !chartOpen && !menuOpen;
             var concluded = view.Phase == BattlePhase.Victory || view.Phase == BattlePhase.Defeat;
             if (view.Enemies.All(e => e.Id != selectedEnemy || e.Health == 0))
                 selectedEnemy = (view.Enemies.FirstOrDefault(e => e.Health > 0) ?? view.Enemies[0]).Id;
@@ -195,28 +216,14 @@ namespace UnsoundedSea.Runtime
             root.EnableInClassList("concluded", concluded);
             root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion);
 
-            // Upper left: the investigator's two separate survival resources.
-            var vitals = Element("vitals");
-            vitals.Add(Meter("生命", view.Health, definition.Health, "health"));
-            vitals.Add(Meter("理智", view.Sanity, definition.Sanity, "sanity"));
-            root.Add(vitals);
 
-            // Upper centre: encounter identity, turn and objective.
+            // Compact objective stays at the right edge and leaves the stage unobstructed.
             var heading = Element("encounter-heading");
+            heading.Add(new SeaUiArt("seal"));
+            heading.Add(Text(definition.Objective == ObjectiveKind.Seal ? "封线" : definition.Objective == ObjectiveKind.Survive ? "撤离" : "压制", "objective-label"));
             heading.Add(Text($"第 {view.Turn:00} 回合", "turn-label"));
-            heading.Add(Text(view.Enemies.Count == 1 ? view.Enemies[0].Name : "未知海域的遭遇", "encounter-name"));
-            var rule = Element("heading-rule");
-            rule.Add(Element("rule-line")); rule.Add(Element("rule-mark")); rule.Add(Element("rule-line"));
-            heading.Add(rule);
-            if (definition.Objective == ObjectiveKind.Seal)
-            {
-                var seal = Element("objective-row");
-                seal.Add(Text("目标 · 封住入口", "objective"));
-                seal.Add(Pips(view.ObjectiveProgress, view.ObjectiveTarget, "seal-pips"));
-                seal.Add(Text($"{view.ObjectiveProgress} / {view.ObjectiveTarget}", "objective-count"));
-                heading.Add(seal);
-            }
-            else heading.Add(Text("目标 · " + view.Objective, "objective"));
+            heading.Add(Text($"{view.ObjectiveProgress}/{view.ObjectiveTarget}", "objective-count"));
+            heading.tooltip = view.Objective;
             root.Add(heading);
 
             var toggle = Button("journal-toggle", "", "journal-toggle", ToggleJournal);
@@ -228,6 +235,10 @@ namespace UnsoundedSea.Runtime
             menuToggle.Add(Text("菜单", "toggle-title"));
             menuToggle.Add(Text("Esc", "toggle-meta"));
             root.Add(menuToggle);
+            var chartToggle = Button("battle-chart-toggle", "", "chart-toggle", ToggleChart);
+            chartToggle.Add(Text("海图", "toggle-title"));
+            chartToggle.Add(Text("M", "toggle-meta"));
+            root.Add(chartToggle);
 
             // Target nameplates float over the stage; selection is shown by brackets and a text label.
             var targetBar = Element("targets");
@@ -239,7 +250,7 @@ namespace UnsoundedSea.Runtime
                 var isSelected = selectedEnemy == id;
                 target.EnableInClassList("selected", isSelected);
                 target.EnableInClassList("defeated", !alive);
-                target.Add(Text(!alive ? "已击退" : isSelected ? "当前目标" : "点击选为目标", "target-state"));
+                target.Add(Text(!alive ? "已击退" : isSelected ? "目标" : "", "target-state"));
                 target.Add(Text(enemy.Name, "target-name"));
                 var hp = Element("target-health");
                 var track = Element("target-track"); var fill = Element("target-fill");
@@ -247,92 +258,32 @@ namespace UnsoundedSea.Runtime
                 track.Add(fill); hp.Add(track);
                 hp.Add(Text($"{enemy.Health} / {enemy.MaxHealth}", "target-value"));
                 target.Add(hp);
+                if (isSelected) target.Add(new EnemyIntentDetails(enemy));
                 foreach (var corner in new[] { "tl", "tr", "bl", "br" }) target.Add(Element("bracket " + corner));
                 targetBar.Add(target);
             }
             root.Add(targetBar);
 
-            // Left edge: only what the investigator can currently see or has confirmed.
-            var selected = view.Enemies.FirstOrDefault(e => e.Id == selectedEnemy);
-            if (selected != null)
-            {
-                var intel = Element("intel");
-                var header = Element("intel-header");
-                header.Add(Text("现场观察", "section-label"));
-                header.Add(Text(selected.Name, "intel-subject"));
-                intel.Add(header);
-                var prefix = $"{selected.Id}/{view.Turn}/";
-                var findings = view.Evidence.Where(e => e.Key.StartsWith(prefix, StringComparison.Ordinal)).ToList();
-                var clueRow = Element("intel-row");
-                var clueHead = Element("intel-row-head");
-                clueHead.Add(Text("征兆", "field-label"));
-                clueHead.Add(LevelTag(KnowledgeLevel.Observed));
-                clueRow.Add(clueHead);
-                clueRow.Add(Text(selected.Clue, "clue"));
-                if (findings.Any(e => e.Key.EndsWith("/clue", StringComparison.Ordinal)))
-                    clueRow.Add(Text("已记入档案", "field-note"));
-                intel.Add(clueRow);
 
-                var intent = Element("intent");
-                var confirmed = selected.IntentConfirmed;
-                intent.EnableInClassList("confirmed", confirmed);
-                var intentHead = Element("intel-row-head");
-                intentHead.Add(Text("本回合意图", "field-label"));
-                intentHead.Add(Text(confirmed ? "已确认" : "未确认", confirmed ? "status-confirmed" : "status-unconfirmed"));
-                intent.Add(intentHead);
-                if (confirmed || selected.Health == 0) intent.Add(Text(selected.Intent, "intent-text"));
-                else
-                {
-                    intent.Add(Text("可能为以下之一：", "field-note"));
-                    foreach (var option in selected.Intent.Split('/'))
-                        if (option.Trim().Length > 0) intent.Add(Text("？ " + option.Trim(), "intent-option"));
-                }
-                var key = $"{prefix}intent";
-                if (confirmed && revealed.Add(key))
-                {
-                    intent.AddToClassList("revealing");
-                    intent.schedule.Execute(() => intent.RemoveFromClassList("revealing")).StartingIn(16);
-                }
-                intel.Add(intent);
-
-                var partial = findings.Where(e => !e.Key.EndsWith("/clue", StringComparison.Ordinal) && !e.Key.EndsWith("/VisibleAction", StringComparison.Ordinal)).ToList();
-                if (partial.Count > 0)
-                {
-                    var found = Element("intel-row");
-                    found.AddToClassList("findings");
-                    found.Add(Text("调查所得", "field-label"));
-                    foreach (var entry in partial)
-                    {
-                        var item = Element("finding");
-                        item.Add(LevelTag(entry.Level));
-                        item.Add(Text(entry.Text, "finding-text"));
-                        found.Add(item);
-                    }
-                    intel.Add(found);
-                }
-                root.Add(intel);
-            }
-
-            // Right edge: the two equipped instruments, each with uses and explicit price.
+            // Right edge: concise investigation tools retain uses, purpose and price.
             var tools = Element("tools");
-            tools.Add(Text("调查工具", "section-label"));
             foreach (var tool in view.Tools)
             {
                 var id = tool.Definition.Id;
                 var spent = tool.RemainingUses == 0;
                 var button = Button("tool-" + id, "", "tool", () => Send(BattleCommand.Investigate(id, selectedEnemy)), !spent && playing);
                 button.EnableInClassList("spent", spent);
-                var head = Element("tool-head");
-                head.Add(Text(tool.Definition.Name, "tool-name"));
-                head.Add(Pips(tool.RemainingUses, tool.Definition.Uses, "use-pips"));
-                button.Add(head);
-                button.Add(Text(ToolQuestion(tool.Definition.Kind), "tool-question"));
+                var art = new SeaUiArt(tool.Definition.Kind == InvestigationKind.SoundSource ? "ear" : tool.Definition.Kind == InvestigationKind.VisibleAction ? "lantern" : "eye");
+                button.Add(art);
+                button.Add(Text(tool.Definition.Name, "tool-name"));
                 var foot = Element("tool-foot");
                 var costly = tool.Definition.SanityCost > 0;
-                var cost = Text(costly ? $"代价 · 支付 {tool.Definition.SanityCost} 理智" : "代价 · 不消耗行动", "tool-cost");
-                cost.EnableInClassList("price", costly);
-                foot.Add(cost);
-                foot.Add(Text(spent ? "已用尽" : $"剩余 {tool.RemainingUses} 次", spent ? "tool-spent" : "tool-uses"));
+                if (costly)
+                {
+                    var cost = Text($"{tool.Definition.SanityCost} 理智", "tool-cost");
+                    cost.AddToClassList("price"); foot.Add(cost);
+                }
+                foot.Add(Text(spent ? "已用尽" : $"×{tool.RemainingUses}", spent ? "tool-spent" : "tool-uses"));
                 button.Add(foot);
                 button.tooltip = $"{tool.Definition.Name}：{ToolQuestion(tool.Definition.Kind)}。对象为当前目标。";
                 tools.Add(button);
@@ -374,20 +325,22 @@ namespace UnsoundedSea.Runtime
                 journal.schedule.Execute(() => entries.scrollOffset = Vector2.zero);
             }
 
-            // Lower left: action budget and the two separate protections.
+            // Independent instruments leave the stage and hand visually open.
             var player = Element("player-status");
+            var vitals = Element("vitals");
+            var health = Meter("生命", view.Health, definition.Health, "health"); health.Add(new SeaUiArt("heart"));
+            var sanity = Meter("理智", view.Sanity, definition.Sanity, "sanity"); sanity.Add(new SeaUiArt("eye"));
+            vitals.Add(health); vitals.Add(sanity); player.Add(vitals);
             var actionLine = Element("action-line");
-            var actionText = Element("action-text");
-            actionText.Add(Text("行动", "section-label"));
-            actionText.Add(Text($"{view.Actions} / {definition.Actions}", "action-value"));
-            actionLine.Add(actionText);
-            actionLine.Add(Pips(view.Actions, Mathf.Max(definition.Actions, view.Actions), "action-pips"));
+            actionLine.Add(new SeaUiArt("compass"));
+            actionLine.Add(Text($"{view.Actions}/{definition.Actions}", "action-value"));
+            actionLine.Add(Text("行动", "section-label"));
             player.Add(actionLine);
             var defense = Element("defenses");
             var block = Element("defense"); block.AddToClassList("block"); block.EnableInClassList("active", view.Block > 0);
-            block.Add(Text("格挡", "defense-label")); block.Add(Text(view.Block.ToString(), "defense-value")); block.Add(Text("抵挡生命伤害", "defense-note"));
+            block.Add(Text("格挡", "defense-label")); block.Add(Text(view.Block.ToString(), "defense-value"));
             var ward = Element("defense"); ward.AddToClassList("ward"); ward.EnableInClassList("active", view.Ward > 0);
-            ward.Add(Text("理智防护", "defense-label")); ward.Add(Text(view.Ward.ToString(), "defense-value")); ward.Add(Text("抵御理智冲击", "defense-note"));
+            ward.Add(Text("理智防护", "defense-label")); ward.Add(Text(view.Ward.ToString(), "defense-value"));
             defense.Add(block); defense.Add(ward);
             player.Add(defense);
             root.Add(player);
@@ -398,26 +351,38 @@ namespace UnsoundedSea.Runtime
             hand.pickingMode = PickingMode.Ignore;
             hand.contentViewport.pickingMode = PickingMode.Ignore;
             hand.contentContainer.pickingMode = PickingMode.Ignore;
-            hand.horizontalScrollerVisibility = ScrollerVisibility.Auto;
+            hand.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+            hand.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+            var fan = Element("fan-track");
+            fan.style.width = Mathf.Max(620, 180 + Mathf.Max(0, view.Hand.Count - 1) * 110);
+            hand.Add(fan);
+            hand.RegisterCallback<GeometryChangedEvent>(_ => fan.style.marginLeft = Mathf.Max(0, (hand.contentViewport.resolvedStyle.width - fan.resolvedStyle.width) * .5f));
+            var cardIndex = 0;
             foreach (var card in view.Hand)
             {
                 var id = card.InstanceId; var data = card.Definition;
                 var shortAction = view.Actions < data.Cost;
                 var shortSanity = view.Sanity <= data.SanityCost;
-                var button = Button("card-" + id, "", "card", () => Send(BattleCommand.Play(id, selectedEnemy)), playing && !shortAction && !shortSanity);
+                var button = Button("card-" + id, "", "card-anchor", () => Send(BattleCommand.Play(id, selectedEnemy)), playing && !shortAction && !shortSanity);
+                button.tabIndex = cardIndex + 1; button.style.left = cardIndex * 110;
+                button.AddToClassList("fan-" + Mathf.Clamp(cardIndex++ - (view.Hand.Count - 1) / 2, -3, 3));
+                button.RegisterCallback<FocusInEvent>(_ => hand.ScrollTo(button));
                 button.EnableInClassList("unaffordable", playing && (shortAction || shortSanity));
                 button.tooltip = data.Name + "：" + data.Description;
+                var face = Element("card"); face.pickingMode = PickingMode.Position;
+                var effect = data.Effects[0].Id;
+                var motif = effect.Contains("damage") ? "gun" : effect == "block" ? "shield" : effect == "ward" ? "eye" : effect.Contains("investigate") ? "lantern" : "scroll";
                 var top = Element("card-top");
                 top.Add(Text(data.Cost.ToString(), "card-cost"));
                 top.Add(Text("行动", "card-cost-label"));
-                button.Add(top);
-                button.Add(Text(data.Name, "card-name"));
-                button.Add(Element("card-rule"));
-                button.Add(Text(data.Description, "card-description"));
-                if (data.SanityCost > 0) button.Add(Text($"代价 · 主动支付 {data.SanityCost} 理智", "card-price"));
-                if (data.Exhaust) button.Add(Text("本场限用一次", "card-exhaust"));
-                if (playing && (shortAction || shortSanity)) button.Add(Text(shortAction ? "行动不足" : "理智不足", "card-blocked"));
-                hand.Add(button);
+                face.Add(top);
+                face.Add(new SeaUiArt(motif));
+                face.Add(Text(data.Name, "card-name"));
+                face.Add(Text(data.Description, "card-description"));
+                if (data.SanityCost > 0) face.Add(Text($"代价 · 主动支付 {data.SanityCost} 理智", "card-price"));
+                if (data.Exhaust) face.Add(Text("本场限用一次", "card-exhaust"));
+                if (playing && (shortAction || shortSanity)) face.Add(Text(shortAction ? "行动不足" : "理智不足", "card-blocked"));
+                button.Add(face); fan.Add(button);
             }
             root.Add(hand);
             var piles = Element("piles");
@@ -444,8 +409,7 @@ namespace UnsoundedSea.Runtime
                 controls.Add(task);
             }
             var end = Button("end-turn", "", "end-turn", () => Send(BattleCommand.EndTurn()), playing);
-            end.Add(Text("结束回合", "end-title"));
-            end.Add(Text("敌方执行已锁定的行动", "end-note"));
+            end.Add(new SeaUiArt("seal")); end.Add(Text("结束\n回合", "end-title"));
             controls.Add(end);
             root.Add(controls);
 
@@ -471,6 +435,15 @@ namespace UnsoundedSea.Runtime
                 if (!journalOpen) actions.Add(Button("outcome-journal", "查看档案", "outcome-journal", ToggleJournal));
                 outcome.Add(actions);
                 root.Add(outcome);
+            }
+
+            if (chartOpen)
+            {
+                var chart = new VisualElement { name = "battle-chart-overlay" };
+                chart.AddToClassList("battle-chart-overlay");
+                chart.Add(new VoyageMapPanel(VoyageRuntime.Session, null, false));
+                chart.Add(Button("battle-chart-close", "返回战斗", "battle-chart-close", CloseChart));
+                root.Add(chart);
             }
 
             if (menuOpen)

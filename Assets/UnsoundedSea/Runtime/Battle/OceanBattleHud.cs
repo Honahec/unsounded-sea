@@ -20,6 +20,7 @@ namespace UnsoundedSea.Runtime
         private VisualElement root, overlay;
         private readonly List<Button> nameplates = new List<Button>();
         private bool showSettings;
+        private bool chartOpen, chartWasPaused;
         public int RenderedFrames { get; private set; }
         private void OnEnable()
         {
@@ -32,11 +33,34 @@ namespace UnsoundedSea.Runtime
             root.RegisterCallback<KeyDownEvent>(Key);
             Render();
         }
-        private void OnDisable() { director.Changed -= Render; root.UnregisterCallback<KeyDownEvent>(Key); root.Clear(); }
+        private void OnDisable()
+        {
+            chartOpen = false; chartWasPaused = false; showSettings = false;
+            director.Changed -= Render; root.UnregisterCallback<KeyDownEvent>(Key); root.Clear();
+        }
         private void Key(KeyDownEvent evt)
         {
-            if (evt.keyCode != KeyCode.Escape) return;
-            showSettings = false; director.SetPaused(!director.Paused); evt.StopPropagation();
+            if (evt.keyCode == KeyCode.Escape && chartOpen) CloseChart();
+            else if (evt.keyCode == KeyCode.M && !showSettings) ToggleChart();
+            else if (evt.keyCode == KeyCode.Escape)
+            {
+                showSettings = false;
+                director.SetPaused(!director.Paused);
+            }
+            else return;
+            evt.StopPropagation();
+        }
+        private void ToggleChart()
+        {
+            if (chartOpen) { CloseChart(); return; }
+            chartWasPaused = director.Paused;
+            chartOpen = true;
+            if (!director.Paused) director.SetPaused(true); else Render();
+        }
+        private void CloseChart()
+        {
+            chartOpen = false;
+            if (director.Paused != chartWasPaused) director.SetPaused(chartWasPaused); else Render();
         }
         private static VisualElement Box(string cls) { var v = new VisualElement { pickingMode = PickingMode.Ignore }; v.AddToClassList(cls); return v; }
         private static Label Text(string text, string cls) { var l = new Label(text) { pickingMode = PickingMode.Ignore }; l.AddToClassList(cls); return l; }
@@ -57,79 +81,100 @@ namespace UnsoundedSea.Runtime
                 }
             }); root.Add(surface);
             var top = Box("sea-top"); root.Add(top);
-            var title = Box("sea-title"); title.Add(Text("U N S O U N D E D   S E A", "eyebrow")); title.Add(Text(scenario.chapter, "chapter")); top.Add(title);
-            var vitals = Box("vitals"); top.Add(vitals);
-            Vital(vitals, "船员生命", v.Health, scenario.encounter.playerHealth, "health");
-            Vital(vitals, "理智", v.Sanity, scenario.encounter.playerSanity, "sanity");
-            var pause = Button("battle-pause", "II  航海日志", () => director.SetPaused(true)); top.Add(pause);
+            top.Add(Button("battle-chart-toggle", "海图 M", ToggleChart));
+            top.Add(Button("battle-pause", "日志 / 设置", () => director.SetPaused(true)));
 
-            var left = Box("intel-panel"); root.Add(left); left.Add(Text(scenario.enemyHeading, "eyebrow"));
-            foreach (var enemy in v.Enemies)
-            {
-                var e = enemy; var b = Button("target-" + e.Id, e.Name + (e.Health <= 0 ? "  /  已倒下" : ""), () => director.Select(e.Id), "target-button");
-                b.EnableInClassList("chosen", director.SelectedEnemy == e.Id); b.SetEnabled(e.Health > 0 && !director.Paused); left.Add(b);
-            }
             var selected = v.Enemies.FirstOrDefault(x => x.Id == director.SelectedEnemy);
-            if (selected != null)
+
+            var tools = Box("tools"); root.Add(tools);
+            foreach (var tool in v.Tools)
             {
-                left.Add(Text(selected.Clue, "clue"));
-                left.Add(Text(selected.IntentConfirmed ? "已确认意图" : "未确认 · 可能的行动", "intel-label"));
-                left.Add(Text(selected.Intent, "intel-text"));
-                left.Add(Text("调查器具 / 每场有限次数", "intel-label"));
-                foreach (var tool in v.Tools)
-                {
-                    var t = tool; var b = Button("tool-" + t.Definition.Id, t.Definition.Name + "  ×" + t.RemainingUses, () => director.Submit(BattleCommand.Investigate(t.Definition.Id, director.SelectedEnemy)));
-                    b.SetEnabled(active && t.RemainingUses > 0 && v.Sanity > t.Definition.SanityCost); left.Add(b);
-                }
+                var t = tool; var cost = t.Definition.SanityCost > 0 ? $"{t.Definition.SanityCost}理智" : "无代价";
+                var b = Button("tool-" + t.Definition.Id, "", () => director.Submit(BattleCommand.Investigate(t.Definition.Id, director.SelectedEnemy)), "tool");
+                b.Add(new SeaUiArt(t.Definition.Kind == InvestigationKind.SoundSource ? "ear" : t.Definition.Kind == InvestigationKind.VisibleAction ? "lantern" : "eye"));
+                b.Add(Text(t.Definition.Name, "tool-name")); b.Add(Text(t.RemainingUses + (t.Definition.SanityCost > 0 ? $" · {t.Definition.SanityCost}理智" : ""), "tool-meta"));
+                b.tooltip = $"{t.Definition.Name}：调查当前目标，剩余 {t.RemainingUses} 次，代价 {cost}";
+                b.SetEnabled(active && selected != null && t.RemainingUses > 0 && v.Sanity > t.Definition.SanityCost); tools.Add(b);
             }
-            var right = Box("objective-panel"); root.Add(right);
-            right.Add(Text("航 行 目 标", "eyebrow")); right.Add(Text(scenario.objectiveHeading, "objective-title"));
-            right.Add(Text(v.Objective, "objective-description"));
+
+            var right = Box("objective-seal"); root.Add(right);
+            right.Add(new SeaUiArt("seal"));
+            right.Add(Text(scenario.encounter.objective == ObjectiveKind.Seal ? "封线" : scenario.encounter.objective == ObjectiveKind.Survive ? "撤离" : "压制", "objective-label"));
+            right.Add(Text($"{v.ObjectiveProgress}/{v.ObjectiveTarget}", "objective-count"));
+            right.tooltip = scenario.objectiveHeading + "：" + v.Objective;
             var seals = Box("seal-row"); seals.EnableInClassList("survival-progress", scenario.encounter.objective == ObjectiveKind.Survive); right.Add(seals);
-            for (var i = 0; i < v.ObjectiveTarget; i++) { var s = Text((i + 1).ToString("00"), "seal"); s.EnableInClassList("complete", i < v.ObjectiveProgress); seals.Add(s); }
+            for (var i = 0; i < v.ObjectiveTarget; i++) { var s = Box("seal"); s.EnableInClassList("complete", i < v.ObjectiveProgress); seals.Add(s); }
             if (!string.IsNullOrWhiteSpace(scenario.taskLabel))
             {
-                var task = Button("battle-task", scenario.taskLabel + "  /  1 行动", () => director.Submit(BattleCommand.Task()), "task-button");
-                task.SetEnabled(active && v.CanAdvanceObjective && v.Actions > 0); right.Add(task);
+                var task = Button("battle-task", scenario.taskLabel + "\n1行动", () => director.Submit(BattleCommand.Task()), "task-button");
+                task.SetEnabled(active && v.CanAdvanceObjective && v.Actions > 0); root.Add(task);
             }
-            right.Add(Text(scenario.objectiveHint, "fine-print"));
-            right.Add(Text($"格挡  {v.Block:00}     理智防护  {v.Ward:00}", "defenses"));
 
-            var center = Box("stage-caption"); center.Add(Text(scenario.location.ToUpperInvariant(), "eyebrow")); root.Add(center);
-            var bottom = Box("hand-area"); root.Add(bottom);
-            var bar = Box("hand-heading"); bottom.Add(bar);
-            bar.Add(Text($"第 {v.Turn:00} 回合  /  {(director.Busy ? "潮声正在回应" : "你的行动")}", "turn-label"));
-            bar.Add(Text($"行动  {new string('◆', v.Actions)}{new string('◇', Math.Max(0, scenario.encounter.actionsPerTurn - v.Actions))}", "action-count"));
-            bar.Add(Text($"牌库 {v.DrawCount}  /  弃牌 {v.DiscardCount}  /  消耗 {v.ExhaustCount}", "fine-print"));
-            var handRow = Box("hand-row"); bottom.Add(handRow);
-            var handScroll = new ScrollView(ScrollViewMode.Horizontal); handScroll.AddToClassList("hand-scroll"); handScroll.horizontalScrollerVisibility = ScrollerVisibility.Auto; handRow.Add(handScroll);
+            var instruments = Box("instruments"); root.Add(instruments);
+            Vital(instruments, "生命", v.Health, scenario.encounter.playerHealth, "health", "heart");
+            Vital(instruments, "理智", v.Sanity, scenario.encounter.playerSanity, "sanity", "eye");
+            var action = Box("action-instrument"); action.Add(new SeaUiArt("compass"));
+            action.Add(Text($"{v.Actions}/{scenario.encounter.actionsPerTurn}", "instrument-value"));
+            action.Add(Text("行动", "instrument-label")); instruments.Add(action);
+            instruments.Add(Text($"格挡 {v.Block} · 防护 {v.Ward}\n牌库 {v.DrawCount} · 弃牌 {v.DiscardCount} · 消耗 {v.ExhaustCount}", "resource-note"));
+
+            var hand = new ScrollView(ScrollViewMode.Horizontal); hand.name = "hand"; hand.AddToClassList("hand");
+            hand.pickingMode = PickingMode.Ignore; hand.contentViewport.pickingMode = PickingMode.Ignore; hand.contentContainer.pickingMode = PickingMode.Ignore;
+            hand.horizontalScrollerVisibility = ScrollerVisibility.Hidden; hand.verticalScrollerVisibility = ScrollerVisibility.Hidden; root.Add(hand);
+            var fan = Box("fan-track"); fan.style.width = Mathf.Max(620, 180 + Mathf.Max(0, v.Hand.Count - 1) * 110); hand.Add(fan);
+            hand.RegisterCallback<GeometryChangedEvent>(_ => fan.style.marginLeft = Mathf.Max(0, (hand.contentViewport.resolvedStyle.width - fan.resolvedStyle.width) * .5f));
+            var cardIndex = 0;
             foreach (var card in v.Hand)
             {
-                var c = card; var def = c.Definition;
-                var b = Button("card-" + c.InstanceId, "", () => director.Submit(BattleCommand.Play(c.InstanceId, director.SelectedEnemy)), "sea-card");
-                var type = def.Effects[0].Id; b.EnableInClassList("attack-card", type.Contains("damage"));
-                var head = Box("card-head"); head.Add(Text(def.Cost.ToString(), "card-cost")); head.Add(Text(type.Contains("damage") ? "压制" : type == "block" ? "防御" : type == "ward" ? "镇定" : "调查 / 技巧", "card-type")); b.Add(head);
-                b.Add(new NauticalGlyph(type)); b.Add(Text(def.Name, "card-name")); b.Add(Text(def.Description, "card-description"));
-                if (def.SanityCost > 0 || def.Exhaust) b.Add(Text((def.SanityCost > 0 ? $"支付 {def.SanityCost} 理智 " : "") + (def.Exhaust ? "· 消耗" : ""), "fine-print"));
-                b.SetEnabled(active && def.Cost <= v.Actions && def.SanityCost < v.Sanity); handScroll.Add(b);
+                var c = card; var def = c.Definition; var type = def.Effects[0].Id;
+                var b = Button("card-" + c.InstanceId, "", () => director.Submit(BattleCommand.Play(c.InstanceId, director.SelectedEnemy)), "card-anchor");
+                b.tabIndex = cardIndex + 1; b.style.left = cardIndex * 110;
+                b.AddToClassList("fan-" + Mathf.Clamp(cardIndex++ - (v.Hand.Count - 1) / 2, -3, 3));
+                b.RegisterCallback<FocusInEvent>(_ => hand.ScrollTo(b));
+                var face = Box("sea-card"); face.pickingMode = PickingMode.Position;
+                var motif = type.Contains("damage") ? "gun" : type == "block" ? "shield" : type == "ward" ? "eye" : type.Contains("investigate") ? "lantern" : "scroll";
+                var head = Box("card-head"); head.Add(Text(def.Cost.ToString(), "card-cost")); head.Add(Text(type.Contains("damage") ? "压制" : type == "block" ? "防御" : type == "ward" ? "镇定" : "调查", "card-type")); face.Add(head);
+                face.Add(new SeaUiArt(motif)); face.Add(Text(def.Name, "card-name")); face.Add(Text(def.Description, "card-description"));
+                if (def.SanityCost > 0 || def.Exhaust) face.Add(Text((def.SanityCost > 0 ? $"支付 {def.SanityCost} 理智 " : "") + (def.Exhaust ? "· 消耗" : ""), "fine-print"));
+                b.Add(face); b.tooltip = def.Name + "：" + def.Description;
+                b.SetEnabled(active && def.Cost <= v.Actions && def.SanityCost < v.Sanity); fan.Add(b);
             }
-            var end = Button("battle-end-turn", "结束回合\n让潮声靠近", () => director.Submit(BattleCommand.EndTurn()), "end-turn"); end.SetEnabled(active); handRow.Add(end);
-            var notice = Text(director.Notice, "battle-notice"); root.Add(notice);
+            var end = Button("battle-end-turn", "", () => director.Submit(BattleCommand.EndTurn()), "end-turn");
+            end.Add(new SeaUiArt("seal")); end.Add(Text("结束\n回合", "end-label")); end.SetEnabled(active); root.Add(end);
+            if (!string.IsNullOrWhiteSpace(director.Notice) && director.Notice != scenario.introduction)
+                root.Add(Text(director.Notice, "battle-notice"));
             if (director.Stage != null)
                 foreach (var actor in director.Stage.Actors)
                 {
                     var a = actor; var enemy = v.Enemies.First(x => x.Id == a.EnemyId);
                     var status = string.IsNullOrWhiteSpace(scenario.enemyStatus) ? enemy.Health + " / " + enemy.MaxHealth : scenario.enemyStatus;
-                    var plate = Button("actor-" + a.EnemyId, enemy.Name + "\n" + status, () => director.Select(a.EnemyId), "actor-label");
+                    var plate = Button("actor-" + a.EnemyId, "", () => director.Select(a.EnemyId), "actor-label");
+                    plate.Add(Text(enemy.Name, "actor-name"));
+                    if (string.IsNullOrWhiteSpace(scenario.enemyStatus))
+                    {
+                        var hp = Box("actor-health"); var fill = Box("actor-health-fill");
+                        fill.style.width = Length.Percent(enemy.MaxHealth > 0 ? 100f * enemy.Health / enemy.MaxHealth : 0); hp.Add(fill); plate.Add(hp);
+                    }
+                    plate.Add(Text(status, "actor-status"));
+                    if (a.EnemyId == director.SelectedEnemy)
+                        plate.Add(new EnemyIntentDetails(enemy));
                     plate.EnableInClassList("selected", a.EnemyId == director.SelectedEnemy); plate.SetEnabled(a.Alive && !director.Paused); root.Add(plate); nameplates.Add(plate);
                 }
-            if (director.Paused || v.Phase == BattlePhase.Victory || v.Phase == BattlePhase.Defeat) Modal(v);
+            if (chartOpen) ChartOverlay();
+            else if (director.Paused || v.Phase == BattlePhase.Victory || v.Phase == BattlePhase.Defeat) Modal(v);
         }
-        private static void Vital(VisualElement parent, string title, int value, int max, string cls)
+        private static void Vital(VisualElement parent, string title, int value, int max, string cls, string motif)
         {
-            var el = Box("vital"); el.AddToClassList(cls);
-            el.Add(Text(title + "   " + value.ToString("00") + " / " + max, "vital-value"));
+            var el = Box("vital"); el.AddToClassList(cls); el.Add(new SeaUiArt(motif));
+            el.Add(Text(value.ToString("00"), "instrument-value")); el.Add(Text(title + " / " + max, "instrument-label"));
             var track = Box("vital-track"); var fill = Box("vital-fill"); fill.style.width = Length.Percent((float)value / max * 100); track.Add(fill); el.Add(track); parent.Add(el);
+        }
+        private void ChartOverlay()
+        {
+            overlay = Box("battle-chart-overlay"); overlay.pickingMode = PickingMode.Position;
+            overlay.Add(new VoyageMapPanel(VoyageRuntime.Session, null, false));
+            overlay.Add(Button("battle-chart-close", "返回战斗", CloseChart, "battle-chart-close"));
+            root.Add(overlay);
         }
         private void Modal(BattleView view)
         {
@@ -145,7 +190,7 @@ namespace UnsoundedSea.Runtime
             foreach (var entry in entries.Skip(Math.Max(0, entries.Length - 12))) log.Add(Text(entry, "log-line"));
             sheet.Add(log);
             if (!end) sheet.Add(Button("battle-resume", "继续航行", () => director.SetPaused(false)));
-            sheet.Add(Button("battle-retry", "重新开始这场遭遇", () => { showSettings = false; director.Restart(); }));
+            sheet.Add(Button("battle-retry", "重新开始这场遭遇", () => { chartOpen = false; chartWasPaused = false; showSettings = false; director.Restart(); }));
             sheet.Add(Button("battle-settings", "设置", () => { showSettings = true; Render(); }));
             sheet.Add(Button("battle-menu", "返回主菜单", () => SceneManager.LoadScene(menuScene)));
         }
@@ -159,22 +204,12 @@ namespace UnsoundedSea.Runtime
                 var actor = director.Stage.Actors[i];
                 var screen = director.Stage.battleCamera.WorldToScreenPoint(actor.LabelPosition);
                 var p = RuntimePanelUtils.ScreenToPanel(root.panel, new Vector2(screen.x, Screen.height - screen.y));
-                nameplates[i].style.left = p.x - 85; nameplates[i].style.top = p.y - 35;
+                var plate = nameplates[i];
+                var width = plate.resolvedStyle.width;
+                var height = plate.resolvedStyle.height;
+                plate.style.left = Mathf.Clamp(p.x - width * .5f, 18, Mathf.Max(18, root.resolvedStyle.width - width - 18));
+                plate.style.top = Mathf.Max(64, p.y - height - 12);
                 nameplates[i].style.display = screen.z > 0 && actor.Alive ? DisplayStyle.Flex : DisplayStyle.None;
-            }
-        }
-        private sealed class NauticalGlyph : VisualElement
-        {
-            private readonly string type;
-            public NauticalGlyph(string type) { this.type = type; AddToClassList("card-glyph"); pickingMode = PickingMode.Ignore; generateVisualContent += Draw; }
-            private void Draw(MeshGenerationContext context)
-            {
-                var p = context.painter2D; p.strokeColor = new Color(0.64f, 0.55f, 0.35f, 0.7f); p.lineWidth = 1;
-                var c = contentRect.center; float r = 18;
-                p.BeginPath(); p.Arc(c, r, 0, 360); p.Stroke();
-                int count = type.Contains("damage") ? 4 : type == "ward" ? 8 : 6;
-                for (var i = 0; i < count; i++) { float a = i * Mathf.PI * 2 / count; var d = new Vector2(Mathf.Cos(a), Mathf.Sin(a)); p.BeginPath(); p.MoveTo(c + d * 6); p.LineTo(c + d * 25); p.Stroke(); }
-                p.BeginPath(); p.MoveTo(c + Vector2.up * -12); p.LineTo(c + Vector2.right * 7); p.LineTo(c + Vector2.up * 12); p.LineTo(c + Vector2.left * 7); p.ClosePath(); p.Stroke();
             }
         }
     }
