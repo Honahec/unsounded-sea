@@ -1,0 +1,73 @@
+{
+  "boss": "M04/B04 无灯舰队的执旗者",
+  "provider": "Hyper3D Agent",
+  "thread": "https://hyper3d.ai/workspace/agent?project=6506617c-2538-4312-a327-2f0702a22e96&thread=3904001c-5636-4f1c-af0e-6b3f1fb65979&lang=zh",
+  "high_generation": "bc75e1ea-badc-5ebc-8aac-798c73193353",
+  "decimation": "aa348dd5-fb9f-5311-b49f-c2cbe1aff09b",
+  "runtime_budget_triangles": 90000,
+  "files": [
+    {
+      "path": "ArtSource/Bosses/UnlitFlagBearer_High.glb",
+      "sha256": "2ea18d2dea4545d59c18e22655d4587d3ce4c4c91b0e6de5f320f3e031f571a9",
+      "bytes": 78899664,
+      "triangles": 1200000,
+      "vertices": 975041,
+      "meshes": 1,
+      "materials": 1,
+      "textures": [
+        {
+          "name": "texture_normal",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 4096,
+          "height": 4096
+        }
+      ],
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "path": "ArtSource/Bosses/UnlitFlagBearer_LOD0.glb",
+      "sha256": "e48ea8a4becae97e845ecc077ba5403f36b0712e9801cbf2605c0b7ed7d4c251",
+      "bytes": 55486396,
+      "triangles": 85000,
+      "vertices": 129165,
+      "meshes": 1,
+      "materials": 1,
+      "textures": [
+        {
+          "name": "texture_normal_lowpoly",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_diffuse_lowpoly",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_metallic_lowpoly-texture_roughness_lowpoly",
+          "width": 4096,
+          "height": 4096
+        }
+      ],
+      "skins": 0,
+      "animations": 0
+    }
+  ],
+  "verification": {
+    "method": "Parsed GLB accessors and embedded PNG dimensions; archived SHA256 matches browser downloads.",
+    "visual": "Concept inspected; model render review pending.",
+    "unity_imported": false,
+    "animation_ready": false,
+    "target_performance_tested": false
+  }
+}
