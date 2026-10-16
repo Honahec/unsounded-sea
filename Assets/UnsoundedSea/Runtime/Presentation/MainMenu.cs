@@ -11,9 +11,11 @@ namespace UnsoundedSea.Runtime
     {
         [SerializeField] private FontAsset interfaceFont;
         [SerializeField] private StyleSheet menuStyle;
-        [SerializeField] private string battleScene = "Battle";
+        [SerializeField] private string voyageScene = VoyageRuntime.VoyageScene;
         private VisualElement root;
         private bool settingsOpen;
+        private bool confirmingNewVoyage;
+        private string error;
 
         private void OnEnable()
         {
@@ -70,12 +72,23 @@ namespace UnsoundedSea.Runtime
 
             var entries = new VisualElement { pickingMode = PickingMode.Ignore };
             entries.AddToClassList("menu-entries");
-            var canStart = Application.CanStreamedLevelBeLoaded(battleScene);
-            entries.Add(Entry("menu-start", "01", "开始调查", canStart ? "登船，前往不存在于海图上的坐标" : "战斗场景未加入构建列表", StartGame, canStart));
-            var settings = Entry("menu-settings", "02", "设置", "音量、显示与界面动效", () => { settingsOpen = true; Build(null); });
-            settings.EnableInClassList("open", settingsOpen);
-            entries.Add(settings);
-            entries.Add(Entry("menu-quit", "03", "退出", "离开调查船", Quit));
+            var canStart = Application.CanStreamedLevelBeLoaded(voyageScene);
+            if (confirmingNewVoyage)
+            {
+                entries.Add(Entry("menu-confirm-new", "01", "确认开始新航程", canStart ? "现有航程存档将被覆盖，且无法恢复" : "航程场景未加入构建列表", StartConfirmed, canStart));
+                entries.Add(Entry("menu-cancel-new", "02", "保留现有航程", "返回，不改动存档", () => { confirmingNewVoyage = false; error = null; Build("menu-start"); }));
+            }
+            else
+            {
+                entries.Add(Entry("menu-start", "01", "开始新航程", canStart ? "登船，前往不存在于海图上的坐标" : "航程场景未加入构建列表", StartGame, canStart));
+                if (VoyageRuntime.HasSavedVoyage)
+                    entries.Add(Entry("menu-continue", "02", "继续航程", "恢复至上次海图进度；若在遭遇中，将从该遭遇开头继续", ContinueGame));
+                var settings = Entry("menu-settings", "03", "设置", "音量、显示与界面动效", () => { settingsOpen = true; error = null; Build(null); });
+                settings.EnableInClassList("open", settingsOpen);
+                entries.Add(settings);
+                entries.Add(Entry("menu-quit", "04", "退出", "离开调查船", Quit));
+            }
+            if (!string.IsNullOrEmpty(error)) entries.Add(Text(error, "menu-error"));
             column.Add(entries);
             column.Add(Text("方向键或鼠标选择 · Enter 确认", "menu-hint"));
             root.Add(column);
@@ -94,7 +107,49 @@ namespace UnsoundedSea.Runtime
                 root.schedule.Execute(() => root.Q<Button>(focus)?.Focus());
         }
 
-        private void StartGame() => SceneManager.LoadScene(battleScene);
+        private void StartGame()
+        {
+            if (VoyageRuntime.HasSavedVoyage)
+            {
+                confirmingNewVoyage = true;
+                error = null;
+                Build("menu-confirm-new");
+                return;
+            }
+            StartConfirmed();
+        }
+        private void StartConfirmed()
+        {
+            try
+            {
+                VoyageRuntime.StartNew();
+                SceneManager.LoadScene(voyageScene);
+            }
+            catch (Exception exception)
+            {
+                error = "无法开始航程：" + exception.Message;
+                confirmingNewVoyage = false;
+                Build("menu-start");
+                Debug.LogException(exception);
+            }
+        }
+        private void ContinueGame()
+        {
+            if (!VoyageRuntime.TryResume(out var resumeError))
+            {
+                error = "无法读取航程存档：" + resumeError;
+                Build("menu-continue");
+                return;
+            }
+            var scene = VoyageRuntime.IsVoyageEncounter ? VoyageRuntime.BattleScene : voyageScene;
+            if (!Application.CanStreamedLevelBeLoaded(scene))
+            {
+                error = (VoyageRuntime.IsVoyageEncounter ? "战斗" : "航程") + "场景未加入构建列表。";
+                Build("menu-continue");
+                return;
+            }
+            SceneManager.LoadScene(scene);
+        }
         private static void Quit()
         {
 #if UNITY_EDITOR

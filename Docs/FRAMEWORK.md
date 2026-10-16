@@ -1,16 +1,16 @@
 # 基础框架开发指南
 
-适用版本：Unity 6000.6.5f1 / URP。需求依据为 [概念设计](DESIGN_DOC_v0_1.md)。本文描述已实现的战斗基础、扩展接口和存档契约；新增机制提案见 [机制与素材设计](ASSET_MECHANICS_DESIGN.md)。
+适用版本：Unity 6000.6.5f1 / URP。需求依据为 [概念设计](DESIGN_DOC_v0_1.md)。本文描述已实现的战斗基础、局外航海、扩展接口和存档契约；新增机制提案见 [机制与素材设计](ASSET_MECHANICS_DESIGN.md)。
 
 ## 快速运行
 
 1. 打开工程，等待脚本编译完成。
-2. 打开 `Assets/UnsoundedSea/Scenes/MainMenu.unity`（构建列表第 0 位）点击 Play：标题界面提供「开始调查 / 设置 / 退出」。也可直接打开 `Battle.unity` 跳过标题。
-3. 默认进入蒙面祷告者遭遇。其他遭遇通过 `BattleHud` Inspector 的 `Initial Encounter` 选择：0 公开意图、1 有限调查、2 封门、3 卡牌实验；游戏 HUD 不提供开发用场景切换。
+2. 打开 `Assets/UnsoundedSea/Scenes/MainMenu.unity`（构建列表第 0 位）点击 Play：可开始新航程、继续航程、设置或退出；已有记录时开始新航程需明确确认覆盖。
+3. 标题进入 `Voyage.unity`，先选择航向，再确认出航；抵达遭遇节点后进入 `Battle.unity`，胜负结算返回航图。直接打开 `Battle.unity` 仍可独立验证遭遇；Inspector 的 `Initial Encounter` 为 0 公开意图、1 有限调查、2 封门、3 卡牌实验。
 4. 点击目标名牌选择敌人，再点击底部手牌或右侧调查工具；右下角结束回合。封门遭遇提供独立的「绘制封线」，四次即可完成，不需要击杀。
 5. 右上角「调查档案」（或 J 键）展开证据与行动记录，Esc 收起；无档案打开时 Esc 打开暂停菜单（继续调查 / 设置 / 返回标题）。回放与文件存档接口仍保留在底层；不在游戏 HUD 中放置调试用保存、读取按钮。
 
-初始化菜单 **Unsounded Sea → Create or Open Battle Scene** 只创建缺失资产，不覆盖已有配置或场景；它不会创建标题场景，标题场景已入库。
+初始化菜单 **Unsounded Sea → Create or Open Battle Scene** 只创建缺失资产，不覆盖已有配置或场景；标题与航海场景均已入库，不由该菜单重建。
 
 界面使用 `Assets/Fonts/default_zh.ttf`（香萃积雪宋）生成的动态 TextCore SDF 字体 `default_zh.asset`，通过 `Interface Font` 绑定。该字体缺少 ✓、箭头、几何符号与「」，状态一律用文字标签或 USS 绘制的形状表达；新增界面文字后应检查字形覆盖。发布前需确认字体商用授权。
 
@@ -26,7 +26,19 @@
 
 HUD 只读取 `BattleView`（含只读的 `ObjectiveProgress / ObjectiveTarget`）并提交 `BattleCommand`；不会读取敌人的真实隐藏意图。阶段切换日志（`阶段：PlayerTurn` 等）只在 HUD 展示层过滤，底层日志不变。
 
-两个场景中的 `Greybox … (placeholder)` 物体只是基础体块、雾与灯光，用于检查构图和中央可见性，不是正式美术；材质在 `Settings/Greybox/`。名牌目前是固定位置的一行，尚未锚定到 3D 敌人坐标；接入正式模型（按下文用 Hyper3D 与 Unity CLI 制作）后应改为投影锚点。
+各场景中的 `Greybox … (placeholder)` 物体只是基础体块、雾与灯光，用于检查构图和中央可见性，不是正式美术；材质在 `Settings/Greybox/`。名牌目前是固定位置的一行，尚未锚定到 3D 敌人坐标；接入正式模型（按下文用 Hyper3D 与 Unity CLI 制作）后应改为投影锚点。
+
+## 航海选路（局外）
+
+- **完整地图先于探索**：`VoyageMapGenerator.Generate(uint)` 在开局生成六层有向无环图，7–13 个地点；每条完整航线经过六个地点、五段航行。拓扑、布局、内容、可见性和各节点战斗使用主种子派生的独立域，调查和动效不推进规则随机数。同种子复现以相同生成算法和内容配置为前提。
+- **分支与合并**：普通可分支层独立采样一个／两个／三个出口，权重为 40%／42%／18%，即 60% 分支、分支中 30% 三出口。出发点固定两个出口；终点前一层固定一个；终点没有出口。下一层宽度适应采样，不用补边改变已采样概率。只连接相邻层，图上横向差不超过 34、直线距离不超过 40（100×100 归一化坐标）。
+- **纯海上地点**：新航程从灰雾补给母船出发，以无声灯船为终点；中途为漂流船、救生艇、浮台、浮标和海况观测点。名称、征兆与说明成组生成，不再把随机岸线文本拼到船只上。终点沿用 `seal` 遭遇 ID，不代表新版灯船 Boss、美术和四拍规则已经迁移。
+- **有限知识**：起步只知道当前位置与两个出口；抵达后默认记录一条后续航路，提前侦察所得继续保留。`KnownStops / KnownRoutes / Choices` 及其节点的 `Next` 都过滤未知连接；HUD 不读取完整地图来画灰点或未获知的路线。
+- **航行工具**：旧海图和测绘望远镜各每航程两次；前者补齐当前位置尚未知的出口，后者侦察所选目的地再往前一段。无新信息或状态不允许时不扣次数；不占战斗工具槽，不因进入战斗刷新，也不重抽地图。
+- **交互与构图**：海面为默认主画面，左侧已知航向与工具、右侧目的地预览与确认；M 按需展开海上航路图，J 展开日志，Esc 打开暂停。航图只绘已知连接和海流装饰线，没有岛屿或陆地填色。选中只预览，确认出航才锁定目的地。
+- **真实三维转场**：`VoyageSailingPresentation` 随航向移动场景相机及独立海景根物体，叠加轻微起伏与雾化；不是只有图上标记移动。正常约 3.2 秒；减少动效使用约 0.25 秒淡化且不位移、不摇晃。航行时收起航图，暂停／日志／设置会暂停推进；抵达只结算一次。
+
+当前只串联现有遭遇与观测记录；补给、招募、完整事件、奖励及跨战斗生命／理智／卡组继承不在此航海模块内。船只与海面仍使用灰盒，不能把选路闭环等同于完整 Roguelike 或正式灯船场景。
 
 ## 层级与依赖
 
@@ -49,8 +61,10 @@ UnsoundedSea.Tests.EditMode       NUnit 行为测试，引用 Core / Runtime
 - `KnowledgeState`：证据带来源和可信级别，低级别记录不能覆盖已验证信息。
 - `IEncounterObjective`：击退、封门、存活目标；可注入其他目标实现。
 - `RunMap`：有向无环节点图，区分进入与完成节点，阻止跳点、回访、悬空连接和不可达节点。
+- `VoyageMapGenerator` / `VoyageSession`：完整航图生成与校验、知识边界、航海工具和航程命令。
+- `VoyageRuntime`：跨场景持有航程，自动保存，关联节点遭遇与派生战斗种子；不承担战斗规则。
 - `BattleReplay` / `IBattleSaveStore`：规则回放与存储介质分离。
-- `BattleHud`：游戏内 UI Toolkit 组合入口，创建 Session、提交操作并按快照刷新四周 HUD；遭遇配置在 Inspector 中选择。
+- `BattleHud`：游戏内 UI Toolkit 组合入口，创建 Session、提交操作并按快照刷新四周 HUD；航程内读取当前节点遭遇与战斗种子，独立验证场景沿用 Inspector 配置。
 
 ## 保证的规则
 
@@ -100,13 +114,15 @@ Project 右键 **Create → Unsounded Sea → Card**。填写唯一 `id`、名�
 
 ## 存档与复现
 
-存档包含格式版本、完整内容 SHA-256、初始种子和成功命令序列。恢复先验证版本与内容，再从头确定性重放，重建手牌、弃牌、消耗、工具次数、知识、目标和回合。非法操作序列会拒绝恢复，不会替换当前会话。
+单场战斗回放存档包含格式版本、完整内容 SHA-256、初始种子和成功命令序列。恢复先验证版本与内容，再从头确定性重放，重建手牌、弃牌、消耗、工具次数、知识、目标和回合。非法操作序列会拒绝恢复，不会替换当前会话。
 
 数据指纹覆盖卡组顺序、全部卡牌效果、敌人意图、工具和战斗参数；任何内容改变都会拒绝加载旧回放。修改效果处理算法、随机算法、自定义目标或其他规则时必须提升 `BattleReplay.CurrentVersion`，旧版本迁移尚未提供。自定义注册表/目标的实现本身不进入数据指纹，版本升级是调用方契约。该机制用于本地复现，不是防作弊方案。
 
 文件存储先写临时文件并 flush，再原子替换已有文件，保留旧 `.bak`；读失败不会自动覆盖或清空。默认实现面向桌面文件系统，WebGL/云存档需另实现 `IBattleSaveStore`。
 
-当前存档边界为单场战斗；完整航程、永久档案和多版本迁移尚未接入。后续航程状态应保存稳定内容 ID、访问路径、卡组、资源和已验证档案，不保存 Unity 对象引用。
+航海另用 `VoyageCheckpoint`：保存完整已生成地图与成功命令历史，恢复知识、已走路径、预览选择、工具余次、小时数和航程阶段；不根据当前内容池重新生成旧地图，因此旧记录的地点文字保持原样。文件为 `Application.persistentDataPath/voyage.json`，临时写入后原子替换并保留 `.bak`；损坏记录不会自动覆盖当前会话或被新档替代。
+
+航海存档不包含局内操作。遭遇未结算时继续会从该场遭遇起点重开；航行中恢复则重播该段转场，不重复计段。单场 `BattleReplay` 接口仍独立存在，尚未接成完整航程战斗检查点。跨战斗资源、永久档案和多版本迁移仍待实现。
 
 ## 验证与后续工作
 
@@ -117,7 +133,7 @@ Unity 菜单 **Unsounded Sea → Validate All Encounters** 可检查配置与未
 ```sh
 export UNITY_PROJECT_PATH="$PWD" # 在仓库根目录执行
 unity status --project-path "$UNITY_PROJECT_PATH" --format json
-unity command run_tests --project-path "$UNITY_PROJECT_PATH" --format json -- --mode editor --filter UnsoundedSea.Tests
+unity command run_tests --project-path "$UNITY_PROJECT_PATH" --timeout 180 --format json -- --mode editor --filter UnsoundedSea.Tests --timeout 120
 ```
 
 CI 中关闭本项目的交互式 Editor 后：
@@ -126,6 +142,6 @@ CI 中关闭本项目的交互式 Editor 后：
 unity test . --mode EditMode --filter UnsoundedSea.Tests --output Logs/framework-tests.xml --timeout 600
 ```
 
-本阶段不是完整 MVP：尚未实现完整 18 卡、显影粉/媒介、被注视与回视、跨局档案、事件和奖励内容、地图界面、完整 5–6 节点航程、音效与战斗中的 3D 表现。下一步建议先接入 `RunMap` 的航程协调器，把现有遭遇、奖励选择和补给串联，再根据试玩扩充内容。
+本阶段已接入六地点航线、迷雾航图、两件航行工具、三维航行转场和现有遭遇往返，但不是完整 MVP。完整内容目录与落地顺序见 [内容扩展设计](CONTENT_EXPANSION_DESIGN.md)；尚未实现其 90 卡、五海域、显影粉／媒介、船员、航程库存与资源继承、事件奖励、跨局档案、正式音效与战斗三维表现。下一步应在现有选路闭环上承接航程资源与内容，而非另建第二套地图或协调器。
 
 已有测试与编辑器验证的日期、覆盖范围和限制见 [验证记录](FRAMEWORK_VALIDATION.md)。修改后应重新运行相关检查，旧记录不是新修订的验收结论。

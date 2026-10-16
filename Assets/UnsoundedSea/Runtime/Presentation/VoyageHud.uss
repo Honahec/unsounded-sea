@@ -1,0 +1,94 @@
+.voyage-hud { background-color: rgba(0, 0, 0, 0); color: rgb(238, 231, 209); font-size: 16px; }
+.voyage-hud Label { white-space: normal; -unity-text-align: middle-left; }
+.voyage-hud Button { margin: 0; border-radius: 0; padding: 10px 13px; border-width: 1px; border-color: rgba(171, 150, 102, 0.6); background-color: rgba(22, 43, 51, 0.92); color: rgb(238, 231, 209); white-space: normal; -unity-text-align: middle-left; min-height: 40px; transition-property: background-color, border-color, translate; transition-duration: 0.12s; }
+.voyage-hud Button:hover { border-color: rgb(238, 207, 141); background-color: rgb(42, 66, 71); }
+.voyage-hud Button:focus { border-color: rgb(255, 225, 159); border-width: 2px; }
+.voyage-hud Button:active { background-color: rgb(64, 85, 86); }
+.voyage-hud Button:disabled { opacity: 0.55; }
+.voyage-hud.reduced-motion Button { transition-duration: 0s; }
+.voyage-header { position: absolute; top: 29px; left: 36px; right: 36px; flex-direction: row; align-items: center; justify-content: space-between; }
+.voyage-heading { width: 430px; }
+.overline { font-size: 13px; color: rgb(214, 184, 123); letter-spacing: 2px; text-shadow: 0 1px 4px rgba(5, 15, 20, 0.8); }
+.voyage-title { font-size: 36px; letter-spacing: 7px; color: rgb(245, 232, 197); margin-top: 5px; text-shadow: 0 2px 6px rgba(5, 15, 20, 0.8); }
+.voyage-status { align-items: center; }
+.phase-label { font-size: 23px; color: rgb(234, 211, 162); letter-spacing: 3px; }
+.voyage-status .muted { margin-top: 5px; font-size: 13px; }
+.voyage-utilities { flex-direction: row; }
+.voyage-utilities .secondary { margin-left: 9px; font-size: 15px; min-width: 105px; -unity-text-align: middle-center; }
+.voyage-workspace { position: absolute; left: 36px; right: 36px; top: 145px; bottom: 87px; flex-direction: row; align-items: flex-start; }
+.ship-report { width: 246px; flex-shrink: 0; margin-right: 20px; margin-top: 45px; padding: 15px 16px 16px; background-color: rgba(17, 36, 44, 0.88); border-left-width: 2px; border-left-color: rgb(179, 148, 91); }
+.section-label { font-size: 13px; letter-spacing: 1px; color: rgb(218, 189, 128); margin-bottom: 9px; margin-top: 16px; }
+.panel-title { font-size: 26px; color: rgb(243, 230, 197); margin-bottom: 12px; }
+.body { font-size: 17px; color: rgb(228, 234, 222); margin-bottom: 13px; }
+.muted { font-size: 16px; color: rgb(180, 202, 196); margin-bottom: 10px; }
+.fine-print { font-size: 13px; color: rgb(177, 196, 188); margin-top: 8px; }
+.voyage-facts { padding: 10px 0 8px; border-top-width: 1px; border-bottom-width: 1px; border-color: rgba(140, 169, 160, 0.26); }
+.fact { color: rgb(212, 224, 209); font-size: 14px; margin-bottom: 5px; }
+.voyage-hud .route-choice { margin-bottom: 7px; font-size: 17px; padding: 9px 11px; min-height: 41px; }
+.voyage-hud .route-choice.selected { border-left-width: 4px; border-color: rgb(227, 194, 125); color: rgb(249, 221, 163); background-color: rgb(43, 62, 62); }
+.voyage-hud .navigation-tool { font-size: 16px; padding: 10px 11px; margin-bottom: 8px; min-height: 68px; border-color: rgba(128, 175, 161, 0.7); -unity-paragraph-spacing: 4px; }
+.sea-window { flex-grow: 1; align-self: stretch; justify-content: flex-end; align-items: center; padding: 0 30px 52px; }
+.sea-bearing { font-size: 24px; color: rgb(232, 215, 173); letter-spacing: 2px; text-shadow: 0 2px 6px rgba(4, 14, 18, 0.95); -unity-text-align: middle-center; }
+.sea-note { font-size: 14px; color: rgb(194, 213, 206); margin-top: 8px; text-shadow: 0 1px 4px rgba(4, 14, 18, 0.95); -unity-text-align: middle-center; }
+.destination-panel { width: 278px; margin-top: 88px; margin-left: 20px; flex-shrink: 0; padding: 19px 20px; background-color: rgba(17, 36, 44, 0.91); border-top-width: 2px; border-top-color: rgb(187, 158, 99); }
+.destination-title { font-size: 32px; color: rgb(246, 229, 185); margin-bottom: 15px; letter-spacing: 2px; }
+.bearing { font-size: 17px; color: rgb(223, 197, 143); margin-bottom: 16px; }
+.voyage-hud .primary { min-height: 48px; padding: 12px 15px; margin-top: 14px; color: rgb(30, 47, 49); background-color: rgb(211, 185, 126); border-color: rgb(235, 211, 160); font-size: 19px; -unity-text-align: middle-center; }
+.voyage-hud .primary:hover { background-color: rgb(238, 216, 164); }
+.arrival-label { font-size: 16px; color: rgb(153, 209, 181); margin-top: 10px; }
+.sailing-track { height: 4px; background-color: rgb(63, 89, 92); margin: 15px 0 18px; }
+.sailing-fill { height: 4px; width: 0; background-color: rgb(222, 193, 126); }
+.voyage-footer { position: absolute; bottom: 25px; left: 36px; right: 36px; flex-direction: row; justify-content: space-between; }
+.footer-note { flex-basis: 58%; font-size: 15px; color: rgb(222, 223, 203); text-shadow: 0 1px 4px rgba(4, 14, 18, 0.9); }
+.footer-motto { flex-basis: 38%; font-size: 13px; color: rgb(178, 202, 193); -unity-text-align: middle-right; text-shadow: 0 1px 4px rgba(4, 14, 18, 0.9); }
+.chart-open .ship-report, .chart-open .destination-panel { margin-top: 0; }
+.chart-frame { flex-grow: 1; flex-basis: 0; align-self: stretch; padding: 17px 20px 10px; background-color: rgb(218, 211, 186); border-width: 1px; border-color: rgb(182, 164, 118); border-top-width: 4px; border-top-color: rgb(174, 142, 85); }
+.chart-heading { padding-bottom: 11px; border-bottom-width: 1px; border-bottom-color: rgb(163, 156, 126); flex-direction: row; justify-content: space-between; align-items: center; }
+.chart-title { color: rgb(39, 59, 57); font-size: 20px; letter-spacing: 2px; }
+.chart-note { color: rgb(91, 98, 80); font-size: 13px; }
+.nautical-chart { flex-grow: 1; margin-top: 8px; margin-bottom: 12px; }
+.voyage-hud .chart-node { position: absolute; width: 112px; min-height: 67px; padding: 0; translate: -50% -38%; align-items: center; background-color: rgba(0, 0, 0, 0); border-width: 0; }
+.voyage-hud .chart-node:disabled { opacity: 1; }
+.node-marker { width: 13px; height: 13px; border-radius: 7px; border-width: 2px; border-color: rgb(107, 124, 111); background-color: rgb(215, 211, 186); margin-bottom: 5px; }
+.node-name { font-size: 16px; color: rgb(67, 81, 70); -unity-text-align: middle-center; background-color: rgba(218, 211, 186, 0.94); padding: 1px 4px; }
+.node-state { font-size: 13px; color: rgb(91, 107, 91); margin-top: 2px; -unity-text-align: middle-center; background-color: rgba(218, 211, 186, 0.9); }
+.current .node-marker { background-color: rgb(32, 66, 65); border-color: rgb(32, 66, 65); width: 16px; height: 16px; }
+.current .node-name { color: rgb(29, 58, 56); }
+.available .node-marker { border-color: rgb(147, 108, 53); background-color: rgb(235, 214, 163); }
+.available .node-name { color: rgb(92, 65, 29); }
+.selected .node-marker { border-color: rgb(148, 73, 32); background-color: rgb(182, 109, 52); }
+.selected .node-name, .selected .node-state { color: rgb(126, 63, 29); }
+.visited .node-marker { background-color: rgb(102, 143, 121); border-color: rgb(62, 105, 85); }
+.voyage-hud .chart-node:hover, .voyage-hud .chart-node:focus { background-color: rgba(238, 225, 190, 0.8); border-color: rgb(152, 102, 46); border-width: 1px; }
+.voyage-hud .chart-node:focus .node-name { color: rgb(108, 62, 25); }
+.chart-ship { position: absolute; width: 10px; height: 20px; translate: -50% -135%; background-color: rgb(137, 64, 34); border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; border-width: 1px; border-color: rgb(235, 219, 177); }
+.chart-compass { position: absolute; left: 9px; top: 12px; width: 54px; align-items: center; }
+.chart-compass Label { font-size: 13px; color: rgb(86, 95, 77); }
+.compass-needle { width: 12px; height: 35px; margin-top: 7px; background-color: rgb(109, 99, 74); border-top-left-radius: 6px; border-top-right-radius: 6px; rotate: 0deg; }
+.chart-fog { position: absolute; top: 8%; left: 32%; right: 25%; color: rgb(113, 123, 110); font-size: 17px; letter-spacing: 3px; -unity-text-align: middle-center; }
+.chart-legend { flex-direction: row; justify-content: center; border-top-width: 1px; border-top-color: rgb(163, 156, 126); padding-top: 10px; }
+.legend-item { flex-direction: row; align-items: center; margin: 0 7px; }
+.legend-mark { width: 8px; height: 8px; border-radius: 4px; margin-right: 4px; background-color: rgb(140, 148, 127); }
+.legend-mark.current { background-color: rgb(32, 66, 65); }
+.legend-mark.available { background-color: rgb(173, 128, 57); }
+.legend-mark.selected { background-color: rgb(166, 81, 32); }
+.legend-mark.visited { background-color: rgb(83, 129, 105); }
+.legend-label { font-size: 13px; color: rgb(74, 86, 72); }
+.voyage-overlay { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(5, 17, 23, 0.65); align-items: center; justify-content: center; }
+.voyage-journal { width: 620px; height: 620px; max-height: 85%; padding: 25px 28px; background-color: rgb(220, 210, 181); border-left-width: 5px; border-left-color: rgb(151, 101, 60); }
+.journal-title { font-size: 30px; color: rgb(36, 55, 54); margin-bottom: 10px; letter-spacing: 4px; }
+.voyage-journal .muted { color: rgb(86, 98, 82); font-size: 14px; }
+.voyage-journal ScrollView { flex-grow: 1; margin-top: 12px; }
+.journal-entry { color: rgb(40, 61, 57); font-size: 17px; padding: 12px 0; border-bottom-width: 1px; border-bottom-color: rgb(171, 165, 133); }
+.voyage-load-error { position: absolute; left: 30%; right: 30%; top: 25%; padding: 28px; background-color: rgb(23, 42, 49); border-top-width: 2px; border-top-color: rgb(197, 151, 107); }
+.save-error { position: absolute; bottom: 16px; left: 20%; right: 20%; padding: 14px 18px; background-color: rgb(81, 43, 37); border-width: 1px; border-color: rgb(218, 159, 111); }
+.save-error .body { margin-bottom: 0; }
+.save-error .primary { min-height: 38px; margin-top: 8px; }
+.voyage-hud .pause { left: 50%; top: 50%; translate: -50% -50%; }
+.voyage-hud .settings { left: 50%; top: 50%; translate: -50% -50%; }
+.sailing-fog { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgb(143, 163, 163); }
+.arrival-fog { opacity: 1; transition-property: opacity; transition-duration: 0.3s; }
+.is-sailing .ship-report { visibility: hidden; }
+.is-sailing .destination-panel { margin-top: 230px; background-color: rgba(17, 36, 44, 0.65); }
+.is-sailing .destination-panel .body, .is-sailing .sea-note { display: none; }
+.is-sailing .sea-bearing { font-size: 28px; }
