@@ -57,6 +57,35 @@ namespace UnsoundedSea.Tests
         }
 
         [Test]
+        public void VesselSampleTracksMaterialWavePhaseAndPausedClock()
+        {
+            source.EnableKeyword("_ENABLEWAVE");
+            source.SetFloat("_ENABLEWAVE", 1);
+            source.SetFloat("_1st_Wave_Length", 2 * Mathf.PI);
+            source.SetFloat("_1st_Wave_Height", 2);
+            source.SetFloat("_1st_Wave_Sharpness", 0.4f);
+            source.SetFloat("_1st_Wave_Speed", 1 / Mathf.Sqrt(9.8f));
+            source.SetVector("_1st_Wave_Direction", Vector3.right);
+            source.SetFloat("_2nd_Wave_Height", 0.1f);
+            source.SetFloat("_2nd_Wave_Sharpness", 0);
+            source.SetFloat("_2nd_Wave_Speed", 0);
+            source.SetVector("_2nd_Wave_Direction", Vector3.forward);
+            water.Bind(camera);
+            Assert.That(water.SampleDisplacement(Vector3.zero).y, Is.EqualTo(2.1f).Within(0.0001f));
+            water.Tick(Mathf.PI / 2, false, false, Vector4.zero);
+            var quarter = water.SampleDisplacement(Vector3.zero);
+            Assert.That(quarter.x, Is.EqualTo(0.4f).Within(0.0001f));
+            Assert.That(quarter.y, Is.EqualTo(0.1f).Within(0.0001f));
+            water.Tick(20, true, false, Vector4.zero);
+            Assert.That(water.SampleDisplacement(Vector3.zero), Is.EqualTo(quarter));
+            Assert.That(water.SampleDisplacement(Vector3.right * (Mathf.PI / 2)).y, Is.EqualTo(2.1f).Within(0.0001f));
+            water.Unbind();
+            Assert.That(water.SampleDisplacement(Vector3.zero), Is.EqualTo(Vector3.zero));
+            source.DisableKeyword("_ENABLEWAVE");source.SetFloat("_ENABLEWAVE", 0);water.Bind(camera);
+            Assert.That(water.SampleDisplacement(Vector3.zero), Is.EqualTo(Vector3.zero));
+        }
+
+        [Test]
         public void RebindAndUnbindReleaseOwnedObjectsAndPreserveSourceAndMask()
         {
             var firstMaterial = water.surface.sharedMaterial;

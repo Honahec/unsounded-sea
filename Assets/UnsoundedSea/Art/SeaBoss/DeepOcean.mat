@@ -73,14 +73,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _1st_Wave_Height: 0.27
-    - _1st_Wave_Length: 9
+    - _1st_Wave_Height: 1.4
+    - _1st_Wave_Length: 45
     - _1st_Wave_Sharpness: 0.18
-    - _1st_Wave_Speed: 0.55
-    - _2nd_Wave_Height: 0.1
-    - _2nd_Wave_Length: 4.5
+    - _1st_Wave_Speed: 0.85
+    - _2nd_Wave_Height: 0.6
+    - _2nd_Wave_Length: 22
     - _2nd_Wave_Sharpness: 0.12
-    - _2nd_Wave_Speed: 0.42
+    - _2nd_Wave_Speed: 0.72
     - _Caustics_Depth: -4
     - _Caustics_Distortion_Scale: 2
     - _Caustics_Distortion_Strength: 3

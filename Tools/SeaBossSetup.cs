@@ -48,6 +48,7 @@ public static class SeaBossSetup
         var layout=anchor.GetComponent<BattleAnchor>();
         layout.labelHeight=0.6f;layout.labelOffset=new Vector3(10,0,8);layout.waterRadius=91;
         stage.fogColor=new Color(0.3f,0.45f,0.48f);stage.fogDensity=0.0025f;
+        stage.vesselFollowsWater=true;stage.placeholderCombatMotion=false;stage.cameraShake=0;
         foreach(var light in stage.GetComponentsInChildren<Light>())
         {
             if(light.name=="Sea creature soft fill")

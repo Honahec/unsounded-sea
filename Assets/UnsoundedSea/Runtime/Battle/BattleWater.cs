@@ -13,6 +13,33 @@ namespace UnsoundedSea.Runtime
         private Material original, instance;
         private PlanarReflectionVolume volume;
         private MaterialPropertyBlock properties;
+        private Wave firstWave, secondWave;
+        private bool wavesEnabled;
+
+        // Matches the pinned Uber shader's GersterWaveGenerator: cos height, negative sin horizontal offset.
+        private struct Wave
+        {
+            public Vector3 direction;
+            public float frequency, amplitude, speed, horizontal;
+            public static Wave Read(Material material, string prefix)
+            {
+                float k = 2 * Mathf.PI / Mathf.Max(0.01f, material.GetFloat(prefix + "Length"));
+                return new Wave { direction = ((Vector3)material.GetVector(prefix + "Direction")).normalized,
+                    frequency = k, amplitude = material.GetFloat(prefix + "Height"),
+                    speed = Mathf.Sqrt(9.8f * k) * material.GetFloat(prefix + "Speed"),
+                    horizontal = material.GetFloat(prefix + "Sharpness") / k };
+            }
+            public Vector3 Sample(Vector3 restPosition, float time)
+            {
+                float phase = Vector3.Dot(direction, restPosition) * frequency - time * speed;
+                return Vector3.up * (amplitude * Mathf.Cos(phase)) - direction * (horizontal * Mathf.Sin(phase));
+            }
+        }
+
+        // A presentation sample at an undisplaced water point, not a physics buoyancy solver.
+        public Vector3 SampleDisplacement(Vector3 restWorldPosition) => wavesEnabled
+            ? firstWave.Sample(restWorldPosition, SeaTime) + secondWave.Sample(restWorldPosition, SeaTime)
+            : Vector3.zero;
 
         public void Bind(Camera camera)
         {
@@ -23,6 +50,9 @@ namespace UnsoundedSea.Runtime
             instance = new Material(original) { name = original.name + " (battle)", hideFlags = HideFlags.DontSave };
             surface.sharedMaterial = instance;
             properties = new MaterialPropertyBlock();
+            wavesEnabled = instance.IsKeywordEnabled("_ENABLEWAVE");
+            firstWave = Wave.Read(instance, "_1st_Wave_");
+            secondWave = Wave.Read(instance, "_2nd_Wave_");
             instance.SetFloat("_UseSeaTime", 1);
 
             var host = new GameObject("Battle water reflections");
@@ -79,6 +109,7 @@ namespace UnsoundedSea.Runtime
             }
             instance = null;
             original = null;
+            wavesEnabled = false;
         }
 
         private static void DestroyOwned(Object value)

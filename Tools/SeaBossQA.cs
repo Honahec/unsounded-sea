@@ -75,6 +75,38 @@ public static class SeaBossQA
         Check(!d.Stage.ambience.isPlaying,"Pause did not stop ambience");Check(!d.Submit(BattleCommand.EndTurn()).Success,"Pause allowed input");Click("battle-resume");
         return State();
     }
+    public static async Task<object> SeaMotion()
+    {
+        Director.Restart();await Task.Delay(500);
+        var d=Director;var s=d.Stage;var origin=s.vessel.position;var min=origin;var max=origin;
+        var camera=s.battleCamera.transform.position;float maxTilt=0;float lastTime=s.water.SeaTime;
+        Check(s.vesselFollowsWater&&!s.placeholderCombatMotion,"Expected continuous sea motion without placeholder combat animation");
+        for(int i=0;i<100;i++)
+        {
+            if(i==20||i==60)
+            {
+                var health=d.View.Health;var sanity=d.View.Sanity;
+                Click("battle-end-turn");
+                Check(d.View.Health<health||d.View.Sanity<sanity,"Attack did not resolve damage");
+            }
+            await Task.Delay(100);
+            Check(s.water.SeaTime>lastTime,"Wave clock stalled during battle");lastTime=s.water.SeaTime;
+            var p=s.vessel.position;min=Vector3.Min(min,p);max=Vector3.Max(max,p);
+            Check(new Vector2(p.x,p.z).magnitude<3,"Vessel drift escaped its bounded area");
+            float pitch=Mathf.Abs(Mathf.DeltaAngle(0,s.vessel.localEulerAngles.x)),roll=Mathf.Abs(Mathf.DeltaAngle(0,s.vessel.localEulerAngles.z));
+            Check(pitch<=s.maxWavePitch+0.1f&&roll<=s.maxWaveRoll+0.1f,"Vessel tilt exceeded configured limit");
+            maxTilt=Mathf.Max(maxTilt,pitch,roll);
+            Check(Vector3.Distance(camera,s.battleCamera.transform.position)<0.001f,"Placeholder hit shook camera");
+            Check(Mathf.Abs(Mathf.DeltaAngle(0,s.Actors[0].transform.GetChild(0).localEulerAngles.x))<0.001f,"Placeholder hit pitched Boss");
+            if(i==24||i==64)Check(!d.Busy,"Still waiting for placeholder attack animation");
+        }
+        var range=max-min;Check(range.y>1&&new Vector2(range.x,range.z).magnitude>1&&maxTilt>1,"Sea/vessel motion is too static");
+        d.SetPaused(true);var pose=s.vessel.position;var rotation=s.vessel.rotation;lastTime=s.water.SeaTime;
+        await Task.Delay(250);
+        Check(s.water.SeaTime==lastTime&&Vector3.Distance(pose,s.vessel.position)<0.001f&&Quaternion.Angle(rotation,s.vessel.rotation)<0.001f,"Pause did not freeze sea and vessel");
+        d.SetPaused(false);
+        return new {sampleSeconds=10,range,maxTilt,continuousDuringCommands=true,pausedTogether=true,placeholderCombatMotion=false};
+    }
     public static async Task<object> Victory()
     {
         await Ready();var d=Director;

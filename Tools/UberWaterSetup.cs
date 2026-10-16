@@ -47,14 +47,14 @@ public static class UberWaterSetup
         mat.SetFloat("_Specular_Spread", 0.45f);
         mat.SetFloat("_Specular_Hardness", 0.15f);
         mat.SetFloat("_Specular_Size", 0.15f);
-        mat.SetFloat("_1st_Wave_Length", 9);
-        mat.SetFloat("_1st_Wave_Height", 0.27f);
-        mat.SetFloat("_1st_Wave_Speed", 0.55f);
+        mat.SetFloat("_1st_Wave_Length", 45);
+        mat.SetFloat("_1st_Wave_Height", 1.4f);
+        mat.SetFloat("_1st_Wave_Speed", 0.85f);
         mat.SetFloat("_1st_Wave_Sharpness", 0.18f);
         mat.SetVector("_1st_Wave_Direction", new Vector4(0.8f, 0, 0.6f, 0));
-        mat.SetFloat("_2nd_Wave_Length", 4.5f);
-        mat.SetFloat("_2nd_Wave_Height", 0.10f);
-        mat.SetFloat("_2nd_Wave_Speed", 0.42f);
+        mat.SetFloat("_2nd_Wave_Length", 22);
+        mat.SetFloat("_2nd_Wave_Height", 0.6f);
+        mat.SetFloat("_2nd_Wave_Speed", 0.72f);
         mat.SetFloat("_2nd_Wave_Sharpness", 0.12f);
         mat.SetVector("_2nd_Wave_Direction", new Vector4(-0.4f, 0, 0.9f, 0));
         mat.SetTexture("_SurfFoam_Map", Texture("Foam 1.png"));
@@ -107,10 +107,17 @@ public static class UberWaterSetup
 
     static Texture2D Texture(string name) => AssetDatabase.LoadAssetAtPath<Texture2D>(Vendor + name);
 
+    static float OceanCoordinate(float unit, float denseExtent, float farExtent)
+    {
+        float a=Mathf.Abs(unit), slope=denseExtent/0.8f;
+        float outer=Mathf.Max(0,a-0.8f)/0.2f;
+        return Mathf.Sign(unit)*(slope*a+(farExtent-slope)*outer*outer*outer);
+    }
+
     static Mesh WaterMesh()
     {
         // Dense between vessel and Boss; extend behind and beside the exterior camera into fog.
-        const int width = 320, depth = 256;
+        const int width = 384, depth = 320;
         var points = new Vector3[(width + 1) * (depth + 1)];
         var normals = new Vector3[points.Length];
         var tangents = new Vector4[points.Length];
@@ -120,8 +127,8 @@ public static class UberWaterSetup
         {
             float u = (x / (float)width - 0.5f) * 2;
             float v = z / (float)depth * 2 - 1;
-            var p = new Vector3(50 * u + 2150 * Mathf.Pow(u, 5), 0,
-                130 + 220 * v + 2050 * Mathf.Pow(v, 5));
+            var p = new Vector3(OceanCoordinate(u, 500, 2200), 0,
+                130 + OceanCoordinate(v, 600, 2270));
             int i = z * (width + 1) + x;
             points[i] = p; normals[i] = Vector3.up; tangents[i] = new Vector4(1, 0, 0, -1); uv[i] = new Vector2(p.x, p.z);
         }

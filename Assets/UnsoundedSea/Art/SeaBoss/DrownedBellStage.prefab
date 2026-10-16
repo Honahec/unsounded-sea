@@ -2090,7 +2090,13 @@ MonoBehaviour:
   vesselHeave: 0.12
   vesselPitch: 0.55
   vesselRoll: 0.8
-  cameraShake: 0.06
+  cameraShake: 0
+  vesselFollowsWater: 1
+  vesselSampleExtents: {x: 2.5, y: 7}
+  maxWavePitch: 6
+  maxWaveRoll: 9
+  vesselYaw: 1.5
+  placeholderCombatMotion: 0
 --- !u!114 &2216325621577066811
 MonoBehaviour:
   m_ObjectHideFlags: 0
