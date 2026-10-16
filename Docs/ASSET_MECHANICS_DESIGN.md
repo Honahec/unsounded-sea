@@ -14,8 +14,8 @@ THE UNSOUNDED SEA　版本 0.2　2026 年 10 月 16 日
 | ------------- | ---------------------- | ------------------------------ |
 | 01 共用规则   | 信息分层与结算契约     | 全部内容共用的字段和反馈       |
 | 02 卡牌       | 临时照明、直觉防护     | 两张牌的构图与规则；共用牌框   |
-| 03 敌人       | 持刀走私者、蒙面祷告者 | 两套行为；一个祷告者模型样例   |
-| 04 Boss       | 灯塔下的回声           | 一个目标战；一个形体模型样例   |
+| 03 敌人       | 持刀走私者、蒙面祷告者 | 两套行为；祷告者初版与高精度版各一个 |
+| 04 Boss       | 灯塔下的回声           | 一个目标战；初版与高精度形体各一个 |
 | 05 道具       | 定向听筒、显影粉       | 两条调查路径；一个听筒模型样例 |
 | 06 场景与媒介 | 灯塔底层、铜铃组件     | 一个空间方案；一个铜铃模型样例 |
 | 07 事件       | 第十三名船员、重复求救 | 两个分支事件及叙事插图需求     |
@@ -54,6 +54,8 @@ Boss 的主识别点是偏大的铆接铜盔、窄而空的观察窗、沉重肩
 重点角色生成档位提升到 `Gen-2.5-High`。本轮 Boss 请求 50,000 个 Quad 多边形、祷告者请求 40,000 个 Quad 多边形，分别替代旧版 18,000 与 10,000 的目标；这些是生成参数，不是对实际面数、材质质量或动画拓扑的保证。铜铃与听筒暂保留各一个样例，将新增迭代集中在最显眼的角色上。
 
 生成时分开角色与环境，采用可辨识材质的中性照明，保留完整正侧背形体。成品镜头的戏剧光在 Unity 内完成，不烘焙进颜色贴图。若重点形体仍不成立，先调整轮廓、比例和参考，再提高面数；若需要雕刻母版，可另用 Raw 高密度输出制作烘焙源，本轮不追加母版生成。
+
+后续重点资产采用“概念造型与材质分区 → 一致的正侧背参考 → Hyper3D 高质量生成 → 分件与形体精修 → 材质重建 → Unity 镜头验收”的顺序。概念参考中明确空腔、布料软硬与构件连接；多视图保持同一比例与附件位置。本轮文字生成作为探索记录，正式造型应由选定参考约束，避免只靠长提示词反复抽取风格。
 
 4K 贴图是后续美术交付目标；当前 MCP 调用没有贴图分辨率参数，不能宣称已经生成 4K 材质。最终需检查实际输出分辨率、UV 利用率与纹理细节，必要时重新绘制或烘焙，单纯放大图片不算达到质量要求。
 
@@ -144,7 +146,7 @@ Boss 的主识别点是偏大的铆接铜盔、窄而空的观察窗、沉重肩
 
 模型采用不对称蜡布斗篷、被盐水浸硬的下摆、无装饰布面罩和宽袖。刀与小铜铃应为独立附件，未调查时藏于袖中；模型默认姿态不得露出答案。轮廓重点是微低的头、宽袖与细瘦脚踝，避免大量触手或夸张尖牙。
 
-动画拆为共同准备、揭示刀具、揭示铃具、挥刃、呼唤、被打断和退场。共同准备循环长度、音量与节奏一致。先生成一个祷告者形体样例；手部、附件分离、绑骨与隐藏切换留给后续生产验收。
+动画拆为共同准备、揭示刀具、揭示铃具、挥刃、呼唤、被打断和退场。共同准备循环长度、音量与节奏一致。祷告者保留初版与高精度版各一个形体样例；手部、附件分离、绑骨与隐藏切换留给后续生产验收。
 
 ## Part 04 Boss 目标与威胁节奏
 
@@ -398,6 +400,46 @@ Unity 接入时使用 1 单位约 1 米，校正朝向与根节点，按实际�
 [基础框架](FRAMEWORK.md)：现有规则层、资产字段、工具次数、回放约束与未实现内容。[框架验证记录](FRAMEWORK_VALIDATION.md)：既有框架测试边界；本文不将这些结果作为新增机制通过测试的证据。
 
 本轮同时对照 CardDefinition、EnemyDefinition、EncounterDefinition 与 smuggler、prayer、echo、seal 样例资产。机制以本文为后续实现提案，不直接改写当前运行时配置。
+
+### High 高精度迭代结果
+
+两项均于 2026 年 10 月 16 日完成生成。共用参数为 `tier=Gen-2.5-High`、`mesh_mode=Quad`、`geometry_file_format=glb`、`texture_delight=true`。本次调整同时提高生成档位和目标面数，并重写形体与材质要求，因此属于综合迭代，不能把视觉差异全部归因于面数。
+
+| 样例 | 目标多边形数 | generation_id | 结果 |
+| --- | ---: | --- | --- |
+| 灯塔下的回声 高精度版 | 50000 | `9f381f12-e876-42bd-a373-30db407b66ce` | [模型结果页](https://hyper3d.ai/workspace/rodin/9f381f12-e876-42bd-a373-30db407b66ce) |
+| 蒙面祷告者 高精度版 | 40000 | `2a00c905-bf7c-4783-bf34-727ff75b2a4c` | [模型结果页](https://hyper3d.ai/workspace/rodin/2a00c905-bf7c-4783-bf34-727ff75b2a4c) |
+
+高精度版仍需完成分件、重拓扑检查、绑骨、材质校验与 Unity 实机表现验收；生成完成仅确认服务完成输出。未下载或导入模型。
+
+#### 本轮预览审阅
+
+已在 Hyper3D 结果页查看两项正面预览，并切换 Boss 的 PBR 预览。该检查只覆盖网页当前视角，尚未覆盖背面、网格拓扑或 Unity 内实际材质，不能作为完整技术验收。
+
+| 样例 | 已看到的表现 | 未通过项与下一步 |
+| --- | --- | --- |
+| Boss 高精度版 | 肩部叠层、躯干连接件与金属外形可读；整体比初版增加结构层次 | 形体仍偏装甲，衣料体积饱满，缺少空壳塌陷感；先用概念参考明确软布与空腔，修正比例后再生产 |
+| 祷告者高精度版 | 兜帽、衣褶、腰带和袖口层次可辨 | 自动增加了长杆武器且双手外露，直接违背隐藏持物机制；本版本不进入生产，后续参考必须锁定空手藏袖姿态并去除长杆 |
+
+两者均保留为高质量参数下的探索样例，不标记为成品美术通过。本轮止于每个 Part 最多两个模型；下一轮优先解决造型约束与参考一致性，再检查真实材质、灯光和动画中的美感。
+
+<details>
+<summary>灯塔下的回声 高精度版的生成提示词</summary>
+
+```text
+Single full-body empty antique diving suit, signature boss of The Unsounded Sea, refined maritime gothic painterly realism. Oversized riveted bronze helmet, narrow black EMPTY viewing ports, heavy shoulder collar, sunken torso, weighted boots. Believable flanges, fasteners, short chest hose, reinforced seams, leather straps. Exquisite materials: polished brass edges, dark oxidized bronze planes, sparse salt in crevices; charcoal teal waxed canvas, large weighted folds, fine seam wrinkles, wet lower hem. Clear large and medium shapes before microdetail, no uniform noisy grunge. Museum-quality sculptural finish, complete front side and back, neutral relaxed pose, arms clear of torso. Isolated suit, neutral background, soft material lighting without baked dramatic shadows. No visible person, no face, no bells, no chains, no scenery, no water plane, no base, no lettering, no tentacles, no gore, no magic glow. Physical weight, elegant unsettling silhouette.
+```
+
+</details>
+
+<details>
+<summary>蒙面祷告者 高精度版的生成提示词</summary>
+
+```text
+Single full-body masked coastal supplicant for The Unsounded Sea, refined maritime gothic painterly realism. Stooped wedge silhouette, lowered hooded head, broad long sleeves, heavy near-vertical coat hem, narrow leather boots. Plain cloth face covering. Both hands and all held objects FULLY CONCEALED in opaque sleeves: no blade, no bell. Exquisite charcoal blue-green waxed canvas: weighted shoulder folds, gathered elbow folds, overlapping cuffs, reinforced stitching, one repair patch, small tarnished brass fasteners, salt-stiff hem. Wet cloth valleys, dry matte fold ridges, sparse salt deposits. Beautiful tactile PBR materials, museum-quality sculptural clarity, large and medium shapes readable before fine detail, no noisy grunge. Neutral standing pose, sleeves clear of torso, no fused limbs, complete front side and back. Isolated character, neutral background and soft material lighting. No base, scenery, text, exposed weapon, tentacles, teeth, gore, glowing symbols. Elegant and unsettling.
+```
+
+</details>
 
 ### Hyper3D 初版结果页
 
