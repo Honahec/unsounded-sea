@@ -994,6 +994,8 @@ MonoBehaviour:
   seed: 20261016
   interfaceFont: {fileID: 11400000, guid: d42cdd7f06ee0455aab49a65c2126337, type: 2}
   interfaceStyle: {fileID: 7433441132597879392, guid: e52880fa4909d4f059975f6f759af8a6, type: 3}
+  menuStyle: {fileID: 7433441132597879392, guid: 5944e187946754d54b2135ec664ad890, type: 3}
+  menuScene: MainMenu
 --- !u!1 &1650042735
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/UnsoundedSea/Scenes/MainMenu.unity
+    guid: 0905f25ace2694b1c9c098c1c896afc3
+  - enabled: 1
     path: Assets/UnsoundedSea/Scenes/Battle.unity
     guid: 21d6e208d4ba749b1b5ccde50a547ffe
   - enabled: 1

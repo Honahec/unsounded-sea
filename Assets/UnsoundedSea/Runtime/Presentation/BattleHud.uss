@@ -343,3 +343,18 @@
 .battle-hud .outcome-journal:focus { border-width: 2px; border-color: rgb(255, 240, 200); }
 
 .error { padding: 20px; color: rgb(255, 190, 164); background-color: rgb(52, 37, 39); }
+
+/* Pause menu entry, beside the archive tab */
+.battle-hud .menu-toggle {
+    position: absolute; top: 22px; right: 206px; width: 84px;
+    padding: 9px 12px 10px 12px; align-items: flex-start;
+    background-color: rgba(12, 26, 34, 0.74);
+    border-left-width: 1px; border-left-color: rgba(198, 162, 96, 0.6);
+}
+.battle-hud .menu-toggle:hover { background-color: rgba(30, 50, 58, 0.9); border-left-color: rgb(236, 206, 140); }
+.battle-hud .menu-toggle:focus { border-width: 1px; border-color: rgb(236, 206, 140); }
+
+/* Reduced motion preference */
+.reduced-motion Button,
+.reduced-motion .intent { transition-duration: 0s; }
+.reduced-motion .intent.revealing { opacity: 1; translate: 0 0; }

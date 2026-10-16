@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TextCore.Text;
 using UnityEngine.UIElements;
 using UnsoundedSea.Core;
@@ -16,6 +17,8 @@ namespace UnsoundedSea.Runtime
         [SerializeField] private int seed = 20261016;
         [SerializeField] private FontAsset interfaceFont;
         [SerializeField] private StyleSheet interfaceStyle;
+        [SerializeField] private StyleSheet menuStyle;
+        [SerializeField] private string menuScene = "MainMenu";
         private BattleSession session;
         private BattleDefinition definition;
         private VisualElement root;
@@ -23,6 +26,8 @@ namespace UnsoundedSea.Runtime
         private string message;
         private int encounterIndex;
         private bool journalOpen;
+        private bool menuOpen;
+        private bool settingsOpen;
         private int[] previousHand = Array.Empty<int>();
         private readonly HashSet<string> revealed = new HashSet<string>();
         public BattleView CurrentView => session?.View;
@@ -37,6 +42,8 @@ namespace UnsoundedSea.Runtime
                 if (interfaceFont == null || interfaceStyle == null)
                     throw new InvalidOperationException("Assign the project HUD font and stylesheet.");
                 root.style.unityFontDefinition = FontDefinition.FromSDFFont(interfaceFont);
+                // Menu sheet first so the HUD sheet wins equal-specificity label rules.
+                if (menuStyle != null && !root.styleSheets.Contains(menuStyle)) root.styleSheets.Add(menuStyle);
                 if (!root.styleSheets.Contains(interfaceStyle)) root.styleSheets.Add(interfaceStyle);
                 root.AddToClassList("battle-hud");
                 root.RegisterCallback<GeometryChangedEvent>(Resize);
@@ -55,9 +62,12 @@ namespace UnsoundedSea.Runtime
         private void Resize(GeometryChangedEvent evt) { root.EnableInClassList("compact", evt.newRect.width < 1200 || evt.newRect.height < 740); }
         private void OnKey(KeyDownEvent evt)
         {
-            if (session == null) return;
-            if (evt.keyCode == KeyCode.J) ToggleJournal();
+            if (session == null || settingsOpen) return;
+            if (evt.keyCode == KeyCode.Escape && menuOpen) ToggleMenu();
+            else if (menuOpen) return;
+            else if (evt.keyCode == KeyCode.J) ToggleJournal();
             else if (evt.keyCode == KeyCode.Escape && journalOpen) ToggleJournal();
+            else if (evt.keyCode == KeyCode.Escape) ToggleMenu();
             else return;
             evt.StopPropagation();
         }
@@ -65,6 +75,12 @@ namespace UnsoundedSea.Runtime
         {
             journalOpen = !journalOpen;
             Refresh(journalOpen ? "journal-close" : "journal-toggle");
+        }
+
+        private void ToggleMenu()
+        {
+            menuOpen = !menuOpen; settingsOpen = false;
+            Refresh(menuOpen ? "pause-resume" : "menu-toggle");
         }
 
         public void StartEncounter(int index)
@@ -77,6 +93,7 @@ namespace UnsoundedSea.Runtime
             selectedEnemy = session.View.Enemies[0].Id;
             message = "";
             journalOpen = false;
+            menuOpen = false; settingsOpen = false;
             previousHand = Array.Empty<int>();
             revealed.Clear();
             Refresh();
@@ -176,6 +193,7 @@ namespace UnsoundedSea.Runtime
                 selectedEnemy = (view.Enemies.FirstOrDefault(e => e.Health > 0) ?? view.Enemies[0]).Id;
             root.Clear();
             root.EnableInClassList("concluded", concluded);
+            root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion);
 
             // Upper left: the investigator's two separate survival resources.
             var vitals = Element("vitals");
@@ -206,6 +224,10 @@ namespace UnsoundedSea.Runtime
             toggle.Add(Text(journalOpen ? "收起档案" : "调查档案", "toggle-title"));
             toggle.Add(Text($"{view.Evidence.Count} 条记录 · J", "toggle-meta"));
             root.Add(toggle);
+            var menuToggle = Button("menu-toggle", "", "menu-toggle", ToggleMenu);
+            menuToggle.Add(Text("菜单", "toggle-title"));
+            menuToggle.Add(Text("Esc", "toggle-meta"));
+            root.Add(menuToggle);
 
             // Target nameplates float over the stage; selection is shown by brackets and a text label.
             var targetBar = Element("targets");
@@ -451,8 +473,32 @@ namespace UnsoundedSea.Runtime
                 root.Add(outcome);
             }
 
+            if (menuOpen)
+            {
+                var scrim = new VisualElement { name = "pause-scrim" };
+                scrim.AddToClassList("pause-scrim");
+                if (settingsOpen)
+                    scrim.Add(new SettingsPanel(() => { settingsOpen = false; Refresh("pause-settings"); },
+                        () => root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion)));
+                else
+                {
+                    var pause = Element("pause");
+                    pause.Add(Text("航行暂停", "pause-overline"));
+                    pause.Add(Text($"第 {view.Turn:00} 回合 · 回合制遭遇不会在此期间推进", "pause-note"));
+                    pause.Add(Button("pause-resume", "继续调查", "pause-option", ToggleMenu));
+                    pause.Add(Button("pause-settings", "设置", "pause-option", () => { settingsOpen = true; Refresh(); }));
+                    var canLeave = Application.CanStreamedLevelBeLoaded(menuScene);
+                    var leave = Button("pause-title", canLeave ? "返回标题 · 放弃本场遭遇" : "返回标题（未加入构建列表）", "pause-option", () => SceneManager.LoadScene(menuScene), canLeave);
+                    leave.AddToClassList("danger");
+                    pause.Add(leave);
+                    scrim.Add(pause);
+                }
+                root.Add(scrim);
+            }
+
             var handIds = view.Hand.Select(c => c.InstanceId).ToArray();
             previousHand = handIds;
+            if (settingsOpen) return;
             hand.schedule.Execute(() =>
             {
                 hand.scrollOffset = handOffset;

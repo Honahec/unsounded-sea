@@ -2,7 +2,21 @@
 
 验证日期：2026-10-16。环境：macOS、Unity 6000.6.5f1、Unity CLI 1.0.0-beta.13、Pipeline 0.8.0-exp.1。
 
-## 游戏内 HUD 重设计（当前）
+## 美术指导与菜单（当前）
+
+在已连接 Editor 中通过 Unity CLI 验证，Game View 固定为 1280×720 与 1920×1080。按钮操作通过面板拾取发送 UI Toolkit Pointer/Key/Navigation 事件（Input System 的 `simulate_pointer`/`simulate_key` 在本环境未到达 UI Toolkit）；悬停伪类无法用合成事件驱动，悬停外观只做了代码审查，焦点外观已截图确认。
+
+- EditMode 回归 **30 通过 / 0 失败**；最终 Play 运行 Console 错误 0、警告 0；所有 HUD/菜单/内容字符串均在字体字形内。
+- 中央场景点 `panel.Pick` 为空；名牌、工具、手牌、按钮均可被拾取。
+- 提灯：意图变为「已确认」，次数 1 → 0、行动不变，工具显示「已用尽」。听筒：只增加「调查所得 · 声源」，意图仍为「未确认」。
+- 出牌：左轮 30 → 24、寻找掩体两次格挡 20；行动 0 时其余手牌显示「行动不足」且焦点落到结束回合；结束回合后挥刃被格挡完全抵消。
+- J 打开档案、Esc 收起；档案不再遮挡名牌。
+- 封门：每回合一次「绘制封线」，使用后显示「本回合已绘制」；第 6 回合 4/4 进入 Victory，敌人仍 999/999。
+- 菜单：标题 → 设置（音量 80% → 70%、减少动效生效，恢复默认还原）→ Esc → 开始调查进入 Battle → Esc 暂停（遮罩拦截结束回合，回合保持 1）→ 设置 → 返回标题 → 退出（Editor 中结束 Play）。
+- 截图（Logs 被 Git 忽略）：`Logs/HudRedesign/final_battle_1280.png`、`v9_1080.png`、`v3_confirmed.png`、`v6_partial_focus.png`、`v4_unaffordable.png`、`v5_archive.png`、`v8_seal_victory.png`、`final_title_1080.png`、`m2_settings.png`、`m3_pause.png`、`m4_pause_settings.png`。
+- 未验证：独立 Player 打包中的全屏切换与 `Application.Quit`、真实鼠标悬停、非 16:9 分辨率、多敌人遭遇的名牌排布（现有遭遇均为单敌）。
+
+## 游戏内 HUD 第一版（历史）
 
 旧测试面板已替换为 `BattleHud`，入口为 `Assets/UnsoundedSea/Scenes/Battle.unity`。底层规则和存档接口保留；场景切换、种子和保存/读取调试按钮不进入游戏 HUD。
 
