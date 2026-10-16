@@ -1,68 +1,65 @@
-.ocean-ui { color: rgb(221, 217, 201); font-size: 15px; }
+.ocean-ui { color: #eee4c9; font-size: 15px; }
 .ocean-ui Label { white-space: normal; }
-.sea-top { position: absolute; top: 0; left: 0; right: 0; height: 104px; flex-direction: row; align-items: center; padding: 20px 40px; background-color: rgba(6, 16, 21, 0.91); border-bottom-width: 1px; border-bottom-color: rgba(183, 140, 85, 0.38); }
-.sea-title { flex-grow: 1; }
-.eyebrow { font-size: 11px; letter-spacing: 2px; color: rgb(159, 158, 137); }
-.chapter { font-size: 28px; margin-top: 7px; letter-spacing: 3px; }
-.vitals { flex-direction: row; margin-right: 40px; }
-.vital { width: 180px; margin-left: 30px; }
-.vital-value { font-size: 15px; margin-bottom: 9px; }
-.vital-track { height: 3px; background-color: rgb(40, 55, 55); }
-.vital-fill { height: 3px; background-color: rgb(145, 74, 63); }
-.sanity .vital-fill { background-color: rgb(103, 151, 152); }
-.sea-button, .target-button, .task-button { min-height: 38px; padding: 8px 12px; margin: 5px 0; border-radius: 0; border-width: 1px; border-color: rgba(166, 146, 107, 0.32); background-color: rgba(12, 28, 31, 0.8); color: rgb(215, 208, 184); -unity-text-align: middle-left; }
-.sea-button:hover, .target-button:hover, .task-button:hover { background-color: rgb(39, 59, 58); border-color: rgb(183, 140, 85); }
-.sea-button:focus, .target-button:focus, .task-button:focus, .sea-card:focus, .end-turn:focus { border-color: rgb(225, 196, 132); }
-.sea-button:disabled, .task-button:disabled, .end-turn:disabled { opacity: 0.35; }
-.intel-panel { position: absolute; left: 35px; top: 137px; width: 265px; padding: 18px; background-color: rgba(6, 18, 23, 0.86); border-left-width: 2px; border-left-color: rgb(95, 121, 119); }
-.target-button { font-size: 17px; margin-top: 13px; }
-.target-button.chosen { border-left-width: 3px; border-left-color: rgb(193, 157, 99); background-color: rgba(74, 70, 47, 0.55); }
-.clue { margin-top: 16px; font-size: 16px; color: rgb(179, 194, 190); }
-.intel-label { margin-top: 17px; margin-bottom: 6px; font-size: 11px; color: rgb(164, 145, 108); letter-spacing: 1px; }
-.intel-text { font-size: 14px; color: rgb(188, 192, 181); }
-.objective-panel { position: absolute; top: 140px; right: 35px; width: 245px; padding: 18px; background-color: rgba(6, 18, 23, 0.8); border-top-width: 1px; border-top-color: rgb(147, 121, 78); }
-.objective-title { font-size: 22px; margin-top: 18px; margin-bottom: 12px; }
-.objective-description { font-size: 15px; color: rgb(178, 194, 189); }
-.seal-row { flex-direction: row; margin-top: 20px; margin-bottom: 15px; }
-.seal { width: 39px; height: 39px; margin-right: 9px; border-width: 1px; border-color: rgb(71, 89, 87); color: rgb(94, 113, 109); -unity-text-align: middle-center; }
-.seal.complete { background-color: rgb(121, 101, 63); color: rgb(240, 222, 176); border-color: rgb(190, 155, 93); }
-.task-button { color: rgb(227, 197, 137); border-color: rgb(137, 115, 74); -unity-text-align: middle-center; }
-.fine-print { font-size: 11px; color: rgb(133, 155, 150); margin-top: 5px; }
-.defenses { margin-top: 18px; color: rgb(175, 194, 187); font-size: 13px; }
-.stage-caption { position: absolute; top: 117px; left: 330px; right: 320px; align-items: center; }
-.hand-area { position: absolute; bottom: 0; left: 0; right: 0; height: 262px; padding: 12px 35px 15px; background-color: rgba(5, 15, 20, 0.95); border-top-width: 1px; border-top-color: rgba(183, 140, 85, 0.35); }
-.hand-heading { flex-direction: row; align-items: center; height: 26px; margin-bottom: 7px; }
-.turn-label { width: 290px; font-size: 13px; color: rgb(155, 177, 172); }
-.action-count { flex-grow: 1; color: rgb(209, 177, 115); font-size: 18px; }
-.hand-row { flex-direction: row; flex-grow: 1; }
-.hand-scroll { flex-grow: 1; flex-shrink: 1; }
-.hand-scroll .unity-scroll-view__content-container { flex-direction: row; min-width: 100%; justify-content: center; }
-.sea-card { width: 180px; min-width: 180px; height: 190px; padding: 11px 14px; margin: 3px 10px 0 0; border-radius: 2px; border-width: 1px; border-color: rgb(94, 105, 89); background-color: rgb(23, 39, 41); color: rgb(221, 217, 201); -unity-text-align: upper-left; }
-.sea-card:hover { background-color: rgb(42, 57, 54); border-color: rgb(210, 178, 113); translate: 0 -3px; }
-.sea-card:disabled { opacity: 0.45; }
-.attack-card { border-top-color: rgb(157, 99, 76); }
+.battle-surface { position: absolute; left: 0; right: 0; top: 0; bottom: 150px; }
+.sea-top { position: absolute; top: 18px; right: 24px; flex-direction: row; }
+.sea-button { min-height: 34px; margin-left: 8px; padding: 6px 10px; border-width: 1px; border-color: rgba(158,135,85,.55); background-color: rgba(8,19,22,.78); color: #eee4c9; }
+.sea-button:hover { background-color: rgba(30,53,52,.94); border-color: #9e8755; }
+.sea-button:focus, .tool:focus, .sea-card:focus, .end-turn:focus, .task-button:focus, .actor-label:focus { border-color: #eee4c9; border-width: 2px; }
+.intel-name { color: #d7bd82; font-size: 12px; letter-spacing: 2px; }
+.clue { margin-top: 3px; font-size: 15px; -unity-text-align: middle-center; text-shadow: 0 1px 2px #020708; }
+.intel-text { margin-top: 3px; color: #80b5a5; font-size: 14px; -unity-text-align: middle-center; }
+.tools { position: absolute; right: 24px; top: 185px; width: 92px; align-items: center; }
+.tool { width: 82px; height: 82px; margin-bottom: 10px; padding: 5px; border-radius: 41px; border-width: 1px; border-color: #9e8755; background-color: rgba(42,37,25,.88); color: #eee4c9; align-items: center; }
+.tool:hover { translate: -5px 0; background-color: rgba(76,62,36,.95); }
+.tool SeaUiArt { width: 32px; height: 32px; }
+.tool-name { font-size: 12px; -unity-text-align: middle-center; }
+.tool-meta { font-size: 9px; color: #d7bd82; -unity-text-align: middle-center; }
+.objective-seal { position: absolute; top: 68px; right: 28px; width: 92px; align-items: center; }
+.objective-seal SeaUiArt { width: 54px; height: 54px; }
+.objective-label { font-size: 10px; color: #d7bd82; -unity-text-align: middle-center; }
+.objective-count { font-size: 17px; color: #d7bd82; }
+.seal-row { flex-direction: row; justify-content: center; flex-wrap: wrap; }
+.seal { width: 7px; height: 7px; margin: 2px; border-radius: 4px; border-width: 1px; border-color: #80b5a5; }
+.seal.complete { background-color: #9e8755; border-color: #d7bd82; }
+.task-button { position: absolute; right: 128px; bottom: 126px; width: 86px; height: 64px; border-radius: 32px; border-width: 1px; border-color: #80b5a5; background-color: rgba(20,50,49,.9); color: #eee4c9; -unity-text-align: middle-center; }
+.instruments { position: absolute; left: 20px; bottom: 18px; flex-direction: row; align-items: flex-end; }
+.vital, .action-instrument { width: 92px; height: 92px; margin-right: -8px; padding: 10px; border-radius: 46px; border-width: 2px; border-color: rgba(158,135,85,.75); background-color: rgba(8,19,22,.84); align-items: center; justify-content: center; }
+.vital SeaUiArt, .action-instrument SeaUiArt { position: absolute; width: 66px; height: 66px; opacity: .3; }
+.instrument-value { font-size: 22px; color: #eee4c9; -unity-text-align: middle-center; }
+.instrument-label { font-size: 10px; color: #d7bd82; -unity-text-align: middle-center; }
+.vital-track { width: 54px; height: 3px; margin-top: 3px; background-color: rgba(128,181,165,.25); }
+.vital-fill { height: 3px; background-color: #9b5d50; }
+.sanity .vital-fill { background-color: #80b5a5; }
+.resource-note { position: absolute; left: 4px; top: -28px; width: 290px; font-size: 10px; color: #80b5a5; }
+.hand { position: absolute; left: 345px; right: 170px; bottom: 0; height: 550px; }
+.hand .unity-scroll-view__content-viewport { overflow: hidden; }
+.hand .unity-scroll-view__content-container { min-width: 100%; height: 544px; padding: 0 15px; }
+.fan-track { position: relative; height: 536px; min-width: 620px; }
+.card-anchor { position: absolute; bottom: 8px; width: 180px; height: 245px; padding: 0; border-width: 0; background-color: rgba(0,0,0,0); transform-origin: 50% 100%; }
+.sea-card { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 10px 13px; border-radius: 9px 9px 3px 3px; border-width: 1px; border-bottom-width: 3px; border-color: #9e8755; background-color: #d8cbaa; color: #172526; transition-property: translate, scale, rotate, background-color; transition-duration: .14s; -unity-text-align: upper-left; }
+.card-anchor:hover .sea-card, .card-anchor:focus .sea-card { translate: 0 -245px; scale: 1.08; rotate: 0deg; background-color: #eee4c9; }
+.fan--3 { rotate: -11deg; translate: 0 15px; }.fan--2 { rotate: -7deg; translate: 0 7px; }.fan--1 { rotate: -3deg; translate: 0 2px; }.fan-1 { rotate: 3deg; translate: 0 2px; }.fan-2 { rotate: 7deg; translate: 0 7px; }.fan-3 { rotate: 11deg; translate: 0 15px; }
 .card-head { flex-direction: row; justify-content: space-between; align-items: center; }
-.card-cost { font-size: 22px; color: rgb(226, 192, 127); }
-.card-type { font-size: 11px; color: rgb(146, 164, 155); }
-.card-glyph { height: 53px; margin-bottom: 4px; }
-.card-name { font-size: 18px; margin-bottom: 7px; }
-.card-description { font-size: 13px; color: rgb(161, 180, 172); }
-.end-turn { width: 156px; margin: 3px 0 0 20px; height: 190px; border-radius: 0; border-width: 1px; border-color: rgb(136, 109, 64); background-color: rgb(65, 59, 40); color: rgb(224, 206, 162); font-size: 18px; white-space: normal; }
-.end-turn:hover { background-color: rgb(88, 77, 47); }
-.battle-notice { position: absolute; bottom: 276px; left: 335px; right: 305px; padding: 9px 15px; -unity-text-align: middle-center; font-size: 13px; color: rgb(194, 203, 184); background-color: rgba(4, 15, 20, 0.75); }
-.actor-label { position: absolute; width: 170px; height: 49px; font-size: 13px; white-space: normal; color: rgb(188, 207, 201); background-color: rgba(6, 21, 25, 0.82); border-radius: 0; border-width: 0; border-bottom-width: 1px; border-bottom-color: rgb(99, 135, 128); }
-.actor-label.selected { color: rgb(235, 209, 153); border-bottom-color: rgb(212, 172, 103); }
-.ocean-modal { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(1, 8, 13, 0.91); }
-.ocean-sheet { width: 650px; max-height: 92%; padding: 30px 45px; background-color: rgb(15, 31, 35); border-width: 1px; border-color: rgb(142, 119, 76); }
-.modal-title { font-size: 32px; margin-bottom: 15px; letter-spacing: 4px; }
-.modal-copy { color: rgb(179, 195, 185); font-size: 16px; margin-bottom: 15px; }
-.journal { height: 180px; margin-bottom: 16px; }
-.log-line { font-size: 13px; color: rgb(133, 158, 152); margin-bottom: 6px; }
-
-.battle-surface { position: absolute; left: 0; right: 0; top: 104px; bottom: 262px; }
-
-.ocean-sheet .settings { position: relative; left: 0; top: 0; width: 100%; }
-.ocean-ui.reduced-motion .sea-card:hover { translate: 0 0; }
-.ocean-ui.reduced-motion Button { transition-duration: 0s; }
-.seal-row { flex-wrap: wrap; }
-.survival-progress .seal { width: 32px; margin-right: 6px; }
+.card-cost { width: 29px; height: 29px; border-radius: 15px; background-color: #19383c; color: #eee4c9; font-size: 18px; -unity-text-align: middle-center; }
+.card-type { font-size: 10px; color: #655d4b; }
+.sea-card SeaUiArt { height: 105px; margin: 2px 0; }
+.card-name { font-size: 17px; color: #202b2c; }
+.card-description { font-size: 15px; color: #303c3b; flex-grow: 1; }
+.fine-print { font-size: 10px; color: #7d3e35; }
+.end-turn { position: absolute; right: 24px; bottom: 18px; width: 104px; height: 104px; border-radius: 52px; border-width: 2px; border-color: #d7bd82; background-color: rgba(112,79,38,.94); color: #eee4c9; }
+.end-turn SeaUiArt { position: absolute; width: 82px; height: 82px; opacity: .5; }
+.end-label { font-size: 17px; -unity-text-align: middle-center; }
+.end-turn:hover { scale: 1.06; background-color: #816035; }
+.battle-notice { position: absolute; bottom: 242px; left: 30%; right: 30%; padding: 5px 10px; -unity-text-align: middle-center; background-color: rgba(8,19,22,.72); }
+.actor-label { position: absolute; width: 164px; min-height: 48px; padding: 3px 8px; border-width: 0; background-color: rgba(0,0,0,0); color: #eee4c9; }
+.actor-name, .actor-status { -unity-text-align: middle-center; text-shadow: 0 1px 3px #000; }.actor-name { font-size: 19px; }.actor-status { font-size: 13px; color: #80b5a5; }
+.actor-health { height: 4px; margin-top: 5px; background-color: rgba(8,19,22,.7); }.actor-health-fill { height: 4px; background-color: #9b5d50; }
+.actor-label.selected { width: 300px; padding: 10px 14px; border-bottom-width: 2px; border-bottom-color: #d7bd82; background-color: rgba(5,16,18,.82); border-top-left-radius: 22px; border-bottom-right-radius: 22px; }
+.ocean-modal { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(1,8,13,.91); }
+.ocean-sheet { width: 620px; max-height: 92%; padding: 26px 38px; background-color: rgb(15,31,35); border-width: 1px; border-color: #9e8755; }
+.modal-title { font-size: 28px; margin-bottom: 12px; letter-spacing: 3px; }.modal-copy { color: #b9cbc2; margin-bottom: 12px; }.journal { height: 180px; margin-bottom: 14px; }.log-line { font-size: 13px; color: #80b5a5; margin-bottom: 5px; }
+.ocean-sheet .settings { position: relative; left: 0; top: 0; width: 100%; translate: 0 0; }
+.battle-chart-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 24px; background-color: rgba(1,8,13,.96); }
+.battle-chart-overlay VoyageMapPanel { flex-grow: 1; }
+.battle-chart-close { position: absolute; right: 38px; bottom: 30px; min-width: 128px; min-height: 40px; padding: 8px 14px; border-width: 1px; border-color: #d7bd82; background-color: #19383c; color: #eee4c9; }
+.ocean-ui.reduced-motion Button { transition-duration: 0s; }.ocean-ui.reduced-motion .card-anchor:hover .sea-card, .ocean-ui.reduced-motion .card-anchor:focus .sea-card { translate: 0 -245px; }

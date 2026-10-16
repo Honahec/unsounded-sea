@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 
 namespace UnsoundedSea.Runtime
 {
-    // Paper settings sheet shared by the title menu and the in-battle pause menu.
+    // Shared by the title and in-game menus.
     public sealed class SettingsPanel : VisualElement
     {
         private readonly Action onClose;
@@ -37,14 +37,13 @@ namespace UnsoundedSea.Runtime
         }
         private void Changed(string focus) { GameSettings.Apply(); onChanged?.Invoke(); Build(focus); }
 
-        private VisualElement Row(string title, string note, VisualElement control)
+        private VisualElement Row(string title, VisualElement control)
         {
             var row = new VisualElement { pickingMode = PickingMode.Ignore };
             row.AddToClassList("settings-row");
             var labels = new VisualElement { pickingMode = PickingMode.Ignore };
             labels.AddToClassList("settings-labels");
             labels.Add(Text(title, "settings-name"));
-            labels.Add(Text(note, "settings-note"));
             row.Add(labels); row.Add(control);
             return row;
         }
@@ -68,7 +67,6 @@ namespace UnsoundedSea.Runtime
             var head = new VisualElement { pickingMode = PickingMode.Ignore };
             head.AddToClassList("settings-head");
             head.Add(Text("设置", "settings-title"));
-            head.Add(Text("更改立即生效，并保存在本机", "settings-subtitle"));
             Add(head);
 
             var volume = new VisualElement { pickingMode = PickingMode.Ignore };
@@ -86,15 +84,15 @@ namespace UnsoundedSea.Runtime
             volume.Add(steps);
             volume.Add(Option("volume-up", "+", "volume-step", () => GameSettings.Volume++));
             volume.Add(Text(GameSettings.Volume * 10 + "%", "volume-value"));
-            Add(Row("主音量", "环境声、征兆音效与界面音", volume));
-            Add(Row("显示模式", "仅在独立运行的游戏中生效", Choice("display", new[] { "全屏", "窗口" }, GameSettings.Fullscreen ? 0 : 1, i => GameSettings.Fullscreen = i == 0)));
-            Add(Row("垂直同步", "避免画面撕裂", Choice("vsync", new[] { "开启", "关闭" }, GameSettings.VSync ? 0 : 1, i => GameSettings.VSync = i == 0)));
-            Add(Row("界面动效", "减少后，卡牌与情报不再做过渡", Choice("motion", new[] { "标准", "减少" }, GameSettings.ReducedMotion ? 1 : 0, i => GameSettings.ReducedMotion = i == 1)));
+            Add(Row("音量", volume));
+            Add(Row("显示", Choice("display", new[] { "全屏", "窗口" }, GameSettings.Fullscreen ? 0 : 1, i => GameSettings.Fullscreen = i == 0)));
+            Add(Row("垂直同步", Choice("vsync", new[] { "开", "关" }, GameSettings.VSync ? 0 : 1, i => GameSettings.VSync = i == 0)));
+            Add(Row("动效", Choice("motion", new[] { "标准", "减少" }, GameSettings.ReducedMotion ? 1 : 0, i => GameSettings.ReducedMotion = i == 1)));
 
             var foot = new VisualElement { pickingMode = PickingMode.Ignore };
             foot.AddToClassList("settings-foot");
             foot.Add(Option("settings-reset", "恢复默认", "settings-secondary", GameSettings.ResetDefaults));
-            var back = new Button(() => onClose?.Invoke()) { name = "settings-back", text = "返回 · Esc" };
+            var back = new Button(() => onClose?.Invoke()) { name = "settings-back", text = "返回" };
             back.AddToClassList("settings-primary");
             foot.Add(back);
             Add(foot);

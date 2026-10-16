@@ -41,16 +41,18 @@ namespace UnsoundedSea.Runtime
             label.AddToClassList(className);
             return label;
         }
-        private static Button Entry(string id, string index, string title, string note, Action action, bool enabled = true)
+        private static Button Entry(string id, string title, Action action, bool enabled = true)
         {
             var button = new Button(action) { name = id };
             button.AddToClassList("menu-entry");
             button.SetEnabled(enabled);
-            button.Add(Text(index, "entry-index"));
+            var mark = new SeaUiArt("seal");
+            mark.AddToClassList("entry-mark");
+            button.Add(mark);
             var text = new VisualElement { pickingMode = PickingMode.Ignore };
             text.AddToClassList("entry-text");
             text.Add(Text(title, "entry-title"));
-            text.Add(Text(note, "entry-note"));
+            button.tooltip = enabled ? "" : "场景不可用";
             button.Add(text);
             return button;
         }
@@ -59,6 +61,9 @@ namespace UnsoundedSea.Runtime
         {
             root.Clear();
             root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion);
+            var apparition = new SeaUiArt("tentacle");
+            apparition.AddToClassList("menu-apparition");
+            root.Add(apparition);
             var column = new VisualElement { pickingMode = PickingMode.Ignore };
             column.AddToClassList("menu-column");
             var title = new VisualElement { pickingMode = PickingMode.Ignore };
@@ -68,7 +73,6 @@ namespace UnsoundedSea.Runtime
             var rule = new VisualElement { pickingMode = PickingMode.Ignore };
             rule.AddToClassList("menu-rule");
             title.Add(rule);
-            title.Add(Text("有些深渊，本就不该被探知。", "menu-tagline"));
             column.Add(title);
 
             var entries = new VisualElement { pickingMode = PickingMode.Ignore };
@@ -76,39 +80,38 @@ namespace UnsoundedSea.Runtime
             var canStart = Application.CanStreamedLevelBeLoaded(voyageScene);
             if (confirmingNewVoyage)
             {
-                entries.Add(Entry("menu-confirm-new", "01", "确认开始新航程", canStart ? "现有航程存档将被覆盖，且无法恢复" : "航程场景未加入构建列表", StartConfirmed, canStart));
-                entries.Add(Entry("menu-cancel-new", "02", "保留现有航程", "返回，不改动存档", () => { confirmingNewVoyage = false; error = null; Build("menu-start"); }));
+                entries.Add(Text("覆盖现有航程？此操作无法撤销。", "menu-error"));
+                entries.Add(Entry("menu-confirm-new", "开始新航程", StartConfirmed, canStart));
+                entries.Add(Entry("menu-cancel-new", "返回", () => { confirmingNewVoyage = false; error = null; Build("menu-start"); }));
             }
             else
             {
-                entries.Add(Entry("menu-start", "01", "开始新航程", canStart ? "登船，前往不存在于海图上的坐标" : "航程场景未加入构建列表", StartGame, canStart));
+                entries.Add(Entry("menu-start", "启航", StartGame, canStart));
                 if (VoyageRuntime.HasSavedVoyage)
-                    entries.Add(Entry("menu-continue", "02", "继续航程", "恢复至上次海图进度；若在遭遇中，将从该遭遇开头继续", ContinueGame));
+                    entries.Add(Entry("menu-continue", "继续航程", ContinueGame));
                 bool hasBoss = !string.IsNullOrWhiteSpace(seaBossScene);
                 if (hasBoss)
-                    entries.Add(Entry("menu-sea-boss", "03", "沉钟海域", "驶向外海，面对海面上的巨大身影", () => SceneManager.LoadScene(seaBossScene), Application.CanStreamedLevelBeLoaded(seaBossScene)));
-                var settings = Entry("menu-settings", hasBoss ? "04" : "03", "设置", "音量、显示与界面动效", () => { settingsOpen = true; error = null; Build(null); });
+                    entries.Add(Entry("menu-sea-boss", "沉钟海域", () => SceneManager.LoadScene(seaBossScene), Application.CanStreamedLevelBeLoaded(seaBossScene)));
+                var settings = Entry("menu-settings", "设置", () => { settingsOpen = true; error = null; Build(null); });
                 settings.EnableInClassList("open", settingsOpen);
                 entries.Add(settings);
-                entries.Add(Entry("menu-quit", hasBoss ? "05" : "04", "退出", "离开调查船", Quit));
+                entries.Add(Entry("menu-quit", "退出", Quit));
             }
             if (!string.IsNullOrEmpty(error)) entries.Add(Text(error, "menu-error"));
             else if (!string.IsNullOrEmpty(VoyageRuntime.EncounterSaveError))
                 entries.Add(Text("遭遇结果尚未保存，请选择继续航程重试：" + VoyageRuntime.EncounterSaveError, "menu-error"));
             column.Add(entries);
-            column.Add(Text("方向键或鼠标选择 · Enter 确认", "menu-hint"));
             root.Add(column);
 
-            var signal = new VisualElement { pickingMode = PickingMode.Ignore };
-            signal.AddToClassList("menu-signal");
-            signal.Add(Text("无线电记录 · 接收时间不明", "signal-label"));
-            signal.Add(Text("来自已废弃航路的求救信号。坐标未载于任何官方海图，每位船员记得的内容都不一样。", "signal-text"));
-            root.Add(signal);
-            root.Add(Text("原型 v0.1", "menu-version"));
 
             if (settingsOpen)
-                root.Add(new SettingsPanel(() => { settingsOpen = false; Build("menu-settings"); },
+            {
+                var scrim = new VisualElement();
+                scrim.AddToClassList("menu-settings-scrim");
+                scrim.Add(new SettingsPanel(() => { settingsOpen = false; Build("menu-settings"); },
                     () => root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion)));
+                root.Add(scrim);
+            }
             else if (focus != null)
                 root.schedule.Execute(() => root.Q<Button>(focus)?.Focus());
         }
