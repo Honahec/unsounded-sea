@@ -27,11 +27,9 @@ THE UNSOUNDED SEA　版本 0.1　2026 年 10 月 16 日
 
 起点为 60 生命、30 理智、每回合 3 行动与抽 5 张；沿用 10 张起始牌组。原型保持 5–6 节点、10–15 分钟目标，以一个完整灯塔战斗空间承载内容验证。
 
-<!-- PAGE -->
+## Part 01 共用机制与结算契约
 
-# Part 01 共用机制与结算契约
-
-## 一次决策的完整过程
+### 一次决策的完整过程
 
 回合开始重置行动与防护并抽牌；敌人选定实际行动并锁定；表现层展示允许公开的征兆；玩家调查、出牌或推进目标；结束回合后按锁定行动结算。调查只改变知识，不能重新抽取敌方行动。
 
@@ -43,41 +41,39 @@ THE UNSOUNDED SEA　版本 0.1　2026 年 10 月 16 日
 | 回声与铜铃   | 脚步或异常声源         | 声源位置、当前连接的铃 | 意图本回合；连接本场 |
 | 档案与事件   | 来源及可信等级         | 通过证据验证的规律     | 本场；跨局另行实现   |
 
-## 操作与状态约束
+### 操作与状态约束
 
 所有命令先验证目标、费用、前置证据和次数，再整体执行。失败不扣资源、不增加使用计数、不写入成功回放。重复查询已回答问题时返回原因，不再消耗工具。主动支付理智后必须至少剩 1；格挡和理智防护均不抵销主动支付。
 
 新素材使用稳定内容 ID；本场对象使用实例 ID。证据建议记录 subjectId、factId、sourceId、certainty、turn、scope，分别表示对象、事实、来源、可信度、回合和有效范围。Observed、Verified、Rumored、Unknown 保持现有四级语义；时间到期只取消可用的当前情报，不删除历史记录。
 
-## 提案中的优先级
+### 提案中的优先级
 
 支付代价 → 按卡面顺序执行效果 → 检查资源耗尽 → 检查目标完成 → 发布反馈。一次命令产生的致命资源耗尽优先于胜利；打断只取消被标为可打断的本回合行动，不产生新的随机替代行动。媒介破坏取消当前关联攻击时，也必须即时更新征兆与日志。
 
-## 防止素材泄露答案
+### 防止素材泄露答案
 
 未确认的同组候选必须共用准备姿态、持物可见性、声音与目标描边。调查后才切换为揭示动画。不能提前播放只属于挥刀或呼唤的预备动作；背景中的发光、粒子或铃体摆幅也不得暗示未获知的连接。
 
 验收用同一固定种子比较“调查”和“不调查”两条操作记录：除知识与玩家资源支出外，锁定行动必须相同。关闭声音与改为灰度画面时，文字仍应提供同等决策信息。
 
-<!-- PAGE -->
+## Part 02 卡牌机制与两张示例牌
 
-# Part 02 卡牌机制与两张示例牌
-
-## 卡牌先承担决策职责
+### 卡牌先承担决策职责
 
 五种类别沿用武装、防护、调查、干预、禁忌。类别用于检索与视觉编码，不自动附带伤害或特殊规则。卡面固定显示行动费用、额外代价、目标、精确效果和次数；插图负责表达动作，不承载隐藏数值。先用两张奖励卡验证“调查后针对”与“不调查也能防护”。
 
-## 临时照明
+### 临时照明
 
 内容 ID 为 light，调查类，费用 1，选择一个敌人。若可观察且意图未确认，则揭示该目标本回合的可见动作；若意图已确认，抽 1 张牌。对无可见动作且尚未确认的目标禁用，说明“光线无法揭示这一异常”，不扣行动。
 
-现有 investigate 效果可承担主规则。必须分别检查已知、可观察未知、不可观察未知三种状态，避免付费后毫无效果。普通调查不扣理智，不触发“超自然回视”。
+现有 investigate 效果可承担揭示与已知时抽牌的主规则；“不可观察时禁用并零扣费”是本轮新增的卡牌校验要求，现有卡牌调查可能结算为没有新信息。实现时必须分别检查已知、可观察未知、不可观察未知三种状态，避免付费后毫无效果。普通调查不扣理智，不触发“超自然回视”。
 
 例：祷告者共享征兆出现时打出此牌，若确认呼唤，可接稳住心神抵御 6 理智冲击；若确认挥刃，可接寻找掩体挡住 10 生命伤害。余下 1 行动用于输出。未抽到此牌时仍可选通用防护。
 
 画面是油灯照入一截潮湿袖口，刀柄与铜铃都只露出不完整的轮廓，不画完整敌人或具体答案。亮区在上半部，底部留出规则区；暖黄光束与煤灰背景形成单一焦点。
 
-## 直觉防护
+### 直觉防护
 
 内容 ID 为 intuition，防护类，费用 1，无需目标。获得 7 格挡与 3 理智防护，均于回合边界按现有规则重置；不抵销主动支付。由 block 7 与 ward 3 依次构成。
 
@@ -85,17 +81,15 @@ THE UNSOUNDED SEA　版本 0.1　2026 年 10 月 16 日
 
 画面是调查员背靠舱壁，一手压紧衣领、一手撑住木箱；斜向阴影切过画面但不遮挡主体。避免将心理防护画成魔法护盾或人体器官。
 
-## 共享视觉与数据规格
+### 共享视觉与数据规格
 
 建议插画源文件 1024 × 768，展示裁切区保持 4∶3；牌框按 750 × 1050 的设计画布制作，文字使用运行时排版。类别用图标加文字，不能仅用颜色。费用置顶，额外理智代价单独一行，消耗牌必须标明“本张牌本场使用一次”。
 
 现有 CardDefinition 没有插图字段。提案新增独立 CardPresentationDefinition，以 cardId 关联 artwork、categoryIcon、frameStyle 和 effectCue，避免把图像混入规则回放指纹。18 张原卡池保持后续扩充范围，本轮不扩写整套卡牌和升级体系。
 
-<!-- PAGE -->
+## Part 03 敌人机制与两个样例
 
-# Part 03 敌人机制与两个样例
-
-## 持刀走私者
+### 持刀走私者
 
 内容 ID 为 smuggler，现有生命 24，每回合公开挥刃，造成 8 点生命伤害，不可打断。其作用是教会玩家读意图、支付行动、格挡与输出，为异常敌人建立可信的对照。
 
@@ -103,7 +97,7 @@ THE UNSOUNDED SEA　版本 0.1　2026 年 10 月 16 日
 
 动作需求为待机、公开准备、挥击、受击、退场五个片段。攻击在规则结算时命中；表现完成前阻止重复触发结算，但动画卡住不得令规则无限等待。首轮使用灰盒，暂不生成该模型。
 
-## 蒙面祷告者
+### 蒙面祷告者
 
 内容 ID 为 prayer，现有生命 30。每回合从挥刃 10 生命伤害与呼唤 6 理智冲击中选择并锁定。两者共用“垂首；袖内金属声；断续低语”。挥刃不可打断，呼唤可打断。
 
@@ -116,17 +110,15 @@ THE UNSOUNDED SEA　版本 0.1　2026 年 10 月 16 日
 
 听筒的声源结果可能被玩家正确推断，但不应凭空升级为系统“已确认意图”。例如记录矛盾只读取正式确认状态；界面应明确区分玩家推理与规则上的确认。后续若允许档案完成确认，需独立的证据组合规则。
 
-## 造型与可读性约束
+### 造型与可读性约束
 
 模型采用不对称蜡布斗篷、被盐水浸硬的下摆、无装饰布面罩和宽袖。刀与小铜铃应为独立附件，未调查时藏于袖中；模型默认姿态不得露出答案。轮廓重点是微低的头、宽袖与细瘦脚踝，避免大量触手或夸张尖牙。
 
 动画拆为共同准备、揭示刀具、揭示铃具、挥刃、呼唤、被打断和退场。共同准备循环长度、音量与节奏一致。先生成一个祷告者形体样例；手部、附件分离、绑骨与隐藏切换留给后续生产验收。
 
-<!-- PAGE -->
+## Part 04 Boss 目标与威胁节奏
 
-# Part 04 Boss 目标与威胁节奏
-
-## 灯塔下的回声
+### 灯塔下的回声
 
 沿用 echo 与 seal 的内容身份。玩家面对空潜水服、三只铜铃和墙后封门；目标始终为封门 4／4。潜水服是异常的显现载体，不能通过打掉它的血条获得胜利。现有 999 生命只用于框架占位，正式界面应显示“显现体”与威胁状态，隐藏该占位数字。
 
@@ -141,27 +133,25 @@ THE UNSOUNDED SEA　版本 0.1　2026 年 10 月 16 日
 
 当前框架已有这两类威胁的数值，但没有四拍策略。提案保留铃鸣来源的调查价值，默认直接公布其 4 理智上限，避免同时隐藏类别、数值和媒介。开战说明“你可以封门脱离，无法靠火力解释这里的异常”。
 
-## 固定任务行动
+### 固定任务行动
 
 绘制封线不入牌堆，每回合最多一次，费用 1，封门 +1。点击前显示本回合是否已用；即使手牌无调查和封印牌也可操作。四段封线分别填入地面四处缺口，用普通粉笔或盐线表达，不使用高饱和魔法阵。
 
 无调查、无防护的下界验证：满状态 60／30 进入，前三次结束回合依次承受 8 生命、4 理智、8 生命；第四回合绘线即达到 4／4，在敌方结算前胜利，剩余 44 生命与 26 理智。该计算只证明满状态存在替代解；低资源进入仍可能失败。
 
-## 终局表现
+### 终局表现
 
 封门完成后先锁定胜利，再停止待结算攻击；潜水服失去支撑而缓慢塌落，水面收束，墙后余响保留。文字为“你封住了它进入这里的途径。至少现在如此。”奖励是档案、工具选择或补给，不出现弑神徽章。
 
-<!-- PAGE -->
+## Part 04 Boss 媒介调查与替代解
 
-# Part 04 Boss 媒介调查与替代解
-
-## 三只铃的作用
+### 三只铃的作用
 
 每场仅一只铃与异常连接，开战时按场景种子选定，直到本场结束保持不变。铃的外观、摆动与位置不默认泄露连接；第一次调查与后续读档必须得到相同结果。普通两只铃用于检验玩家是否建立了证据链，不能靠暗中换答案维持悬念。
 
 调查分两层。定向听筒在铃鸣回合确认声源来自墙上铜铃；显影粉可直接在铜铃组上使用，显示当前连接的盐水细线并生成本场有效的 Verified 证据。听筒帮助定位，但不是显影粉的强制前置，避免两个道具槽全部被唯一解占用。
 
-## 固定场景行动
+### 固定场景行动
 
 提案新增“切断铃索”：目标为已验证连接的铃，费用 2，整场一次。成功后媒介变为 Broken，当前与未来的铃鸣冲击被取消，封门额外 +1。未验证、非连接铃或已破坏状态都显示禁用原因，不扣费用。普通伤害卡不会自动破坏场景物件。
 
@@ -174,23 +164,21 @@ THE UNSOUNDED SEA　版本 0.1　2026 年 10 月 16 日
 | 只确认声源 | 一次听筒                | 获得证据；不自动推进目标 |
 | 牌面干预   | 抽到破坏媒介且有证据    | 与切索共用一次性收益     |
 
-## 可执行的三回合示例
+### 可执行的三回合示例
 
 第一回合绘线并布置防护，结束时承受最多 8 生命伤害。第二回合显影粉确认连接，切断铃索 +1，再绘线 +1，总进度 3；本回合铃鸣取消。第三回合绘线达到 4，立即胜利。显影粉节省一次敌方逼近与一轮占用时间，但消耗航程中的稀缺物资。
 
-## 必须先实现的边界
+### 必须先实现的边界
 
 SceneAction 需要独立于手牌的目标验证；MediumState 至少包含 Hidden、Verified、Broken；IntentPolicy 提供可保存的节拍游标。铃被破坏后，“铃鸣”拍显示“连接已断，本回合无冲击”，不偷偷换成逼近。回放保存媒介初始选择和成功命令，恢复后不能重选连接。
 
-<!-- PAGE -->
+## Part 05 道具机制与两个样例
 
-# Part 05 道具机制与两个样例
-
-## 调查工具的共用限制
+### 调查工具的共用限制
 
 沿用两个装备槽。普通工具不消耗行动、不扣理智，各自提供有限问题；首版不让工具直接造成伤害或生成通用力量。道具应先显示将查询的对象与问题，再显示费用。装备在遭遇前选择；战斗中不得靠换槽重置次数。
 
-## 定向听筒
+### 定向听筒
 
 内容 ID 为 listener，沿用现有工具，每场 1 次。问题为“当前声源在哪里”；答案只回答本体、袖内铜铃或墙上铜铃等空间关系。无声音、问题已经回答或目标无有效声源时不消耗次数。
 
@@ -198,7 +186,7 @@ SceneAction 需要独立于手牌的目标验证；MediumState 至少包含 Hidd
 
 造型采用木柄、弧形黄铜听音口和织物包覆短管；轮廓朝向明确，材质朴素，没有屏幕与全知扫描光束。交互时做一次举起、微转、放下；结果依靠文字，音效只增强方向感。样例只生成该工具的静态形体。
 
-## 显影粉
+### 显影粉
 
 提案内容 ID 为 revealing_powder，一次性航程消耗品，占一个工具槽，每份 1 次。问题为“所选物件组是否有可显影的连接”；对灯塔铜铃组直接确认当前连接铃。无适用连接或已确认时不消耗，按钮解释原因。
 
@@ -206,17 +194,15 @@ SceneAction 需要独立于手牌的目标验证；MediumState 至少包含 Hidd
 
 现有工具次数每场重置，尚不能表示航程一次性物资。提案增加 InventoryItemInstance 与 chargesRemaining；在航程协调器未完成时，仅在独立 Boss 实验场发放 1 份，不伪称已实现跨遭遇消耗。
 
-## 其他两件原定工具
+### 其他两件原定工具
 
 防风提灯继续承担可见动作查询；听潮贝壳继续回答主要伤害资源类型并主动支付 3 理智。它们沿用已有方向，本轮不再生成模型。后续“回视”必须提前显示触发条件与额外代价，并在同一次命令中检查总支付是否可承受。
 
 工具不是强制税：普通敌人意图公开；祷告者有混合防护；Boss 有四次绘线。三个场景都必须在没有使用工具的情况下存在可解释的生存策略。
 
-<!-- PAGE -->
+## Part 06 场景与媒介素材
 
-# Part 06 场景与媒介素材
-
-## 灯塔底层战斗空间
+### 灯塔底层战斗空间
 
 场景使用固定斜视镜头。潜水服置于画面中上区域，三铃在后墙，封门线在中景，底部约三分之一屏幕留给卡牌和资源。角色前后运动是动作表现，不产生距离、射界或站位规则。
 
@@ -224,7 +210,7 @@ SceneAction 需要独立于手牌的目标验证；MediumState 至少包含 Hidd
 
 模块包括潮湿石墙、地面浅水、封门框、铜铃支架和少量日志杂物。背景不添加能被误认为可调查目标的高亮装饰。灯光以冷灰环境光与暖铜局部反射为主；铜铃连接揭示后使用高对比细线，不依赖色相判断。
 
-## 铜铃媒介组件
+### 铜铃媒介组件
 
 每只铃的组件结构建议为 MediumRoot、BellMesh、ClapperPivot、RopeAnchor、EvidenceOverlay。三个实例可共用一个静态网格；连接身份由规则状态决定，不能烘焙在贴图或模型名称里。
 
@@ -242,15 +228,13 @@ SceneAction 需要独立于手牌的目标验证；MediumState 至少包含 Hidd
 
 材质使用 URP 可支持的 PBR 通道，盐蚀和湿痕通过材质表现。完整房间不直接生成一个无法拆分的大模型；本轮只生成一只铜铃，先验证媒介交互与场景尺度。
 
-<!-- PAGE -->
+## Part 07 事件机制与两个样例
 
-# Part 07 事件机制与两个样例
-
-## 事件的共用结构
+### 事件的共用结构
 
 EventDefinition 提案包含 id、entryCondition、description、choices 与 outcomes。选项必须展示确定的资源代价，故事推测与未知后果分别标注；未知可影响后续叙事，但不能在没有提示时追加致命惩罚。选择后记录 branchId，读档不得再次领取一次性收益。
 
-## 第十三名船员
+### 第十三名船员
 
 沿用原设定：船上登记十二人，晚餐却出现十三份使用过的餐具。插画只画餐桌与第十三张潮湿餐巾，避免提前把某个人描成怪物。首轮提案把笼统的“调查资源”具体化为一份航程补给，便于测试成本。
 
@@ -262,7 +246,7 @@ EventDefinition 提案包含 id、entryCondition、description、choices 与 out
 
 被注视在本轮仅是事件标记，不改变卡费、不强制乱出牌、不触发未预告伤害。第三个选项须直接说明“这会引来后续关注”；首版没有后续事件时仅保留日志，不能宣称标记系统已形成完整玩法。
 
-## 重复求救
+### 重复求救
 
 新增事件 ID 为 repeating_distress。旧无线电重复播报一段不同人听到不同内容的求救信号。这个事件为灯塔提供可选预备线索，不承担唯一进入条件。插画是耳机、频率盘与两张不一致的抄报纸，不出现无线电里真实说话者的脸。
 
@@ -276,11 +260,9 @@ EventDefinition 提案包含 id、entryCondition、description、choices 与 out
 
 两个事件先做 2D 插画与分支文字，无需额外角色模型。跨局保留只适用于明确验证的事实；船员身份与听闻不能因查看日志就升级为真相。
 
-<!-- PAGE -->
+## Part 08 界面声音与反馈
 
-# Part 08 界面声音与反馈
-
-## 样例一 祷告者的调查前后
+### 样例一 祷告者的调查前后
 
 调查前显示名称、生命 30／30、共享征兆、候选“挥刃 10 生命／呼唤 6 理智”以及工具剩余次数。候选并排等权展示；模型和音效不能替玩家预先选中答案。伤害资源使用不同图形和文字标签。
 
@@ -288,7 +270,7 @@ EventDefinition 提案包含 id、entryCondition、description、choices 与 out
 
 听筒只获得“声源 袖内铜铃”；界面保留“声源已观察”标签，不能错误点亮要求意图正式确认的卡牌条件。玩家可以自行推理，系统必须诚实显示自己的确认状态。
 
-## 样例二 Boss 的封门与媒介
+### 样例二 Boss 的封门与媒介
 
 界面常驻“目标 封门 0／4”，其下是绘制封线按钮、费用 1 与本回合可用次数。选中已验证铜铃后显示切断铃索按钮和费用 2；不允许通过三维物件的微小点击区完成关键操作，另提供文字目标列表。
 
@@ -302,17 +284,15 @@ EventDefinition 提案包含 id、entryCondition、description、choices 与 out
 | 调查确认 | 局部亮起，标记更新 | 纸笔或轻机械声   | 事实 来源 有效期   |
 | 封门推进 | 填入一段粉线       | 粉笔磨擦         | 封门进度与行动消耗 |
 
-## 可读性与操作承诺
+### 可读性与操作承诺
 
 理智冲击特效不得覆盖费用、手牌、按钮和目标；屏幕扰动可关闭。共享征兆使用相同音效池，避免铃声尾音泄露挥刃或呼唤。关闭声音后，所有对策略有用的信息仍由字幕提供。
 
 建议 1080p 下核心规则文字至少 18 像素，提供缩放；实际字体须具备授权并随构建发布。反馈时长以短促为主，结果文字可回看；动画不得阻塞日志、跳过演出或状态检查。
 
-<!-- PAGE -->
+## 实现顺序与验收
 
-# 实现顺序与验收
-
-## 按机制依赖分阶段落地
+### 按机制依赖分阶段落地
 
 | 阶段         | 内容及交付                       | 完成条件                   |
 | ------------ | -------------------------------- | -------------------------- |
@@ -323,13 +303,13 @@ EventDefinition 提案包含 id、entryCondition、description、choices 与 out
 
 每阶段独立 commit，保留固定种子、操作序列与版本号。规则修改应提高 BattleReplay 版本，新增静态数据加入内容指纹；表现资产与规则状态分别维护。所有 Unity 导入、Prefab 组装与编辑器验证使用 Unity CLI。
 
-## 与当前框架的衔接
+### 与当前框架的衔接
 
 现有可复用 CardDefinition 的费用与效果、EnemyDefinition 的征兆与声源、EncounterDefinition 的封门目标，以及 KnowledgeState 和命令回放。presentationPrefab 已预留，但当前验证 UI 不实例化模型；绑定引用本身不代表已经接入表现。
 
 提案新增 IntentPolicy、MediumState、SceneAction、EventDefinition、航程库存和独立表现配置。CardDefinition 目前没有 artwork 字段；ToolDefinition 尚无航程消耗语义；实际行动隐藏仍由 Session 维护，不让场景脚本读取种子推断答案。
 
-## 必须通过的场景验证
+### 必须通过的场景验证
 
 1. 同种子调查前后实际意图不变；失败查询零扣费；下回合不能误用上一回合确认。
 2. 祷告者两种动作在调查前的姿态、声效、材质与图标均无差异；确认后展示相应动作。
@@ -339,15 +319,13 @@ EventDefinition 提案包含 id、entryCondition、description、choices 与 out
 6. 主动理智支付不可被防护抵销；资源耗尽优先于目标胜利；工具槽不得重复装备以刷次数。
 7. 关闭声音、关闭画面扰动、调整窗口后，候选意图、卡费和任务行动仍可读可操作。
 
-## 首轮试玩记录
+### 首轮试玩记录
 
 每次遭遇记录调查前计划、调查后计划、实际承伤、工具使用次数和决策耗时。重点看玩家是否因新事实改变出牌，以及是否愿意选择不调查路线；若调查总是必选，先降低工具收益或增加公开信息，不增加假线索。
 
-<!-- PAGE -->
+## 示例模型与制作交接
 
-# 示例模型与制作交接
-
-## 每类一个样例
+### 每类一个样例
 
 3D 样例仅覆盖敌人、Boss、道具和场景媒介四个部分；卡牌、事件、界面与音效按前文机制进行二维或声音制作。生成结果用于审阅轮廓与材质方向，不等同于可直接发布的 Unity 资产。
 
@@ -358,26 +336,81 @@ EventDefinition 提案包含 id、entryCondition、description、choices 与 out
 | 道具     | 定向听筒     | 一个静态手持工具       |
 | 场景媒介 | 铜铃         | 一个可复用的基础铃体   |
 
-## 共同制作语言
+### 共同制作语言
 
 低饱和海雾灰、旧木褐、盐白和氧化铜；材质粗糙度承载年代感，暖光用于引导视线。避免全屏触手、紫色魔法阵、夸张血浆、明亮霓虹或写实疾病表征。主形体从固定战斗镜头可识别，细节不得成为唯一情报。
 
 已先行生成的 Boss 样例提示词包含潜水服与三铃，结果可能合并部件。正式接入前应检查并拆分；如果铜铃不可独立控制，则该样例仅用于风格审阅，战斗媒介采用独立铜铃样例。不得据此把隐藏连接固定在某个网格上。
 
-## 交接检查
+### 交接检查
 
 生成记录保存模型 ID、原始提示词、请求参数与结果页。美术验收检查正侧背轮廓、缺面、穿插、UV、材质槽、贴图通道与可分件性；敌人还需检查关节变形和持物遮挡。生成完成不代表这些检查已通过。
 
 Unity 接入时使用 1 单位约 1 米，校正朝向与根节点，按实际三角面统计预算；灯光和材质在 URP 内重建并验证。声音、粒子和动画只消费允许公开的表现事件，不直接读取隐藏行动对象。
 
-## 依据与追溯
+### 依据与追溯
 
-DESIGN_DOC_v0_1.md：核心体验、18 张原卡池、四工具、海域、事件、Boss 与 MVP 边界。
+[概念设计](DESIGN_DOC_v0_1.md)：核心体验、18 张原卡池、四工具、海域、事件、Boss 与 MVP 边界。
 
-FRAMEWORK.md：现有规则层、资产字段、工具次数、回放约束与未实现内容。FRAMEWORK_VALIDATION.md：既有框架测试边界；本文不将这些结果作为新增机制通过测试的证据。
+[基础框架](FRAMEWORK.md)：现有规则层、资产字段、工具次数、回放约束与未实现内容。[框架验证记录](FRAMEWORK_VALIDATION.md)：既有框架测试边界；本文不将这些结果作为新增机制通过测试的证据。
 
 本轮同时对照 CardDefinition、EnemyDefinition、EncounterDefinition 与 smuggler、prayer、echo、seal 样例资产。机制以本文为后续实现提案，不直接改写当前运行时配置。
 
-## Hyper3D 结果页
+### Hyper3D 结果页
 
-MODEL_LINKS_PLACEHOLDER
+[蒙面祷告者](https://hyper3d.ai/workspace/rodin/99fe59bf-fa5d-4589-a80e-f74969b9d66a)
+
+[灯塔下的回声](https://hyper3d.ai/workspace/rodin/3260f26a-afc0-44af-afb6-866d641e77ea)
+
+[定向听筒](https://hyper3d.ai/workspace/rodin/6bfe629a-c08a-46a7-a802-4fcc2a004711)
+
+[铜铃](https://hyper3d.ai/workspace/rodin/d8f99115-9a17-4963-84a2-9adea98eb29f)
+
+### 生成记录
+
+四项均于 2026 年 10 月 16 日通过 Hyper3D MCP 完成生成；只核实服务返回的完成状态，尚未做模型视觉与 Unity 导入验收。未下载模型文件。
+
+| 样例 | generation_id | Quad 目标多边形数 |
+| --- | --- | ---: |
+| 蒙面祷告者 | `99fe59bf-fa5d-4589-a80e-f74969b9d66a` | 10000 |
+| 灯塔下的回声 | `3260f26a-afc0-44af-afb6-866d641e77ea` | 18000 |
+| 定向听筒 | `6bfe629a-c08a-46a7-a802-4fcc2a004711` | 2500 |
+| 铜铃 | `d8f99115-9a17-4963-84a2-9adea98eb29f` | 1500 |
+
+统一请求参数为 `geometry_file_format=glb`、`mesh_mode=Quad`、`tier=Gen-2.5-Medium`、`texture_delight=true`。目标面数为请求参数，实际拓扑、分件和面数需单独验收。
+
+<details>
+<summary>蒙面祷告者的原始生成提示词</summary>
+
+```text
+A single masked human supplicant character for The Unsounded Sea, a restrained nautical cosmic horror card game. Full body neutral standing pose, head slightly lowered, asymmetrical dark grey waxed raincoat with broad long sleeves fully hiding both hands and all held objects, plain cloth face covering, salt-stiff wet hem, narrow boots, human proportions, no visible blade or bell, no tentacles, no gore, no magic glow. Readable silhouette for fixed oblique battle camera, muted oxidized brass fasteners, painterly semi realistic PBR. Isolated character only, neutral background, no environment, no base, no text.
+```
+
+</details>
+
+<details>
+<summary>灯塔下的回声的原始生成提示词</summary>
+
+```text
+Stylized semi-realistic 3D game boss asset for a Lovecraftian investigation card roguelike: an antique brass diving suit standing in a flooded lighthouse crypt, no visible human body, three tarnished copper bells hanging from wet stone chains, algae and salt corrosion, restrained silhouette, readable at fixed isometric battle camera, dark teal and oxidized brass palette, subtle uncanny asymmetry, no tentacles, no gore, game-ready single character prop, neutral studio background
+```
+
+</details>
+
+<details>
+<summary>定向听筒的原始生成提示词</summary>
+
+```text
+One antique handheld directional acoustic listening tool for a maritime investigation game. A compact curved tarnished brass acoustic horn attached to a short dark wooden handle, small cloth wrapped listening tube, simple mechanical construction with clearly readable silhouette. Desaturated patina, salt wear, believable mundane nautical instrument, painterly semi realistic PBR. Single isolated prop, no character, no room, no base, no lettering, no digital screen, no neon, no magic. Neutral studio background.
+```
+
+</details>
+
+<details>
+<summary>铜铃的原始生成提示词</summary>
+
+```text
+One small antique lighthouse bronze bell prop, isolated, readable flared bell silhouette, simple thick upper suspension loop, a clapper visible inside, tarnished bronze with salt white deposits and subtle grey green corrosion. Semi realistic painterly PBR for a restrained maritime cosmic horror game, approximately 35 cm tall. Single bell only, no wall, no rope, no chain, no stand, no base, no character, no symbols, no text, no supernatural glow. Neutral studio background. Balanced intact silhouette suitable for three duplicated scene instances.
+```
+
+</details>
