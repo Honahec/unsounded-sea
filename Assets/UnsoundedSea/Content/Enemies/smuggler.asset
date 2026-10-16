@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 704da23baf0814ad2a86fad0cc4954f8, type: 3}
+  m_Name: smuggler
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
+  id: smuggler
+  displayName: "\u6301\u5200\u8D70\u79C1\u8005"
+  health: 24
+  candidateDescription: "\u6325\u5203 \xB7 8 \u751F\u547D\u4F24\u5BB3"
+  intents:
+  - id: slash
+    displayName: "\u6325\u5203"
+    clue: "\u6301\u5200\u524D\u503E\uFF0C\u51C6\u5907\u7A81\u523A\u3002"
+    channel: 0
+    amount: 8
+    isPublic: 1
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
+  presentationPrefab: {fileID: 0}

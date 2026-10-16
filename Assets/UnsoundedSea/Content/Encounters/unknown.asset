@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d43cadea211484720a1195097e37f092, type: 3}
+  m_Name: unknown
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EncounterDefinition
+  id: unknown
+  displayName: "02 / \u6709\u9650\u8C03\u67E5"
+  objective: 0
+  objectiveTarget: 4
+  playerHealth: 60
+  playerSanity: 30
+  actionsPerTurn: 3
+  drawPerTurn: 5
+  deck:
+  - {fileID: 11400000, guid: 0ff56e49aeeb54e38886a61f7e523cca, type: 2}
+  - {fileID: 11400000, guid: 0ff56e49aeeb54e38886a61f7e523cca, type: 2}
+  - {fileID: 11400000, guid: 0ff56e49aeeb54e38886a61f7e523cca, type: 2}
+  - {fileID: 11400000, guid: 0ff56e49aeeb54e38886a61f7e523cca, type: 2}
+  - {fileID: 11400000, guid: e1e6d32d3dd6143ada0b7ce278858d5f, type: 2}
+  - {fileID: 11400000, guid: e1e6d32d3dd6143ada0b7ce278858d5f, type: 2}
+  - {fileID: 11400000, guid: e1e6d32d3dd6143ada0b7ce278858d5f, type: 2}
+  - {fileID: 11400000, guid: e1e6d32d3dd6143ada0b7ce278858d5f, type: 2}
+  - {fileID: 11400000, guid: 372e003d9698b49d6acda922f63933cc, type: 2}
+  - {fileID: 11400000, guid: 3df029c460b504761b4cef1abb4c23f4, type: 2}
+  enemies:
+  - {fileID: 11400000, guid: 1779fb52b5c5942488949acca0b7c1f5, type: 2}
+  equippedTools:
+  - {fileID: 11400000, guid: d2943be9a66734ec2ae7bdaa9992577a, type: 2}
+  - {fileID: 11400000, guid: 1d7a30e50a223431b9ba28e4fc023447, type: 2}
