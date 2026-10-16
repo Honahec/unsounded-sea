@@ -66,7 +66,7 @@
 
 已检查 1600×900 战斗、胜利和设置画面，及 1280×720 布局。甲板战检查人物全身、脚底和选中环；海面战检查完整小船与远处巨兽的斜侧构图、浸没与尺度差、五段撤离进度；可用 `SeaBossQA.ExteriorComposition(true)` 复查受击过程。调整构图后再次通过 Boss 胜负、选中、暂停、减少动效及水体生命周期检查。共同检查船舷灯、湿木甲板、海面、雾和投影名牌。海面战保留常态整体摆动，关闭占位攻击/受击动作；不声称已完成骨骼动画。新版海面检查了细波高光、Boss 倒影、浸没接触和远景雾衔接。最终验证区间无新增编译或运行错误；开发期间的上游兼容错误与测试夹具问题已修复，CLI 曾提示重复进入 Play；脚本重载时 CLI 请求中断，等待编译完成后重新验证。
 
-持久画面：[甲板战](ArtReferences/ocean-battle.png)、[封门胜利](ArtReferences/ocean-victory.png)、[海面 Boss](ArtReferences/sea-boss-battle.png)。详细本地工具日志在被忽略的 `Logs/`，不作为团队唯一交付。船体高低模已从独立 clone 经 LFS 回读，两份 SHA 全部匹配（资产提交 `56a27ff`）。海面 Boss 高低模也已在资产提交 `32388b6` 完成独立远端下载，两份 SHA256 均匹配，`git lfs fsck` 通过。水体资产提交 `2478960` 的 4 张纹理与海面网格也通过独立 clone 的 LFS 下载，5 份 SHA256 全部匹配。模型参数、来源和哈希只维护在 [船体 manifest](../ArtSource/Vessels/manifest.json) 与 [Boss manifest](../ArtSource/Bosses/manifest.json)。
+持久画面：[甲板战](ArtReferences/ocean-battle.png)、[封门胜利](ArtReferences/ocean-victory.png)、[海面 Boss](ArtReferences/sea-boss-battle.png)。详细本地工具日志在被忽略的 `Logs/`，不作为团队唯一交付。船体高低模已从独立 clone 经 LFS 回读，两份 SHA 全部匹配（资产提交 `56a27ff`）。海面 Boss 高低模也已在资产提交 `32388b6` 完成独立远端下载，两份 SHA256 均匹配，`git lfs fsck` 通过。水体资产提交 `2478960` 的 4 张纹理与海面网格也通过独立 clone 的 LFS 下载，5 份 SHA256 全部匹配；扩大并加密后的海面网格（`d9f50fa`）也从独立 clone 重新下载，SHA256 一致。模型参数、来源和哈希只维护在 [船体 manifest](../ArtSource/Vessels/manifest.json) 与 [Boss manifest](../ArtSource/Bosses/manifest.json)。
 
 ## 验证边界
 
