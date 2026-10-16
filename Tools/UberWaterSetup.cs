@@ -87,7 +87,7 @@ public static class UberWaterSetup
         {
             var stage = root.GetComponent<BattleStage>();
             stage.fogColor = new Color(0.3f, 0.45f, 0.48f);
-            stage.fogDensity = 0.01f;
+            stage.fogDensity = 0.0025f;
             var water = stage.ocean;
             water.gameObject.layer = 4;
             water.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
@@ -109,7 +109,7 @@ public static class UberWaterSetup
 
     static Mesh WaterMesh()
     {
-        // Concentrate vertices where the low camera can resolve waves; far water fades into fog.
+        // Dense between vessel and Boss; extend behind and beside the exterior camera into fog.
         const int width = 320, depth = 256;
         var points = new Vector3[(width + 1) * (depth + 1)];
         var normals = new Vector3[points.Length];
@@ -119,9 +119,9 @@ public static class UberWaterSetup
         for (int x = 0; x <= width; x++)
         {
             float u = (x / (float)width - 0.5f) * 2;
-            float v = z / (float)depth;
-            var p = new Vector3(Mathf.Sign(u) * (30 * Mathf.Abs(u) + 230 * Mathf.Pow(Mathf.Abs(u), 3)), 0,
-                -25 + 60 * v + 340 * v * v * v);
+            float v = z / (float)depth * 2 - 1;
+            var p = new Vector3(50 * u + 2150 * Mathf.Pow(u, 5), 0,
+                130 + 220 * v + 2050 * Mathf.Pow(v, 5));
             int i = z * (width + 1) + x;
             points[i] = p; normals[i] = Vector3.up; tangents[i] = new Vector4(1, 0, 0, -1); uv[i] = new Vector2(p.x, p.z);
         }
@@ -138,7 +138,7 @@ public static class UberWaterSetup
         if (mesh == null) { mesh = new Mesh(); AssetDatabase.CreateAsset(mesh, path); }
         mesh.Clear(); mesh.name = "DeepOceanMesh"; mesh.indexFormat = IndexFormat.UInt32;
         mesh.vertices = points; mesh.normals = normals; mesh.tangents = tangents; mesh.uv = uv; mesh.triangles = indices;
-        mesh.bounds = new Bounds(new Vector3(0, 0, 175), new Vector3(524, 8, 404));
+        mesh.bounds = new Bounds(new Vector3(0, 0, 130), new Vector3(4404, 8, 4544));
         EditorUtility.SetDirty(mesh); AssetDatabase.SaveAssetIfDirty(mesh);
         return mesh;
     }

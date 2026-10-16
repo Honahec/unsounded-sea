@@ -22,6 +22,39 @@ public static class SeaBossQA
         for(int i=0;i<100;i++){if(Director!=null&&!Director.Busy)return;await Task.Delay(50);}
         throw new Exception("Feedback did not release.");
     }
+    public static async Task<object> ExteriorComposition(bool duringAttack=false)
+    {
+        await Ready();var stage=Director.Stage;var camera=stage.battleCamera;
+        Check(!camera.transform.IsChildOf(stage.vessel),"Camera inherits vessel motion");
+        var cameraPosition=camera.transform.position;var cameraRotation=camera.transform.rotation;
+        var shipPosition=stage.vessel.localPosition;var shipRotation=stage.vessel.localRotation;
+        try
+        {
+            stage.vessel.localPosition+=Vector3.up;stage.vessel.Rotate(0,0,10);
+            Check(Vector3.Distance(cameraPosition,camera.transform.position)<0.001f&&Quaternion.Angle(cameraRotation,camera.transform.rotation)<0.001f,"Vessel moves camera");
+        }
+        finally {stage.vessel.localPosition=shipPosition;stage.vessel.localRotation=shipRotation;}
+        if(duringAttack)Click("battle-end-turn");
+        float minX=1,maxX=0,minY=1,maxY=0;
+        for(int frame=0;frame<30;frame++)
+        {
+            var bounds=new Bounds(stage.vessel.position,Vector3.zero);
+            foreach(var renderer in stage.vessel.GetComponentsInChildren<Renderer>())bounds.Encapsulate(renderer.bounds);
+            for(int corner=0;corner<8;corner++)
+            {
+                var world=new Vector3((corner&1)==0?bounds.min.x:bounds.max.x,Mathf.Max(0,(corner&2)==0?bounds.min.y:bounds.max.y),(corner&4)==0?bounds.min.z:bounds.max.z);
+                var p=camera.WorldToViewportPoint(world);
+                Check(p.z>camera.nearClipPlane&&p.x>0&&p.x<1&&p.y>0&&p.y<1,"Vessel cropped by camera");
+                var ui=Root.LocalToWorld(new Vector2(p.x*Root.resolvedStyle.width,(1-p.y)*Root.resolvedStyle.height));
+                Check(Root.panel.Pick(ui)?.name=="battle-surface","Vessel occluded by HUD");
+                minX=Mathf.Min(minX,p.x);maxX=Mathf.Max(maxX,p.x);minY=Mathf.Min(minY,p.y);maxY=Mathf.Max(maxY,p.y);
+            }
+            await Task.Delay(50);
+        }
+        var actor=stage.Actors.Single();var separation=Vector2.Distance(new Vector2(stage.vessel.position.x,stage.vessel.position.z),new Vector2(actor.transform.position.x,actor.transform.position.z));
+        Check(separation>=250,"Sea engagement is too close");
+        return new {size=camera.pixelWidth+"x"+camera.pixelHeight,separation,duringAttack,shipViewport=new[]{minX,minY,maxX,maxY},cameraIndependent=true};
+    }
     public static async Task<object> PlacementAndPause()
     {
         await Ready();var d=Director;var actor=d.Stage.Actors.Single();

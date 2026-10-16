@@ -180,6 +180,103 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &2078546682399053878
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 900114091288964370}
+  - component: {fileID: 7153079893611027445}
+  m_Layer: 0
+  m_Name: Vessel exterior fill
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &900114091288964370
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2078546682399053878}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 12, y: 9, z: -8}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6927056962710888796}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!108 &7153079893611027445
+Light:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2078546682399053878}
+  m_Enabled: 1
+  serializedVersion: 13
+  m_Type: 2
+  m_Color: {r: 0.43, g: 0.62, b: 0.7, a: 1}
+  m_Intensity: 100
+  m_Range: 35
+  m_SpotAngle: 30
+  m_InnerSpotAngle: 21.802082
+  m_CookieSize2D: {x: 0.5, y: 0.5}
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+    m_CullingMatrixOverride:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    m_UseCullingMatrixOverride: 0
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingLayerMask: 1
+  m_Lightmapping: 4
+  m_LightShadowCasterMode: 0
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
+  m_ForceVisible: 0
+  m_ShapeRadius: 0.025
+  m_ShadowAngle: 0
+  m_LightUnit: 1
+  m_LuxAtDistance: 1
+  m_EnableSpotReflector: 1
 --- !u!1 &2115658150569425470
 GameObject:
   m_ObjectHideFlags: 0
@@ -483,7 +580,7 @@ Transform:
   m_GameObject: {fileID: 2499661892113426030}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12, y: 16, z: 37}
+  m_LocalPosition: {x: -60, y: 70, z: 110}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -500,8 +597,8 @@ Light:
   serializedVersion: 13
   m_Type: 2
   m_Color: {r: 0.38, g: 0.69, b: 0.67, a: 1}
-  m_Intensity: 80
-  m_Range: 65
+  m_Intensity: 400
+  m_Range: 300
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.802082
   m_CookieSize2D: {x: 0.5, y: 0.5}
@@ -580,8 +677,8 @@ Transform:
   m_GameObject: {fileID: 2512019140475030435}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
-  m_LocalPosition: {x: 0, y: -7, z: 60}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: -45.5, z: 260}
+  m_LocalScale: {x: 6.5, y: 6.5, z: 6.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6927056962710888796}
@@ -599,11 +696,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.BattleAnchor
   environment: 1
-  labelHeight: 0.85
-  labelOffset: {x: -14, y: 0.7, z: 0}
+  labelHeight: 0.6
+  labelOffset: {x: 10, y: 0, z: 8}
   showSelectionRing: 0
   heave: 0.22
-  waterRadius: 14
+  waterRadius: 91
 --- !u!1 &2829935205172334178
 GameObject:
   m_ObjectHideFlags: 0
@@ -1961,6 +2058,7 @@ Transform:
   - {fileID: 4548282515221985200}
   - {fileID: 1129455319281471553}
   - {fileID: 2865199684710799391}
+  - {fileID: 900114091288964370}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8139019866066109063
@@ -1988,7 +2086,7 @@ MonoBehaviour:
   impactCue: {fileID: 8300000, guid: 96f93d5de192d47ffa6d3bc586455053, type: 3}
   sanityCue: {fileID: 8300000, guid: 48f0151987bec456aa34f4a6bb956a36, type: 3}
   fogColor: {r: 0.3, g: 0.45, b: 0.48, a: 1}
-  fogDensity: 0.01
+  fogDensity: 0.0025
   vesselHeave: 0.12
   vesselPitch: 0.55
   vesselRoll: 0.8
@@ -2037,8 +2135,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7457013176256575744}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.006666222, y: -0, z: -0, w: 0.99997777}
-  m_LocalPosition: {x: 0, y: 3.2, z: 0}
+  m_LocalRotation: {x: 0.04008831, y: -0.38232303, z: 0.016605122, w: 0.9230094}
+  m_LocalPosition: {x: 130, y: 24, z: -35}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2076,8 +2174,8 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.08
-  far clip plane: 240
-  field of view: 52
+  far clip plane: 1800
+  field of view: 60
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -2540,7 +2638,7 @@ Transform:
   m_GameObject: {fileID: 8823914695504670781}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 12, y: 28, z: 72}
+  m_LocalPosition: {x: 60, y: 100, z: 280}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2557,8 +2655,8 @@ Light:
   serializedVersion: 13
   m_Type: 2
   m_Color: {r: 0.52, g: 0.69, b: 0.84, a: 1}
-  m_Intensity: 90
-  m_Range: 55
+  m_Intensity: 450
+  m_Range: 250
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.802082
   m_CookieSize2D: {x: 0.5, y: 0.5}
