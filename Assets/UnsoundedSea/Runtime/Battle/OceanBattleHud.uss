@@ -36,7 +36,7 @@
 .action-count { flex-grow: 1; color: rgb(209, 177, 115); font-size: 18px; }
 .hand-row { flex-direction: row; flex-grow: 1; }
 .hand-scroll { flex-grow: 1; flex-shrink: 1; }
-.hand-scroll .unity-scroll-view__content-container { flex-direction: row; }
+.hand-scroll .unity-scroll-view__content-container { flex-direction: row; min-width: 100%; justify-content: center; }
 .sea-card { width: 180px; min-width: 180px; height: 190px; padding: 11px 14px; margin: 3px 10px 0 0; border-radius: 2px; border-width: 1px; border-color: rgb(94, 105, 89); background-color: rgb(23, 39, 41); color: rgb(221, 217, 201); -unity-text-align: upper-left; }
 .sea-card:hover { background-color: rgb(42, 57, 54); border-color: rgb(210, 178, 113); translate: 0 -3px; }
 .sea-card:disabled { opacity: 0.45; }
@@ -58,3 +58,10 @@
 .modal-copy { color: rgb(179, 195, 185); font-size: 16px; margin-bottom: 15px; }
 .journal { height: 180px; margin-bottom: 16px; }
 .log-line { font-size: 13px; color: rgb(133, 158, 152); margin-bottom: 6px; }
+
+.battle-surface { position: absolute; left: 0; right: 0; top: 104px; bottom: 262px; }
+
+.ocean-sheet .settings { position: relative; left: 0; top: 0; width: 100%; }
+.ocean-ui.reduced-motion .sea-card:hover { translate: 0 0; }
+.ocean-ui.reduced-motion Button { transition-duration: 0s; }
+.seal-row { flex-wrap: wrap; }

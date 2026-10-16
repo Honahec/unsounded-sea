@@ -24,7 +24,7 @@ namespace UnsoundedSea.Runtime
         private void OnEnable()
         {
             director = GetComponent<BattleDirector>(); root = GetComponent<UIDocument>().rootVisualElement;
-            root.Clear(); root.AddToClassList("ocean-ui"); root.pickingMode = PickingMode.Ignore;
+            root.Clear(); root.AddToClassList("ocean-ui"); root.pickingMode = PickingMode.Ignore; root.focusable = true;
             if (menuStyle != null) root.styleSheets.Add(menuStyle);
             if (styleSheet != null) root.styleSheets.Add(styleSheet);
             if (font != null) root.style.unityFontDefinition = FontDefinition.FromSDFFont(font);
@@ -44,8 +44,18 @@ namespace UnsoundedSea.Runtime
         { var b = new Button(action) { name = name, text = text }; b.AddToClassList(cls); return b; }
         private void Render()
         {
-            root.Clear(); nameplates.Clear(); var v = director.View; if (v == null) return;
+            root.Clear(); root.Focus(); root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion); nameplates.Clear(); var v = director.View; if (v == null) return;
             var scenario = director.scenario; bool active = v.Phase == BattlePhase.PlayerTurn && !director.Paused && !director.Busy;
+            var surface = Box("battle-surface"); surface.name = "battle-surface"; surface.pickingMode = PickingMode.Position;
+            surface.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                if (director.Stage == null || director.Paused || evt.button != 0) return;
+                var point = new Vector3(evt.position.x / root.resolvedStyle.width * Screen.width, Screen.height - evt.position.y / root.resolvedStyle.height * Screen.height, 0);
+                if (Physics.Raycast(director.Stage.battleCamera.ScreenPointToRay(point), out var hit))
+                {
+                    var actor = hit.collider.GetComponent<BattleActorView>(); if (actor != null) director.Select(actor.EnemyId);
+                }
+            }); root.Add(surface);
             var top = Box("sea-top"); root.Add(top);
             var title = Box("sea-title"); title.Add(Text("U N S O U N D E D   S E A", "eyebrow")); title.Add(Text(scenario.chapter, "chapter")); top.Add(title);
             var vitals = Box("vitals"); top.Add(vitals);
@@ -73,7 +83,7 @@ namespace UnsoundedSea.Runtime
                 }
             }
             var right = Box("objective-panel"); root.Add(right);
-            right.Add(Text("航 行 目 标", "eyebrow")); right.Add(Text("不要试图杀死海。", "objective-title"));
+            right.Add(Text("航 行 目 标", "eyebrow")); right.Add(Text(scenario.objectiveHeading, "objective-title"));
             right.Add(Text(v.Objective, "objective-description"));
             var seals = Box("seal-row"); right.Add(seals);
             for (var i = 0; i < v.ObjectiveTarget; i++) { var s = Text((i + 1).ToString("00"), "seal"); s.EnableInClassList("complete", i < v.ObjectiveProgress); seals.Add(s); }
@@ -126,13 +136,16 @@ namespace UnsoundedSea.Runtime
             sheet.Add(Text(end ? (view.Phase == BattlePhase.Victory ? "海面重新沉默" : "无人回应的呼号") : "航海日志", "modal-title"));
             sheet.Add(Text(end ? (view.Phase == BattlePhase.Victory ? director.scenario.victoryText : director.scenario.defeatText) : "你听见海水拍打船舷。", "modal-copy"));
             var log = new ScrollView(); log.AddToClassList("journal");
-            foreach (var entry in view.Log.Skip(Math.Max(0, view.Log.Count - 12))) log.Add(Text(entry, "log-line"));
+            foreach (var evidence in view.Evidence) log.Add(Text($"[{KnowledgeLabel(evidence.Level)}] {evidence.Text} / {evidence.Source}", "log-line"));
+            var entries = view.Log.Where(x => !x.Contains("阶段：")).ToArray();
+            foreach (var entry in entries.Skip(Math.Max(0, entries.Length - 12))) log.Add(Text(entry, "log-line"));
             sheet.Add(log);
             if (!end) sheet.Add(Button("battle-resume", "继续航行", () => director.SetPaused(false)));
             sheet.Add(Button("battle-retry", "重新开始这场遭遇", () => { showSettings = false; director.Restart(); }));
             sheet.Add(Button("battle-settings", "设置", () => { showSettings = true; Render(); }));
             sheet.Add(Button("battle-menu", "返回主菜单", () => SceneManager.LoadScene(menuScene)));
         }
+        private static string KnowledgeLabel(KnowledgeLevel level) => level == KnowledgeLevel.Verified ? "已验证" : level == KnowledgeLevel.Observed ? "已观察" : level == KnowledgeLevel.Rumored ? "传闻" : "未知";
         private void LateUpdate()
         {
             RenderedFrames++;

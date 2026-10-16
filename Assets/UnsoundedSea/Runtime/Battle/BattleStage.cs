@@ -11,6 +11,9 @@ namespace UnsoundedSea.Runtime
         public Transform[] actorAnchors;
         public Material selectionMaterial;
         public Renderer ocean;
+        public AudioSource ambience;
+        public AudioSource feedback;
+        public AudioClip sealCue, impactCue;
         public Color fogColor = new Color(0.055f, 0.1f, 0.12f);
         public float fogDensity = 0.023f;
         public IReadOnlyList<BattleActorView> Actors => actors;
@@ -53,12 +56,19 @@ namespace UnsoundedSea.Runtime
             for (var i = 0; i < actors.Count; i++)
                 actors[i].Feedback(after.Enemies[i].Health < before.Enemies[i].Health,
                     command.kind == CommandKind.EndTurn && before.Enemies[i].Health > 0, after.Enemies[i].Health > 0);
-            if (after.Health < before.Health || after.Sanity < before.Sanity) shake = 1;
+            if (after.Health < before.Health || after.Sanity < before.Sanity) { shake = 1; if (feedback != null && impactCue != null) feedback.PlayOneShot(impactCue); }
+            if (after.ObjectiveProgress > before.ObjectiveProgress && feedback != null && sealCue != null) feedback.PlayOneShot(sealCue);
             RefreshSelection();
         }
         private void Update()
         {
-            if (director == null || director.Paused) return;
+            if (director == null) return;
+            if (ambience != null)
+            {
+                if (director.Paused && ambience.isPlaying) ambience.Pause();
+                else if (!director.Paused && !ambience.isPlaying) ambience.UnPause();
+            }
+            if (director.Paused) return;
             age += Time.unscaledDeltaTime;
             var reduced = GameSettings.ReducedMotion;
             vessel.localPosition = shipPosition + Vector3.up * (reduced ? 0 : Mathf.Sin(age * 0.55f) * 0.06f);

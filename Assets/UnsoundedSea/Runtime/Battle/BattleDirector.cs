@@ -52,7 +52,7 @@ namespace UnsoundedSea.Runtime
             var after = View;
             if (!after.Enemies.Any(x => x.Id == SelectedEnemy && x.Health > 0))
                 SelectedEnemy = after.Enemies.FirstOrDefault(x => x.Health > 0)?.Id;
-            Notice = after.Log.LastOrDefault() ?? "";
+            Notice = after.Log.LastOrDefault(x => !x.Contains("阶段：")) ?? "";
             feedbackUntil = Time.unscaledTime + (GameSettings.ReducedMotion ? 0.12f : command.kind == CommandKind.EndTurn ? 1.05f : 0.4f);
             wasBusy = true;
             Resolved?.Invoke(before, after, command);
