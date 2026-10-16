@@ -1,0 +1,6 @@
+{
+  "name": "UnsoundedSea.Editor",
+  "rootNamespace": "UnsoundedSea.Editor",
+  "references": ["UnsoundedSea.Core", "UnsoundedSea.Runtime"],
+  "includePlatforms": ["Editor"]
+}

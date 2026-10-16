@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dfcb1b8040ce4eca9f15db5edd8332d, type: 3}
+  m_Name: light
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
+  id: light
+  displayName: "\u4E34\u65F6\u7167\u660E"
+  description: "\u63ED\u793A\u53EF\u89C1\u52A8\u4F5C\uFF1B\u82E5\u5DF2\u77E5\u610F\u56FE\u5219\u62BD 1 \u5F20\u3002"
+  actionCost: 1
+  sanityCost: 0
+  exhaust: 0
+  effects:
+  - effectId: investigate
+    amount: 0

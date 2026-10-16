@@ -1,0 +1,5 @@
+{
+  "name": "UnsoundedSea.Runtime",
+  "rootNamespace": "UnsoundedSea.Runtime",
+  "references": ["UnsoundedSea.Core"]
+}
