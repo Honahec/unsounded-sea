@@ -39,8 +39,8 @@ public static class SeaBossSetup
     static void ConfigureComposition(BattleStage stage)
     {
         var camera=stage.battleCamera;
-        camera.transform.localPosition=new Vector3(130,24,-35);
-        camera.transform.LookAt(stage.transform.TransformPoint(new Vector3(0,8,95)),stage.transform.up);
+        camera.transform.localPosition=new Vector3(85,22,-26);
+        camera.transform.LookAt(stage.transform.TransformPoint(new Vector3(0,8,70)),stage.transform.up);
         camera.fieldOfView=60;camera.farClipPlane=1800;
         var anchor=stage.actorAnchors[0];
         anchor.localPosition=new Vector3(0,-45.5f,260);
