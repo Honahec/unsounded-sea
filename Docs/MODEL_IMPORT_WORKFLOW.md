@@ -1,52 +1,68 @@
-# 模型交付、Unity 导入与 Git LFS 同步
+# 模型制作全流程
 
-2026-10-16 实跑记录。运行时采用减面网格，精细感由轮廓、PBR 材质和灯光共同提供。高模仅作为制作母版保存在 Unity 的 `Assets/` 外。当前是桌面近景展示用 LOD0 候选，不是最终性能预算，也不是刻意采用棱面感的 low-poly 美术风格。
+本文件是模型生产、验收与归档的唯一流程入口。造型、机制和暂定面数预算见 [机制与素材设计](ASSET_MECHANICS_DESIGN.md)；Deemos 网页操作见 [Agent 操作说明](../DEEMOS_AGENT.md)。下文区分通用流程与 2026-10-16 已验证样例。
 
-## 本次交付
+## 1. 先定资产任务，再选生成方式
 
-| 资产 | 高模三角面 | Unity LOD0 三角面 | 减少 | LOD0 顶点 | GLB 大小 | 展示高度 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 祷告者 Prayer | 500,000 | 60,000 | 88% | 64,861 | 42.16 MiB | 1.8 m |
-| 空潜水服 Boss Echo | 800,000 | 90,000 | 88.75% | 116,379 | 52.36 MiB | 2.1 m |
+每个任务先写清：内容 ID、用途与镜头距离、尺寸、轮廓/材质参考、必须隐藏的信息、需要独立活动的部件、静态或动画用途、目标平台与预算。每个 Part 先做 1–2 个样例；同一设计逐次修订，不批量增加变体。
 
-每份均为 1 个网格、1 个 PBR 材质、3 张 4096 × 4096 内嵌贴图，无骨骼、蒙皮和动画。减面输出贴图与高模的文件哈希不同，不宣称逐字节继承；实际验证了贴图尺寸、材质映射和 Unity 中的可见结果。
+| 情况 | 使用方式 | 进入下一步的条件 |
+| --- | --- | --- |
+| 简单道具、轮廓探索、一次生成即可检查的资产 | Hyper3D MCP 直接生成 | 实际输出满足造型、分件和材质要求，可直接评估运行时网格 |
+| 主角/Boss、复杂造型约束、多视图参考、已有结果需定向修正 | 优先 Deemos Agent，使用当前页面提供的相关技能 | 锁定参考与修订目标，检查真实输出；Agent 不保证自动达到成品标准 |
+| MCP 结果造型已合格，但面数过高 | 直接进入减面阶段；可用 Agent 处理已有资产 | 不为“走完整流程”重新生成造型 |
+| 需要可变形角色，自动结果缺少合理关节拓扑/部件 | Agent 可辅助；补充 DCC 重拓扑、分件、烘焙与绑定 | 动作变形通过后才能标记为动画可用 |
 
-![Unity Play 模式下的减面模型](ArtReferences/unity-lod0-review.jpg)
+Deemos Agent 是可选生产工具，不是每件资产的必经步骤。高模同样按需制作：合格且预算内的网格可直接导入；高密度母版用于精修、烘焙和后续修订，运行时使用验收后的低面数网格。“低模”不要求棱面美术风格。
 
-[同一相机的高模参考](ArtReferences/unity-high-reference.jpg)；[Deemos 交付记录截图](ArtReferences/deemos-lod0-proof.jpg)。截图为中性灯光下的模型检查，不代表成品场景美术。
+```text
+机制/镜头/参考 → MCP 生成 或 Agent 定向制作 → 本地核验
+                         ↑ 造型不合格返回参考修订
+本地核验 → 预算内直接使用 / 减面 / 动画重拓扑与烘焙
+        → Unity 材质、尺寸和画面验收 → 按用途验收动画/性能
+        → 归档 + Git LFS 提交与远端回读
+```
 
-目录职责：
+## 2. 生成与修订
 
-- `ArtSource/Characters/*_High.glb`：高模母版，通过 LFS 保存，不进入 Unity 导入或构建依赖。
-- `ArtSource/Characters/manifest.json`：高模来源、大小、面数、SHA-256。
-- `ArtSource/runtime-manifest.json`：低模任务、工件 ID、文件哈希和实测规格。
-- `ArtSource/unity-import-validation.json`：Unity 导入后的网格、贴图、尺寸与 GUID 检查结果。
-- `Assets/UnsoundedSea/Art/Models/*_LOD0.glb`：当前运行时展示网格，通过 LFS 保存。
-- `Assets/UnsoundedSea/Art/Prefabs/Prayer.prefab`、`Echo.prefab`：标准化尺寸和原点的表现 Prefab。
-- `Assets/UnsoundedSea/Scenes/ModelImportReview.unity`：独立模型审阅场景。
-- `Tools/ModelImportWorkflow.cs`：由 Unity CLI 编译执行的导入与检查脚本；不进入玩家代码。
-- `Logs/AssetDesign/agent/`：被 Git 忽略的下载暂存和原始验证输出，不是团队同步来源。
+**MCP 路线：**依据当前工具 schema 提交参考、提示词、格式和几何目标；记录任务 ID 与实际请求参数；查询同一任务直至成功或失败，再下载真实模型。目标 Quad 数、档位名称或服务完成状态都不是质量验收。未暴露的参数（例如贴图分辨率）不能声称已经设置。
 
-`prayer.asset` / `echo.asset` 的 `presentationPrefab` 已绑定。现有 `BattleSandbox` UI 尚不实例化这个字段，所以此交付没有把模型接入战斗画面。审阅场景未添加到构建场景清单。
+**Agent 路线：**在同一项目/聊天继续修订，引用准确资产，必要时上传参考图与原模型；先检查概念和正侧背一致性，再制作一个候选。要求明确本次属于原网格编辑、参考重建还是减面/重拓扑，不能把重新生成称作无损局部修改。
 
-## 1. Rodin → 本地文件 → Deemos Agent
+共同要求：角色与场景分开；铜铃、刀、绳索等交互部件单独规划；中性照明检查 PBR，不把戏剧灯光烘进颜色纹理。祷告者须藏手、藏持物，Boss 须体现空潜水服的软布塌陷；形体不合格时先改参考，不靠增加面数补救。
 
-本项目实际遇到 Rodin 任务链接无法被 Agent 读取的问题。可靠路径是下载真正的 GLB，再通过 Agent 附件上传；仅粘贴任务 UUID 或结果页不等于资产已导入。
+### Rodin 与 Agent 资产不互通时
 
-1. 在 Rodin 结果中下载带 PBR 贴图的 GLB，保留原文件。
-2. 在本地核对文件长度、SHA-256、三角面、材质、内嵌图片尺寸和 skins/animations，避免将生成请求的 Quad 目标当作实际三角面。
-3. 上传真实 GLB 至 Agent，要求明确确认可读取网格及贴图。
-4. 锁定概念参考后做一次定向精修；记录实际属于原网格编辑还是参考重建。本轮高模是参考重建。
-5. 在同一聊天指定已交付高模工件，要求只做保留轮廓和 UV/PBR 的减面，不重新生成造型。本轮目标为 Prayer 60,000 / Echo 90,000 三角面。
-6. 下载减面 GLB，重做本地核验，按稳定名称归档。签名下载链接会过期，不把它写进仓库。
+本项目曾遇到 Agent 按 Rodin 任务 ID 查询返回 `Task not found`；这只证明当时的直接引用失败，不能推断平台所有资产均不互通。使用以下中转：
 
-[本轮 Agent 聊天](https://hyper3d.ai/workspace/agent?project=5d2ea8e0-e8dc-4bb9-8437-3309d6f1c6ab&thread=3fab207e-1239-4613-9d04-68e5799e8edf&lang=zh)。工件与 SHA 详见 manifest；Agent 文本曾错误报告 2K，高低模文件实际均为 4K，以文件和引擎解析结果为准。
+1. 从 Rodin 下载带贴图的真实 GLB，暂存至 `Logs/AssetDesign/<任务>/`。
+2. 检查文件完整性与规格，再通过 Agent 的文件上传控件附加 GLB；本地路径或结果页文字不等于附件。
+3. 等附件上传完成再提交，确认 Agent 可读取网格和贴图，且聊天中出现对应模型预览。
+4. 在同一聊天完成修订并下载结果。若掉线，先检查原任务状态，避免重复创建任务。
 
-## 2. Unity 导入
+### 下载后的最低检查
 
-实跑环境：Unity 6000.6.5f1、URP、Unity CLI 1.0.0-beta.13、Pipeline 0.8.0-exp.1、官方 `com.unity.cloud.gltfast@6.20.0`。包版本和锁文件已提交。glTFast 自动导入 GLB 为模型 Prefab 与内嵌网格、材质、纹理子资产。
+检查 GLB 声明长度与文件长度、SHA-256、网格/primitive、索引拓扑与实际三角面、顶点、材质槽、UV/法线、图片尺寸和通道，以及 skins/animations。只有 TRIANGLES 拓扑才能直接按索引数 ÷ 3 计面；其它拓扑需转换统计。外部纹理/缓冲依赖也必须归档，不能只下载壳文件。
 
-以下命令在仓库根目录执行，`UNITY_PROJECT_PATH` 设为本机此仓库绝对路径：
+实际查看正侧背、缺面、穿插、错误附件和材质。生成器的文字总结与文件不符时，以文件和引擎检查为准；不把预览图片当作模型交付。
+
+## 3. 制作运行时低模
+
+| 资产用途 | 处理路径 | 验收重点 |
+| --- | --- | --- |
+| 静态展示、硬表面道具 | 保留 UV/材质的减面；必要时重烘焙法线 | 轮廓、孔洞、薄边、法线接缝和材质分区 |
+| 蒙皮角色、明显布料形变 | 先拆部件、做关节布线，再烘焙、绑定与权重检查 | 肩肘膝等变形、袖口遮挡、附件独立活动；减面不等于动画拓扑 |
+| 多距离/多实例场景 | 根据屏幕占比制作 LOD，并配置/检查切换 | 近景质感、远景闪烁、轮廓跳变和实例总成本 |
+
+给 Agent 的减面任务必须包含：源工件、**三角面**预算、保留轮廓与 UV/PBR、是否允许重烘焙、保留母版、输出稳定文件名、报告实际面数/贴图尺寸/骨骼状态。结果再次做本地核验，并在同机位对比母版；纹理经过重新导出或烘焙时，不宣称逐字节继承。
+
+当前桌面近景样例采用 Prayer 60k / Echo 90k，来源于设计预算；不作为移动端或所有角色的默认标准。贴图分辨率、压缩、材质数、显存与动画成本分别检查，不能用 GLB 文件大小代替性能结论。
+
+## 4. Unity 导入与表现绑定
+
+通过 Unity CLI 操作本项目 Editor；场景、Prefab、导入器和 `.meta` 使用 Unity API 管理。项目已锁定 glTFast，clone 后等待包解析即可，无需重复安装。2026-10-16 实跑环境为 Unity 6000.6.5f1 / URP、CLI 1.0.0-beta.13、Pipeline 0.8.0-exp.1、glTFast 6.20.0；后续以项目配置和 CLI 发现结果为准。
+
+在仓库根目录执行：
 
 ```sh
 export UNITY_PROJECT_PATH="$PWD"
@@ -54,43 +70,41 @@ unity self-update --check --format json
 unity status --project-path "$UNITY_PROJECT_PATH" --format json
 ```
 
-已有包随项目解析，无需重复安装。新项目首次安装可使用已连接 Editor 的 `package_add`，并用 `package_status` 确认安装、编译结束：
+glTFast 将 GLB 导入为模型 Prefab 与网格、材质、纹理子资产。另建表现 Prefab 处理尺度、原点和附件，不修改原模型来迁就场景。约定 1 单位 = 1 米、脚底 y=0、正面 +Z；本例身高 1.8 / 2.1 米，审阅场景实例转 Y=180° 面向位于 -Z 的相机。
 
-```sh
-unity command package_add --project-path "$UNITY_PROJECT_PATH" --format json -- \
-  --identifier com.unity.cloud.gltfast@6.20.0 --confirm true
-unity command package_status --project-path "$UNITY_PROJECT_PATH" --format json
-```
+本例材质为 `Shader Graphs/glTF-pbrMetallicRoughness`，当前 URP 可用。glTF metallic/roughness 通道由导入器解释；换 Shader 时另验色彩空间、法线方向和 smoothness 转换，不能直接把 roughness 当 smoothness。
 
-新资产准备在暂存目录，文件名为 `Prayer_LOD0.glb` / `Echo_LOD0.glb`。本轮脚本固定校验已交付修订的 SHA；后续替换模型必须先更新 manifest 和脚本的预期值，不能静默覆盖不同修订。
+### 复现现有 Prayer / Echo 样例
+
+[ModelImportWorkflow.cs](../Tools/ModelImportWorkflow.cs) 是**这两个固定资产的脚本**，不是通用导入器。clone 已归档模型后，跳过 `ImportSources`，直接打开/检查已有场景。首次从下载暂存重建才执行：
 
 ```sh
 unity command run_script --project-path "$UNITY_PROJECT_PATH" --timeout 180 --format json -- \
   --file Tools/ModelImportWorkflow.cs --entry ModelImportWorkflow.ImportSources \
   --args '["Logs/AssetDesign/agent"]' --timeout_ms 150000
+```
+
+源文件必须为 `Prayer_LOD0.glb`、`Echo_LOD0.glb`，SHA 与脚本一致。然后执行：
+
+```sh
 unity command run_script --project-path "$UNITY_PROJECT_PATH" --timeout 180 --format json -- \
   --file Tools/ModelImportWorkflow.cs --entry ModelImportWorkflow.CreateReviewScene --timeout_ms 150000
 unity command run_script --project-path "$UNITY_PROJECT_PATH" --timeout 180 --format json -- \
   --file Tools/ModelImportWorkflow.cs --entry ModelImportWorkflow.Validate --timeout_ms 150000
 ```
 
-团队 clone 后模型已在 `Assets/`，不需要本地 Logs 文件或重新执行 `ImportSources`，直接打开已有审阅场景并运行 `Validate` 即可。脚本遇到未保存场景会停止；已有审阅场景只打开，不覆盖编辑。
+`CreateReviewScene` 拒绝未保存场景；已有场景只打开，不重新创建或绑定。`Validate` 检查面数、材质、4K 纹理、Shader 支持、Prefab/Enemy 引用及尺寸，不能替代视觉、动画和性能验收。
 
-Prefab 根节点保持单位缩放，子节点负责按身高缩放、横向居中与脚底归零。约定 1 Unity 单位 = 1 米，模型面向 +Z；审阅场景实例绕 Y 轴旋转 180° 面向位于 -Z 的相机。保存 `.meta` 保持 GUID 稳定，移动资产使用 Unity AssetDatabase。
+**新增或替换模型：**先更新导入配置/脚本的名称、路径、SHA、预算和验收预期；当前 `ImportSources` 会拒绝覆盖不同哈希文件。应通过单独的 Unity CLI/AssetDatabase 更新步骤替换目标内容、保留 `.meta` GUID、重导入并检查子资产引用及 Prefab。不要删掉已编辑的场景来强迫初始化脚本重建；已有场景的重新绑定需要显式处理。同步更新 manifest 和验收结果。
 
-材质使用 `Shader Graphs/glTF-pbrMetallicRoughness`，已验证当前 URP 支持。glTF metallic/roughness 通道由导入器解释，不把 roughness 原图直接塞入 URP smoothness。需要换自定义 Shader 时，单独验证色彩空间、法线方向及通道转换。
+## 5. 引擎验收
 
-## 3. 验证流程与本次结果
+先检查缺材质粉色、法线/接缝、穿插、脚底、尺度、轮廓与铜/布/皮革区分，再检查游戏镜头下的信息遮挡。需要动画的资产必须验证实际动作；只有展示用静态网格可以以静态标准验收。正式使用前在目标设备测帧耗、显存、加载卡顿，并检查最终 Player 的 Shader 和纹理。
 
-1. `Validate` 检查实际三角面、1 材质、3 张 4K 纹理、Shader 支持、Prefab/EnemyDefinition 引用、1.8 / 2.1 m 高度和脚底 y=0。
-2. 打开 `ModelImportReview.unity`，进入 Play 模式，确认 `Time.frameCount` 确实推进，再截取 1920 × 1080 的相机画面。本轮计数从 2055 到 2068，检查 met=true。
-3. 观察缺材质的粉色、错法线、悬空、轮廓破损、铜/布/皮革分区。当前正面视角可正常展示；复杂动作、背面遮挡及目标设备性能仍需后续专项验收。
-4. 退出 Play 后恢复临时 `Application.runInBackground` 设置。
-5. 运行现有测试：31/31 通过，无编译失败。低模导入之后无新增控制台错误。
+Play 模式验证须证明帧数推进，再截图。以下沿用本例已验证命令；不同 Pipeline 版本先查命令 schema。记录原 `runInBackground` 值，结束后恢复：
 
 ```sh
 unity command set_autotick --project-path "$UNITY_PROJECT_PATH" -- --persist false
-# 当前 Pipeline 无 editor_set_run_in_background；先记录原值，再临时开启
 unity command eval --project-path "$UNITY_PROJECT_PATH" -- --code 'return UnityEngine.Application.runInBackground;'
 unity command eval --project-path "$UNITY_PROJECT_PATH" -- --code 'UnityEngine.Application.runInBackground=true;'
 unity command editor_play --project-path "$UNITY_PROJECT_PATH"
@@ -99,49 +113,58 @@ unity command wait_for --project-path "$UNITY_PROJECT_PATH" --format json -- \
   --condition '{"member":"UnityEngine.Time.frameCount","op":"changed"}' --timeout_s 10
 unity command capture_game_view --project-path "$UNITY_PROJECT_PATH" --format json -- \
   --source camera --width 1920 --height 1080 --save_path Assets/Logs/AssetDesign/review.png
+unity command console --project-path "$UNITY_PROJECT_PATH" --format json -- --level error
 unity command editor_stop --project-path "$UNITY_PROJECT_PATH"
-# 本次原值为 false；其他机器恢复其先前值
+# 本例原值为 false；其他环境恢复其记录值
 unity command eval --project-path "$UNITY_PROJECT_PATH" -- --code 'UnityEngine.Application.runInBackground=false;'
-unity command run_tests --project-path "$UNITY_PROJECT_PATH" --timeout 180 --format json -- \
-  --mode editor --filter UnsoundedSea.Tests --timeout 150
 ```
 
-本次遇到并处理的工具问题：
+当前截图命令将相对路径解析至 Assets 下，故使用明确的 `Assets/Logs/...`。挑选必要证据归档后，经 AssetDatabase 删除临时截图资产。大导入使用明确超时的 `run_script`；超时后先检查实际状态，不能假定未执行而重复操作。规则/配置回归测试入口见 [框架指南](FRAMEWORK.md)。
 
-- 安装包时 Unity SceneView 内部出现一次 `ArgumentNullException`，之后编译成功、导入与测试通过。保留为工具异常记录，不算模型错误。
-- 清理临时高模时一次 `eval` 超过默认 5 秒；先查 Editor ready 和资产实际状态，确认删除已完成，没有重复删除。大操作改用 `run_script` 的明确超时。
-- 当前版本 `capture_game_view` 将相对路径视为 Assets 下路径；用明确 `Assets/Logs/...`，将所需截图归档到 `Docs/ArtReferences/` 后，经 AssetDatabase 删除临时截图资产。
+## 6. 归档、提交与 Git LFS 同步
 
-## 4. 性能和制作边界
+| 路径 | 唯一职责 |
+| --- | --- |
+| `ArtSource/Characters/*_High.glb` | 已选高模母版，位于 Assets 外，LFS 保存 |
+| [母版 manifest](../ArtSource/Characters/manifest.json) / [运行时 manifest](../ArtSource/runtime-manifest.json) | 来源、任务/工件、文件路径、SHA、实测规格；后续修订补充父修订、操作类型、生成参数/提示词或其引用 |
+| `Assets/UnsoundedSea/Art/Models/` / `Prefabs/` | 引擎内低模与表现 Prefab，提交关联 `.meta` |
+| `Assets/UnsoundedSea/Scenes/ModelImportReview.unity` | 可重复检查模型的独立场景 |
+| [Unity 检查结果](../ArtSource/unity-import-validation.json) / `Docs/ArtReferences/` | 当前导入结果与少量关键视觉证据 |
+| `Logs/AssetDesign/` | 被忽略的下载暂存与完整日志，不作为团队唯一交付来源 |
 
-6 万 / 9 万是本轮桌面近景 LOD0 的起点，适合先验证视觉，不是所有设备、所有屏幕占比的通用目标。尚未生成 LOD1/LOD2，也未配置 LODGroup。
+生成参数、SHA 和逐文件规格只在 manifest 维护；正文保留决策、步骤和简短当前状态。后续替换更新当前记录，旧版本由 Git/LFS 历史追溯，不另写一篇操作流水账。签名下载 URL 不入库。
 
-本次 glTFast 内嵌贴图实际为 ARGB32、13 级 mip，尚未做 GPU 压缩。每角色三张 4K 完整 mip 链理论约 256 MiB，两角色约 512 MiB，仅为纹理数据估算，不是 Profiler 实测。GLB 文件变小不等于显存按比例下降。正式投放需导出/重映射纹理为可配置的 TextureImporter 资产，按目标平台设置压缩及最大尺寸，并对比法线、粗糙度和铜材质后测显存与帧耗；不能声称内嵌贴图已有普通 TextureImporter 的平台覆写。
-
-动画角色还需针对肩肘、袖口和膝盖重拓扑、分件、绑定与变形检查。当前袖中刀/铃、Boss 独立铜铃等机制部件没有制作完成。包围盒验收不代表可动画，也不代表成品美术已验收。
-
-## 5. Git LFS 与协作
-
-`.gitattributes` 已为 `*.glb`、`*.gltf`、`*.bin` 配置 LFS，现有图片/FBX 规则沿用。GLB 和预览图存大文件对象；`.meta`、Prefab、Scene、配置和 Markdown 保持普通 Git 文本。禁止提交 Library/Temp/Logs，也不需要重写历史。
-
-每位协作者先安装 Git LFS，再执行：
+`.gitattributes` 已跟踪 GLB/glTF/bin 和相关图片/FBX；`.meta`、Prefab、Scene、Markdown 保持普通 Git 文本。Library/Temp/Logs 不提交。已有文件匹配 LFS 规则但仍为普通 Git blob 时，仅对该文件 `git add --renormalize <路径>`，不为此重写历史。
 
 ```sh
+# 首次 clone 前安装 Git LFS；已有 checkout 在拉取后执行
 git lfs install --local
-git fetch origin
-git switch dev/asset-mechanism-design
 git lfs pull
 git lfs ls-files
 git lfs fsck
 ```
 
-首次 clone 可直接 `git clone --branch dev/asset-mechanism-design <仓库地址>`，然后 `git lfs pull`。只想拉运行时模型时可用 `git lfs pull --include='Assets/UnsoundedSea/Art/Models/*.glb'`，高模不必进入每个人的 Unity 工作集。
+仅需运行时模型时可用 `git lfs pull --include='Assets/UnsoundedSea/Art/Models/*.glb'`；使用 `GIT_LFS_SKIP_SMUDGE=1 git clone <仓库地址>` 可避免 clone 时先下载全部母版。协作分支按当前任务选择，不把示例分支写死到流程。
 
-提交时按阶段保留包配置、母版、Unity 低模接入、文档验收四个边界。先检查 `git check-attr filter -- <模型路径>` 返回 lfs，再暂存模型与对应 `.meta`。`git show :<模型路径>` 应显示 LFS pointer 的 oid/size，而不是二进制。
+按“工具/包配置 → 制作母版 → 低模与 Unity 接入 → 文档与验收”分阶段 commit；已有环境不产生空提交。每阶段暂存明确路径，检查 `git check-attr filter -- <模型>` 为 lfs、`git show :<模型>` 为 pointer，并运行 `git lfs fsck`。正常 `git push -u origin HEAD` 通过 pre-push hook 上传 LFS 对象。
 
-```sh
-git lfs fsck
-git push -u origin dev/asset-mechanism-design
-```
+推送后，在独立临时 clone 中执行远端 LFS fetch/pull，比对模型 SHA 和 manifest；只检查当前 checkout 的 pointer 不足以证明远端可下载。
 
-正常 push 的 pre-push hook 同步 LFS 对象。验证应包含一次独立临时 clone 的远端 LFS fetch，并对四份 GLB 的 SHA-256 与 manifest 比对，而不只检查本地指针。
+## 当前样例与已知缺口
+
+2026-10-16：MCP 探索 → Rodin GLB 下载/Agent 上传 → Agent 参考重建 → 同聊天减面 → Unity CLI 导入 → LFS 同步已跑通。[Agent 聊天](https://hyper3d.ai/workspace/agent?project=5d2ea8e0-e8dc-4bb9-8437-3309d6f1c6ab&thread=3fab207e-1239-4613-9d04-68e5799e8edf&lang=zh)。
+
+| 当前资产 | 母版 → LOD0 三角面 | 已验证 | 未完成 |
+| --- | --- | --- | --- |
+| Prayer | 500,000 → 60,000 | Unity 材质、1.8 m、脚底、Prefab 引用、正面 Play 画面 | 袖内刀/铃分件、动画、全视角与目标设备验收 |
+| Echo | 800,000 → 90,000 | Unity 材质、2.1 m、脚底、Prefab 引用、正面 Play 画面 | 更明显的空壳塌陷、独立铜铃、动画、全视角与目标设备验收 |
+
+两者各 1 网格/材质、3 张 4K 纹理，无蒙皮/动画；尚无 LOD1/2 或 LODGroup。内嵌纹理为 ARGB32、13 级 mip，两角色完整纹理链理论约 512 MiB（非 Profiler 实测），尚未 GPU 压缩。后续需提取/重映射为可配置 TextureImporter 资产，按平台选择压缩与尺寸后复核；普通纹理平台覆写不能直接套用到这些内嵌子资产。
+
+`EnemyDefinition.presentationPrefab` 已绑定，但战斗 UI 不实例化此字段，审阅场景不在构建清单。导入阶段现有 31 项 EditMode 测试通过；四份高低模经独立远端 LFS 下载后 SHA 全部一致（`ffe264e`）。这些结果只覆盖该修订，不代表以后修改自动通过。
+
+![Unity 中的 LOD0 审阅画面](ArtReferences/unity-lod0-review.jpg)
+
+视觉依据：[高模同机位](ArtReferences/unity-high-reference.jpg)、[Prayer 概念](ArtReferences/prayer-concept.jpg)、[Prayer 三视图](ArtReferences/prayer-views.jpg)、[Echo 三视图](ArtReferences/echo-views.jpg)、[Agent 减面交付](ArtReferences/deemos-lod0-proof.jpg)。
+
+听筒与铜铃仍为服务端探索样例，未纳入 Unity/LFS：[听筒](https://hyper3d.ai/workspace/rodin/6bfe629a-c08a-46a7-a802-4fcc2a004711)、[铜铃](https://hyper3d.ai/workspace/rodin/d8f99115-9a17-4963-84a2-9adea98eb29f)。已淘汰角色候选、旧提示词和逐轮错误记录见 Git 历史（整理前 `ffe264e:Docs/ASSET_MECHANICS_DESIGN.md`），不在当前指南重复保留。
