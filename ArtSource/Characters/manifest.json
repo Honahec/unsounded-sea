@@ -1,0 +1,58 @@
+{
+  "assets": [
+    {
+      "file": "Prayer_High.glb",
+      "bytes": 49749660,
+      "sha256": "c27fc24417fd5b763131f3fc3de985af88b1b014691eaf8fcac7746a4c505eba",
+      "triangles": 500000,
+      "vertices": 329906,
+      "meshes": 1,
+      "materials": 1,
+      "images": [
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ]
+      ],
+      "skins": 0,
+      "animations": 0,
+      "role": "high-poly source; not imported into runtime Assets",
+      "source": "https://hyper3d.ai/workspace/rodin/dd31dd39-7e6f-5de7-92e8-52ce3a7f82de"
+    },
+    {
+      "file": "Echo_High.glb",
+      "bytes": 68749880,
+      "sha256": "95cb3678eae2d341f8db1de4b310861d6ac5281bdd6594eae886f784e73b4404",
+      "triangles": 800000,
+      "vertices": 620345,
+      "meshes": 1,
+      "materials": 1,
+      "images": [
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ]
+      ],
+      "skins": 0,
+      "animations": 0,
+      "role": "high-poly source; not imported into runtime Assets",
+      "source": "https://hyper3d.ai/workspace/rodin/53d64d53-96a8-5d2d-9334-9d2ba75473e5"
+    }
+  ]
+}
