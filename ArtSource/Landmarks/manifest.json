@@ -130,8 +130,8 @@
       {
         "location": "漂流货船",
         "prefab": "DriftingCargo",
-        "renderers": 8,
-        "triangles": 35840
+        "renderers": 5,
+        "triangles": 35928
       },
       {
         "location": "无旗接驳艇",
@@ -142,8 +142,8 @@
       {
         "location": "失联救生艇",
         "prefab": "LostLifeboat",
-        "renderers": 6,
-        "triangles": 18060
+        "renderers": 2,
+        "triangles": 18012
       },
       {
         "location": "旧无线电船",
@@ -160,8 +160,8 @@
       {
         "location": "断桅渔船",
         "prefab": "BrokenMastFishingBoat",
-        "renderers": 10,
-        "triangles": 81856
+        "renderers": 6,
+        "triangles": 81952
       },
       {
         "location": "封舱驳船",
@@ -190,14 +190,14 @@
       {
         "location": "潮流观测点",
         "prefab": "CurrentObservation",
-        "renderers": 35,
-        "triangles": 11240
+        "renderers": 15,
+        "triangles": 11104
       },
       {
         "location": "远海浮标",
         "prefab": "OffshoreBuoy",
-        "renderers": 8,
-        "triangles": 5404
+        "renderers": 3,
+        "triangles": 5344
       },
       {
         "location": "无声灯船",
@@ -207,13 +207,20 @@
       }
     ],
     "shader": "UnsoundedSea/Voyage Landmark",
-    "scope": "Play Mode static appearance, waterline, sampled floating motion and scene transitions at 1600x900. Target-device performance not measured."
-  },
-  "lfsVerification": {
-    "date": "2026-10-17",
-    "assetCommit": "b3f9a6aa6551d01dfe9a7f201b717d58352e8aa6",
-    "method": "independent clone fetch from origin, selective LFS fetch, SHA-256 of every downloaded object compared with local files",
-    "verifiedFiles": 122,
-    "allMatch": true
+    "scope": "Play Mode static appearance, waterline, sampled floating motion and scene transitions at 1600x900. Target-device performance not measured.",
+    "debris_revision": {
+      "layout": "asymmetric local clusters; no debris at lifeboat or offshore buoy",
+      "types": [
+        "splintered hull plank",
+        "short broken spar",
+        "broken hatch panel"
+      ],
+      "counts": {
+        "DriftingCargo": 3,
+        "BrokenMastFishingBoat": 4,
+        "CurrentObservation": 9
+      },
+      "wave_motion_pause_reduced_motion_verified": true
+    }
   }
 }
