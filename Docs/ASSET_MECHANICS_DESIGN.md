@@ -1,8 +1,8 @@
 # 未测之海机制与素材设计
 
-THE UNSOUNDED SEA　版本 0.3　2026 年 10 月 16 日
+THE UNSOUNDED SEA　版本 0.4　2026 年 10 月 16 日
 
-本文件面向策划、美术与 Unity 实现人员，定义首个可玩航程所需内容的交互规则、信息边界和素材职责。先用小规模内容证明调查能够改变出牌选择，同时把一个灯塔场景打磨到可代表成品的视觉品质，再扩充卡池与海域。每个 Part 保持一至两个样例；重点形体允许一个高精度迭代，与原样例形成对照。
+本文件面向策划、美术与 Unity 实现人员，定义首个可玩航程所需内容的交互规则、信息边界和素材职责。先用小规模内容证明调查能够改变出牌选择，同时把一个灯塔场景打磨到可代表成品的视觉品质，再扩充卡池与海域。每个 Part 保持一至两个样例，同一设计按版本修订。模型制作步骤与当前交付状态统一见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
 
 ## 设计结论
 
@@ -14,8 +14,8 @@ THE UNSOUNDED SEA　版本 0.3　2026 年 10 月 16 日
 | ------------- | ---------------------- | ------------------------------ |
 | 01 共用规则   | 信息分层与结算契约     | 全部内容共用的字段和反馈       |
 | 02 卡牌       | 临时照明、直觉防护     | 两张牌的构图与规则；共用牌框   |
-| 03 敌人       | 持刀走私者、蒙面祷告者 | 两套行为；祷告者初版与高精度版各一个 |
-| 04 Boss       | 灯塔下的回声           | 一个目标战；初版与高精度形体各一个 |
+| 03 敌人       | 持刀走私者、蒙面祷告者 | 两套行为；一个祷告者设计候选 |
+| 04 Boss       | 灯塔下的回声           | 一个目标战；一个潜水服设计候选 |
 | 05 道具       | 定向听筒、显影粉       | 两条调查路径；一个听筒模型样例 |
 | 06 场景与媒介 | 灯塔底层、铜铃组件     | 一个空间方案；一个铜铃模型样例 |
 | 07 事件       | 第十三名船员、重复求救 | 两个分支事件及叙事插图需求     |
@@ -23,7 +23,7 @@ THE UNSOUNDED SEA　版本 0.3　2026 年 10 月 16 日
 
 ## 版本约定
 
-“现有”指项目框架及样例资产已经提供的能力；“提案”指本文件新增、尚需实现与试玩的规则。本文数值均用于首轮验证，不代表最终平衡。当前交付是设计与概念模型样例，角色与 Boss 的减面样例现已通过 Unity 材质和尺寸检查；动画拓扑、骨骼和目标设备性能仍待验收。详见 [模型导入与 LFS 流程](MODEL_IMPORT_WORKFLOW.md)。
+“现有”指项目框架及样例资产已经提供的能力；“提案”指本文件新增、尚需实现与试玩的规则。本文数值均用于首轮验证，不代表最终平衡。本文件定义待实现的细化方案；实际功能与验收边界见 [框架指南](FRAMEWORK.md) 和 [验证记录](FRAMEWORK_VALIDATION.md)，不能把提案当作已实现。
 
 起点为 60 生命、30 理智、每回合 3 行动与抽 5 张；沿用 10 张起始牌组。原型保持 5–6 节点、10–15 分钟目标，以一个完整灯塔战斗空间承载内容验证。
 
@@ -49,15 +49,9 @@ Boss 的主识别点是偏大的铆接铜盔、窄而空的观察窗、沉重肩
 
 固定镜头下先确定主光、轮廓光与环境填充的关系，再增加局部雾、水面反射和漂浮微粒。高光不能烧白头盔，雾不能抹掉封线，反射不能抢过目标文字。灯塔灯光的慢速扫动、服装的微弱呼吸式起伏和水面细波作为环境节奏，不改变实际意图，也不增加操作干扰。
 
-### 高质量生成与成品资产的关系
+### 制作要求
 
-重点角色生成档位提升到 `Gen-2.5-High`。本轮 Boss 请求 50,000 个 Quad 多边形、祷告者请求 40,000 个 Quad 多边形，分别替代旧版 18,000 与 10,000 的目标；这些是生成参数，不是对实际面数、材质质量或动画拓扑的保证。铜铃与听筒暂保留各一个样例，将新增迭代集中在最显眼的角色上。
-
-生成时分开角色与环境，采用可辨识材质的中性照明，保留完整正侧背形体。成品镜头的戏剧光在 Unity 内完成，不烘焙进颜色贴图。若重点形体仍不成立，先调整轮廓、比例和参考，再提高面数；若需要雕刻母版，可另用 Raw 高密度输出制作烘焙源，本轮不追加母版生成。
-
-后续重点资产优先通过 Deemos Agent 的“专业精修”工作流执行：“导入真实模型 → 概念造型与材质分区 → 一致的正侧背参考 → 定向编辑或参考重建 → 材质重建 → Unity 镜头验收”。概念参考中明确空腔、布料软硬与构件连接；多视图保持同一比例与附件位置。文字生成作为探索记录，正式造型由选定参考约束。每次必须标明是原网格编辑还是参考重建，不把新生成的模型称为原模型局部修改。
-
-4K 贴图是后续美术交付目标；当前 MCP 调用没有贴图分辨率参数，不能宣称已经生成 4K 材质。最终需检查实际输出分辨率、UV 利用率与纹理细节，必要时重新绘制或烘焙，单纯放大图片不算达到质量要求。
+角色与环境分开，概念参考锁定轮廓、材质和正侧背一致性；刀、铃、绳索等交互部件需独立活动。母版、运行时网格与贴图分别验收，4K 或高面数不能替代造型质量。选用 MCP 或 Deemos Agent、减面及归档步骤只在 [模型全流程](MODEL_IMPORT_WORKFLOW.md) 维护。
 
 ## Part 01 共用机制与结算契约
 
@@ -146,7 +140,7 @@ Boss 的主识别点是偏大的铆接铜盔、窄而空的观察窗、沉重肩
 
 模型采用不对称蜡布斗篷、被盐水浸硬的下摆、无装饰布面罩和宽袖。刀与小铜铃应为独立附件，未调查时藏于袖中；模型默认姿态不得露出答案。轮廓重点是微低的头、宽袖与细瘦脚踝，避免大量触手或夸张尖牙。
 
-动画拆为共同准备、揭示刀具、揭示铃具、挥刃、呼唤、被打断和退场。共同准备循环长度、音量与节奏一致。祷告者保留初版与高精度版各一个形体样例；手部、附件分离、绑骨与隐藏切换留给后续生产验收。
+动画拆为共同准备、揭示刀具、揭示铃具、挥刃、呼唤、被打断和退场。共同准备循环长度、音量与节奏一致。祷告者只维护一个设计候选；手部、附件分离、绑骨与隐藏切换按这些动作验收。
 
 ## Part 04 Boss 目标与威胁节奏
 
@@ -174,8 +168,6 @@ Boss 的主识别点是偏大的铆接铜盔、窄而空的观察窗、沉重肩
 ### 终局表现
 
 封门完成后先锁定胜利，再停止待结算攻击；潜水服失去支撑而缓慢塌落，水面收束，墙后余响保留。文字为“你封住了它进入这里的途径。至少现在如此。”奖励是档案、工具选择或补给，不出现弑神徽章。
-
-## Part 04 Boss 媒介调查与替代解
 
 ### 三只铃的作用
 
@@ -346,7 +338,7 @@ EventDefinition 提案包含 id、entryCondition、description、choices 与 out
 5. 卡牌插画、三维场景、图标、字体与声音共享同一时代感；完整画面没有占位图、默认按钮样式或破坏构图的调试文字。
 6. 选定目标桌面设备后，以 60 fps 和约 16.7 ms 总帧时间作为优化目标；分别记录 CPU、GPU、显存与卡顿，包含水面、雾、动画和五张手牌同时显示的情况。此项是待测试目标，不是现有性能结论。
 
-每阶段独立 commit，保留固定种子、操作序列与版本号。规则修改应提高 BattleReplay 版本，新增静态数据加入内容指纹；表现资产与规则状态分别维护。所有 Unity 导入、Prefab 组装与编辑器验证使用 Unity CLI。
+规则修改与回放兼容性遵循 [框架指南](FRAMEWORK.md)；制作及提交约定遵循 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
 
 ### 与当前框架的衔接
 
@@ -368,206 +360,6 @@ EventDefinition 提案包含 id、entryCondition、description、choices 与 out
 
 每次遭遇记录调查前计划、调查后计划、实际承伤、工具使用次数和决策耗时。重点看玩家是否因新事实改变出牌，以及是否愿意选择不调查路线；若调查总是必选，先降低工具收益或增加公开信息，不增加假线索。
 
-## 示例模型与制作交接
+## 相关文档
 
-### 每类一至两个样例
-
-3D 样例覆盖敌人、Boss、道具和场景媒介四个部分。敌人与 Boss 各保留一个初版及一个高精度迭代，听筒与铜铃各保留一个样例；卡牌、事件、界面与音效按前文机制进行二维或声音制作。生成结果用于审阅轮廓与材质方向，不等同于可直接发布的 Unity 资产。
-
-| Part     | 样例与角色   | 本轮生成边界           |
-| -------- | ------------ | ---------------------- |
-| 敌人     | 蒙面祷告者   | 初版及 High 高精度形体，各一个 |
-| Boss     | 灯塔下的回声 | 初版及 High 独立潜水服，各一个 |
-| 道具     | 定向听筒     | 一个静态手持工具       |
-| 场景媒介 | 铜铃         | 一个可复用的基础铃体   |
-
-### 共同制作语言
-
-低饱和海雾灰、旧木褐、盐白和氧化铜；材质粗糙度承载年代感，暖光用于引导视线。避免全屏触手、紫色魔法阵、夸张血浆、明亮霓虹或写实疾病表征。主形体从固定战斗镜头可识别，细节不得成为唯一情报。
-
-初版 Boss 样例提示词包含潜水服与三铃，结果可能合并部件，仅保留为探索版本。高精度迭代只生成潜水服，铜铃使用独立组件；正式接入仍需检查实际分件，不能把隐藏连接固定在某个网格上。
-
-### 交接检查
-
-生成记录保存模型 ID、原始提示词、请求参数与结果页。美术验收检查正侧背轮廓、缺面、穿插、UV、材质槽、贴图通道与可分件性；敌人还需检查关节变形和持物遮挡。生成完成不代表这些检查已通过。
-
-Unity 接入时使用 1 单位约 1 米，校正朝向与根节点，按实际三角面统计预算；灯光和材质在 URP 内重建并验证。声音、粒子和动画只消费允许公开的表现事件，不直接读取隐藏行动对象。
-
-### 依据与追溯
-
-[概念设计](DESIGN_DOC_v0_1.md)：核心体验、18 张原卡池、四工具、海域、事件、Boss 与 MVP 边界。
-
-[基础框架](FRAMEWORK.md)：现有规则层、资产字段、工具次数、回放约束与未实现内容。[框架验证记录](FRAMEWORK_VALIDATION.md)：既有框架测试边界；本文不将这些结果作为新增机制通过测试的证据。
-
-本轮同时对照 CardDefinition、EnemyDefinition、EncounterDefinition 与 smuggler、prayer、echo、seal 样例资产。机制以本文为后续实现提案，不直接改写当前运行时配置。
-
-### High 高精度迭代结果
-
-两项均于 2026 年 10 月 16 日完成生成。共用参数为 `tier=Gen-2.5-High`、`mesh_mode=Quad`、`geometry_file_format=glb`、`texture_delight=true`。本次调整同时提高生成档位和目标面数，并重写形体与材质要求，因此属于综合迭代，不能把视觉差异全部归因于面数。
-
-| 样例 | 目标多边形数 | generation_id | 结果 |
-| --- | ---: | --- | --- |
-| 灯塔下的回声 高精度版 | 50000 | `9f381f12-e876-42bd-a373-30db407b66ce` | [模型结果页](https://hyper3d.ai/workspace/rodin/9f381f12-e876-42bd-a373-30db407b66ce) |
-| 蒙面祷告者 高精度版 | 40000 | `2a00c905-bf7c-4783-bf34-727ff75b2a4c` | [模型结果页](https://hyper3d.ai/workspace/rodin/2a00c905-bf7c-4783-bf34-727ff75b2a4c) |
-
-高精度版仍需完成分件、重拓扑检查、绑骨、材质校验与 Unity 实机表现验收；生成完成仅确认服务完成输出。两份原始 PBR GLB 已下载并上传至 Deemos Agent，尚未导入 Unity，详见下方互通记录。
-
-#### 本轮预览审阅
-
-已在 Hyper3D 结果页查看两项正面预览，并切换 Boss 的 PBR 预览。该检查只覆盖网页当前视角，尚未覆盖背面、网格拓扑或 Unity 内实际材质，不能作为完整技术验收。
-
-| 样例 | 已看到的表现 | 未通过项与下一步 |
-| --- | --- | --- |
-| Boss 高精度版 | 肩部叠层、躯干连接件与金属外形可读；整体比初版增加结构层次 | 形体仍偏装甲，衣料体积饱满，缺少空壳塌陷感；先用概念参考明确软布与空腔，修正比例后再生产 |
-| 祷告者高精度版 | 兜帽、衣褶、腰带和袖口层次可辨 | 自动增加了长杆武器且双手外露，直接违背隐藏持物机制；本版本不进入生产，后续参考必须锁定空手藏袖姿态并去除长杆 |
-
-两者均保留为高质量参数下的探索样例，不标记为成品美术通过。后续精修替换当前设计候选，原文件作为历史来源保留，不扩展为第三套独立角色设计；优先解决造型约束与参考一致性，再检查真实材质、灯光和动画中的美感。
-
-### Deemos Agent 工作流与资产互通
-
-操作依据为项目根目录的 [DEEMOS_AGENT.md](../DEEMOS_AGENT.md)。使用已登录网页中的“专业精修”能力，继续同一项目与聊天，避免重新创建任务丢失上下文。
-
-[未测之海 美术精修 Agent 聊天](https://hyper3d.ai/workspace/agent?project=5d2ea8e0-e8dc-4bb9-8437-3309d6f1c6ab&thread=3fab207e-1239-4613-9d04-68e5799e8edf&lang=zh)
-
-本次实测中，Agent 使用两个 Rodin generation_id 查询资产时返回 `400 Task not found`，当前项目资源选择器也没有这些模型。该结果说明这条直接引用路径在本会话不可用；不能据此确定平台所有资产均不互通，也不能把 Agent 对租户关系的解释视为已验证根因。
-
-采用的互通路径为：Rodin 结果下载 PBR GLB → 本地验证 GLB 与内嵌贴图 → Agent 的“从设备上传” → 等待附件上传完成 → 随精修指令提交 → 检查聊天中的 Preview 按钮与项目模型计数。两份文件提交后，资源区已显示 2 个模型。
-
-| 原始资产 | 本地暂存文件 | 实测三角面 | 材质与贴图 |
-| --- | --- | ---: | --- |
-| Boss High | `Logs/AssetDesign/import/echo-high-original.glb` | 97,328 | 1 个材质，3 张内嵌 2048 × 2048 图片 |
-| 祷告者 High | `Logs/AssetDesign/import/prayer-high-original.glb` | 76,276 | 1 个材质，3 张内嵌 2048 × 2048 图片 |
-
-以上数据来自本地 GLB JSON、索引计数与内嵌图片尺寸检查；不是对动画、拓扑或引擎兼容性的验收。文件、校验摘要位于被 Git 忽略的暂存目录，持久来源由本文 Rodin 结果页和 Agent 聊天追溯。两份 GLB 的 SHA-256 分别为：
-
-- Boss：`8b95db3313cb6cf7a4ddfb86d521794e94055b124dd1b55b1d1139dfa3cda02b`。
-- 祷告者：`629000248735e7a2e60a443e6703966d716792d01b7cc73da7fa51ff38401d0c`。
-
-Agent 已提供第一张祷告者概念参考，素材 ID 为 `dbbef6bf-295c-42e7-9447-6182997d196b`。预览中不再有长杆，双手藏入衣袖，蜡布与盐蚀层次更接近目标；但口鼻仍外露，帽顶偏尖，已要求追加布面罩和圆钝帽型。该图是独立概念参考，不能冒充原始网格编辑结果。
-
-两份源文件上传后，Agent 已成功读取并渲染各自的正侧背视图，确认文件中转路径有效。本轮先处理祷告者，再处理 Boss，每类保留一个精修候选。实际操作采用“检查原模型 → 修正概念图 → 参考图重建”，不是对原网格直接做局部修改。
-
-#### 祷告者参考重建候选
-
-[Agent 生成模型结果页](https://hyper3d.ai/workspace/rodin/dd31dd39-7e6f-5de7-92e8-52ce3a7f82de)。模型已下载到 `Logs/AssetDesign/agent/prayer-refined.glb`，属于高模母版候选，未导入 Unity。
-
-| 本地实测项 | 结果 |
-| --- | --- |
-| 三角面 / 顶点 | 500,000 / 329,906 |
-| 网格 / 材质 | 1 / 1 |
-| 内嵌图片 | 3 张 4096 × 4096 |
-| 骨骼蒙皮 / 动画 | 0 / 0 |
-| 文件大小 | 49,749,660 字节 |
-| SHA-256 | `c27fc24417fd5b763131f3fc3de985af88b1b014691eaf8fcac7746a4c505eba` |
-
-修正后的概念图：
-
-![祷告者修正概念图](ArtReferences/prayer-concept.jpg)
-
-实际三维模型的正侧背渲染：
-
-![祷告者三维模型三视图](ArtReferences/prayer-views.jpg)
-
-视觉检查：正侧背视图均无长杆和外露双手；口鼻被遮挡，帽顶已变圆，宽袖和衣摆的大形较原版更一致。渲染中布料反光偏亮，需校正粗糙度并在中性灯光下复核；袖口的内部空间、可切换持物安装位置和动画变形尚未验证。50 万三角面明显超出运行时预算，后续需重拓扑、烘焙、LOD 与绑定；4K 贴图和高面数本身不代表成品美术验收通过。
-
-#### Boss 参考重建候选
-
-[Agent 生成模型结果页](https://hyper3d.ai/workspace/rodin/53d64d53-96a8-5d2d-9334-9d2ba75473e5)。模型已下载到 `Logs/AssetDesign/agent/echo-refined.glb`，未导入 Unity。
-
-| 本地实测项 | 结果 |
-| --- | --- |
-| 三角面 / 顶点 | 800,000 / 620,345 |
-| 网格 / 材质 | 1 / 1 |
-| 内嵌图片 | 3 张 4096 × 4096 |
-| 骨骼蒙皮 / 动画 | 0 / 0 |
-| 文件大小 | 68,749,880 字节 |
-| SHA-256 | `95cb3678eae2d341f8db1de4b310861d6ac5281bdd6594eae886f784e73b4404` |
-
-![Boss 三维模型三视图](ArtReferences/echo-views.jpg)
-
-视觉检查：金属头盔、布制躯干与皮革绑带的分区比原版清晰；观察窗内未见人脸，无场景或铜铃粘连。胸腹增加了软布褶皱，但肩、腿、手套的体积仍像由人体支撑，“空壳塌陷”要求只部分满足。后续需加强胸腹空腔、肩线下落和不对称垂坠；同时进行运行时网格、材质与动画制作。当前为高模设计候选，不标记为生产可用 Boss。
-
-本轮 Agent 已结束并交付两份候选。其最终文字总结将新模型贴图写成 2K，与下载文件中三张 4096 × 4096 图片的解析结果不符，本文以本地文件实测为准；也不采信其未经验证的原模型绑定状态或“完全满足造型”的概括。三视图支持外观检查，不能替代拓扑、绑定和 Unity 验收。预览图随本 Markdown 纳入版本管理，下载暂存位于 `Logs/AssetDesign/agent/`；后续高模母版已归档到 `ArtSource/Characters/` 并通过 LFS 同步，低模和 Unity 验证见下节。
-
-<details>
-<summary>灯塔下的回声 高精度版的生成提示词</summary>
-
-```text
-Single full-body empty antique diving suit, signature boss of The Unsounded Sea, refined maritime gothic painterly realism. Oversized riveted bronze helmet, narrow black EMPTY viewing ports, heavy shoulder collar, sunken torso, weighted boots. Believable flanges, fasteners, short chest hose, reinforced seams, leather straps. Exquisite materials: polished brass edges, dark oxidized bronze planes, sparse salt in crevices; charcoal teal waxed canvas, large weighted folds, fine seam wrinkles, wet lower hem. Clear large and medium shapes before microdetail, no uniform noisy grunge. Museum-quality sculptural finish, complete front side and back, neutral relaxed pose, arms clear of torso. Isolated suit, neutral background, soft material lighting without baked dramatic shadows. No visible person, no face, no bells, no chains, no scenery, no water plane, no base, no lettering, no tentacles, no gore, no magic glow. Physical weight, elegant unsettling silhouette.
-```
-
-</details>
-
-<details>
-<summary>蒙面祷告者 高精度版的生成提示词</summary>
-
-```text
-Single full-body masked coastal supplicant for The Unsounded Sea, refined maritime gothic painterly realism. Stooped wedge silhouette, lowered hooded head, broad long sleeves, heavy near-vertical coat hem, narrow leather boots. Plain cloth face covering. Both hands and all held objects FULLY CONCEALED in opaque sleeves: no blade, no bell. Exquisite charcoal blue-green waxed canvas: weighted shoulder folds, gathered elbow folds, overlapping cuffs, reinforced stitching, one repair patch, small tarnished brass fasteners, salt-stiff hem. Wet cloth valleys, dry matte fold ridges, sparse salt deposits. Beautiful tactile PBR materials, museum-quality sculptural clarity, large and medium shapes readable before fine detail, no noisy grunge. Neutral standing pose, sleeves clear of torso, no fused limbs, complete front side and back. Isolated character, neutral background and soft material lighting. No base, scenery, text, exposed weapon, tentacles, teeth, gore, glowing symbols. Elegant and unsettling.
-```
-
-</details>
-
-### Unity 减面接入更新（2026-10-16）
-
-以两份 Agent 高模为来源继续减面，实测 Prayer 60,000 / Echo 90,000 三角面，每份 1 材质及 3 张 4K 纹理，无骨骼动画。两份运行时候选已导入 Unity、创建表现 Prefab 并绑定 EnemyDefinition，在独立审阅场景通过 Play 模式画面检查。此前章节中的“未导入”属于对应阶段的历史记录。
-
-高模存 `ArtSource/Characters/`，低模存 `Assets/UnsoundedSea/Art/Models/`，均由 Git LFS 同步。当前没有 LODGroup、动画和目标设备性能验收；贴图仍未压缩，战斗 UI 尚未实例化表现模型。完整实跑步骤、限制与截图见 [模型导入与 LFS 流程](MODEL_IMPORT_WORKFLOW.md)。
-
-### Hyper3D 初版结果页
-
-[蒙面祷告者](https://hyper3d.ai/workspace/rodin/99fe59bf-fa5d-4589-a80e-f74969b9d66a)
-
-[灯塔下的回声](https://hyper3d.ai/workspace/rodin/3260f26a-afc0-44af-afb6-866d641e77ea)
-
-[定向听筒](https://hyper3d.ai/workspace/rodin/6bfe629a-c08a-46a7-a802-4fcc2a004711)
-
-[铜铃](https://hyper3d.ai/workspace/rodin/d8f99115-9a17-4963-84a2-9adea98eb29f)
-
-### 初版生成记录
-
-四项均于 2026 年 10 月 16 日通过 Hyper3D MCP 完成生成；只核实服务返回的完成状态，尚未做模型视觉与 Unity 导入验收。未下载模型文件。
-
-| 样例 | generation_id | Quad 目标多边形数 |
-| --- | --- | ---: |
-| 蒙面祷告者 | `99fe59bf-fa5d-4589-a80e-f74969b9d66a` | 10000 |
-| 灯塔下的回声 | `3260f26a-afc0-44af-afb6-866d641e77ea` | 18000 |
-| 定向听筒 | `6bfe629a-c08a-46a7-a802-4fcc2a004711` | 2500 |
-| 铜铃 | `d8f99115-9a17-4963-84a2-9adea98eb29f` | 1500 |
-
-统一请求参数为 `geometry_file_format=glb`、`mesh_mode=Quad`、`tier=Gen-2.5-Medium`、`texture_delight=true`。目标面数为请求参数，实际拓扑、分件和面数需单独验收。
-
-<details>
-<summary>蒙面祷告者的原始生成提示词</summary>
-
-```text
-A single masked human supplicant character for The Unsounded Sea, a restrained nautical cosmic horror card game. Full body neutral standing pose, head slightly lowered, asymmetrical dark grey waxed raincoat with broad long sleeves fully hiding both hands and all held objects, plain cloth face covering, salt-stiff wet hem, narrow boots, human proportions, no visible blade or bell, no tentacles, no gore, no magic glow. Readable silhouette for fixed oblique battle camera, muted oxidized brass fasteners, painterly semi realistic PBR. Isolated character only, neutral background, no environment, no base, no text.
-```
-
-</details>
-
-<details>
-<summary>灯塔下的回声的原始生成提示词</summary>
-
-```text
-Stylized semi-realistic 3D game boss asset for a Lovecraftian investigation card roguelike: an antique brass diving suit standing in a flooded lighthouse crypt, no visible human body, three tarnished copper bells hanging from wet stone chains, algae and salt corrosion, restrained silhouette, readable at fixed isometric battle camera, dark teal and oxidized brass palette, subtle uncanny asymmetry, no tentacles, no gore, game-ready single character prop, neutral studio background
-```
-
-</details>
-
-<details>
-<summary>定向听筒的原始生成提示词</summary>
-
-```text
-One antique handheld directional acoustic listening tool for a maritime investigation game. A compact curved tarnished brass acoustic horn attached to a short dark wooden handle, small cloth wrapped listening tube, simple mechanical construction with clearly readable silhouette. Desaturated patina, salt wear, believable mundane nautical instrument, painterly semi realistic PBR. Single isolated prop, no character, no room, no base, no lettering, no digital screen, no neon, no magic. Neutral studio background.
-```
-
-</details>
-
-<details>
-<summary>铜铃的原始生成提示词</summary>
-
-```text
-One small antique lighthouse bronze bell prop, isolated, readable flared bell silhouette, simple thick upper suspension loop, a clapper visible inside, tarnished bronze with salt white deposits and subtle grey green corrosion. Semi realistic painterly PBR for a restrained maritime cosmic horror game, approximately 35 cm tall. Single bell only, no wall, no rope, no chain, no stand, no base, no character, no symbols, no text, no supernatural glow. Neutral studio background. Balanced intact silhouette suitable for three duplicated scene instances.
-```
-
-</details>
+[概念设计](DESIGN_DOC_v0_1.md) 保存世界观、完整 18 卡草案和 MVP 范围；本文件维护八类内容的机制与美术要求。生成方法、模型规格、来源和验收结果集中在 [模型全流程](MODEL_IMPORT_WORKFLOW.md) 及其链接的 manifest，历史尝试通过 Git 追溯。

@@ -34,11 +34,8 @@
 
 本地画面证据：`Logs/Framework/investigation.png`、`Logs/Framework/seal-victory.png`。
 
-## 修复与边界
+## 验证边界
 
-- 初次 CLI 重编译请求连接中断；重新检查确认 Editor 可达、非 Safe Mode、无编译错误，并通过后续测试和运行验证。
-- 场景创建后资源引用丢失：改为切换场景后从 AssetDatabase 重新解析持久化引用，补充保存场景引用回归测试。
-- 旧式系统字体产生加载警告：改用 TextCore SDF FontAsset，最终运行无字体警告。正式发行需绑定已授权的项目中文字体。
-- macOS 高 DPI 下的 CLI 原始指针坐标模拟不稳定，改用 UI Toolkit 指针事件检查按钮链路。
-- Editor 自动将 QualitySettings 序列化版本升级并补充默认 meshLodThreshold；无主动画质调优。
-- 尚未执行独立 Player 打包、目标平台设备测试或完整航程试玩；本次结论限于规则测试与编辑器内验证场。
+已验证规则与编辑器内沙盒；未执行独立 Player 打包、目标设备测试或完整航程试玩。UI 检查使用 Toolkit 指针事件，未覆盖所有设备输入；正式发行仍需提供已授权中文字体。既有修复过程保留在 Git 历史。
+
+重跑命令见 [框架指南](FRAMEWORK.md)；模型审阅属于独立范围，见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。新规则提案不能引用本文作为已通过证明。
