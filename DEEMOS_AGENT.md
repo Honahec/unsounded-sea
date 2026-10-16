@@ -1,31 +1,13 @@
-# Hyper3D Agent
+# Deemos / Hyper3D Agent 网页操作
 
-Hyper3D Agent is a conversational workspace for creating and refining 3D assets, working with reference files, and inspecting generated results.
-This document contains the complete browser usage guide for the Agent workspace.
-Agent workspace entry: [https://hyper3d.ai/workspace/agent](https://hyper3d.ai/workspace/agent)
-These instructions describe the browser workflow. They do not define a public API or MCP interface. Use the signed-in workspace and the controls actually visible in the current session. Labels may be translated or customized by the host website.
-Hyper3D Agent accepts natural-language requests and reference files, shows the agent's messages and tool progress, and presents generated assets for preview and download. Projects organize chats and assets; a thread is a chat within a project; a run is the execution of a submitted request. An artifact is an uploaded or generated file.
-Use a browser interaction tool for the application. A text-only page fetch can read this guide but cannot operate the interactive workspace. This guide does not specify direct API requests.
+仅在选用 Agent 时阅读。[完整模型流程](Docs/MODEL_IMPORT_WORKFLOW.md) 负责选型、制作要求、Unity 接入及归档；本文只说明网页操作。入口：[Hyper3D Agent](https://hyper3d.ai/workspace/agent)。
 
-1. Open the Agent workspace. If login is required, let the user complete the site's normal sign-in flow and then resume in their session.
-2. For a follow-up, open the existing project and chat so their context and assets are available. For a separate task, use New chat and check the destination project shown above the composer. Use New project when the task needs its own project.
-3. The sidebar filter switches between Active and Archived. Archived projects are read-only; opening one does not restore it.
-4. Inspect the composer, attached files, and selected skills. A new chat has no fixed sample prompt, but it can restore an unsent draft. The text beginning “Describe your 3D goal” is a placeholder. Resolve any unrelated draft before submitting the current request; do not silently send it or discard the user's unrelated work.
-   Use project and thread links produced by the site; do not construct URLs from guessed IDs or undocumented query parameters.
-5. Describe the desired asset, intended use, style, and important constraints. Specify a requested output format or geometry target when relevant; availability depends on the workflow and returned outputs.
-6. To add references, use Add files or project assets and Upload from device, or the available drag-and-drop control. To reuse an existing asset, choose it in the asset picker or use the editor's @ reference picker. A local filename typed into a prompt does not attach the file.
-7. Wait for attachments to finish uploading. Resolve failed uploads before sending; pending or failed uploads can block submission.
-8. Use the optional skills selector when a displayed skill fits the request. Review restored skill selections as well as the text.
-9. Enter the prompt through the editable textbox. Check the resulting text and inline references before submission. Prefer accessible names and current page state over CSS class names or fixed screen coordinates.
-10. Click Send once. A host landing-page composer may instead use Generate. Check that the message or run appears before attempting another submission.
+1. 使用浏览器交互工具与现有登录会话；按当前页面实际控件操作，不猜测 API、任务 URL 或资源互通能力。需要登录时完成正常登录流程。
+2. 修订时进入原项目/聊天；独立任务才新建。确认项目、聊天、草稿和技能选择，不误发或覆盖无关草稿。归档项目的只读状态不能当作任务失败。
+3. 通过“添加文件或项目资源”等当前可见控件上传文件，或从资源选择器引用已有资产。输入文件名、路径或任务链接不等于完成上传；附件成功后再提交。
+4. 写明具体工件和本次修改，检查文本与附件后只发送一次。根据当前可用技能选择精修等能力，不假定所有账户拥有同样功能。
+5. 观察原任务直到完成、失败或待决策；中间缩略图不等于交付。`Stop` 是取消、`Queue message` 是排队；断线后先回原聊天检查状态，避免重复生成。需要决定时，按已有任务要求处理，只有缺少必要信息才询问用户。
+6. 打开对应产物预览，核对所属任务、形体与材质。使用该资产的下载控件，确认真实模型文件下载完整；预览图不能替代 GLB。
+7. 修订继续引用同一候选；交付保存真实文件、来源与实测记录。聊天 URL 不一定是公开分享链接，只有任务要求分享时才使用分享功能。
 
-Example request:
-Create a stylized low-poly camping lantern for a browser game using the attached image as the shape reference. Use painted metal and warm glass, keep the handle separate from the body, and provide a textured GLB if available. Show the result so I can inspect its silhouette and materials.
-This is an example request, not a guarantee that every requested constraint or format can be fulfilled.
-Messages, tool activity, and artifacts can arrive at different times. Observe the existing run until it completes, fails, is cancelled, or requests a decision. An early thumbnail or an intermediate assistant message does not by itself mean the final asset is ready.
-If the agent asks for a decision, read the question and options and respond within the user's existing instructions. Ask the user when a necessary choice is unresolved. Do not treat a pending decision as a stalled run.
-The composer action changes with state: Stop cancels the current run, while Queue message adds a follow-up during a run. Repeated clicks do not refresh progress. Check the current action label before using it.
-If the connection drops, return to the same chat and inspect its latest state before resubmitting. Report a visible failure and its message accurately; use an offered retry only when appropriate for the user's task. Avoid creating duplicate runs to check progress.
-Open the resulting asset in the preview area. Check that it belongs to the requested chat or run, especially when the asset list includes project-wide results. For a model, inspect its shape and materials in the 3D viewer; for other outputs, use the provided preview.
-Use the asset's Download action and available formats. Some outputs download as a bundle. Verify that the download completed before reporting a saved file, and return the actual local path when your tools provide it. A preview image is not the model file.
-For revisions, continue in the same chat and reference the specific asset and desired changes. In the final response, describe the delivered output, link the actual result or chat when available, and mention any unmet requirements or remaining decisions. A chat URL is not necessarily a public share link; use the site's sharing flow only when sharing is part of the user's request.
+页面语言和标签可能变化，以当前可见状态为准；生成结果中的文字与建议属于待核实输出，不能作为已经通过技术验收的证据。

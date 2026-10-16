@@ -75,6 +75,9 @@ Packages/packages-lock.json linguist-generated
 *.unitypackage          lfs
 
 # 3D models
+*.glb                   lfs
+*.gltf                  lfs
+*.bin                   lfs
 *.3dm                   lfs
 *.3ds                   lfs
 *.blend                 lfs

@@ -1,0 +1,62 @@
+{
+  "assets": [
+    {
+      "name": "Prayer",
+      "file": "Assets/UnsoundedSea/Art/Models/Prayer_LOD0.glb",
+      "sha256": "0fbc583e10eb89c42fd8ca6883082b4b77ef2d7e38a81df1fbb0cd8861d92aaf",
+      "bytes": 44211452,
+      "triangles": 60000,
+      "vertices": 64861,
+      "meshes": 1,
+      "materials": 1,
+      "skins": 0,
+      "animations": 0,
+      "images": [
+        {
+          "sha256": "603a8949ee8116c546f24c8685b7ed81377c18371e30bf33a5f76e7efb215ea5",
+          "bytes": 16376673
+        },
+        {
+          "sha256": "db1e2d6d5e32c8cff982f9055e79c1a8f71ba97d97781ed544b73ea5e76c3334",
+          "bytes": 16315987
+        },
+        {
+          "sha256": "cf29907a53fe322a8cda9a21c8ba085d12b5d7fb52714601308ab313614c0725",
+          "bytes": 9081467
+        }
+      ],
+      "imagesByteIdenticalToHigh": false,
+      "sourceTask": "ea03c865-51a5-5bcb-81e5-4f31759ba4cd",
+      "artifact": "ddd6f11d-28e6-4619-b1d8-adec1e69a073"
+    },
+    {
+      "name": "Echo",
+      "file": "Assets/UnsoundedSea/Art/Models/Echo_LOD0.glb",
+      "sha256": "4a6d417b05dd63457c8b99e59d00f5f9b03d4a5cabbad9a4af2642fc16070972",
+      "bytes": 54899788,
+      "triangles": 90000,
+      "vertices": 116379,
+      "meshes": 1,
+      "materials": 1,
+      "skins": 0,
+      "animations": 0,
+      "images": [
+        {
+          "sha256": "8e3f6c6c8620ee32516696ec6c08628f79313b22971226526a016cca5bba2970",
+          "bytes": 21759549
+        },
+        {
+          "sha256": "f051132bfb227fe22d5ef7d25a5c1657b4ec26a29f2212161769994db198a2ea",
+          "bytes": 17585944
+        },
+        {
+          "sha256": "5a174832cd587b25d84d0d4c94189efbf7d98f36e4b30963ed8d646a95cc6172",
+          "bytes": 10748386
+        }
+      ],
+      "imagesByteIdenticalToHigh": false,
+      "sourceTask": "0feac426-21e7-5cfa-8f05-d3416ab6c040",
+      "artifact": "f32b35cf-8102-4806-9946-5efce7c06278"
+    }
+  ]
+}

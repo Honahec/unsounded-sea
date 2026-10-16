@@ -1,6 +1,6 @@
 # 基础框架开发指南
 
-适用版本：Unity 6000.6.5f1 / URP。需求依据为 `DESIGN_DOC_v0_1.md`，本阶段落实其开发顺序 1–5 的战斗基础，并预留航程图基础类型。
+适用版本：Unity 6000.6.5f1 / URP。需求依据为 [概念设计](DESIGN_DOC_v0_1.md)。本文描述已实现的战斗基础、扩展接口和存档契约；新增机制提案见 [机制与素材设计](ASSET_MECHANICS_DESIGN.md)。
 
 ## 快速运行
 
@@ -90,7 +90,7 @@ Project 右键 **Create → Unsounded Sea → Card**。填写唯一 `id`、名�
 
 创建 Enemy 和 Encounter 资产。意图的 `clue` 与 `candidateDescription` 必须提供可推断信息；不要在隐藏行动间意外使用泄露答案的 UI 图标。当前敌人从意图列表等概率选择；后续可提取 `IIntentPolicy` 支持循环、权重和阶段策略，始终在 `IntentLocked` 前决策。
 
-同一敌人资产可在遭遇中多次引用，编译时按资产 ID 和下标生成不同实例 ID。`presentationPrefab` 是后续表现资产接入点，本阶段验证 UI 不实例化模型。需要生成正式模型时使用 Hyper3D MCP，再通过 Unity CLI 完成导入、Prefab 和表现绑定。
+同一敌人资产可在遭遇中多次引用，编译时按资产 ID 和下标生成不同实例 ID。`presentationPrefab` 是表现接入点；当前验证 UI 不实例化模型。已绑定样例、独立审阅场景和生产流程见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
 
 自定义目标实现 `IEncounterObjective` 并注入 Session；恢复回放时必须注入同样的目标与效果注册表。当前资产菜单提供击退、封门和存活三种配置。
 
@@ -115,8 +115,9 @@ Unity 菜单 **Unsounded Sea → Validate All Encounters** 可检查配置与未
 使用已连接编辑器时：
 
 ```sh
-unity status --project-path /Users/honahec/workspace/unsounded-sea --format json
-unity command run_tests --project-path /Users/honahec/workspace/unsounded-sea --format json -- --mode editor --filter UnsoundedSea.Tests
+export UNITY_PROJECT_PATH="$PWD" # 在仓库根目录执行
+unity status --project-path "$UNITY_PROJECT_PATH" --format json
+unity command run_tests --project-path "$UNITY_PROJECT_PATH" --format json -- --mode editor --filter UnsoundedSea.Tests
 ```
 
 CI 中关闭本项目的交互式 Editor 后：
@@ -125,4 +126,6 @@ CI 中关闭本项目的交互式 Editor 后：
 unity test . --mode EditMode --filter UnsoundedSea.Tests --output Logs/framework-tests.xml --timeout 600
 ```
 
-本阶段不是完整 MVP：尚未实现完整 18 卡、显影粉/媒介、被注视与回视、跨局档案、事件和奖励内容、地图界面、完整 5–6 节点航程、音效与 3D 美术。下一步建议先接入 `RunMap` 的航程协调器，把现有遭遇、奖励选择和补给串联，再根据试玩扩充内容。
+本阶段不是完整 MVP：尚未实现完整 18 卡、显影粉/媒介、被注视与回视、跨局档案、事件和奖励内容、地图界面、完整 5–6 节点航程、音效与战斗中的 3D 表现。下一步建议先接入 `RunMap` 的航程协调器，把现有遭遇、奖励选择和补给串联，再根据试玩扩充内容。
+
+已有测试与编辑器验证的日期、覆盖范围和限制见 [验证记录](FRAMEWORK_VALIDATION.md)。修改后应重新运行相关检查，旧记录不是新修订的验收结论。
