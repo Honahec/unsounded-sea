@@ -1,0 +1,82 @@
+{
+  "provider": "Hyper3D Deemos Agent",
+  "date": "2026-10-16",
+  "thread": "https://hyper3d.ai/workspace/agent?project=5d2ea8e0-e8dc-4bb9-8437-3309d6f1c6ab&thread=d7f15d02-26b1-4a95-900d-ab2707233bd9&lang=zh",
+  "high_generation": "020d73c8-7721-581f-ae65-3f8fd8c93d1d",
+  "runtime_budget_triangles": 110000,
+  "files": [
+    {
+      "path": "ArtSource/Bosses/BellMother_High.glb",
+      "sha256": "a62ad89c7d451b71b9d1b2ee98a2ed8a2e7dc5690a9c6d56c9a3e7359d49c267",
+      "bytes": 106188888,
+      "triangles": 1500000,
+      "vertices": 1066327,
+      "meshes": 1,
+      "materials": 1,
+      "textures": [
+        {
+          "name": "texture_normal",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 4096,
+          "height": 4096
+        }
+      ],
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "path": "Assets/UnsoundedSea/Art/Models/BellMother_LOD0.glb",
+      "sha256": "02235843a98668af5421db8d79fd6297afd62da583d745f2c93b641c250e7fb0",
+      "bytes": 68376164,
+      "triangles": 109998,
+      "vertices": 151658,
+      "meshes": 1,
+      "materials": 1,
+      "textures": [
+        {
+          "name": "texture_normal_lowpoly",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_diffuse_lowpoly",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_metallic_lowpoly-texture_roughness_lowpoly",
+          "width": 4096,
+          "height": 4096
+        }
+      ],
+      "skins": 0,
+      "animations": 0
+    }
+  ],
+  "notes": [
+    "Single source candidate; decimation with retained UV/PBR. Static whole-body presentation, no skin or animation.",
+    "Separate emission PNGs archived. Generation report is not a substitute for Unity validation."
+  ],
+  "unity": {
+    "prefab": "Assets/UnsoundedSea/Art/Prefabs/BellMother.prefab",
+    "heightMeters": 32,
+    "widthMeters": 36.5,
+    "depthMeters": 36.4,
+    "normalizationScale": 19.257061,
+    "scene": "Assets/UnsoundedSea/Scenes/SeaBossBattle.unity",
+    "placement": "Independent sea anchor (0,-7,60); camera (0,3.2,0), FOV 52; source bow/front +Z, anchor yaw 180",
+    "material": "Assets/UnsoundedSea/Art/SeaBoss/BellMother.mat",
+    "metallicFactor": 0.45,
+    "roughnessFactor": 1.3,
+    "emission": "Separate PNG imported at 2048 with CompressedHQ, mipmaps; source GLB unchanged"
+  }
+}

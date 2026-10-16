@@ -85,7 +85,7 @@ namespace UnsoundedSea.Runtime
             var right = Box("objective-panel"); root.Add(right);
             right.Add(Text("航 行 目 标", "eyebrow")); right.Add(Text(scenario.objectiveHeading, "objective-title"));
             right.Add(Text(v.Objective, "objective-description"));
-            var seals = Box("seal-row"); right.Add(seals);
+            var seals = Box("seal-row"); seals.EnableInClassList("survival-progress", scenario.encounter.objective == ObjectiveKind.Survive); right.Add(seals);
             for (var i = 0; i < v.ObjectiveTarget; i++) { var s = Text((i + 1).ToString("00"), "seal"); s.EnableInClassList("complete", i < v.ObjectiveProgress); seals.Add(s); }
             if (!string.IsNullOrWhiteSpace(scenario.taskLabel))
             {
