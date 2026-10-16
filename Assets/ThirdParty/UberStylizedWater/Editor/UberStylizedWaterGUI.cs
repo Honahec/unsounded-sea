@@ -160,12 +160,8 @@ namespace UberStylizedWater.Editor
         void DrawLighting()
         {
             Prop("_ShadowColor", "Shadow Color", "Color of shadows on the water. Alpha controls shadow strength.");
-            Prop("_Specular_Color", "Specular Color", "Highlight color. Overrides the light color. Use HDR intensity for brightness, 0 removes highlights.");
-            Prop("_Specular_Spread", "Spread", "0 gives a focused highlight, higher values give softer and wider highlights.");
-            Prop("_Specular_Hardness", "Hardness", "Blends between soft and hard highlight edges.");
-            var hardness = Find("_Specular_Hardness");
-            using (new EditorGUI.DisabledScope(hardness != null && !hardness.hasMixedValue && hardness.floatValue <= 0f))
-                Prop("_Specular_Size", "Size", "Size of the hard highlight. Needs Hardness above 0.");
+            Prop("_Specular_Color", "Specular Tint", "Neutral tint preserves scene light colours. Clamped to 0–1; water uses dielectric Fresnel, not emissive HDR highlights.");
+            Prop("_Specular_Spread", "Roughness", "Rough-water GGX highlight width, clamped to 0.22–0.8 with pixel normal variance filtering. Legacy Hardness and Size are unused.");
         }
 
         void DrawReflection()

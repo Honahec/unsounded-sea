@@ -56,7 +56,7 @@ float SeaNoise(float2 p)
     return lerp(lerp(SeaHash(i),SeaHash(i+float2(1,0)),f.x),lerp(SeaHash(i+float2(0,1)),SeaHash(i+1),f.x),f.y);
 }
 
-float3 UnsoundedSeaWakeFoam(float2 p, float4 threat, float time)
+float UnsoundedSeaFoamMask(float2 p, float4 threat, float time)
 {
 #if !defined(_ENABLEWAVE)
     return 0;
@@ -69,7 +69,7 @@ float3 UnsoundedSeaWakeFoam(float2 p, float4 threat, float time)
     float d=distance(p,threat.xy);
     float disturbance=exp(-abs(d-threat.z)*0.021)*step(0.01,threat.z);
     float churn=smoothstep(0.35,1.3,UnsoundedSeaWake(p,threat,time))*smoothstep(0.38,0.72,n+fine*0.25);
-    return float3(0.22,0.30,0.29)*(whitecap*_StormStrength+churn*disturbance*0.85);
+    return saturate(whitecap*_StormStrength+churn*disturbance*0.85);
 #endif
 }
 #endif

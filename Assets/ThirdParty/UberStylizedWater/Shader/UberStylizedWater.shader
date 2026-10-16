@@ -747,6 +747,7 @@ Shader "UberStylizedWater"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/ParallaxMapping.hlsl"
         #include_with_pragmas "../SubGraphs/CubeMap.hlsl"
         #include_with_pragmas "../Third Party/URP_ShaderGraphCustomLighting-main/CustomLighting.hlsl"
+        #include "../../../UnsoundedSea/Art/Shaders/BattleWaterLighting.hlsl"
         
         // -- Property used by ScenePickingPass
         #ifdef SCENEPICKINGPASS
@@ -2772,7 +2773,7 @@ Shader "UberStylizedWater"
             float3 _SpecularLighting_47977597963f45e1a9b14b5293e606ed_Specular_1_Vector3;
             SG_SpecularLighting_43e4204f01ba4fc4385d3b279d795f9d_float(_Property_6b500ff806c3409095853627e6bdf85f_Out_0_Float, _Property_cc053c5357f74e3084e74e18ebe348b0_Out_0_Float, _Property_d96b9d429c3247a8a141e18636c65205_Out_0_Float, (float4(_GetVariable_a55ef60d313c44cb83d658032ff409c9_Vector3_4_Vector3, 1.0)), _Property_8f61f7ebf977413abfde3b2f374d1f06_Out_0_Vector4, _SpecularLighting_47977597963f45e1a9b14b5293e606ed, _SpecularLighting_47977597963f45e1a9b14b5293e606ed_Specular_1_Vector3);
             float3 _Add_9b2a96511a1140088dd4bb91cfef5cad_Out_2_Vector3;
-            Unity_Add_float3(_Lerp_20b49dc05a3049e983e94a7f4c6d57dc_Out_3_Vector3, _SpecularLighting_47977597963f45e1a9b14b5293e606ed_Specular_1_Vector3, _Add_9b2a96511a1140088dd4bb91cfef5cad_Out_2_Vector3);
+            _Add_9b2a96511a1140088dd4bb91cfef5cad_Out_2_Vector3 = _Lerp_20b49dc05a3049e983e94a7f4c6d57dc_Out_3_Vector3;
             float4 _Property_b9d02c2d4966443d8a2758a4f5c52dd8_Out_0_Vector4 = _ShadowColor;
             Bindings_SampleShadowmask_9138d5438d90fb24f805131efa395cf6_half _SampleShadowmask_503fbcdbfb44406a9ca28035c178791b;
             _SampleShadowmask_503fbcdbfb44406a9ca28035c178791b.uv1 = IN.uv1;
@@ -2790,7 +2791,7 @@ Shader "UberStylizedWater"
             Bindings_MixFog_aadfc52f8da612746841c7c5af3fcea6_float _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf;
             _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf.ObjectSpacePosition = IN.ObjectSpacePosition;
             float3 _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3;
-            SG_MixFog_aadfc52f8da612746841c7c5af3fcea6_float((_ColorLayerAlpha_34e3f5e1269e4ba4bff0b5a898665524_Color_1_Vector4.xyz) + UnsoundedSeaWakeFoam(IN.WorldSpacePosition.xz, _Threat, _SeaTime), _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf, _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3);
+            SG_MixFog_aadfc52f8da612746841c7c5af3fcea6_float(UnsoundedSeaLitSurface(_ColorLayerAlpha_34e3f5e1269e4ba4bff0b5a898665524_Color_1_Vector4.xyz, IN.WorldSpacePosition, IN.WorldSpaceNormal, IN.WorldSpaceViewDirection, _EnableNormal_ed4ba08e93fd4e6eb9ca787bb106f616_Out_0_Vector3, IN.WorldSpaceTangent, IN.WorldSpaceBiTangent), _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf, _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3);
             Bindings_GetVariable_5951f0cfb2fb4134ea014f63adeff8d9_float _GetVariable_397e978c909c4ad1bf01f75628183f4c;
             float4 _GetVariable_397e978c909c4ad1bf01f75628183f4c_Vector_1_Vector4;
             float _GetVariable_397e978c909c4ad1bf01f75628183f4c_Float_2_Float;
@@ -7356,6 +7357,7 @@ Shader "UberStylizedWater"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/ParallaxMapping.hlsl"
         #include_with_pragmas "../SubGraphs/CubeMap.hlsl"
         #include_with_pragmas "../Third Party/URP_ShaderGraphCustomLighting-main/CustomLighting.hlsl"
+        #include "../../../UnsoundedSea/Art/Shaders/BattleWaterLighting.hlsl"
         
         // -- Property used by ScenePickingPass
         #ifdef SCENEPICKINGPASS
@@ -9381,7 +9383,7 @@ Shader "UberStylizedWater"
             float3 _SpecularLighting_47977597963f45e1a9b14b5293e606ed_Specular_1_Vector3;
             SG_SpecularLighting_43e4204f01ba4fc4385d3b279d795f9d_float(_Property_6b500ff806c3409095853627e6bdf85f_Out_0_Float, _Property_cc053c5357f74e3084e74e18ebe348b0_Out_0_Float, _Property_d96b9d429c3247a8a141e18636c65205_Out_0_Float, (float4(_GetVariable_a55ef60d313c44cb83d658032ff409c9_Vector3_4_Vector3, 1.0)), _Property_8f61f7ebf977413abfde3b2f374d1f06_Out_0_Vector4, _SpecularLighting_47977597963f45e1a9b14b5293e606ed, _SpecularLighting_47977597963f45e1a9b14b5293e606ed_Specular_1_Vector3);
             float3 _Add_9b2a96511a1140088dd4bb91cfef5cad_Out_2_Vector3;
-            Unity_Add_float3(_Lerp_20b49dc05a3049e983e94a7f4c6d57dc_Out_3_Vector3, _SpecularLighting_47977597963f45e1a9b14b5293e606ed_Specular_1_Vector3, _Add_9b2a96511a1140088dd4bb91cfef5cad_Out_2_Vector3);
+            _Add_9b2a96511a1140088dd4bb91cfef5cad_Out_2_Vector3 = _Lerp_20b49dc05a3049e983e94a7f4c6d57dc_Out_3_Vector3;
             float4 _Property_b9d02c2d4966443d8a2758a4f5c52dd8_Out_0_Vector4 = _ShadowColor;
             Bindings_SampleShadowmask_9138d5438d90fb24f805131efa395cf6_half _SampleShadowmask_503fbcdbfb44406a9ca28035c178791b;
             _SampleShadowmask_503fbcdbfb44406a9ca28035c178791b.uv1 = IN.uv1;
@@ -9399,7 +9401,7 @@ Shader "UberStylizedWater"
             Bindings_MixFog_aadfc52f8da612746841c7c5af3fcea6_float _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf;
             _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf.ObjectSpacePosition = IN.ObjectSpacePosition;
             float3 _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3;
-            SG_MixFog_aadfc52f8da612746841c7c5af3fcea6_float((_ColorLayerAlpha_34e3f5e1269e4ba4bff0b5a898665524_Color_1_Vector4.xyz) + UnsoundedSeaWakeFoam(IN.WorldSpacePosition.xz, _Threat, _SeaTime), _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf, _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3);
+            SG_MixFog_aadfc52f8da612746841c7c5af3fcea6_float(UnsoundedSeaLitSurface(_ColorLayerAlpha_34e3f5e1269e4ba4bff0b5a898665524_Color_1_Vector4.xyz, IN.WorldSpacePosition, IN.WorldSpaceNormal, IN.WorldSpaceViewDirection, _EnableNormal_ed4ba08e93fd4e6eb9ca787bb106f616_Out_0_Vector3, IN.WorldSpaceTangent, IN.WorldSpaceBiTangent), _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf, _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3);
             Bindings_GetVariable_5951f0cfb2fb4134ea014f63adeff8d9_float _GetVariable_397e978c909c4ad1bf01f75628183f4c;
             float4 _GetVariable_397e978c909c4ad1bf01f75628183f4c_Vector_1_Vector4;
             float _GetVariable_397e978c909c4ad1bf01f75628183f4c_Float_2_Float;
@@ -12032,6 +12034,7 @@ Shader "UberStylizedWater"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/ParallaxMapping.hlsl"
         #include_with_pragmas "../SubGraphs/CubeMap.hlsl"
         #include_with_pragmas "../Third Party/URP_ShaderGraphCustomLighting-main/CustomLighting.hlsl"
+        #include "../../../UnsoundedSea/Art/Shaders/BattleWaterLighting.hlsl"
         
         // -- Property used by ScenePickingPass
         #ifdef SCENEPICKINGPASS
@@ -14057,7 +14060,7 @@ Shader "UberStylizedWater"
             float3 _SpecularLighting_47977597963f45e1a9b14b5293e606ed_Specular_1_Vector3;
             SG_SpecularLighting_43e4204f01ba4fc4385d3b279d795f9d_float(_Property_6b500ff806c3409095853627e6bdf85f_Out_0_Float, _Property_cc053c5357f74e3084e74e18ebe348b0_Out_0_Float, _Property_d96b9d429c3247a8a141e18636c65205_Out_0_Float, (float4(_GetVariable_a55ef60d313c44cb83d658032ff409c9_Vector3_4_Vector3, 1.0)), _Property_8f61f7ebf977413abfde3b2f374d1f06_Out_0_Vector4, _SpecularLighting_47977597963f45e1a9b14b5293e606ed, _SpecularLighting_47977597963f45e1a9b14b5293e606ed_Specular_1_Vector3);
             float3 _Add_9b2a96511a1140088dd4bb91cfef5cad_Out_2_Vector3;
-            Unity_Add_float3(_Lerp_20b49dc05a3049e983e94a7f4c6d57dc_Out_3_Vector3, _SpecularLighting_47977597963f45e1a9b14b5293e606ed_Specular_1_Vector3, _Add_9b2a96511a1140088dd4bb91cfef5cad_Out_2_Vector3);
+            _Add_9b2a96511a1140088dd4bb91cfef5cad_Out_2_Vector3 = _Lerp_20b49dc05a3049e983e94a7f4c6d57dc_Out_3_Vector3;
             float4 _Property_b9d02c2d4966443d8a2758a4f5c52dd8_Out_0_Vector4 = _ShadowColor;
             Bindings_SampleShadowmask_9138d5438d90fb24f805131efa395cf6_half _SampleShadowmask_503fbcdbfb44406a9ca28035c178791b;
             _SampleShadowmask_503fbcdbfb44406a9ca28035c178791b.uv1 = IN.uv1;
@@ -14075,7 +14078,7 @@ Shader "UberStylizedWater"
             Bindings_MixFog_aadfc52f8da612746841c7c5af3fcea6_float _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf;
             _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf.ObjectSpacePosition = IN.ObjectSpacePosition;
             float3 _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3;
-            SG_MixFog_aadfc52f8da612746841c7c5af3fcea6_float((_ColorLayerAlpha_34e3f5e1269e4ba4bff0b5a898665524_Color_1_Vector4.xyz) + UnsoundedSeaWakeFoam(IN.WorldSpacePosition.xz, _Threat, _SeaTime), _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf, _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3);
+            SG_MixFog_aadfc52f8da612746841c7c5af3fcea6_float(UnsoundedSeaLitSurface(_ColorLayerAlpha_34e3f5e1269e4ba4bff0b5a898665524_Color_1_Vector4.xyz, IN.WorldSpacePosition, IN.WorldSpaceNormal, IN.WorldSpaceViewDirection, _EnableNormal_ed4ba08e93fd4e6eb9ca787bb106f616_Out_0_Vector3, IN.WorldSpaceTangent, IN.WorldSpaceBiTangent), _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf, _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3);
             Bindings_GetVariable_5951f0cfb2fb4134ea014f63adeff8d9_float _GetVariable_397e978c909c4ad1bf01f75628183f4c;
             float4 _GetVariable_397e978c909c4ad1bf01f75628183f4c_Vector_1_Vector4;
             float _GetVariable_397e978c909c4ad1bf01f75628183f4c_Float_2_Float;

@@ -27,7 +27,7 @@ public static class UberWaterSetup
         mat.SetFloat("_SeaTime", 0);
         mat.SetColor("_Color_Deep", new Color(0.012f, 0.032f, 0.037f, 1));
         mat.SetColor("_Color_Shallow", new Color(0.025f, 0.068f, 0.072f, 1));
-        mat.SetColor("_Wave_Top_Color", new Color(0.07f, 0.13f, 0.14f, 0.15f));
+        mat.SetColor("_Wave_Top_Color", new Color(0.07f, 0.13f, 0.14f, 0));
         mat.SetFloat("_Water_Depth", 0.4f);
         mat.SetFloat("_WorldSpaceDepth", 1);
         mat.SetFloat("_DistanceMask_Start", 20);
@@ -39,14 +39,14 @@ public static class UberWaterSetup
         mat.SetFloat("_Normal_Strength", 1.1f);
         mat.SetFloat("_Normal_DistanceStrength", 0.28f);
         mat.SetFloat("_Normal_Pan", 0.19f);
-        mat.SetFloat("_Reflection_Strength", 0.42f);
+        mat.SetFloat("_Reflection_Strength", 0.3f);
         mat.SetFloat("_Reflection_Fresnel", 2.8f);
         mat.SetFloat("_Reflection_Distortion", 4.5f);
         mat.SetFloat("_Refraction_Strength", 0.04f);
         mat.SetFloat("_Refraction_Distance_Strength", 0.01f);
-        mat.SetColor("_Specular_Color", new Color(1.3f, 1.8f, 1.9f, 1));
-        mat.SetFloat("_Specular_Spread", 0.45f);
-        mat.SetFloat("_Specular_Hardness", 0.15f);
+        mat.SetColor("_Specular_Color", new Color(0.8f, 0.8f, 0.8f, 1));
+        mat.SetFloat("_Specular_Spread", 0.38f);
+        mat.SetFloat("_Specular_Hardness", 0);
         mat.SetFloat("_Specular_Size", 0.15f);
         mat.SetFloat("_1st_Wave_Length", 45);
         mat.SetFloat("_1st_Wave_Height", 0.75f);
@@ -66,7 +66,7 @@ public static class UberWaterSetup
         mat.SetTexture("_SurfFoam_Map", Texture("Foam 1.png"));
         mat.SetTexture("_SurfaceDistortion_Map", Texture("Noise 1.png"));
         mat.SetFloat("_Enable_SurfaceFoam", 0);
-        mat.SetColor("_SurfFoam_Color", new Color(0.16f, 0.27f, 0.28f, 0.3f));
+        mat.SetColor("_SurfFoam_Color", new Color(0.78f, 0.82f, 0.8f, 0.3f));
         mat.SetFloat("_SurfFoam_Scale", 8);
         mat.SetFloat("_SurfFoam_AlphaBlend", 0.75f);
         mat.SetFloat("_SurfFoam_Edge", 0.08f);
@@ -76,7 +76,7 @@ public static class UberWaterSetup
         mat.SetVector("_SurfaceDistortion_Pan", new Vector4(0.04f, 0.02f, 0, 0));
         mat.SetFloat("_Enable_Intersection", 1);
         mat.SetTexture("_InterSec_Foam_Mask", Texture("Foam 1.png"));
-        mat.SetColor("_InterSec_Color", new Color(0.28f, 0.39f, 0.38f, 0.75f));
+        mat.SetColor("_InterSec_Color", new Color(0.08f, 0.13f, 0.12f, 0.55f));
         mat.SetFloat("_InterSec_Width", 1.1f);
         mat.SetFloat("_InterSec_Dissolve", 1.2f);
         mat.SetFloat("_InterSec_Foam_Scale", 2.4f);
