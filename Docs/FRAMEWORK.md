@@ -28,12 +28,13 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 - **特殊战入口**：派生 `BattleRuleModule`，为每次会话创建新的 `EffectRegistry` / `IEncounterObjective`。`SealingRuleModule` 用于雾海封线；`SurvivalRuleModule` 用于海面撤离，按已结算轮数计数。两者均不靠敌人全部死亡判胜。模块资产只存配置，不能共享可变进度。需要新命令、敌人阶段策略或即时玩法时仍需扩展 Core 与测试；当前入口不等于这些玩法已实现。
 - **反馈事件**：Director 的 `Resolved(before, after, command)` 通知舞台，`Changed` 通知 UI；短暂反馈期间拒绝连点，规则仍同步确定性结算。暂停冻结舞台运动与环境声；减少动效关闭船体摇晃、镜头震动和角色摆动。
 
-「沉钟海域」使用 **Uber Stylized Water**：双向 Gerstner 波、细波法线、半分辨率平面反射、浅层折射、接触泡沫和海雾；甲板战保留原轻量水面。巨兽扰流与钟声只负责表现，不影响规则随机数。场景雾、月光、暖色船灯、Bloom/Vignette 构成海洋氛围；音轨为原创合成底噪和动作提示。三名角色仍是无骨骼静态网格，整体变换反馈不能替代正式战斗动画。
+「沉钟海域」使用 **Uber Stylized Water**：双向 Gerstner 波、细波法线、半分辨率平面反射、浅层折射、接触泡沫和海雾；甲板战保留原轻量水面。巨兽扰流与钟声只负责表现，不影响规则随机数。场景雾、月光、暖色船灯、Bloom/Vignette 构成海洋氛围；音轨为原创合成底噪和动作提示。三名角色仍是无骨骼静态网格；海面战关闭占位攻击/受击位移和镜头震动，仅保留常态运动、音效与结算提示，正式动作等待骨骼动画接入。`BattleStage.placeholderCombatMotion` 控制占位动作和对应输入等待时长，甲板样例保留原表现。
 
 ### 海面配置
 
-- `BattleStage.water` 可选接入 `BattleWater`，`surface` 指向同一海面 Renderer；使用 `Art/SeaBoss/DeepOcean.mat` 和 `DeepOceanMesh.asset`。水面保持水平、单位缩放，放在 Water（4）层，反射层排除水面；一场战斗只启用一个平面反射水体。当前网格为固定战斗镜头设计，不是无限海洋或船舶浮力系统。
+- `BattleStage.water` 可选接入 `BattleWater`，`surface` 指向同一海面 Renderer；使用 `Art/SeaBoss/DeepOcean.mat` 和 `DeepOceanMesh.asset`。水面保持水平、单位缩放，放在 Water（4）层，反射层排除水面；一场战斗只启用一个平面反射水体。当前网格为固定战斗镜头设计，不是无限海洋。
 - `BattleWater` 在每场开始克隆材质并创建反射组件，停用时恢复原材质、清理相机和 RT。`_SeaTime` 驱动全部水面动画，暂停冻结时钟及反射；减少动效时以 1/4 速率连续推进，不跳变相位。`_Threat` 保留海面角色的扰流和冲击反馈。避免直接修改共享材质。
+- 常态涌浪为 45 m / 22 m 双向波，振幅 1.4 m / 0.6 m。`vesselFollowsWater` 使用相同材质参数和 `SeaTime` 采样升沉与水平位移，船首/尾、左右采样决定姿态，默认俯仰限 6°、横摇限 9°；这是平滑的表现跟浪，尚非刚体浮力。换船后调整 `vesselSampleExtents`。暂停冻结海浪和船，减少动效保持船姿态；恢复时平滑追随。波参数在 Bind 时读取，编辑后重开生效。
 - PC 管线需要 **Depth Texture / Opaque Texture**；当前 Unity 6000.6.5f1、URP 17.6、Forward+ 已配置。`reflectionScale` 默认 0.5，降低可减少额外渲染成本。移动管线、XR、多相机/多水位组合尚未验收。
 - 上游版本、MIT 许可、原始哈希与本地补丁集中记录在 [UPSTREAM.json](../Assets/ThirdParty/UberStylizedWater/UPSTREAM.json)。只引入运行依赖，不依赖上游 Shader Graph 编辑插件。升级需重新应用时钟、扰流和反射补丁，并验证所有 Shader pass；不要用上游重新导出的 Shader 直接覆盖本地版。
 
