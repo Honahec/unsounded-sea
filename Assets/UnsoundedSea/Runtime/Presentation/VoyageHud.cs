@@ -17,9 +17,9 @@ namespace UnsoundedSea.Runtime
         [SerializeField] private BattleScenario encounterScenario;
         private VisualElement root;
         private IVisualElementScheduledItem sailing;
-        private bool paused, settingsOpen, journalOpen, chartOpen, arrivalFade;
+        private bool paused, settingsOpen, journalOpen, chartOpen;
         private string saveError, loadError, notice;
-        private float travelElapsed, lastTick;
+        private float lastTick;
         private VoyageSession Session => VoyageRuntime.Session;
 
         private void OnEnable()
@@ -44,9 +44,19 @@ namespace UnsoundedSea.Runtime
                     }
                     else VoyageRuntime.StartNew();
                 }
+                var current = Session.Current;
+                var previous = Session.Visited.Count > 1
+                    ? System.Linq.Enumerable.FirstOrDefault(Session.KnownStops, x => x.Id == Session.Visited[Session.Visited.Count - 2]) : null;
+                sailingPresentation.SetLocation(new Vector2(current.X, current.Y), previous == null ? Vector2.up : new Vector2(current.X - previous.X, current.Y - previous.Y));
                 Refresh();
             }
             catch (Exception exception) { loadError = exception.Message; Refresh(); Debug.LogException(exception); }
+        }
+        private void Update()
+        {
+            sailingPresentation?.Tick(Time.unscaledDeltaTime,
+                paused || settingsOpen || journalOpen || chartOpen || !string.IsNullOrEmpty(saveError) || !string.IsNullOrEmpty(loadError),
+                GameSettings.ReducedMotion);
         }
         private void OnDisable()
         {
@@ -201,14 +211,6 @@ namespace UnsoundedSea.Runtime
                 var footer = Element("voyage-footer");
                 footer.Add(Text(notice, "footer-note")); root.Add(footer);
             }
-            if (arrivalFade)
-            {
-                arrivalFade = false;
-                var fog = Element("sailing-fog"); fog.AddToClassList("arrival-fog");
-                root.Insert(0, fog);
-                fog.schedule.Execute(() => fog.style.opacity = 0).StartingIn(16);
-                fog.schedule.Execute(fog.RemoveFromHierarchy).StartingIn(350);
-            }
             if (!string.IsNullOrEmpty(saveError))
             {
                 var error = Element("save-error"); error.pickingMode = PickingMode.Position;
@@ -241,7 +243,7 @@ namespace UnsoundedSea.Runtime
             switch (session.Phase)
             {
                 case VoyagePhase.ChoosingRoute:
-                    var sail = Action("set-sail", string.Empty, "seal-action", () => { travelElapsed = 0; chartOpen = false; Change(Session.SetSail); }, saved);
+                    var sail = Action("set-sail", string.Empty, "seal-action", () => { chartOpen = false; Change(Session.SetSail); }, saved);
                     sail.Add(new SeaUiArt("seal")); sail.Add(Text("启航", "seal-label")); panel.Add(sail);
                     break;
                 case VoyagePhase.Sailing:
@@ -272,21 +274,20 @@ namespace UnsoundedSea.Runtime
         {
             if (!sailingPresentation.IsPlaying)
             {
-                var from = Session.Current; var to = Session.Selected;
-                sailingPresentation.Begin(new Vector2(to.X - from.X, to.Y - from.Y).normalized, GameSettings.ReducedMotion);
+                var to = Session.Selected;
+                sailingPresentation.Begin(new Vector2(to.X, to.Y), GameSettings.ReducedMotion);
             }
             lastTick = Time.realtimeSinceStartup;
             sailing = root.schedule.Execute(() =>
             {
                 var now = Time.realtimeSinceStartup; var delta = now - lastTick; lastTick = now;
                 if (paused || settingsOpen || journalOpen || Session.Phase != VoyagePhase.Sailing) return;
-                travelElapsed += delta;
-                var progress = Mathf.Clamp01(travelElapsed / (GameSettings.ReducedMotion ? 0.25f : sailingPresentation.Duration));
+                sailingPresentation.Advance(delta, GameSettings.ReducedMotion);
+                var progress = sailingPresentation.Progress;
                 fill.style.width = Length.Percent(progress * 100); chart?.SetProgress(progress);
-                sailingPresentation.SetProgress(progress);
                 veil.style.opacity = sailingPresentation.TransitionOpacity;
                 if (progress < 1) return;
-                sailing.Pause(); sailingPresentation.Finish(); arrivalFade = true;
+                sailing.Pause(); sailingPresentation.Finish();
                 Change(Session.Arrive);
             }).Every(33);
         }

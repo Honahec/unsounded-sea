@@ -3,136 +3,156 @@ using UnityEngine;
 
 namespace UnsoundedSea.Runtime
 {
+    /// <summary>Owns voyage-only vessel, camera, wake and water. Never advances voyage rules.</summary>
     public sealed class VoyageSailingPresentation : MonoBehaviour
     {
-        private const float PassageDuration = 3.2f;
-        private const float FadeFraction = 0.12f;
-
         [SerializeField] private Camera voyageCamera;
-        [SerializeField] private Transform seaStage;
-
-        private Vector3 cameraPosition;
-        private Quaternion cameraRotation;
-        private Vector3 stagePosition;
-        private Quaternion stageRotation;
-        private Vector3 forward;
-        private Vector3 right;
-        private float lateralHeading;
-        private float progress;
-        private float transitionOpacity;
-        private bool reducedMotion;
+        [SerializeField] private Transform vessel;
+        [SerializeField] private BattleWater water;
+        [SerializeField] private VoyageWake wake;
+        [SerializeField] private AudioSource ambience;
+        [SerializeField] private Vector3 cameraOffset = new Vector3(25, 17, -29);
+        [SerializeField] private Vector3 cameraTarget = new Vector3(0, 0, 4);
+        private VoyageSailingPath path;
+        private Vector3 routePosition, routeHeading = Vector3.forward;
+        private Vector3 previousPosition;
+        private float cameraYaw, progress, speed;
+        private bool initialized, reducedPassage, reducedRelocated;
+        private float reducedElapsed, reducedStartProgress;
 
         public bool IsPlaying { get; private set; }
-        public float Duration => PassageDuration;
-        public float TransitionOpacity => transitionOpacity;
-
-        public void Begin(Vector2 heading, bool reducedMotion)
+        public float Duration => path.Duration;
+        public float Progress => progress;
+        public float Speed => speed;
+        public Vector3 RoutePosition => routePosition;
+        public Transform Vessel => vessel;
+        public Camera VoyageCamera => voyageCamera;
+        public BattleWater Water => water;
+        // Normal travel is continuous, including arrival. Only reduced motion uses a short veil.
+        public float TransitionOpacity
         {
-            if (IsPlaying) return;
-            if (voyageCamera == null)
-                throw new InvalidOperationException("Assign the voyageCamera reference before beginning a sailing passage.");
-            if (seaStage == null)
-                throw new InvalidOperationException("Assign the seaStage reference before beginning a sailing passage.");
-            if (seaStage == voyageCamera.transform || voyageCamera.transform.IsChildOf(seaStage))
-                throw new InvalidOperationException("seaStage must be a separate world-stage root and must not contain voyageCamera.");
-
-            var cameraTransform = voyageCamera.transform;
-            cameraPosition = cameraTransform.position;
-            cameraRotation = cameraTransform.rotation;
-            stagePosition = seaStage.position;
-            stageRotation = seaStage.rotation;
-
-            forward = Vector3.ProjectOnPlane(cameraTransform.forward, Vector3.up);
-            if (forward.sqrMagnitude < 0.0001f)
-                forward = Vector3.ProjectOnPlane(seaStage.forward, Vector3.up);
-            forward = forward.sqrMagnitude < 0.0001f ? Vector3.forward : forward.normalized;
-            right = Vector3.Cross(Vector3.up, forward);
-            lateralHeading = Vector2.ClampMagnitude(heading, 1f).x;
-            this.reducedMotion = reducedMotion;
-            progress = 0f;
-            transitionOpacity = 1f;
-            IsPlaying = true;
-            ApplyProgress();
+            get
+            {
+                if (!reducedPassage || !IsPlaying) return 0;
+                float t = Mathf.Clamp01(reducedElapsed / 0.25f);
+                return t < 0.3f ? Mathf.SmoothStep(0, 1, t / 0.3f)
+                    : t > 0.7f ? Mathf.SmoothStep(1, 0, (t - 0.7f) / 0.3f) : 1;
+            }
         }
 
-        public void SetProgress(float value)
+        public void SetLocation(Vector2 chartPosition, Vector2 heading)
+        {
+            if (voyageCamera == null || vessel == null || water == null)
+                throw new InvalidOperationException("Assign the voyage camera, vessel and water references.");
+            if (!initialized) { water.Bind(voyageCamera); initialized = true; }
+            routePosition = VoyageSailingPath.WorldPoint(chartPosition);
+            routeHeading = new Vector3(heading.x, 0, heading.y).normalized;
+            if (routeHeading.sqrMagnitude < 0.001f) routeHeading = Vector3.forward;
+            previousPosition = routePosition;
+            vessel.SetPositionAndRotation(routePosition + water.SampleDisplacement(routePosition), Quaternion.LookRotation(routeHeading));
+            cameraYaw = Mathf.Atan2(routeHeading.x, routeHeading.z) * Mathf.Rad2Deg;
+            PlaceCamera(1);
+            wake?.Clear();
+        }
+
+        public void Begin(Vector2 destination, bool reduceMotion)
+        {
+            if (IsPlaying) return;
+            if (!initialized) throw new InvalidOperationException("Set the voyage location before sailing.");
+            path = new VoyageSailingPath(routePosition, VoyageSailingPath.WorldPoint(destination), routeHeading);
+            reducedPassage = reduceMotion; reducedRelocated = false; reducedElapsed = 0; reducedStartProgress = 0;
+            progress = 0; speed = 0; IsPlaying = true;
+        }
+
+        public void Advance(float deltaTime, bool reduceMotion)
         {
             if (!IsPlaying) return;
-            progress = float.IsNaN(value) ? 0f : Mathf.Clamp01(value);
-            UpdateTransitionOpacity();
-            ApplyProgress();
+            if (reduceMotion && !reducedPassage)
+            {
+                reducedPassage = true; reducedElapsed = 0; reducedStartProgress = progress;
+            }
+            if (!reducedPassage)
+            {
+                progress = Mathf.Clamp01(progress + Mathf.Max(0, deltaTime) / Duration);
+                path.Evaluate(progress, out routePosition, out routeHeading);
+                return;
+            }
+            reducedElapsed += Mathf.Max(0, deltaTime);
+            float t = Mathf.Clamp01(reducedElapsed / 0.25f);
+            progress = Mathf.Lerp(reducedStartProgress, 1, t);
+            // Relocate once, while the accessibility veil is fully opaque.
+            if (t >= 0.5f && !reducedRelocated)
+            {
+                reducedRelocated = true;
+                path.Evaluate(1, out routePosition, out routeHeading);
+                vessel.SetPositionAndRotation(routePosition + water.SampleDisplacement(routePosition), Quaternion.LookRotation(routeHeading));
+                cameraYaw = Mathf.Atan2(routeHeading.x, routeHeading.z) * Mathf.Rad2Deg;
+                PlaceCamera(1); wake?.Clear();
+            }
         }
 
         public void Finish()
         {
             if (!IsPlaying) return;
-            RestoreBaseline();
-            IsPlaying = false;
+            IsPlaying = false; speed = 0;
+            // Keep the arrival pose. Returning to a previous baseline would visibly teleport the ship.
         }
 
-        private void UpdateTransitionOpacity()
+        public void Tick(float deltaTime, bool paused, bool reduceMotion)
         {
-            if (progress < FadeFraction)
-                transitionOpacity = 1f - Mathf.SmoothStep(0f, 1f, progress / FadeFraction);
-            else if (progress > 1f - FadeFraction)
-                transitionOpacity = Mathf.SmoothStep(0f, 1f, (progress - (1f - FadeFraction)) / FadeFraction);
-            else
-                transitionOpacity = 0f;
+            if (!initialized) return;
+            water.Tick(deltaTime, paused, reduceMotion, Vector4.zero);
+            if (ambience != null)
+            {
+                if (paused && ambience.isPlaying) ambience.Pause();
+                else if (!paused && !ambience.isPlaying) ambience.UnPause();
+            }
+            if (paused) return;
+            float dt = Mathf.Max(0.0001f, deltaTime);
+            float targetSpeed = IsPlaying && !reduceMotion ? Vector3.Distance(routePosition, previousPosition) / dt : 0;
+            speed = Mathf.Lerp(speed, targetSpeed, 1 - Mathf.Exp(-dt * 4));
+            previousPosition = routePosition;
+            if (!reduceMotion && !(IsPlaying && reducedPassage))
+            {
+                FollowWaves(dt);
+                float yaw = Mathf.Atan2(routeHeading.x, routeHeading.z) * Mathf.Rad2Deg;
+                cameraYaw = Mathf.LerpAngle(cameraYaw, yaw, 1 - Mathf.Exp(-dt * 1.4f));
+                PlaceCamera(1 - Mathf.Exp(-dt * 3));
+            }
+            wake?.Tick(dt, routePosition, routeHeading, speed, water, reduceMotion);
         }
 
-        private void ApplyProgress()
+        private void FollowWaves(float dt)
         {
-            var eased = Mathf.SmoothStep(0f, 1f, progress);
-            var lateral = lateralHeading * eased;
+            var right = Vector3.Cross(Vector3.up, routeHeading);
+            float pitch = -Mathf.Atan2(water.SampleDisplacement(routePosition + routeHeading * 7).y - water.SampleDisplacement(routePosition - routeHeading * 7).y, 14) * Mathf.Rad2Deg;
+            float roll = Mathf.Atan2(water.SampleDisplacement(routePosition + right * 2.5f).y - water.SampleDisplacement(routePosition - right * 2.5f).y, 5) * Mathf.Rad2Deg;
+            var rotation = Quaternion.LookRotation(routeHeading) * Quaternion.Euler(Mathf.Clamp(pitch, -6, 6), 0, Mathf.Clamp(roll, -8, 8));
+            // Horizontal translation belongs to the route, while swell adds a small physical drift.
+            var displacement = water.SampleDisplacement(routePosition);
+            displacement.x *= 0.4f; displacement.z *= 0.4f;
+            float blend = 1 - Mathf.Exp(-dt * 3);
+            vessel.position = Vector3.Lerp(vessel.position, routePosition + displacement, blend);
+            vessel.rotation = Quaternion.Slerp(vessel.rotation, rotation, blend);
+        }
+
+        private void PlaceCamera(float blend)
+        {
+            var orbit = Quaternion.Euler(0, cameraYaw, 0);
+            // Track navigation, not hull roll; only a fifth of the heave reaches the camera.
+            var center = routePosition + Vector3.up * (vessel.position.y * 0.2f);
+            var position = center + orbit * cameraOffset;
+            var target = center + orbit * cameraTarget;
             var cameraTransform = voyageCamera.transform;
-            var forwardDistance = reducedMotion ? 0f : 4f;
-            cameraTransform.position = cameraPosition + forward * (forwardDistance * eased) + right * (reducedMotion ? 0f : 0.45f * lateral);
-            seaStage.position = reducedMotion ? stagePosition : stagePosition - forward * (1.6f * eased) - right * (0.25f * lateral);
-
-            if (reducedMotion)
-            {
-                cameraTransform.rotation = cameraRotation;
-                seaStage.rotation = stageRotation;
-                return;
-            }
-
-            var passageArc = Mathf.Sin(progress * Mathf.PI);
-            cameraTransform.position += Vector3.up * (0.12f * Mathf.Sin(progress * Mathf.PI * 2f));
-            cameraTransform.rotation = cameraRotation * Quaternion.Euler(
-                0.35f * passageArc,
-                0f,
-                (0.45f + 0.35f * lateralHeading) * passageArc);
-            seaStage.rotation = stageRotation;
-        }
-
-        private void RestoreBaseline()
-        {
-            if (voyageCamera != null)
-            {
-                voyageCamera.transform.position = cameraPosition;
-                voyageCamera.transform.rotation = cameraRotation;
-            }
-            if (seaStage != null)
-            {
-                seaStage.position = stagePosition;
-                seaStage.rotation = stageRotation;
-            }
+            cameraTransform.position = Vector3.Lerp(cameraTransform.position, position, blend);
+            cameraTransform.rotation = Quaternion.Slerp(cameraTransform.rotation, Quaternion.LookRotation(target - cameraTransform.position, Vector3.up), blend);
         }
 
         private void OnDisable()
         {
-            if (!IsPlaying) return;
-            RestoreBaseline();
-            IsPlaying = false;
-            transitionOpacity = 0f;
-        }
-
-        private void OnDestroy()
-        {
-            if (!IsPlaying) return;
-            RestoreBaseline();
-            IsPlaying = false;
-            transitionOpacity = 0f;
+            IsPlaying = false; initialized = false;
+            if (water != null) water.Unbind();
+            wake?.Clear();
         }
     }
 }
