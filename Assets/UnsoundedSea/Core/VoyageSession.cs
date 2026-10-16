@@ -230,7 +230,7 @@ namespace UnsoundedSea.Core
             var succeeded = false;
             switch (action.Kind)
             {
-                case VoyageActionKind.Select: succeeded = Select(action.StopId); break;
+                case VoyageActionKind.Select: succeeded = (phase == VoyagePhase.ChoosingRoute && selected?.Id == action.StopId) || Select(action.StopId); break;
                 case VoyageActionKind.SetSail: succeeded = SetSail(); break;
                 case VoyageActionKind.Arrive: succeeded = Arrive(); break;
                 case VoyageActionKind.Continue: succeeded = Continue(); break;

@@ -23,6 +23,8 @@ namespace UnsoundedSea.Runtime
         private static BattleDirector encounterDirector;
         private static bool unsavedOutcome;
 
+        internal static bool OwnsEncounter(BattleDirector director) => encounterDirector != null && encounterDirector == director;
+
         public static void StartNew(uint? seed = null)
         {
             var session = VoyageSession.Create(seed ?? NewSeed());

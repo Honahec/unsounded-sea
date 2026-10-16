@@ -206,6 +206,42 @@ namespace UnsoundedSea.Tests
             }));
         }
 
+        [Test]
+        public void RestoreAcceptsCanonicalizedRepeatedSelectionOnlyWhileChoosingRoute()
+        {
+            var session = VoyageSession.Create(18u);
+            var first = session.Choices[0].Id;
+            var second = session.Choices[1].Id;
+            Assert.That(session.Select(first), Is.True);
+            Assert.That(session.Select(first), Is.False);
+            Assert.That(session.ScoutAhead(), Is.True);
+            Assert.That(session.Select(second), Is.True);
+            Assert.That(session.Select(first), Is.True);
+
+            var restored = VoyageSession.Restore(session.Export());
+            var roundTripped = VoyageSession.Restore(restored.Export());
+            Assert.That(roundTripped.Selected.Id, Is.EqualTo(first));
+            Assert.That(roundTripped.LookoutUses, Is.EqualTo(session.LookoutUses));
+            Assert.That(roundTripped.KnownStops.Select(x => x.Id), Is.EqualTo(session.KnownStops.Select(x => x.Id)));
+            Assert.That(roundTripped.SetSail(), Is.True);
+            Assert.That(roundTripped.Arrive(), Is.True);
+            FinishArrival(roundTripped);
+            var continued = VoyageSession.Restore(roundTripped.Export());
+            Assert.That(continued.Current.Id, Is.EqualTo(roundTripped.Current.Id));
+            Assert.That(continued.Phase, Is.EqualTo(roundTripped.Phase));
+            Assert.That(continued.ElapsedHours, Is.EqualTo(roundTripped.ElapsedHours));
+
+            var sailing = VoyageSession.Create(18u);
+            Assert.That(sailing.Select(first), Is.True);
+            Assert.That(sailing.SetSail(), Is.True);
+            var invalid = sailing.Export();
+            invalid.History = invalid.History.Concat(new[]
+            {
+                new VoyageActionData { Kind = VoyageActionKind.Select, StopId = first }
+            }).ToArray();
+            Assert.Throws<ArgumentException>(() => VoyageSession.Restore(invalid));
+        }
+
 
         [Test]
         public void RepeatedRoutePreviewsRemainRestorableWithoutConsumingTravel()

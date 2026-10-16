@@ -66,7 +66,11 @@ namespace UnsoundedSea.Runtime
         private void OnKey(KeyDownEvent evt)
         {
             if (session == null) return;
-            if (evt.keyCode == KeyCode.Escape && chartOpen) CloseChart();
+            if (chartOpen)
+            {
+                if (evt.keyCode != KeyCode.Escape && evt.keyCode != KeyCode.M) return;
+                CloseChart();
+            }
             else if (evt.keyCode == KeyCode.M && !settingsOpen) ToggleChart();
             else if (settingsOpen) return;
             else if (evt.keyCode == KeyCode.Escape && menuOpen) ToggleMenu();
@@ -398,7 +402,7 @@ namespace UnsoundedSea.Runtime
             var controls = Element("turn-controls");
             if (definition.Objective == ObjectiveKind.Seal)
             {
-                var task = Button("objective-action", "", "task", () => Send(BattleCommand.Task()), view.CanAdvanceObjective);
+                var task = Button("objective-action", "", "task", () => Send(BattleCommand.Task()), playing && view.CanAdvanceObjective);
                 var drawnThisTurn = playing && !view.CanAdvanceObjective && view.Actions >= 1;
                 task.EnableInClassList("spent", drawnThisTurn);
                 var taskHead = Element("task-head");
@@ -439,6 +443,7 @@ namespace UnsoundedSea.Runtime
 
             if (chartOpen)
             {
+                foreach (var child in root.Children()) child.SetEnabled(false);
                 var chart = new VisualElement { name = "battle-chart-overlay" };
                 chart.AddToClassList("battle-chart-overlay");
                 chart.Add(new VoyageMapPanel(VoyageRuntime.Session, null, false));

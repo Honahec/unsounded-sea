@@ -190,7 +190,8 @@ namespace UnsoundedSea.Runtime
             foreach (var entry in entries.Skip(Math.Max(0, entries.Length - 12))) log.Add(Text(entry, "log-line"));
             sheet.Add(log);
             if (!end) sheet.Add(Button("battle-resume", "继续航行", () => director.SetPaused(false)));
-            sheet.Add(Button("battle-retry", "重新开始这场遭遇", () => { chartOpen = false; chartWasPaused = false; showSettings = false; director.Restart(); }));
+            if (!end || !VoyageRuntime.OwnsEncounter(director))
+                sheet.Add(Button("battle-retry", "重新开始这场遭遇", () => { chartOpen = false; chartWasPaused = false; showSettings = false; director.Restart(); }));
             sheet.Add(Button("battle-settings", "设置", () => { showSettings = true; Render(); }));
             sheet.Add(Button("battle-menu", "返回主菜单", () => SceneManager.LoadScene(menuScene)));
         }
