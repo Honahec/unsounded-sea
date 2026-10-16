@@ -49,8 +49,9 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 - `BattleStage.water` 可选接入 `BattleWater`，`surface` 指向同一海面 Renderer；使用 `Art/SeaBoss/DeepOcean.mat` 和 `DeepOceanMesh.asset`。水面保持水平、单位缩放，放在 Water（4）层，反射层排除水面；一场战斗只启用一个平面反射水体。当前网格为固定战斗镜头设计，不是无限海洋。
 - `BattleWater` 在每场开始克隆材质并创建反射组件，停用时恢复原材质、清理相机和 RT。`_SeaTime` 驱动全部水面动画，暂停冻结时钟及反射；减少动效时以 1/4 速率连续推进，不跳变相位。`_Threat` 保留海面角色的扰流和冲击反馈。避免直接修改共享材质。
 - 常态海况由两组基础波与四组方向、尺度、速度各异的相位扰动涌浪组成；浪尖按噪声破碎，巨兽周围持续产生宽范围不对称扰流。`DeepOcean.mat` 的 Storm 参数可在材质 Inspector 调整，修改后重开战斗刷新船体采样。`vesselFollowsWater` 使用同一组波参数、扰流和 `SeaTime` 驱动升沉/横移，船首尾与左右采样决定姿态，默认俯仰限 6°、横摇限 9°。换船后调整 `vesselSampleExtents`；这是平滑表现采样，尚非刚体浮力。暂停冻结海浪和船，减少动效保持船姿态，恢复时平滑追随。
+- `BattleWaterLighting.hlsl` 以水的约 2% 正入射反射率计算 GGX 高光，读取主光/Forward+ 点光的颜色、强度、衰减与阴影；法线像素方差抑制远处闪点。`Specular Tint` 为 0–1 色调，`Roughness` 控制展宽（有效 0.22–0.8），旧 Hardness/Size 不再使用。浪尖泡沫使用 `SurfFoam Color` 作为漫反射色覆盖水面，接受环境与直接光，不作自发光相加；接触泡沫仍为低亮度美术色。
 - PC 管线需要 **Depth Texture / Opaque Texture**；当前 Unity 6000.6.5f1、URP 17.6、Forward+ 已配置。`reflectionScale` 默认 0.5，降低可减少额外渲染成本。移动管线、XR、多相机/多水位组合尚未验收。
-- 上游版本、MIT 许可、原始哈希与本地补丁集中记录在 [UPSTREAM.json](../Assets/ThirdParty/UberStylizedWater/UPSTREAM.json)。只引入运行依赖，不依赖上游 Shader Graph 编辑插件。升级需重新应用时钟、风暴波形/法线/泡沫、扰流和反射补丁，并验证所有 Shader pass；不要用上游重新导出的 Shader 直接覆盖本地版。
+- 上游版本、MIT 许可、原始哈希与本地补丁集中记录在 [UPSTREAM.json](../Assets/ThirdParty/UberStylizedWater/UPSTREAM.json)。只引入运行依赖，不依赖上游 Shader Graph 编辑插件。升级需重新应用时钟、风暴波形/法线/泡沫、光照、扰流和反射补丁，并验证所有 Shader pass；不要用上游重新导出的 Shader 直接覆盖本地版。
 
 `OceanBattlePanel` 参考 1600×900；USS 位于 `Runtime/Battle/OceanBattleHud.uss`。局内不显示游戏、章节与地点标题；中央保留 3D 画面，生命／理智与行动使用左下圆形仪表，工具和结束回合使用印记式控件。手牌为扇形叠放，始终右牌覆盖左牌；悬停／聚焦只抬起牌面，不改变兄弟顺序，多牌横向滚动并随聚焦定位。卡牌保留精确规则、费用和消耗标记。敌人名牌与中央指针按战斗相机视口和 UI 根节点换算，不依赖反射渲染期间的 `Screen` 尺寸；名牌按头顶投影，详情向上展开；普通目标显示生命条，配置 `enemyStatus` 的巨兽只显示状态。共享 `EnemyIntentDetails` 将征兆按分号换行，候选行动逐行显示名称与数值效果，调查确认后只显示已确认行动；不提前泄露意图。中央指针通过相机射线选敌，历史调查按需查日志。字体使用项目现有 TextCore SDF。
 
