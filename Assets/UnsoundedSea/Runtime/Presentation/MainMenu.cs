@@ -89,6 +89,8 @@ namespace UnsoundedSea.Runtime
                 entries.Add(Entry("menu-quit", "04", "退出", "离开调查船", Quit));
             }
             if (!string.IsNullOrEmpty(error)) entries.Add(Text(error, "menu-error"));
+            else if (!string.IsNullOrEmpty(VoyageRuntime.EncounterSaveError))
+                entries.Add(Text("遭遇结果尚未保存，请选择继续航程重试：" + VoyageRuntime.EncounterSaveError, "menu-error"));
             column.Add(entries);
             column.Add(Text("方向键或鼠标选择 · Enter 确认", "menu-hint"));
             root.Add(column);
@@ -141,14 +143,13 @@ namespace UnsoundedSea.Runtime
                 Build("menu-continue");
                 return;
             }
-            var scene = VoyageRuntime.IsVoyageEncounter ? VoyageRuntime.BattleScene : voyageScene;
-            if (!Application.CanStreamedLevelBeLoaded(scene))
+            if (!Application.CanStreamedLevelBeLoaded(voyageScene))
             {
-                error = (VoyageRuntime.IsVoyageEncounter ? "战斗" : "航程") + "场景未加入构建列表。";
+                error = "航程场景未加入构建列表。";
                 Build("menu-continue");
                 return;
             }
-            SceneManager.LoadScene(scene);
+            SceneManager.LoadScene(voyageScene);
         }
         private static void Quit()
         {

@@ -1,12 +1,26 @@
 # 基础框架开发指南
 
-适用版本：Unity 6000.6.5f1 / URP。需求依据为 [概念设计](DESIGN_DOC_v0_1.md)。本文描述已实现的战斗基础、扩展接口和存档契约；新增机制提案见 [机制与素材设计](ASSET_MECHANICS_DESIGN.md)。
+适用版本：Unity 6000.6.5f1 / URP。需求依据为 [概念设计](DESIGN_DOC_v0_1.md)。本文描述已实现的战斗基础、局外航海、扩展接口和存档契约；新增机制提案见 [机制与素材设计](ASSET_MECHANICS_DESIGN.md)。
 
 ## 快速运行
 
-打开 `Assets/UnsoundedSea/Scenes/MainMenu.unity`，Play 后选择「开始调查」，进入 `OceanBattle.unity`。也可直接打开后者 Play。Editor 运行当前场景；pull 不会自动切换入口。`Battle.unity` 保留为旧规则样例，`ModelImportReview.unity` 仅供美术审阅。
+打开 `Assets/UnsoundedSea/Scenes/MainMenu.unity`，Play 后选择「开始新航程」或「继续航程」，进入 `Voyage.unity` 选路；已有存档时新航程需确认覆盖。可直接打开 `OceanBattle.unity` 验证主线战斗。Editor 运行当前场景；pull 不会自动切换入口。`Battle.unity` 保留为旧规则样例，`ModelImportReview.unity` 仅供美术审阅。
 
 首场「雾海来客」：调查船上同时出现祷告者和空潜水服。每回合 3 行动、抽 5 张牌，点击模型、投影名牌或左侧目标按钮选敌，点击手牌出牌。调查工具每场次数有限。每回合消耗 1 行动刻一段封线，累计 4 段获胜；敌人可以仍然存活。生命或理智归零失败。右上「航海日志」查看证据、暂停、设置或返回标题；终局可重开。
+
+## 航海选路（局外）
+
+- **先生成后探索**：开局由一个主种子生成六层完整有向无环图，7–13 个地点；每条完整航线经过六个地点、五段航行。拓扑、布局、内容、可见性和节点战斗种子独立派生；调查与动画不推进规则随机数。同种子复现以相同算法、版本和内容配置为前提。
+- **分支与合并**：普通可分支层按 40%／42%／18% 采样一个／两个／三个出口，即 60% 分支、分支中 30% 三出口。起点固定两个出口、终点前一层固定一个、终点零出口；后续层宽度适应采样，不用补边改变概率。只连接相邻层，100×100 图坐标上横向差不超过 34、直线距离不超过 40。
+- **纯海上内容**：补给母船出发，无声灯船收束；中途为漂流船、救生艇、浮台、浮标和海况观测点。地点名、征兆与说明成组生成，不拼接随机岸线。地图没有岛屿或陆地填色；装饰海流不代表可选择航路。
+- **知识边界**：开局只知道当前位置与两个出口，抵达后默认记录一条后续航路，提前侦察保留。HUD 只读取 `KnownStops / KnownRoutes / Choices`，连节点的 `Next` 也过滤未知连接；不画隐藏地点灰点或完整拓扑。
+- **航行工具**：旧海图、测绘望远镜各每航程两次，分别补齐当前未知出口、侦察选定目的地再往前一段。无新信息或状态不允许时不扣次数；不占战斗槽、不因进入战斗刷新、不改地图与遭遇。
+- **交互与动效**：默认中央为海面，左右为航向、工具与目的地；M 展开航图、J 展开日志、Esc 暂停。选择只预览，确认才出航。每段约 3.2 秒，由真实相机与独立海景根物体位移、轻微起伏及雾化表现；减少动效改为约 0.25 秒淡化且不位移、不摇晃。航行时收图，暂停／日志／设置停住推进，抵达只结算一次。
+- **战斗仅作边界对接**：航海侧使用主线已有的 `FogVisitors` Scenario（自带 `FogSealing` 规则模块），在 Director 的 `Start` 前传入节点种子，监听公开结果保存航程。当前遭遇节点共用这一现有场景，不额外制作战斗变体。不修改 `Runtime/Battle/`、旧 `BattleHud`、效果处理器或战斗场景。战斗原有重开与返回标题保留；返回标题后选择继续航程，回到海图或航程总结。未结算遭遇先恢复海图，再从该遭遇起点继续。
+
+`VoyageMapGenerator`／`VoyageSession` 属于纯 C# 航海规则；`VoyageRuntime` 负责场景边界与文件；`VoyageHud`／`VoyageSailingPresentation` 只负责交互和航行表现。当前航海海面、船舷与浮标仍为灰盒，不代表正式航海美术。
+
+补给、船员、完整多选事件、奖励及跨战斗生命／理智／卡组继承仍未实现；不要把选路闭环称为完整 Roguelike。
 
 ## 3D 战斗组合与扩展
 
@@ -28,9 +42,9 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 
 `OceanBattlePanel` 参考 1600×900；USS 位于 `Runtime/Battle/OceanBattleHud.uss`。四周工具与手牌让出中心 3D 空间，名牌每帧按角色头顶坐标投影；中央指针通过相机射线选择角色。UI 只读取 `BattleView`，未知意图保持候选说明；历史调查保存在日志中。手牌横向滚动支持超过五张；字体使用项目现有 TextCore SDF。
 
-`MainMenu` 与 `SettingsPanel` 复用原菜单/设置。`GameSettings` 的音量、全屏、垂直同步、减少动效属于设备偏好，不进入规则或回放。旧 `BattleHud` 仅服务 `Battle.unity`，不参与新战斗。
+`MainMenu` 与 `SettingsPanel` 复用原菜单/设置；标题入口现由航海模块接管。`GameSettings` 的音量、全屏、垂直同步、减少动效属于设备偏好，不进入规则或回放。旧 `BattleHud` 仅服务 `Battle.unity`，不参与新战斗。
 
-场景已入库，无需生成脚本才能运行。需要有意重建本场样例时，用 Unity CLI 执行 `Tools/OceanBattleSetup.cs` 的 `OceanBattleSetup.Build`；它会覆盖本场场景与配置，并更新标题入口，运行前先保存改动。`Tools/ImportSurveyVessel.cs` 负责选定船体版本的归一化；模型制作和 LFS 规范见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
+场景已入库，无需生成脚本才能运行。需要有意重建本场样例时，用 Unity CLI 执行 `Tools/OceanBattleSetup.cs` 的 `OceanBattleSetup.Build`；它会覆盖本场场景与配置，但不再覆盖由航海模块管理的标题入口。运行前先保存改动，构建列表保留既有 Voyage 项。`Tools/ImportSurveyVessel.cs` 负责选定船体版本的归一化；模型制作和 LFS 规范见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
 
 ## 层级与依赖
 
@@ -104,13 +118,15 @@ Project 右键 **Create → Unsounded Sea → Card**。填写唯一 `id`、名�
 
 ## 存档与复现
 
-存档包含格式版本、完整内容 SHA-256、初始种子和成功命令序列。恢复先验证版本与内容，再从头确定性重放，重建手牌、弃牌、消耗、工具次数、知识、目标和回合。非法操作序列会拒绝恢复，不会替换当前会话。
+单场战斗回放存档包含格式版本、完整内容 SHA-256、初始种子和成功命令序列。恢复先验证版本与内容，再从头确定性重放，重建手牌、弃牌、消耗、工具次数、知识、目标和回合。非法操作序列会拒绝恢复，不会替换当前会话。
 
 数据指纹覆盖卡组顺序、全部卡牌效果、敌人意图、工具和战斗参数；任何内容改变都会拒绝加载旧回放。修改效果处理算法、随机算法、自定义目标或其他规则时必须提升 `BattleReplay.CurrentVersion`，旧版本迁移尚未提供。自定义注册表/目标的实现本身不进入数据指纹，版本升级是调用方契约。该机制用于本地复现，不是防作弊方案。
 
 文件存储先写临时文件并 flush，再原子替换已有文件，保留旧 `.bak`；读失败不会自动覆盖或清空。默认实现面向桌面文件系统，WebGL/云存档需另实现 `IBattleSaveStore`。
 
-当前存档边界为单场战斗；完整航程、永久档案和多版本迁移尚未接入。后续航程状态应保存稳定内容 ID、访问路径、卡组、资源和已验证档案，不保存 Unity 对象引用。
+航海另用 `VoyageCheckpoint` 保存完整地图与成功命令历史，恢复路径、知识、预览、工具余次、小时数和阶段，不按新内容池重抽。当前地图生成器版本为 3，检查点格式为 2；不支持通用旧版迁移。文件为 `Application.persistentDataPath/voyage.json`，原子替换并保留 `.bak`；读取损坏文件不覆盖当前会话。遭遇结果若保存失败会保留在当前内存，标题提示通过继续航程重试。
+
+航海存档不包含局内操作：未结算遭遇从起点重开，航行中恢复则重播该段过场，不重复计段。单场 `BattleReplay` 接口仍独立存在，尚未组成完整航程战斗检查点。永久档案、跨战斗资源和通用版本迁移尚未接入。
 
 ## 验证与后续工作
 
@@ -121,7 +137,7 @@ Unity 菜单 **Unsounded Sea → Validate All Encounters** 可检查配置与未
 ```sh
 export UNITY_PROJECT_PATH="$PWD" # 在仓库根目录执行
 unity status --project-path "$UNITY_PROJECT_PATH" --format json
-unity command run_tests --project-path "$UNITY_PROJECT_PATH" --format json -- --mode editor --filter UnsoundedSea.Tests
+unity command run_tests --project-path "$UNITY_PROJECT_PATH" --timeout 180 --format json -- --mode editor --filter UnsoundedSea.Tests --timeout 120
 ```
 
 CI 中关闭本项目的交互式 Editor 后：
@@ -130,6 +146,6 @@ CI 中关闭本项目的交互式 Editor 后：
 unity test . --mode EditMode --filter UnsoundedSea.Tests --output Logs/framework-tests.xml --timeout 600
 ```
 
-本阶段不是完整 MVP：尚未实现完整 18 卡、显影粉/媒介、被注视与回视、跨局档案、事件和奖励内容、地图界面、完整 5–6 节点航程、正式骨骼动画与目标平台性能优化。下一步建议先接入 `RunMap` 的航程协调器，把现有遭遇、奖励选择和补给串联，再根据试玩扩充内容。
+本阶段已有六地点航线、迷雾航图、两件航行工具、三维航行转场和主线战斗入口对接，但不是完整 MVP。完整内容目录与顺序见 [内容扩展设计](CONTENT_EXPANSION_DESIGN.md)；航程资源、库存、船员、事件奖励、跨局档案和正式航海美术仍待制作，战斗扩展继续由其自身模块维护。下一步在现有选路与存档上承接内容，不另建第二套地图或协调器。
 
 已有测试与编辑器验证的日期、覆盖范围和限制见 [验证记录](FRAMEWORK_VALIDATION.md)。修改后应重新运行相关检查，旧记录不是新修订的验收结论。

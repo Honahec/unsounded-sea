@@ -16,6 +16,7 @@ namespace UnsoundedSea.Runtime
         [SerializeField] private StyleSheet interfaceStyle;
         [SerializeField] private StyleSheet menuStyle;
         [SerializeField] private VoyageSailingPresentation sailingPresentation;
+        [SerializeField] private BattleScenario encounterScenario;
         private VisualElement root;
         private IVisualElementScheduledItem sailing;
         private bool paused, settingsOpen, journalOpen, chartOpen, arrivalFade;
@@ -29,8 +30,9 @@ namespace UnsoundedSea.Runtime
             root.pickingMode = PickingMode.Ignore;
             try
             {
-                if (interfaceFont == null || interfaceStyle == null || menuStyle == null || sailingPresentation == null)
-                    throw new InvalidOperationException("Assign the voyage font, stylesheets and 3D sailing presentation.");
+                if (interfaceFont == null || interfaceStyle == null || menuStyle == null || sailingPresentation == null ||
+                    encounterScenario == null)
+                    throw new InvalidOperationException("Assign the voyage font, stylesheets, sailing presentation and encounter entries.");
                 root.style.unityFontDefinition = FontDefinition.FromSDFFont(interfaceFont);
                 if (!root.styleSheets.Contains(menuStyle)) root.styleSheets.Add(menuStyle);
                 if (!root.styleSheets.Contains(interfaceStyle)) root.styleSheets.Add(interfaceStyle);
@@ -98,7 +100,7 @@ namespace UnsoundedSea.Runtime
         private void EnterEncounter()
         {
             if (paused || !string.IsNullOrEmpty(saveError)) return;
-            try { VoyageRuntime.EnterEncounter(); }
+            try { VoyageRuntime.EnterEncounter(encounterScenario); }
             catch (Exception exception) { notice = "无法进入遭遇 / " + exception.Message; Refresh(); }
         }
         private static string PhaseName(VoyagePhase phase)
@@ -130,6 +132,8 @@ namespace UnsoundedSea.Runtime
                 root.Add(error); return;
             }
             var session = Session;
+            var selected = session.Selected;
+            var ended = session.Phase == VoyagePhase.Completed || session.Phase == VoyagePhase.Failed;
             var header = Element("voyage-header");
             var heading = Element("voyage-heading");
             heading.Add(Text("THE UNSOUNDED SEA / GREY MIST PASSAGE", "overline"));
@@ -158,9 +162,9 @@ namespace UnsoundedSea.Runtime
                     var destination = stop;
                     var choice = Action("route-" + stop.Id, session.HeadingTo(stop) + " / " + stop.Name, "route-choice",
                         () => Change(() => Session.Select(destination.Id)), string.IsNullOrEmpty(saveError));
-                    choice.EnableInClassList("selected", session.Selected?.Id == stop.Id); report.Add(choice);
+                    choice.EnableInClassList("selected", selected?.Id == stop.Id); report.Add(choice);
                 }
-            else if (session.Phase == VoyagePhase.Completed || session.Phase == VoyagePhase.Failed)
+            else if (ended)
                 report.Add(Text("本次航路已封存。可以查阅日志或返回标题。", "muted"));
             else report.Add(Text(session.Phase == VoyagePhase.Sailing ? "航向已确认。抵达前不能改变目的地。" : "先处理当前地点，再决定下一段航向。", "muted"));
             report.Add(Text("航海工具 / 本航程次数", "section-label"));
@@ -172,9 +176,9 @@ namespace UnsoundedSea.Runtime
             {
                 chartOpen = true; Change(Session.ScoutAhead, "远望记录已加入海图，仅补记选定航向的下一段。");
             }, session.CanScoutAhead && string.IsNullOrEmpty(saveError)));
-            report.Add(Text(session.Phase == VoyagePhase.Completed || session.Phase == VoyagePhase.Failed
+            report.Add(Text(ended
                 ? "本次航程已经结束，工具不再消耗。"
-                : session.Selected == null ? "先选航向才能远望。没有新信息时不消耗次数。" : "道具只扩展已知航路，不改变地图或遭遇。", "fine-print"));
+                : selected == null ? "先选航向才能远望。没有新信息时不消耗次数。" : "道具只扩展已知航路，不改变地图或遭遇。", "fine-print"));
             workspace.Add(report);
 
             VoyageChart chart = null;
@@ -196,13 +200,13 @@ namespace UnsoundedSea.Runtime
             else
             {
                 var sea = Element("sea-window");
-                sea.Add(Text(session.Selected == null ? "海雾以外，尚有未测之路" : "下一航向 / " + session.HeadingTo(session.Selected), "sea-bearing"));
-                sea.Add(Text("展开海图规划航路，或从左侧选择已知航向。", "sea-note")); workspace.Add(sea);
+                sea.Add(Text(ended ? "航路已封存" : selected == null ? "海雾以外，尚有未测之路" : "下一航向 / " + session.HeadingTo(selected), "sea-bearing"));
+                sea.Add(Text(ended ? "查看本次航图与日志，或返回标题。" : "展开海图规划航路，或从左侧选择已知航向。", "sea-note")); workspace.Add(sea);
             }
             var destinationPanel = Element("destination-panel");
             BuildDestination(destinationPanel, session, chart); workspace.Add(destinationPanel); root.Add(workspace);
             var footer = Element("voyage-footer");
-            footer.Add(Text(notice ?? "选择航向只作预览。确认启航后，调查船沿已选路线自动前进。", "footer-note"));
+            footer.Add(Text(ended ? "本次航程已结束，已知航路与观测仍可回看。" : notice ?? "选择航向只作预览。确认启航后，调查船沿已选路线自动前进。", "footer-note"));
             footer.Add(Text($"航程种子 {session.Seed} / 迷雾遮蔽知识，不改写航路", "footer-motto")); root.Add(footer);
             if (arrivalFade)
             {
@@ -266,7 +270,7 @@ namespace UnsoundedSea.Runtime
                     if (!encounter) panel.Add(Text("记录航路观测，不自动补充资源或发放奖励。", "fine-print")); break;
                 case VoyagePhase.Encounter:
                     panel.Add(Text("调查尚未结算。继续时从本场遭遇开始，局内操作不属于航海存档。", "body"));
-                    panel.Add(Action("resume-encounter", "继续遭遇调查", "primary", () => SceneManager.LoadScene(VoyageRuntime.BattleScene), saved)); break;
+                    panel.Add(Action("resume-encounter", "继续遭遇调查", "primary", EnterEncounter, saved)); break;
                 case VoyagePhase.Completed:
                     panel.Add(Text("你带回了航路记录，而不是深渊的全部解释。", "body"));
                     panel.Add(Action("voyage-finish", "返回标题", "primary", () => SceneManager.LoadScene(VoyageRuntime.MainMenuScene))); break;

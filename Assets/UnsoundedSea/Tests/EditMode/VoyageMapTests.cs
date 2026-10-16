@@ -24,7 +24,6 @@ namespace UnsoundedSea.Tests
             Assert.That(plan.Stops.Select(x => x.Name), Is.Unique);
             Assert.That(stops[plan.StartId].Next.Count, Is.EqualTo(2));
             Assert.That(stops[plan.GoalId].Kind, Is.EqualTo(RunNodeKind.Boss));
-            Assert.That(stops[plan.GoalId].EncounterId, Is.EqualTo("seal"));
             Assert.That(stops[plan.GoalId].Next, Is.Empty);
 
             var incoming = plan.Stops.ToDictionary(x => x.Id, x => 0, StringComparer.Ordinal);

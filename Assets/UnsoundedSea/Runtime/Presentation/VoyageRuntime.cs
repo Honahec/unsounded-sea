@@ -11,19 +11,25 @@ namespace UnsoundedSea.Runtime
     public static class VoyageRuntime
     {
         public const string VoyageScene = "Voyage";
-        public const string BattleScene = "Battle";
+        public const string BattleScene = "OceanBattle";
         public const string MainMenuScene = "MainMenu";
 
         public static VoyageSession Session { get; private set; }
         public static bool HasSavedVoyage => File.Exists(SavePath);
         public static string SavePath => Path.Combine(Application.persistentDataPath, "voyage.json");
         public static bool IsVoyageEncounter => Session != null && Session.Phase == VoyagePhase.Encounter;
+        public static string EncounterSaveError { get; private set; }
+        private static BattleScenario pendingScenario;
+        private static BattleDirector encounterDirector;
+        private static bool unsavedOutcome;
 
         public static void StartNew(uint? seed = null)
         {
             var session = VoyageSession.Create(seed ?? NewSeed());
             Save(session.Export());
             Session = session;
+            unsavedOutcome = false;
+            EncounterSaveError = null;
         }
 
         private static uint NewSeed()
@@ -37,6 +43,7 @@ namespace UnsoundedSea.Runtime
         {
             try
             {
+                if (unsavedOutcome) Checkpoint();
                 if (!HasSavedVoyage)
                     throw new FileNotFoundException("未找到航程存档。", SavePath);
                 var checkpoint = Load();
@@ -56,15 +63,21 @@ namespace UnsoundedSea.Runtime
         {
             if (Session == null) throw new InvalidOperationException("没有可保存的航程。");
             Save(Session.Export());
+            unsavedOutcome = false;
+            EncounterSaveError = null;
         }
 
-        public static void EnterEncounter()
+        public static void EnterEncounter(BattleScenario scenario)
         {
             if (Session == null) throw new InvalidOperationException("没有进行中的航程。");
+            if (pendingScenario != null) return;
+            if (scenario == null || scenario.encounter == null || scenario.encounter.id != Session.Current.EncounterId)
+                throw new InvalidOperationException("航图节点与战斗场景配置不匹配。");
+            scenario.ValidatePresentation();
             if (!Application.CanStreamedLevelBeLoaded(BattleScene))
                 throw new InvalidOperationException("战斗场景未加入构建列表。");
             var previous = Session.Export();
-            if (!Session.BeginEncounter())
+            if (!IsVoyageEncounter && !Session.BeginEncounter())
                 throw new InvalidOperationException("当前位置不能开始遭遇。");
             try { Checkpoint(); }
             catch
@@ -72,25 +85,48 @@ namespace UnsoundedSea.Runtime
                 Session = VoyageSession.Restore(previous);
                 throw;
             }
+            pendingScenario = scenario;
+            SceneManager.sceneLoaded -= ConfigureEncounter;
+            SceneManager.sceneLoaded += ConfigureEncounter;
             SceneManager.LoadScene(BattleScene);
         }
 
-        public static void ReturnFromBattle(bool victory)
+        private static void ConfigureEncounter(Scene scene, LoadSceneMode mode)
         {
-            if (Session == null || Session.Phase != VoyagePhase.Encounter)
-                throw new InvalidOperationException("没有等待结算的航程遭遇。");
-            if (!Application.CanStreamedLevelBeLoaded(VoyageScene))
-                throw new InvalidOperationException("航程场景未加入构建列表。");
-            var previous = Session.Export();
-            if (!Session.ResolveEncounter(victory))
-                throw new InvalidOperationException("航程遭遇无法结算。");
+            if (scene.name != BattleScene) return;
+            SceneManager.sceneLoaded -= ConfigureEncounter;
+            encounterDirector = UnityEngine.Object.FindAnyObjectByType<BattleDirector>();
+            if (encounterDirector == null) throw new InvalidOperationException("OceanBattle 场景缺少 BattleDirector。");
+            encounterDirector.scenario = pendingScenario;
+            encounterDirector.seed = Session.Current.BattleSeed;
+            pendingScenario = null;
+            encounterDirector.Changed += RecordEncounterOutcome;
+            SceneManager.sceneUnloaded += ReleaseEncounter;
+        }
+
+        private static void RecordEncounterOutcome()
+        {
+            if (encounterDirector == null || !IsVoyageEncounter) return;
+            var view = encounterDirector.View;
+            if (view == null) return;
+            var phase = view.Phase;
+            if (phase != BattlePhase.Victory && phase != BattlePhase.Defeat) return;
+            if (!Session.ResolveEncounter(phase == BattlePhase.Victory)) return;
+            unsavedOutcome = true;
             try { Checkpoint(); }
-            catch
+            catch (Exception exception)
             {
-                Session = VoyageSession.Restore(previous);
-                throw;
+                EncounterSaveError = exception.Message;
+                Debug.LogError("航程结算尚未保存，返回标题后选择继续航程重试：" + exception.Message);
             }
-            SceneManager.LoadScene(VoyageScene);
+        }
+
+        private static void ReleaseEncounter(Scene scene)
+        {
+            if (scene.name != BattleScene) return;
+            SceneManager.sceneUnloaded -= ReleaseEncounter;
+            if (encounterDirector != null) encounterDirector.Changed -= RecordEncounterOutcome;
+            encounterDirector = null;
         }
 
         private static VoyageCheckpoint Load()

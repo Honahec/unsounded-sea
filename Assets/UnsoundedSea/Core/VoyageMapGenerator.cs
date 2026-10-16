@@ -127,7 +127,7 @@ namespace UnsoundedSea.Core
 
     public static class VoyageMapGenerator
     {
-        public const int Version = 2;
+        public const int Version = 3;
         private const int Layers = 6;
         private static readonly (string Name, string Clue, string Description)[] StopTexts =
         {
@@ -169,7 +169,7 @@ namespace UnsoundedSea.Core
                     x += Jitter(layout, 1);
                     var y = 12f + layer * 15f + Jitter(layout >> 8, 1);
                     var kind = OrdinaryKinds[(int)(content % (uint)OrdinaryKinds.Length)];
-                    var encounter = kind == RunNodeKind.Battle ? ((content & 4) == 0 ? "ordinary" : "unknown") : string.Empty;
+                    var encounter = kind == RunNodeKind.Battle ? "fog-visitors" : string.Empty;
                     string name, clue, description;
                     var hours = layer == 0 ? 0 : 3 + (int)((content >> 24) % 6);
                     if ((layer == 1 || layer == 3) && index == 0)
@@ -186,7 +186,7 @@ namespace UnsoundedSea.Core
                     {
                         name = "无声灯船"; clue = "一艘旧灯船停在雾中，信号灯始终熄灭";
                         description = "灯船下层舱窗透出微弱反光，接驳口旁留着旧值班记录。";
-                        kind = RunNodeKind.Boss; encounter = "seal";
+                        kind = RunNodeKind.Boss; encounter = "fog-visitors";
                     }
                     else
                     {
@@ -261,10 +261,9 @@ namespace UnsoundedSea.Core
                 if (stop.TravelHours < 0 || stop.TravelHours > 24) throw Invalid("Invalid travel time.");
                 if (!Enum.IsDefined(typeof(RunNodeKind), stop.Kind) || stop.EncounterId == null || stop.Next == null || stop.Next.Length > 3) throw Invalid("Invalid stop kind, encounter, or routes.");
                 if (stop.Next.Any(x => !ValidId(x)) || stop.Next.Distinct(StringComparer.Ordinal).Count() != stop.Next.Length) throw Invalid("Invalid or duplicate route.");
-                var battle = stop.Kind == RunNodeKind.Battle;
-                if ((battle && stop.EncounterId != "ordinary" && stop.EncounterId != "unknown") ||
-                    (stop.Kind == RunNodeKind.Boss && stop.EncounterId != "seal") ||
-                    (!battle && stop.Kind != RunNodeKind.Boss && !string.IsNullOrEmpty(stop.EncounterId))) throw Invalid("Invalid encounter content.");
+                var encounter = stop.Kind == RunNodeKind.Battle || stop.Kind == RunNodeKind.Boss;
+                if ((encounter && stop.EncounterId != "fog-visitors") ||
+                    (!encounter && !string.IsNullOrEmpty(stop.EncounterId))) throw Invalid("Invalid encounter content.");
             }
             if (data.Stops.Select(x => x.Name).Distinct(StringComparer.Ordinal).Count() != data.Stops.Length) throw Invalid("Stop names must be unique.");
             if (data.Stops.Any(x => x.BattleSeed != VoyageSeeds.Derive(data.Seed, "battle", x.Id))) throw Invalid("Invalid battle seed domain.");

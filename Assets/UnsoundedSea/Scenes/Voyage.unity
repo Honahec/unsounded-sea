@@ -719,6 +719,7 @@ MonoBehaviour:
   interfaceStyle: {fileID: 7433441132597879392, guid: 722bc963923a34af596fac4505e3f068, type: 3}
   menuStyle: {fileID: 7433441132597879392, guid: 5944e187946754d54b2135ec664ad890, type: 3}
   sailingPresentation: {fileID: 1184011520}
+  encounterScenario: {fileID: 11400000, guid: 580c88669e831483ebd024807d14fe7d, type: 2}
 --- !u!114 &1184011520
 MonoBehaviour:
   m_ObjectHideFlags: 0
