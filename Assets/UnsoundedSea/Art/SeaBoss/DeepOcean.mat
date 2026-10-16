@@ -14,7 +14,6 @@ Material:
   m_ValidKeywords:
   - _ENABLENORMAL
   - _ENABLEPLANERREFLECTION
-  - _ENABLEREFRACTION
   - _ENABLEWAVE
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -73,11 +72,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _1st_Wave_Height: 1.4
+    - _1st_Wave_Height: 0.75
     - _1st_Wave_Length: 45
     - _1st_Wave_Sharpness: 0.18
     - _1st_Wave_Speed: 0.85
-    - _2nd_Wave_Height: 0.6
+    - _2nd_Wave_Height: 0.35
     - _2nd_Wave_Length: 22
     - _2nd_Wave_Sharpness: 0.12
     - _2nd_Wave_Speed: 0.72
@@ -95,7 +94,7 @@ Material:
     - _ENABLECAUSTICS: 0
     - _ENABLENORMAL: 1
     - _ENABLEPLANERREFLECTION: 1
-    - _ENABLEREFRACTION: 1
+    - _ENABLEREFRACTION: 0
     - _ENABLESHORELINE: 0
     - _ENABLEWAVE: 1
     - _ENABLE_UNDERWATERLAYER: 0
@@ -110,15 +109,15 @@ Material:
     - _InterSec_GradientDissolve: 0
     - _InterSec_Width: 1.1
     - _Invert_SurfFoam: 0
-    - _Normal_DistanceStrength: 0.075
-    - _Normal_Pan: 0.09
+    - _Normal_DistanceStrength: 0.28
+    - _Normal_Pan: 0.19
     - _Normal_Scale: 8
-    - _Normal_Strength: 0.85
+    - _Normal_Strength: 1.1
     - _QueueControl: -1
     - _QueueOffset: 0
-    - _Reflection_Distortion: 1.2
-    - _Reflection_Fresnel: 1.5
-    - _Reflection_Strength: 0.95
+    - _Reflection_Distortion: 4.5
+    - _Reflection_Fresnel: 2.8
+    - _Reflection_Strength: 0.42
     - _Refraction_Distance_Fade: 0.5
     - _Refraction_Distance_Strength: 0.01
     - _Refraction_Strength: 0.04
@@ -134,11 +133,12 @@ Material:
     - _SL_Trail_Fade: 1
     - _SL_WaterDepth: 0.3
     - _SeaTime: 0
-    - _ShoreFade: 1
+    - _ShoreFade: 0
     - _ShoreFade_Smoothness: 0.25
     - _Specular_Hardness: 0.15
     - _Specular_Size: 0.15
     - _Specular_Spread: 0.45
+    - _StormStrength: 1
     - _SurfFoam_AlphaBlend: 0.75
     - _SurfFoam_Edge: 0.08
     - _SurfFoam_EdgeSmooth: 0.16
@@ -150,13 +150,13 @@ Material:
     - _UnderWater_Start: 5
     - _Underwater_Fade: 15
     - _UseSeaTime: 1
-    - _Water_Depth: 2.5
+    - _Water_Depth: 0.4
     - _WorldSpaceDepth: 1
     m_Colors:
     - _1st_Wave_Direction: {r: 0.8, g: 0, b: 0.6, a: 0}
     - _2nd_Wave_Direction: {r: -0.4, g: 0, b: 0.9, a: 0}
-    - _Color_Deep: {r: 0.018, g: 0.065, b: 0.08, a: 1}
-    - _Color_Shallow: {r: 0.08, g: 0.19, b: 0.2, a: 0.65}
+    - _Color_Deep: {r: 0.012, g: 0.032, b: 0.037, a: 1}
+    - _Color_Shallow: {r: 0.025, g: 0.068, b: 0.072, a: 1}
     - _InterSec_Color: {r: 0.28, g: 0.39, b: 0.38, a: 0.75}
     - _InterSec_Foam_Pan: {r: 0.035, g: 0.015, b: 0, a: 0}
     - _InterSec_Foam_Tile: {r: 1, g: 1, b: 0, a: 0}
@@ -165,12 +165,16 @@ Material:
     - _SL_MaskTile: {r: 1, g: 1, b: 0, a: 0}
     - _ShadowColor: {r: 0, g: 0, b: 0, a: 0.6}
     - _Specular_Color: {r: 1.3, g: 1.8, b: 1.9, a: 1}
+    - _StormWaveA: {r: 0.35, g: 63, b: 1.6, a: 0.9}
+    - _StormWaveB: {r: 1.7, g: 37, b: 1.1, a: 0.8}
+    - _StormWaveC: {r: -0.8, g: 21, b: 0.6, a: 1.1}
+    - _StormWaveD: {r: 2.6, g: 13, b: 0.35, a: 0.95}
     - _SurfFoam_Color: {r: 0.16, g: 0.27, b: 0.28, a: 0.3}
     - _SurfFoam_Pan: {r: 0.015, g: 0.025, b: 0, a: 0}
     - _SurfFoam_Tile: {r: 1, g: 1, b: 0, a: 0}
     - _SurfaceDistortion_Pan: {r: 0.04, g: 0.02, b: 0, a: 0}
     - _Threat: {r: 0, g: 0, b: 0, a: 0}
     - _Underwater_Color: {r: 0, g: 0, b: 0, a: 0.5019608}
-    - _Wave_Top_Color: {r: 0.07, g: 0.16, b: 0.18, a: 0.12}
+    - _Wave_Top_Color: {r: 0.07, g: 0.13, b: 0.14, a: 0.15}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

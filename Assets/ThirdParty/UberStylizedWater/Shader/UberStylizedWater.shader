@@ -4,6 +4,11 @@ Shader "UberStylizedWater"
     {
         [HideInInspector] _UseSeaTime("Use Battle Clock", Float) = 0
         [HideInInspector] _SeaTime("Battle Clock", Float) = 0
+        _StormStrength("Storm Swell Strength", Range(0,2)) = 0
+        _StormWaveA("Storm A: heading, length, height, speed", Vector) = (0.35,63,1.6,0.9)
+        _StormWaveB("Storm B", Vector) = (1.7,37,1.1,0.8)
+        _StormWaveC("Storm C", Vector) = (-0.8,21,0.6,1.1)
+        _StormWaveD("Storm D", Vector) = (2.6,13,0.35,0.95)
         [HideInInspector] _Threat("Sea Actor XZ, Radius, Impact", Vector) = (0,0,0,0)
         [HDR]_Color_Shallow("Color_Shallow", Color) = (0.2269659, 0.822786, 0.4507858, 0)
         [HDR]_Color_Deep("Color_Deep", Color) = (0, 0.2541522, 0.4507858, 1)
@@ -614,6 +619,8 @@ Shader "UberStylizedWater"
         float _UseSeaTime;
         float _SeaTime;
         float4 _Threat;
+        float _StormStrength;
+        float4 _StormWaveA, _StormWaveB, _StormWaveC, _StormWaveD;
         float4 _ParallaxMapping_ca6a44575e7e4a939c2f1426afff27a2_Heightmap_1_Texture2D_TexelSize;
         float _Reflection_Strength;
         float _DistanceMask_Fade;
@@ -2194,8 +2201,11 @@ Shader "UberStylizedWater"
             float3 _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3 = IN.ObjectSpaceNormal;
             #endif
             description.Position = _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3;
-            description.Position += TransformWorldToObjectDir(float3(0, UnsoundedSeaWake(IN.WorldSpacePosition.xz, _Threat, _SeaTime), 0), false);
+            float2 stormGradient;
+            float stormHeight = UnsoundedSeaSurface(IN.WorldSpacePosition.xz, _Threat, _SeaTime, stormGradient);
+            description.Position += TransformWorldToObjectDir(float3(0, stormHeight, 0), false);
             description.Normal = _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3;
+            description.Normal = normalize(description.Normal + TransformWorldToObjectDir(float3(-stormGradient.x * 2, 0, -stormGradient.y * 2), false));
             description.Tangent = IN.ObjectSpaceTangent;
             return description;
         }
@@ -3343,6 +3353,8 @@ Shader "UberStylizedWater"
         float _UseSeaTime;
         float _SeaTime;
         float4 _Threat;
+        float _StormStrength;
+        float4 _StormWaveA, _StormWaveB, _StormWaveC, _StormWaveD;
         float4 _ParallaxMapping_ca6a44575e7e4a939c2f1426afff27a2_Heightmap_1_Texture2D_TexelSize;
         float _Reflection_Strength;
         float _DistanceMask_Fade;
@@ -4440,7 +4452,9 @@ Shader "UberStylizedWater"
             float3 _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3 = IN.ObjectSpacePosition;
             #endif
             description.Position = _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3;
-            description.Position += TransformWorldToObjectDir(float3(0, UnsoundedSeaWake(IN.WorldSpacePosition.xz, _Threat, _SeaTime), 0), false);
+            float2 stormGradient;
+            float stormHeight = UnsoundedSeaSurface(IN.WorldSpacePosition.xz, _Threat, _SeaTime, stormGradient);
+            description.Position += TransformWorldToObjectDir(float3(0, stormHeight, 0), false);
             return description;
         }
         
@@ -5241,6 +5255,8 @@ Shader "UberStylizedWater"
         float _UseSeaTime;
         float _SeaTime;
         float4 _Threat;
+        float _StormStrength;
+        float4 _StormWaveA, _StormWaveB, _StormWaveC, _StormWaveD;
         float4 _ParallaxMapping_ca6a44575e7e4a939c2f1426afff27a2_Heightmap_1_Texture2D_TexelSize;
         float _Reflection_Strength;
         float _DistanceMask_Fade;
@@ -6347,8 +6363,11 @@ Shader "UberStylizedWater"
             float3 _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3 = IN.ObjectSpaceNormal;
             #endif
             description.Position = _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3;
-            description.Position += TransformWorldToObjectDir(float3(0, UnsoundedSeaWake(IN.WorldSpacePosition.xz, _Threat, _SeaTime), 0), false);
+            float2 stormGradient;
+            float stormHeight = UnsoundedSeaSurface(IN.WorldSpacePosition.xz, _Threat, _SeaTime, stormGradient);
+            description.Position += TransformWorldToObjectDir(float3(0, stormHeight, 0), false);
             description.Normal = _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3;
+            description.Normal = normalize(description.Normal + TransformWorldToObjectDir(float3(-stormGradient.x * 2, 0, -stormGradient.y * 2), false));
             description.Tangent = IN.ObjectSpaceTangent;
             return description;
         }
@@ -7209,6 +7228,8 @@ Shader "UberStylizedWater"
         float _UseSeaTime;
         float _SeaTime;
         float4 _Threat;
+        float _StormStrength;
+        float4 _StormWaveA, _StormWaveB, _StormWaveC, _StormWaveD;
         float4 _ParallaxMapping_ca6a44575e7e4a939c2f1426afff27a2_Heightmap_1_Texture2D_TexelSize;
         float _Reflection_Strength;
         float _DistanceMask_Fade;
@@ -8789,8 +8810,11 @@ Shader "UberStylizedWater"
             float3 _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3 = IN.ObjectSpaceNormal;
             #endif
             description.Position = _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3;
-            description.Position += TransformWorldToObjectDir(float3(0, UnsoundedSeaWake(IN.WorldSpacePosition.xz, _Threat, _SeaTime), 0), false);
+            float2 stormGradient;
+            float stormHeight = UnsoundedSeaSurface(IN.WorldSpacePosition.xz, _Threat, _SeaTime, stormGradient);
+            description.Position += TransformWorldToObjectDir(float3(0, stormHeight, 0), false);
             description.Normal = _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3;
+            description.Normal = normalize(description.Normal + TransformWorldToObjectDir(float3(-stormGradient.x * 2, 0, -stormGradient.y * 2), false));
             description.Tangent = IN.ObjectSpaceTangent;
             return description;
         }
@@ -9942,6 +9966,8 @@ Shader "UberStylizedWater"
         float _UseSeaTime;
         float _SeaTime;
         float4 _Threat;
+        float _StormStrength;
+        float4 _StormWaveA, _StormWaveB, _StormWaveC, _StormWaveD;
         float4 _ParallaxMapping_ca6a44575e7e4a939c2f1426afff27a2_Heightmap_1_Texture2D_TexelSize;
         float _Reflection_Strength;
         float _DistanceMask_Fade;
@@ -11048,8 +11074,11 @@ Shader "UberStylizedWater"
             float3 _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3 = IN.ObjectSpaceNormal;
             #endif
             description.Position = _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3;
-            description.Position += TransformWorldToObjectDir(float3(0, UnsoundedSeaWake(IN.WorldSpacePosition.xz, _Threat, _SeaTime), 0), false);
+            float2 stormGradient;
+            float stormHeight = UnsoundedSeaSurface(IN.WorldSpacePosition.xz, _Threat, _SeaTime, stormGradient);
+            description.Position += TransformWorldToObjectDir(float3(0, stormHeight, 0), false);
             description.Normal = _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3;
+            description.Normal = normalize(description.Normal + TransformWorldToObjectDir(float3(-stormGradient.x * 2, 0, -stormGradient.y * 2), false));
             description.Tangent = IN.ObjectSpaceTangent;
             return description;
         }
@@ -11875,6 +11904,8 @@ Shader "UberStylizedWater"
         float _UseSeaTime;
         float _SeaTime;
         float4 _Threat;
+        float _StormStrength;
+        float4 _StormWaveA, _StormWaveB, _StormWaveC, _StormWaveD;
         float4 _ParallaxMapping_ca6a44575e7e4a939c2f1426afff27a2_Heightmap_1_Texture2D_TexelSize;
         float _Reflection_Strength;
         float _DistanceMask_Fade;
@@ -13455,8 +13486,11 @@ Shader "UberStylizedWater"
             float3 _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3 = IN.ObjectSpaceNormal;
             #endif
             description.Position = _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3;
-            description.Position += TransformWorldToObjectDir(float3(0, UnsoundedSeaWake(IN.WorldSpacePosition.xz, _Threat, _SeaTime), 0), false);
+            float2 stormGradient;
+            float stormHeight = UnsoundedSeaSurface(IN.WorldSpacePosition.xz, _Threat, _SeaTime, stormGradient);
+            description.Position += TransformWorldToObjectDir(float3(0, stormHeight, 0), false);
             description.Normal = _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3;
+            description.Normal = normalize(description.Normal + TransformWorldToObjectDir(float3(-stormGradient.x * 2, 0, -stormGradient.y * 2), false));
             description.Tangent = IN.ObjectSpaceTangent;
             return description;
         }

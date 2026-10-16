@@ -15,6 +15,8 @@ namespace UnsoundedSea.Runtime
         private MaterialPropertyBlock properties;
         private Wave firstWave, secondWave;
         private bool wavesEnabled;
+        private Vector4 stormA, stormB, stormC, stormD, currentThreat;
+        private float stormStrength;
 
         // Matches the pinned Uber shader's GersterWaveGenerator: cos height, negative sin horizontal offset.
         private struct Wave
@@ -37,9 +39,29 @@ namespace UnsoundedSea.Runtime
         }
 
         // A presentation sample at an undisplaced water point, not a physics buoyancy solver.
-        public Vector3 SampleDisplacement(Vector3 restWorldPosition) => wavesEnabled
-            ? firstWave.Sample(restWorldPosition, SeaTime) + secondWave.Sample(restWorldPosition, SeaTime)
-            : Vector3.zero;
+        public Vector3 SampleDisplacement(Vector3 restWorldPosition)
+        {
+            if (!wavesEnabled) return Vector3.zero;
+            var p = new Vector2(restWorldPosition.x, restWorldPosition.z);
+            float storm = (StormWave(p, stormA, 0.7f) + StormWave(p, stormB, 2.3f)
+                + StormWave(p, stormC, 4.1f) + StormWave(p, stormD, 5.8f)) * stormStrength;
+            var delta = p - new Vector2(currentThreat.x, currentThreat.y);
+            float d = delta.magnitude, angle = Mathf.Atan2(delta.y, delta.x);
+            float r = d - currentThreat.z + 12 * Mathf.Sin(angle * 3 + SeaTime * 0.17f) + 7 * Mathf.Sin(angle * 7 - SeaTime * 0.11f);
+            float envelope = currentThreat.z < 0.01f ? 0 : Mathf.Exp(-Mathf.Abs(r) * 0.018f) * Mathf.SmoothStep(0, 1, Mathf.InverseLerp(20, 65, d));
+            float wake = envelope * (Mathf.Sin(r * 0.16f - SeaTime * 0.75f + Mathf.Sin(angle * 4) * 0.8f) * 1.4f + Mathf.Sin(r * 0.29f + SeaTime * 0.61f + angle * 3) * 0.65f);
+            return firstWave.Sample(restWorldPosition, SeaTime) + secondWave.Sample(restWorldPosition, SeaTime) + Vector3.up * (storm + wake);
+        }
+
+        private float StormWave(Vector2 p, Vector4 wave, float offset)
+        {
+            var dir = new Vector2(Mathf.Cos(wave.x), Mathf.Sin(wave.x));
+            var side = new Vector2(-dir.y, dir.x);
+            float k = 2 * Mathf.PI / Mathf.Max(0.01f, wave.y);
+            float warp = Vector2.Dot(side, p) * k * 0.63f + SeaTime * 0.19f + offset;
+            float phase = Vector2.Dot(dir, p) * k - Mathf.Sqrt(9.8f * k) * SeaTime * wave.w + offset + 0.85f * Mathf.Sin(warp);
+            return wave.z * (Mathf.Cos(phase) + 0.22f * Mathf.Cos(2 * phase)) / 1.22f;
+        }
 
         public void Bind(Camera camera)
         {
@@ -53,6 +75,9 @@ namespace UnsoundedSea.Runtime
             wavesEnabled = instance.IsKeywordEnabled("_ENABLEWAVE");
             firstWave = Wave.Read(instance, "_1st_Wave_");
             secondWave = Wave.Read(instance, "_2nd_Wave_");
+            stormStrength = instance.GetFloat("_StormStrength");
+            stormA = instance.GetVector("_StormWaveA"); stormB = instance.GetVector("_StormWaveB");
+            stormC = instance.GetVector("_StormWaveC"); stormD = instance.GetVector("_StormWaveD");
             instance.SetFloat("_UseSeaTime", 1);
 
             var host = new GameObject("Battle water reflections");
@@ -76,6 +101,7 @@ namespace UnsoundedSea.Runtime
             if (instance == null) return;
             Reflections.suspended = paused;
             if (paused) return;
+            currentThreat = threat;
             // Integrating speed preserves phase when the accessibility setting changes.
             SeaTime += deltaTime * (reducedMotion ? 0.25f : 1f);
             surface.GetPropertyBlock(properties);

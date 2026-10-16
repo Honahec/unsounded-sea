@@ -20,27 +20,28 @@ public static class UberWaterSetup
         if (mat == null) { mat = new Material(shader); AssetDatabase.CreateAsset(mat, materialPath); }
         mat.shader = shader;
         foreach (var keyword in mat.shaderKeywords) mat.DisableKeyword(keyword);
-        foreach (var keyword in new[] { "_ENABLENORMAL", "_ENABLEWAVE", "_ENABLEPLANERREFLECTION", "_ENABLEREFRACTION" })
+        mat.SetFloat("_ENABLEREFRACTION", 0);
+        foreach (var keyword in new[] { "_ENABLENORMAL", "_ENABLEWAVE", "_ENABLEPLANERREFLECTION" })
         { mat.EnableKeyword(keyword); mat.SetFloat(keyword, 1); }
         mat.SetFloat("_UseSeaTime", 1);
         mat.SetFloat("_SeaTime", 0);
-        mat.SetColor("_Color_Deep", new Color(0.018f, 0.065f, 0.08f, 1));
-        mat.SetColor("_Color_Shallow", new Color(0.08f, 0.19f, 0.20f, 0.65f));
-        mat.SetColor("_Wave_Top_Color", new Color(0.07f, 0.16f, 0.18f, 0.12f));
-        mat.SetFloat("_Water_Depth", 2.5f);
+        mat.SetColor("_Color_Deep", new Color(0.012f, 0.032f, 0.037f, 1));
+        mat.SetColor("_Color_Shallow", new Color(0.025f, 0.068f, 0.072f, 1));
+        mat.SetColor("_Wave_Top_Color", new Color(0.07f, 0.13f, 0.14f, 0.15f));
+        mat.SetFloat("_Water_Depth", 0.4f);
         mat.SetFloat("_WorldSpaceDepth", 1);
         mat.SetFloat("_DistanceMask_Start", 20);
         mat.SetFloat("_DistanceMask_Fade", 100);
-        mat.SetFloat("_ShoreFade", 1);
+        mat.SetFloat("_ShoreFade", 0);
         mat.SetFloat("_ShoreFade_Smoothness", 0.25f);
         mat.SetTexture("_Normal_Map", Texture("Normal 1.png"));
         mat.SetFloat("_Normal_Scale", 8);
-        mat.SetFloat("_Normal_Strength", 0.85f);
-        mat.SetFloat("_Normal_DistanceStrength", 0.075f);
-        mat.SetFloat("_Normal_Pan", 0.09f);
-        mat.SetFloat("_Reflection_Strength", 0.95f);
-        mat.SetFloat("_Reflection_Fresnel", 1.5f);
-        mat.SetFloat("_Reflection_Distortion", 1.2f);
+        mat.SetFloat("_Normal_Strength", 1.1f);
+        mat.SetFloat("_Normal_DistanceStrength", 0.28f);
+        mat.SetFloat("_Normal_Pan", 0.19f);
+        mat.SetFloat("_Reflection_Strength", 0.42f);
+        mat.SetFloat("_Reflection_Fresnel", 2.8f);
+        mat.SetFloat("_Reflection_Distortion", 4.5f);
         mat.SetFloat("_Refraction_Strength", 0.04f);
         mat.SetFloat("_Refraction_Distance_Strength", 0.01f);
         mat.SetColor("_Specular_Color", new Color(1.3f, 1.8f, 1.9f, 1));
@@ -48,15 +49,20 @@ public static class UberWaterSetup
         mat.SetFloat("_Specular_Hardness", 0.15f);
         mat.SetFloat("_Specular_Size", 0.15f);
         mat.SetFloat("_1st_Wave_Length", 45);
-        mat.SetFloat("_1st_Wave_Height", 1.4f);
+        mat.SetFloat("_1st_Wave_Height", 0.75f);
         mat.SetFloat("_1st_Wave_Speed", 0.85f);
         mat.SetFloat("_1st_Wave_Sharpness", 0.18f);
         mat.SetVector("_1st_Wave_Direction", new Vector4(0.8f, 0, 0.6f, 0));
         mat.SetFloat("_2nd_Wave_Length", 22);
-        mat.SetFloat("_2nd_Wave_Height", 0.6f);
+        mat.SetFloat("_2nd_Wave_Height", 0.35f);
         mat.SetFloat("_2nd_Wave_Speed", 0.72f);
         mat.SetFloat("_2nd_Wave_Sharpness", 0.12f);
         mat.SetVector("_2nd_Wave_Direction", new Vector4(-0.4f, 0, 0.9f, 0));
+        mat.SetFloat("_StormStrength", 1);
+        mat.SetVector("_StormWaveA", new Vector4(0.35f, 63, 1.6f, 0.9f));
+        mat.SetVector("_StormWaveB", new Vector4(1.7f, 37, 1.1f, 0.8f));
+        mat.SetVector("_StormWaveC", new Vector4(-0.8f, 21, 0.6f, 1.1f));
+        mat.SetVector("_StormWaveD", new Vector4(2.6f, 13, 0.35f, 0.95f));
         mat.SetTexture("_SurfFoam_Map", Texture("Foam 1.png"));
         mat.SetTexture("_SurfaceDistortion_Map", Texture("Noise 1.png"));
         mat.SetFloat("_Enable_SurfaceFoam", 0);
@@ -145,7 +151,7 @@ public static class UberWaterSetup
         if (mesh == null) { mesh = new Mesh(); AssetDatabase.CreateAsset(mesh, path); }
         mesh.Clear(); mesh.name = "DeepOceanMesh"; mesh.indexFormat = IndexFormat.UInt32;
         mesh.vertices = points; mesh.normals = normals; mesh.tangents = tangents; mesh.uv = uv; mesh.triangles = indices;
-        mesh.bounds = new Bounds(new Vector3(0, 0, 130), new Vector3(4404, 8, 4544));
+        mesh.bounds = new Bounds(new Vector3(0, 0, 130), new Vector3(4404, 16, 4544));
         EditorUtility.SetDirty(mesh); AssetDatabase.SaveAssetIfDirty(mesh);
         return mesh;
     }

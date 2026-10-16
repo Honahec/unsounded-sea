@@ -209,6 +209,10 @@ namespace UberStylizedWater.Editor
             WaveProps("_1st");
             Header("Wave 2");
             WaveProps("_2nd");
+            Header("Storm swells");
+            Prop("_StormStrength", "Storm Strength", "Crossing irregular swells. Restart the battle after editing so vessel samples reload.");
+            foreach (var suffix in new[] { "A", "B", "C", "D" })
+                Prop("_StormWave" + suffix, "Storm " + suffix, "X heading (radians), Y wavelength (m), Z amplitude (m), W speed.");
         }
 
         void WaveProps(string prefix)
