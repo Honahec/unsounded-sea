@@ -1,0 +1,67 @@
+.ocean-ui { color: rgb(221, 217, 201); font-size: 15px; }
+.ocean-ui Label { white-space: normal; }
+.sea-top { position: absolute; top: 0; left: 0; right: 0; height: 104px; flex-direction: row; align-items: center; padding: 20px 40px; background-color: rgba(6, 16, 21, 0.91); border-bottom-width: 1px; border-bottom-color: rgba(183, 140, 85, 0.38); }
+.sea-title { flex-grow: 1; }
+.eyebrow { font-size: 11px; letter-spacing: 2px; color: rgb(159, 158, 137); }
+.chapter { font-size: 28px; margin-top: 7px; letter-spacing: 3px; }
+.vitals { flex-direction: row; margin-right: 40px; }
+.vital { width: 180px; margin-left: 30px; }
+.vital-value { font-size: 15px; margin-bottom: 9px; }
+.vital-track { height: 3px; background-color: rgb(40, 55, 55); }
+.vital-fill { height: 3px; background-color: rgb(145, 74, 63); }
+.sanity .vital-fill { background-color: rgb(103, 151, 152); }
+.sea-button, .target-button, .task-button { min-height: 38px; padding: 8px 12px; margin: 5px 0; border-radius: 0; border-width: 1px; border-color: rgba(166, 146, 107, 0.32); background-color: rgba(12, 28, 31, 0.8); color: rgb(215, 208, 184); -unity-text-align: middle-left; }
+.sea-button:hover, .target-button:hover, .task-button:hover { background-color: rgb(39, 59, 58); border-color: rgb(183, 140, 85); }
+.sea-button:focus, .target-button:focus, .task-button:focus, .sea-card:focus, .end-turn:focus { border-color: rgb(225, 196, 132); }
+.sea-button:disabled, .task-button:disabled, .end-turn:disabled { opacity: 0.35; }
+.intel-panel { position: absolute; left: 35px; top: 137px; width: 265px; padding: 18px; background-color: rgba(6, 18, 23, 0.86); border-left-width: 2px; border-left-color: rgb(95, 121, 119); }
+.target-button { font-size: 17px; margin-top: 13px; }
+.target-button.chosen { border-left-width: 3px; border-left-color: rgb(193, 157, 99); background-color: rgba(74, 70, 47, 0.55); }
+.clue { margin-top: 16px; font-size: 16px; color: rgb(179, 194, 190); }
+.intel-label { margin-top: 17px; margin-bottom: 6px; font-size: 11px; color: rgb(164, 145, 108); letter-spacing: 1px; }
+.intel-text { font-size: 14px; color: rgb(188, 192, 181); }
+.objective-panel { position: absolute; top: 140px; right: 35px; width: 245px; padding: 18px; background-color: rgba(6, 18, 23, 0.8); border-top-width: 1px; border-top-color: rgb(147, 121, 78); }
+.objective-title { font-size: 22px; margin-top: 18px; margin-bottom: 12px; }
+.objective-description { font-size: 15px; color: rgb(178, 194, 189); }
+.seal-row { flex-direction: row; margin-top: 20px; margin-bottom: 15px; }
+.seal { width: 39px; height: 39px; margin-right: 9px; border-width: 1px; border-color: rgb(71, 89, 87); color: rgb(94, 113, 109); -unity-text-align: middle-center; }
+.seal.complete { background-color: rgb(121, 101, 63); color: rgb(240, 222, 176); border-color: rgb(190, 155, 93); }
+.task-button { color: rgb(227, 197, 137); border-color: rgb(137, 115, 74); -unity-text-align: middle-center; }
+.fine-print { font-size: 11px; color: rgb(133, 155, 150); margin-top: 5px; }
+.defenses { margin-top: 18px; color: rgb(175, 194, 187); font-size: 13px; }
+.stage-caption { position: absolute; top: 117px; left: 330px; right: 320px; align-items: center; }
+.hand-area { position: absolute; bottom: 0; left: 0; right: 0; height: 262px; padding: 12px 35px 15px; background-color: rgba(5, 15, 20, 0.95); border-top-width: 1px; border-top-color: rgba(183, 140, 85, 0.35); }
+.hand-heading { flex-direction: row; align-items: center; height: 26px; margin-bottom: 7px; }
+.turn-label { width: 290px; font-size: 13px; color: rgb(155, 177, 172); }
+.action-count { flex-grow: 1; color: rgb(209, 177, 115); font-size: 18px; }
+.hand-row { flex-direction: row; flex-grow: 1; }
+.hand-scroll { flex-grow: 1; flex-shrink: 1; }
+.hand-scroll .unity-scroll-view__content-container { flex-direction: row; min-width: 100%; justify-content: center; }
+.sea-card { width: 180px; min-width: 180px; height: 190px; padding: 11px 14px; margin: 3px 10px 0 0; border-radius: 2px; border-width: 1px; border-color: rgb(94, 105, 89); background-color: rgb(23, 39, 41); color: rgb(221, 217, 201); -unity-text-align: upper-left; }
+.sea-card:hover { background-color: rgb(42, 57, 54); border-color: rgb(210, 178, 113); translate: 0 -3px; }
+.sea-card:disabled { opacity: 0.45; }
+.attack-card { border-top-color: rgb(157, 99, 76); }
+.card-head { flex-direction: row; justify-content: space-between; align-items: center; }
+.card-cost { font-size: 22px; color: rgb(226, 192, 127); }
+.card-type { font-size: 11px; color: rgb(146, 164, 155); }
+.card-glyph { height: 53px; margin-bottom: 4px; }
+.card-name { font-size: 18px; margin-bottom: 7px; }
+.card-description { font-size: 13px; color: rgb(161, 180, 172); }
+.end-turn { width: 156px; margin: 3px 0 0 20px; height: 190px; border-radius: 0; border-width: 1px; border-color: rgb(136, 109, 64); background-color: rgb(65, 59, 40); color: rgb(224, 206, 162); font-size: 18px; white-space: normal; }
+.end-turn:hover { background-color: rgb(88, 77, 47); }
+.battle-notice { position: absolute; bottom: 276px; left: 335px; right: 305px; padding: 9px 15px; -unity-text-align: middle-center; font-size: 13px; color: rgb(194, 203, 184); background-color: rgba(4, 15, 20, 0.75); }
+.actor-label { position: absolute; width: 170px; height: 49px; font-size: 13px; white-space: normal; color: rgb(188, 207, 201); background-color: rgba(6, 21, 25, 0.82); border-radius: 0; border-width: 0; border-bottom-width: 1px; border-bottom-color: rgb(99, 135, 128); }
+.actor-label.selected { color: rgb(235, 209, 153); border-bottom-color: rgb(212, 172, 103); }
+.ocean-modal { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(1, 8, 13, 0.91); }
+.ocean-sheet { width: 650px; max-height: 92%; padding: 30px 45px; background-color: rgb(15, 31, 35); border-width: 1px; border-color: rgb(142, 119, 76); }
+.modal-title { font-size: 32px; margin-bottom: 15px; letter-spacing: 4px; }
+.modal-copy { color: rgb(179, 195, 185); font-size: 16px; margin-bottom: 15px; }
+.journal { height: 180px; margin-bottom: 16px; }
+.log-line { font-size: 13px; color: rgb(133, 158, 152); margin-bottom: 6px; }
+
+.battle-surface { position: absolute; left: 0; right: 0; top: 104px; bottom: 262px; }
+
+.ocean-sheet .settings { position: relative; left: 0; top: 0; width: 100%; }
+.ocean-ui.reduced-motion .sea-card:hover { translate: 0 0; }
+.ocean-ui.reduced-motion Button { transition-duration: 0s; }
+.seal-row { flex-wrap: wrap; }

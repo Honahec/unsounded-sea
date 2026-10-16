@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a5669d6e551d4540831a5ab65d9dd9e, type: 3}
+  m_Name: FogSealing
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.SealingRuleModule
+  objectiveDescription: "\u5B8C\u6210\u56DB\u6BB5\u5C01\u7EBF\uFF0C\u9A76\u79BB\u56DE\u58F0\u6D77\u57DF"

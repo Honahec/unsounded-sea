@@ -1,0 +1,81 @@
+{
+  "provider": "Hyper3D Deemos Agent",
+  "date": "2026-10-16",
+  "thread": "https://hyper3d.ai/workspace/agent?project=5d2ea8e0-e8dc-4bb9-8437-3309d6f1c6ab&thread=da3e6b2c-a32d-4527-abc2-db97f9bf9194&lang=zh",
+  "high_generation": "5a1dd685-17f0-5b0d-b13a-6b6fe5ad1689",
+  "runtime_budget_triangles": 80000,
+  "files": [
+    {
+      "path": "ArtSource/Vessels/SurveyVessel_High.glb",
+      "sha256": "2123b143a5543badb9de72efd3b4159bd60f6ff1a16d997a4361e53e715647d4",
+      "bytes": 74417544,
+      "triangles": 800000,
+      "vertices": 571474,
+      "skins": 0,
+      "animations": 0,
+      "textures": [
+        {
+          "name": "texture_normal",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 4096,
+          "height": 4096
+        }
+      ]
+    },
+    {
+      "path": "Assets/UnsoundedSea/Art/Models/SurveyVessel_LOD0.glb",
+      "sha256": "fb0158aea6ec71727e24781982bd3067d7d78a5245e70730d5bc6061d43cce26",
+      "bytes": 54280384,
+      "triangles": 80000,
+      "vertices": 86280,
+      "skins": 0,
+      "animations": 0,
+      "textures": [
+        {
+          "name": "texture_normal_lowpoly",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_diffuse_lowpoly",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_metallic_lowpoly-texture_roughness_lowpoly",
+          "width": 4096,
+          "height": 4096
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "GLBs have base color, normal and packed metallic/roughness; emission delivered separately.",
+    "Static vessel; deck alignment is authored in SurveyVessel prefab."
+  ],
+  "unity": {
+    "prefab": "Assets/UnsoundedSea/Art/Prefabs/SurveyVessel.prefab",
+    "lengthMeters": 18,
+    "scale": 9.482137,
+    "authoredDeckY": 1.45,
+    "modelOffsetY": -3.0066,
+    "sourceBowAxis": "+Z",
+    "scene": "Assets/UnsoundedSea/Scenes/OceanBattle.unity"
+  },
+  "lfsVerification": {
+    "date": "2026-10-16",
+    "remoteBranch": "dev/ocean-battle",
+    "assetCommit": "56a27ff469e3f16b3459fa97ffcc60360ede77f2",
+    "method": "independent shallow clone, selective git lfs pull, SHA-256 comparison",
+    "highAndRuntimeMatch": true
+  }
+}
