@@ -1,0 +1,68 @@
+[
+  {
+    "name": "Prayer",
+    "triangles": 60000,
+    "meshes": 1,
+    "shader": "Shader Graphs/glTF-pbrMetallicRoughness",
+    "height": 1.8,
+    "feetY": 0,
+    "textures": [
+      {
+        "name": "texture_normal_lowpoly",
+        "width": 4096,
+        "height": 4096,
+        "mipmapCount": 13,
+        "format": "ARGB32"
+      },
+      {
+        "name": "texture_metallic_lowpoly-texture_roughness_lowpoly",
+        "width": 4096,
+        "height": 4096,
+        "mipmapCount": 13,
+        "format": "ARGB32"
+      },
+      {
+        "name": "texture_diffuse_lowpoly",
+        "width": 4096,
+        "height": 4096,
+        "mipmapCount": 13,
+        "format": "ARGB32"
+      }
+    ],
+    "prefab": "Assets/UnsoundedSea/Art/Prefabs/Prayer.prefab",
+    "guid": "9a52bfad4c848488c98968e7de84ef50"
+  },
+  {
+    "name": "Echo",
+    "triangles": 90000,
+    "meshes": 1,
+    "shader": "Shader Graphs/glTF-pbrMetallicRoughness",
+    "height": 2.1,
+    "feetY": 0,
+    "textures": [
+      {
+        "name": "texture_normal_lowpoly",
+        "width": 4096,
+        "height": 4096,
+        "mipmapCount": 13,
+        "format": "ARGB32"
+      },
+      {
+        "name": "texture_diffuse_lowpoly",
+        "width": 4096,
+        "height": 4096,
+        "mipmapCount": 13,
+        "format": "ARGB32"
+      },
+      {
+        "name": "texture_metallic_lowpoly-texture_roughness_lowpoly",
+        "width": 4096,
+        "height": 4096,
+        "mipmapCount": 13,
+        "format": "ARGB32"
+      }
+    ],
+    "prefab": "Assets/UnsoundedSea/Art/Prefabs/Echo.prefab",
+    "guid": "5d4814dbbf70a4f518acd57420affe6e"
+  }
+]
