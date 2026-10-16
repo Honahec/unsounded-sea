@@ -1,0 +1,158 @@
+using System;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnsoundedSea.Runtime;
+
+// Reapply after SeaBossSetup.Build; only replaces the encounter's water configuration.
+public static class UberWaterSetup
+{
+    const string Art = "Assets/UnsoundedSea/Art/SeaBoss";
+    const string Vendor = "Assets/ThirdParty/UberStylizedWater/Textures/";
+
+    public static object Build()
+    {
+        if (EditorApplication.isPlaying) throw new InvalidOperationException("Stop Play first.");
+        var shader = Shader.Find("UberStylizedWater");
+        if (shader == null || !shader.isSupported) throw new InvalidOperationException("Import Uber Stylized Water first.");
+        var materialPath = Art + "/DeepOcean.mat";
+        var mat = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+        if (mat == null) { mat = new Material(shader); AssetDatabase.CreateAsset(mat, materialPath); }
+        mat.shader = shader;
+        foreach (var keyword in mat.shaderKeywords) mat.DisableKeyword(keyword);
+        mat.SetFloat("_ENABLEREFRACTION", 0);
+        foreach (var keyword in new[] { "_ENABLENORMAL", "_ENABLEWAVE", "_ENABLEPLANERREFLECTION" })
+        { mat.EnableKeyword(keyword); mat.SetFloat(keyword, 1); }
+        mat.SetFloat("_UseSeaTime", 1);
+        mat.SetFloat("_SeaTime", 0);
+        mat.SetColor("_Color_Deep", new Color(0.012f, 0.032f, 0.037f, 1));
+        mat.SetColor("_Color_Shallow", new Color(0.025f, 0.068f, 0.072f, 1));
+        mat.SetColor("_Wave_Top_Color", new Color(0.07f, 0.13f, 0.14f, 0));
+        mat.SetFloat("_Water_Depth", 0.4f);
+        mat.SetFloat("_WorldSpaceDepth", 1);
+        mat.SetFloat("_DistanceMask_Start", 20);
+        mat.SetFloat("_DistanceMask_Fade", 100);
+        mat.SetFloat("_ShoreFade", 0);
+        mat.SetFloat("_ShoreFade_Smoothness", 0.25f);
+        mat.SetTexture("_Normal_Map", Texture("Normal 1.png"));
+        mat.SetFloat("_Normal_Scale", 8);
+        mat.SetFloat("_Normal_Strength", 1.1f);
+        mat.SetFloat("_Normal_DistanceStrength", 0.28f);
+        mat.SetFloat("_Normal_Pan", 0.19f);
+        mat.SetFloat("_Reflection_Strength", 0.3f);
+        mat.SetFloat("_Reflection_Fresnel", 2.8f);
+        mat.SetFloat("_Reflection_Distortion", 4.5f);
+        mat.SetFloat("_Refraction_Strength", 0.04f);
+        mat.SetFloat("_Refraction_Distance_Strength", 0.01f);
+        mat.SetColor("_Specular_Color", new Color(0.8f, 0.8f, 0.8f, 1));
+        mat.SetFloat("_Specular_Spread", 0.38f);
+        mat.SetFloat("_Specular_Hardness", 0);
+        mat.SetFloat("_Specular_Size", 0.15f);
+        mat.SetFloat("_1st_Wave_Length", 45);
+        mat.SetFloat("_1st_Wave_Height", 0.75f);
+        mat.SetFloat("_1st_Wave_Speed", 0.85f);
+        mat.SetFloat("_1st_Wave_Sharpness", 0.18f);
+        mat.SetVector("_1st_Wave_Direction", new Vector4(0.8f, 0, 0.6f, 0));
+        mat.SetFloat("_2nd_Wave_Length", 22);
+        mat.SetFloat("_2nd_Wave_Height", 0.35f);
+        mat.SetFloat("_2nd_Wave_Speed", 0.72f);
+        mat.SetFloat("_2nd_Wave_Sharpness", 0.12f);
+        mat.SetVector("_2nd_Wave_Direction", new Vector4(-0.4f, 0, 0.9f, 0));
+        mat.SetFloat("_StormStrength", 1);
+        mat.SetVector("_StormWaveA", new Vector4(0.35f, 63, 1.6f, 0.9f));
+        mat.SetVector("_StormWaveB", new Vector4(1.7f, 37, 1.1f, 0.8f));
+        mat.SetVector("_StormWaveC", new Vector4(-0.8f, 21, 0.6f, 1.1f));
+        mat.SetVector("_StormWaveD", new Vector4(2.6f, 13, 0.35f, 0.95f));
+        mat.SetTexture("_SurfFoam_Map", Texture("Foam 1.png"));
+        mat.SetTexture("_SurfaceDistortion_Map", Texture("Noise 1.png"));
+        mat.SetFloat("_Enable_SurfaceFoam", 0);
+        mat.SetColor("_SurfFoam_Color", new Color(0.78f, 0.82f, 0.8f, 0.3f));
+        mat.SetFloat("_SurfFoam_Scale", 8);
+        mat.SetFloat("_SurfFoam_AlphaBlend", 0.75f);
+        mat.SetFloat("_SurfFoam_Edge", 0.08f);
+        mat.SetFloat("_SurfFoam_EdgeSmooth", 0.16f);
+        mat.SetVector("_SurfFoam_Pan", new Vector4(0.015f, 0.025f, 0, 0));
+        mat.SetFloat("_SurfaceDistortion_Strength", 0.18f);
+        mat.SetVector("_SurfaceDistortion_Pan", new Vector4(0.04f, 0.02f, 0, 0));
+        mat.SetFloat("_Enable_Intersection", 1);
+        mat.SetTexture("_InterSec_Foam_Mask", Texture("Foam 1.png"));
+        mat.SetColor("_InterSec_Color", new Color(0.08f, 0.13f, 0.12f, 0.55f));
+        mat.SetFloat("_InterSec_Width", 1.1f);
+        mat.SetFloat("_InterSec_Dissolve", 1.2f);
+        mat.SetFloat("_InterSec_Foam_Scale", 2.4f);
+        mat.SetFloat("_InterSec_Foam_Smooth", 0.18f);
+        mat.SetFloat("_InterSec_Edge_Fade", 0.35f);
+        mat.SetVector("_InterSec_Foam_Pan", new Vector4(0.035f, 0.015f, 0, 0));
+        EditorUtility.SetDirty(mat);
+        AssetDatabase.SaveAssetIfDirty(mat);
+
+        var mesh = WaterMesh();
+        var path = Art + "/DrownedBellStage.prefab";
+        var root = PrefabUtility.LoadPrefabContents(path);
+        try
+        {
+            var stage = root.GetComponent<BattleStage>();
+            stage.fogColor = new Color(0.3f, 0.45f, 0.48f);
+            stage.fogDensity = 0.0025f;
+            var water = stage.ocean;
+            water.gameObject.layer = 4;
+            water.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            water.transform.localScale = Vector3.one;
+            water.GetComponent<MeshFilter>().sharedMesh = mesh;
+            water.sharedMaterial = mat;
+            water.shadowCastingMode = ShadowCastingMode.Off;
+            stage.water = root.GetComponent<BattleWater>() ?? root.AddComponent<BattleWater>();
+            stage.water.surface = water;
+            stage.water.reflectionScale = 0.5f;
+            stage.water.reflectionLayers = ~(1 << 4);
+            PrefabUtility.SaveAsPrefabAsset(root, path);
+        }
+        finally { PrefabUtility.UnloadPrefabContents(root); }
+        return new { materialPath, mesh.vertexCount, triangles = mesh.triangles.Length / 3 };
+    }
+
+    static Texture2D Texture(string name) => AssetDatabase.LoadAssetAtPath<Texture2D>(Vendor + name);
+
+    static float OceanCoordinate(float unit, float denseExtent, float farExtent)
+    {
+        float a=Mathf.Abs(unit), slope=denseExtent/0.8f;
+        float outer=Mathf.Max(0,a-0.8f)/0.2f;
+        return Mathf.Sign(unit)*(slope*a+(farExtent-slope)*outer*outer*outer);
+    }
+
+    static Mesh WaterMesh()
+    {
+        // Dense between vessel and Boss; extend behind and beside the exterior camera into fog.
+        const int width = 384, depth = 320;
+        var points = new Vector3[(width + 1) * (depth + 1)];
+        var normals = new Vector3[points.Length];
+        var tangents = new Vector4[points.Length];
+        var uv = new Vector2[points.Length];
+        for (int z = 0; z <= depth; z++)
+        for (int x = 0; x <= width; x++)
+        {
+            float u = (x / (float)width - 0.5f) * 2;
+            float v = z / (float)depth * 2 - 1;
+            var p = new Vector3(OceanCoordinate(u, 500, 2200), 0,
+                130 + OceanCoordinate(v, 600, 2270));
+            int i = z * (width + 1) + x;
+            points[i] = p; normals[i] = Vector3.up; tangents[i] = new Vector4(1, 0, 0, -1); uv[i] = new Vector2(p.x, p.z);
+        }
+        var indices = new int[width * depth * 6];
+        for (int z = 0, t = 0; z < depth; z++)
+        for (int x = 0; x < width; x++)
+        {
+            int i = z * (width + 1) + x;
+            indices[t++] = i; indices[t++] = i + width + 1; indices[t++] = i + 1;
+            indices[t++] = i + 1; indices[t++] = i + width + 1; indices[t++] = i + width + 2;
+        }
+        var path = Art + "/DeepOceanMesh.asset";
+        var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+        if (mesh == null) { mesh = new Mesh(); AssetDatabase.CreateAsset(mesh, path); }
+        mesh.Clear(); mesh.name = "DeepOceanMesh"; mesh.indexFormat = IndexFormat.UInt32;
+        mesh.vertices = points; mesh.normals = normals; mesh.tangents = tangents; mesh.uv = uv; mesh.triangles = indices;
+        mesh.bounds = new Bounds(new Vector3(0, 0, 130), new Vector3(4404, 16, 4544));
+        EditorUtility.SetDirty(mesh); AssetDatabase.SaveAssetIfDirty(mesh);
+        return mesh;
+    }
+}

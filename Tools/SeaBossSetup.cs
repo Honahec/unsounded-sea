@@ -35,6 +35,42 @@ public static class SeaBossSetup
         return material;
     }
 
+    // An exterior camera and world-scale separation keep the vessel readable as a tiny foreground subject.
+    static void ConfigureComposition(BattleStage stage)
+    {
+        var camera=stage.battleCamera;
+        camera.transform.localPosition=new Vector3(85,22,-26);
+        camera.transform.LookAt(stage.transform.TransformPoint(new Vector3(0,8,70)),stage.transform.up);
+        camera.fieldOfView=60;camera.farClipPlane=1800;
+        var anchor=stage.actorAnchors[0];
+        anchor.localPosition=new Vector3(0,-45.5f,260);
+        anchor.localScale=Vector3.one*6.5f;
+        var layout=anchor.GetComponent<BattleAnchor>();
+        layout.labelHeight=0.6f;layout.labelOffset=new Vector3(10,0,8);layout.waterRadius=91;
+        stage.fogColor=new Color(0.3f,0.45f,0.48f);stage.fogDensity=0.0025f;
+        stage.vesselFollowsWater=true;stage.placeholderCombatMotion=false;stage.cameraShake=0;
+        foreach(var light in stage.GetComponentsInChildren<Light>())
+        {
+            if(light.name=="Sea creature soft fill")
+            {light.transform.localPosition=new Vector3(-60,70,110);light.range=300;light.intensity=400;}
+            if(light.name=="Sea creature rim")
+            {light.transform.localPosition=new Vector3(60,100,280);light.range=250;light.intensity=450;}
+        }
+        var fill=stage.transform.Find("Vessel exterior fill");
+        var lightFill=fill!=null?fill.GetComponent<Light>():Obj("Vessel exterior fill",stage.transform,new Vector3(12,9,-8)).AddComponent<Light>();
+        lightFill.type=LightType.Point;lightFill.range=35;lightFill.intensity=100;
+        lightFill.color=new Color(0.43f,0.62f,0.7f);lightFill.shadows=LightShadows.None;
+    }
+
+    public static string ApplyComposition()
+    {
+        if(EditorApplication.isPlaying)throw new InvalidOperationException("Stop Play first.");
+        var path=Art+"/DrownedBellStage.prefab";var root=PrefabUtility.LoadPrefabContents(path);
+        try {ConfigureComposition(root.GetComponent<BattleStage>());PrefabUtility.SaveAsPrefabAsset(root,path);}
+        finally {PrefabUtility.UnloadPrefabContents(root);}
+        return "Exterior sea battle composition saved: 260 m separation, 208 m Boss, 18 m vessel.";
+    }
+
     public static object ImportModel()
     {
         var source=AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/Art/Models/BellMother_LOD0.glb");
@@ -76,7 +112,6 @@ public static class SeaBossSetup
         var layout=anchor.AddComponent<BattleAnchor>();layout.environment=BattleEnvironment.Sea;layout.labelHeight=0.85f;layout.labelOffset=new Vector3(-14,0.7f,0);layout.showSelectionRing=false;layout.heave=0.22f;layout.waterRadius=14;
         stage.actorAnchors=new[]{anchor.transform};stage.fogColor=new Color(0.13f,0.22f,0.24f);stage.fogDensity=0.009f;
         stage.vesselHeave=0.12f;stage.vesselPitch=0.55f;stage.vesselRoll=0.8f;stage.cameraShake=0.06f;
-        var camera=stage.battleCamera;camera.transform.position=new Vector3(0,3.2f,0);camera.transform.LookAt(new Vector3(0,4,60));camera.fieldOfView=52;camera.farClipPlane=240;
         foreach(var light in go.GetComponentsInChildren<Light>())
         {
             if(light.type==LightType.Directional){light.intensity=1.8f;light.color=new Color(0.55f,0.73f,0.76f);light.transform.rotation=Quaternion.Euler(30,-35,0);}
@@ -87,6 +122,7 @@ public static class SeaBossSetup
         stage.sanityCue=AssetDatabase.LoadAssetAtPath<AudioClip>(Art+"/DeepBell.wav");stage.feedback.volume=0.6f;
         // No objective chime on each survival tick: the creature's low bell remains the focal sound.
         stage.sealCue=null;
+        ConfigureComposition(stage);
         var stagePrefab=PrefabUtility.SaveAsPrefabAsset(go,Art+"/DrownedBellStage.prefab").GetComponent<BattleStage>();UnityEngine.Object.DestroyImmediate(go);
         var enemy=Asset<EnemyDefinition>(Root+"/Content/Enemies/bell-mother.asset",e=>
         {

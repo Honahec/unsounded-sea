@@ -74,8 +74,10 @@ namespace UnsoundedSea.Runtime
             surface.RegisterCallback<PointerDownEvent>(evt =>
             {
                 if (director.Stage == null || director.Paused || evt.button != 0) return;
-                var point = new Vector3(evt.position.x / root.resolvedStyle.width * Screen.width, Screen.height - evt.position.y / root.resolvedStyle.height * Screen.height, 0);
-                if (Physics.Raycast(director.Stage.battleCamera.ScreenPointToRay(point), out var hit))
+                // Use the battle viewport: an offscreen reflection render can change Screen dimensions.
+                var local = root.WorldToLocal(new Vector2(evt.position.x, evt.position.y));
+                var point = new Vector3(local.x / root.resolvedStyle.width, 1 - local.y / root.resolvedStyle.height, 0);
+                if (Physics.Raycast(director.Stage.battleCamera.ViewportPointToRay(point), out var hit))
                 {
                     var actor = hit.collider.GetComponent<BattleActorView>(); if (actor != null) director.Select(actor.EnemyId);
                 }
@@ -119,10 +121,14 @@ namespace UnsoundedSea.Runtime
             instruments.Add(Text($"格挡 {v.Block} · 防护 {v.Ward}\n牌库 {v.DrawCount} · 弃牌 {v.DiscardCount} · 消耗 {v.ExhaustCount}", "resource-note"));
 
             var hand = new ScrollView(ScrollViewMode.Horizontal); hand.name = "hand"; hand.AddToClassList("hand");
-            hand.pickingMode = PickingMode.Ignore; hand.contentViewport.pickingMode = PickingMode.Ignore; hand.contentContainer.pickingMode = PickingMode.Ignore;
+            // Ignore the full built-in scroll shell, including the content/vertical-scroll wrapper.
+            // Only the cards added below should intercept clicks over the 3D scene.
+            hand.pickingMode = PickingMode.Ignore;
+            hand.Query<VisualElement>().ForEach(element => element.pickingMode = PickingMode.Ignore);
             hand.horizontalScrollerVisibility = ScrollerVisibility.Hidden; hand.verticalScrollerVisibility = ScrollerVisibility.Hidden; root.Add(hand);
             var fan = Box("fan-track"); fan.style.width = Mathf.Max(620, 180 + Mathf.Max(0, v.Hand.Count - 1) * 110); hand.Add(fan);
             hand.RegisterCallback<GeometryChangedEvent>(_ => fan.style.marginLeft = Mathf.Max(0, (hand.contentViewport.resolvedStyle.width - fan.resolvedStyle.width) * .5f));
+            var cardPresentation = new HandCardPresentation(hand);
             var cardIndex = 0;
             foreach (var card in v.Hand)
             {
@@ -130,7 +136,7 @@ namespace UnsoundedSea.Runtime
                 var b = Button("card-" + c.InstanceId, "", () => director.Submit(BattleCommand.Play(c.InstanceId, director.SelectedEnemy)), "card-anchor");
                 b.tabIndex = cardIndex + 1; b.style.left = cardIndex * 110;
                 b.AddToClassList("fan-" + Mathf.Clamp(cardIndex++ - (v.Hand.Count - 1) / 2, -3, 3));
-                b.RegisterCallback<FocusInEvent>(_ => hand.ScrollTo(b));
+                cardPresentation.Add(b);
                 var face = Box("sea-card"); face.pickingMode = PickingMode.Position;
                 var motif = type.Contains("damage") ? "gun" : type == "block" ? "shield" : type == "ward" ? "eye" : type.Contains("investigate") ? "lantern" : "scroll";
                 var head = Box("card-head"); head.Add(Text(def.Cost.ToString(), "card-cost")); head.Add(Text(type.Contains("damage") ? "压制" : type == "block" ? "防御" : type == "ward" ? "镇定" : "调查", "card-type")); face.Add(head);
@@ -203,8 +209,8 @@ namespace UnsoundedSea.Runtime
             for (var i = 0; i < nameplates.Count; i++)
             {
                 var actor = director.Stage.Actors[i];
-                var screen = director.Stage.battleCamera.WorldToScreenPoint(actor.LabelPosition);
-                var p = RuntimePanelUtils.ScreenToPanel(root.panel, new Vector2(screen.x, Screen.height - screen.y));
+                var screen = director.Stage.battleCamera.WorldToViewportPoint(actor.LabelPosition);
+                var p = new Vector2(screen.x * root.resolvedStyle.width, (1 - screen.y) * root.resolvedStyle.height);
                 var plate = nameplates[i];
                 var width = plate.resolvedStyle.width;
                 var height = plate.resolvedStyle.height;

@@ -361,6 +361,7 @@ namespace UnsoundedSea.Runtime
             fan.style.width = Mathf.Max(620, 180 + Mathf.Max(0, view.Hand.Count - 1) * 110);
             hand.Add(fan);
             hand.RegisterCallback<GeometryChangedEvent>(_ => fan.style.marginLeft = Mathf.Max(0, (hand.contentViewport.resolvedStyle.width - fan.resolvedStyle.width) * .5f));
+            var cardPresentation = new HandCardPresentation(hand);
             var cardIndex = 0;
             foreach (var card in view.Hand)
             {
@@ -370,7 +371,7 @@ namespace UnsoundedSea.Runtime
                 var button = Button("card-" + id, "", "card-anchor", () => Send(BattleCommand.Play(id, selectedEnemy)), playing && !shortAction && !shortSanity);
                 button.tabIndex = cardIndex + 1; button.style.left = cardIndex * 110;
                 button.AddToClassList("fan-" + Mathf.Clamp(cardIndex++ - (view.Hand.Count - 1) / 2, -3, 3));
-                button.RegisterCallback<FocusInEvent>(_ => hand.ScrollTo(button));
+                cardPresentation.Add(button);
                 button.EnableInClassList("unaffordable", playing && (shortAction || shortSanity));
                 button.tooltip = data.Name + "：" + data.Description;
                 var face = Element("card"); face.pickingMode = PickingMode.Position;
