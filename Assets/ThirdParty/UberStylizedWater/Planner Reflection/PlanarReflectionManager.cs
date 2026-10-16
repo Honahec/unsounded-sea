@@ -11,6 +11,9 @@ using UnityEngine.Rendering.Universal;
 public class PlanarReflectionManager : MonoBehaviour
 {
     public bool runOnEditMode = true;
+    public Camera sourceCamera;
+    public bool suspended;
+    public RenderTexture ReflectionTexture => _reflectionTexture;
 
     private static PlanarReflectionManager _instance;
     public static PlanarReflectionManager Instance
@@ -64,21 +67,24 @@ public class PlanarReflectionManager : MonoBehaviour
 
     void OnDisable()
     {
+        if (_instance == this) _instance = null;
         CleanUp();
     }
 
     void OnDestroy()
     {
+        if (_instance == this) _instance = null;
         CleanUp();
     }
 
     void LateUpdate()
     {
+        if (suspended) return;
         Camera targetCamera = null;
 
         if (Application.isPlaying)
         {
-            targetCamera = Camera.main;
+            targetCamera = sourceCamera != null ? sourceCamera : Camera.main;
             if (targetCamera != null)
             {
                 DoPlanarReflections(default, targetCamera);
@@ -95,7 +101,7 @@ public class PlanarReflectionManager : MonoBehaviour
             }
             else
             {
-                targetCamera = Camera.main;
+                targetCamera = sourceCamera != null ? sourceCamera : Camera.main;
                 if (targetCamera == null)
                 {
                     LogMissingGameCameraWarning();
@@ -217,16 +223,13 @@ public class PlanarReflectionManager : MonoBehaviour
 
         var data = new PlanarReflectionSettingData();
         data.Set();
-
-        BeginPlanarReflections?.Invoke(context, _reflectionCamera);
-
-        var activePrimaryTarget = activeVolume.GetPrimaryTarget();
-        if (activePrimaryTarget != null && _reflectionCamera.WorldToViewportPoint(activePrimaryTarget.transform.position).z < 100000)
+        try
         {
-            RenderPipeline.SubmitRenderRequest(_reflectionCamera, new UniversalRenderPipeline.SingleCameraRequest());
+            BeginPlanarReflections?.Invoke(context, _reflectionCamera);
+            RenderPipeline.SubmitRenderRequest(_reflectionCamera,
+                new UniversalRenderPipeline.SingleCameraRequest { destination = _reflectionTexture });
         }
-
-        data.Restore();
+        finally { data.Restore(); }
         Shader.SetGlobalTexture(_planarReflectionTextureId, _reflectionTexture);
     }
 
@@ -234,11 +237,7 @@ public class PlanarReflectionManager : MonoBehaviour
     {
         if (_reflectionCamera == null)
         {
-            _reflectionCamera = FindReflectionCamera();
-            if (_reflectionCamera == null)
-            {
-                _reflectionCamera = InitializeReflectionCamera(volume);
-            }
+            _reflectionCamera = InitializeReflectionCamera(volume);
         }
 
         _reflectionCamera.gameObject.hideFlags = HideFlags.DontSave;
@@ -302,6 +301,8 @@ public class PlanarReflectionManager : MonoBehaviour
         if (dest == null) return;
 
         dest.CopyFrom(src);
+        dest.enabled = false;
+        dest.cameraType = CameraType.Reflection;
         dest.useOcclusionCulling = false;
 
         if (dest.gameObject.TryGetComponent(out UnityEngine.Rendering.Universal.UniversalAdditionalCameraData camData))
@@ -319,7 +320,7 @@ public class PlanarReflectionManager : MonoBehaviour
     private Camera InitializeReflectionCamera(PlanarReflectionVolume volume)
     {
         var go = new GameObject("", typeof(Camera));
-        go.name = "Reflection Camera [" + go.GetInstanceID() + "]";
+        go.name = "Reflection Camera [" + go.GetEntityId() + "]";
         go.hideFlags = HideFlags.DontSave;
         
         var camData = go.AddComponent(typeof(UnityEngine.Rendering.Universal.UniversalAdditionalCameraData)) as UnityEngine.Rendering.Universal.UniversalAdditionalCameraData;
@@ -335,19 +336,6 @@ public class PlanarReflectionManager : MonoBehaviour
         reflectionCamera.enabled = false;
 
         return reflectionCamera;
-    }
-
-    private Camera FindReflectionCamera()
-    {
-        Camera[] cameras = GameObject.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        foreach (var cam in cameras)
-        {
-            if (cam.name.Contains("Reflection Camera ["))
-            {
-                return cam;
-            }
-        }
-        return null;
     }
 
     private void CreateReflectionTexture(Camera camera, PlanarReflectionVolume volume)
@@ -371,8 +359,8 @@ public class PlanarReflectionManager : MonoBehaviour
 
     RenderTextureDescriptor GetDescriptor(Camera camera, float pipelineRenderScale, float renderScale)
     {
-        var width = (int)Mathf.Max(camera.pixelWidth * pipelineRenderScale * renderScale);
-        var height = (int)Mathf.Max(camera.pixelHeight * pipelineRenderScale * renderScale);
+        var width = Mathf.Max(1, (int)(camera.pixelWidth * pipelineRenderScale * renderScale));
+        var height = Mathf.Max(1, (int)(camera.pixelHeight * pipelineRenderScale * renderScale));
         var hdr = camera.allowHDR;
         var renderTextureFormat = hdr ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default;
 
@@ -440,6 +428,8 @@ public class PlanarReflectionManager : MonoBehaviour
 
         if (_reflectionTexture)
         {
+            if (Shader.GetGlobalTexture(_planarReflectionTextureId) == _reflectionTexture)
+                Shader.SetGlobalTexture(_planarReflectionTextureId, Texture2D.blackTexture);
             RenderTexture.ReleaseTemporary(_reflectionTexture);
             _reflectionTexture = null;
         }
@@ -447,34 +437,36 @@ public class PlanarReflectionManager : MonoBehaviour
 
     void SafeDestroyObject(UnityEngine.Object obj)
     {
-        if (Application.isEditor) DestroyImmediate(obj);
-        else Destroy(obj);
+        if (Application.isPlaying) Destroy(obj);
+        else DestroyImmediate(obj);
     }
 
     class PlanarReflectionSettingData
     {
         private readonly bool fog;
+        private readonly bool invertCulling;
         private readonly int maximumLODLevel;
         private readonly float lodBias;
 
         public PlanarReflectionSettingData()
         {
             fog = RenderSettings.fog;
+            invertCulling = GL.invertCulling;
             maximumLODLevel = QualitySettings.maximumLODLevel;
             lodBias = QualitySettings.lodBias;
         }
 
         public void Set()
         {
-            GL.invertCulling = true;
-            RenderSettings.fog = false;
+            GL.invertCulling = !invertCulling;
+            // Keep atmospheric fog consistent with the source camera.
             QualitySettings.maximumLODLevel = 1;
             QualitySettings.lodBias = lodBias * 0.5f;
         }
 
         public void Restore()
         {
-            GL.invertCulling = false;
+            GL.invertCulling = invertCulling;
             RenderSettings.fog = fog;
             QualitySettings.maximumLODLevel = maximumLODLevel;
             QualitySettings.lodBias = lodBias;
@@ -498,7 +490,7 @@ public class PlanarReflectionManagerEditor : Editor
 
         // Scan the scene for an active global volume
         PlanarReflectionVolume globalVolume = null;
-        var volumes = GameObject.FindObjectsByType<PlanarReflectionVolume>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        var volumes = GameObject.FindObjectsByType<PlanarReflectionVolume>(FindObjectsInactive.Include);
         foreach (var vol in volumes)
         {
             if (vol.isActiveAndEnabled && vol.isGlobal)

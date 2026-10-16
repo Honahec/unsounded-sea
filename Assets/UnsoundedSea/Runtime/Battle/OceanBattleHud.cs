@@ -50,8 +50,10 @@ namespace UnsoundedSea.Runtime
             surface.RegisterCallback<PointerDownEvent>(evt =>
             {
                 if (director.Stage == null || director.Paused || evt.button != 0) return;
-                var point = new Vector3(evt.position.x / root.resolvedStyle.width * Screen.width, Screen.height - evt.position.y / root.resolvedStyle.height * Screen.height, 0);
-                if (Physics.Raycast(director.Stage.battleCamera.ScreenPointToRay(point), out var hit))
+                // Use the battle viewport: an offscreen reflection render can change Screen dimensions.
+                var local = root.WorldToLocal(new Vector2(evt.position.x, evt.position.y));
+                var point = new Vector3(local.x / root.resolvedStyle.width, 1 - local.y / root.resolvedStyle.height, 0);
+                if (Physics.Raycast(director.Stage.battleCamera.ViewportPointToRay(point), out var hit))
                 {
                     var actor = hit.collider.GetComponent<BattleActorView>(); if (actor != null) director.Select(actor.EnemyId);
                 }
@@ -157,8 +159,8 @@ namespace UnsoundedSea.Runtime
             for (var i = 0; i < nameplates.Count; i++)
             {
                 var actor = director.Stage.Actors[i];
-                var screen = director.Stage.battleCamera.WorldToScreenPoint(actor.LabelPosition);
-                var p = RuntimePanelUtils.ScreenToPanel(root.panel, new Vector2(screen.x, Screen.height - screen.y));
+                var screen = director.Stage.battleCamera.WorldToViewportPoint(actor.LabelPosition);
+                var p = new Vector2(screen.x * root.resolvedStyle.width, (1 - screen.y) * root.resolvedStyle.height);
                 nameplates[i].style.left = p.x - 85; nameplates[i].style.top = p.y - 35;
                 nameplates[i].style.display = screen.z > 0 && actor.Alive ? DisplayStyle.Flex : DisplayStyle.None;
             }

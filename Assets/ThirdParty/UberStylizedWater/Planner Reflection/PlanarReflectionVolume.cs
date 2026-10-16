@@ -13,7 +13,7 @@ public class PlanarReflectionVolume : MonoBehaviour
     public bool isGlobal = false;
 
     [Range(0.01f, 1f)] public float renderScale = 1f;
-    public LayerMask reflectionLayer = -1;
+    public LayerMask reflectionLayer = ~(1 << 4);
     public bool reflectSkybox;
     [System.Obsolete("Use reflectionTargets instead")]
     [HideInInspector]
@@ -35,7 +35,6 @@ public class PlanarReflectionVolume : MonoBehaviour
 
     void OnEnable()
     {
-        reflectionLayer = ~(1 << 4);
         UpdateTargetMaterials();
         PlanarReflectionManager.RegisterVolume(this);
     }
@@ -73,7 +72,7 @@ public class PlanarReflectionVolume : MonoBehaviour
 
         if (this == null || !isGlobal) return;
 
-        var volumes = GameObject.FindObjectsByType<PlanarReflectionVolume>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        var volumes = GameObject.FindObjectsByType<PlanarReflectionVolume>(FindObjectsInactive.Include);
         foreach (var vol in volumes)
         {
             if (vol != this && vol.isGlobal)
@@ -228,7 +227,7 @@ public class PlanarReflectionVolumeEditor : Editor
         PlanarReflectionVolume volume = (PlanarReflectionVolume)target;
 
         // Check for global conflicts
-        var volumes = GameObject.FindObjectsByType<PlanarReflectionVolume>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        var volumes = GameObject.FindObjectsByType<PlanarReflectionVolume>(FindObjectsInactive.Include);
         bool hasOtherGlobal = false;
         PlanarReflectionVolume activeGlobal = null;
 

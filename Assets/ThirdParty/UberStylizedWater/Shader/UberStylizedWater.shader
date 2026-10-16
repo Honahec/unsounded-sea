@@ -2,6 +2,9 @@ Shader "UberStylizedWater"
 {
     Properties
     {
+        [HideInInspector] _UseSeaTime("Use Battle Clock", Float) = 0
+        [HideInInspector] _SeaTime("Battle Clock", Float) = 0
+        [HideInInspector] _Threat("Sea Actor XZ, Radius, Impact", Vector) = (0,0,0,0)
         [HDR]_Color_Shallow("Color_Shallow", Color) = (0.2269659, 0.822786, 0.4507858, 0)
         [HDR]_Color_Deep("Color_Deep", Color) = (0, 0.2541522, 0.4507858, 1)
         _Water_Depth("Water_Depth", Float) = 0.3
@@ -458,13 +461,7 @@ Shader "UberStylizedWater"
         
         // Includes
         #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
-        // Fog: Fog.hlsl only exists in URP 17.3+ (Unity 6.3+). Inlined so this shader also compiles on Unity 6.0.
-        #include "Packages/com.unity.render-pipelines.universal-config/Runtime/ShaderConfig.cs.hlsl"
-        #if defined(USE_DYNAMIC_BRANCH_FOG_KEYWORD) && USE_DYNAMIC_BRANCH_FOG_KEYWORD
-        #pragma dynamic_branch _ FOG_LINEAR FOG_EXP FOG_EXP2
-        #else
-        #pragma multi_compile_fog
-        #endif
+        #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Fog.hlsl"
         #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/RenderingLayers.hlsl"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Texture.hlsl"
@@ -614,6 +611,9 @@ Shader "UberStylizedWater"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _UseSeaTime;
+        float _SeaTime;
+        float4 _Threat;
         float4 _ParallaxMapping_ca6a44575e7e4a939c2f1426afff27a2_Heightmap_1_Texture2D_TexelSize;
         float _Reflection_Strength;
         float _DistanceMask_Fade;
@@ -710,6 +710,7 @@ Shader "UberStylizedWater"
         float _InterSec_GradientDissolve;
         UNITY_TEXTURE_STREAMING_DEBUG_VARS;
         CBUFFER_END
+        #include "../../../UnsoundedSea/Art/Shaders/BattleWaterWake.hlsl"
         
         
         // Object and Global properties
@@ -2193,6 +2194,7 @@ Shader "UberStylizedWater"
             float3 _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3 = IN.ObjectSpaceNormal;
             #endif
             description.Position = _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3;
+            description.Position += TransformWorldToObjectDir(float3(0, UnsoundedSeaWake(IN.WorldSpacePosition.xz, _Threat, _SeaTime), 0), false);
             description.Normal = _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3;
             description.Tangent = IN.ObjectSpaceTangent;
             return description;
@@ -2778,7 +2780,7 @@ Shader "UberStylizedWater"
             Bindings_MixFog_aadfc52f8da612746841c7c5af3fcea6_float _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf;
             _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf.ObjectSpacePosition = IN.ObjectSpacePosition;
             float3 _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3;
-            SG_MixFog_aadfc52f8da612746841c7c5af3fcea6_float((_ColorLayerAlpha_34e3f5e1269e4ba4bff0b5a898665524_Color_1_Vector4.xyz), _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf, _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3);
+            SG_MixFog_aadfc52f8da612746841c7c5af3fcea6_float((_ColorLayerAlpha_34e3f5e1269e4ba4bff0b5a898665524_Color_1_Vector4.xyz) + UnsoundedSeaWakeFoam(IN.WorldSpacePosition.xz, _Threat, _SeaTime), _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf, _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3);
             Bindings_GetVariable_5951f0cfb2fb4134ea014f63adeff8d9_float _GetVariable_397e978c909c4ad1bf01f75628183f4c;
             float4 _GetVariable_397e978c909c4ad1bf01f75628183f4c_Vector_1_Vector4;
             float _GetVariable_397e978c909c4ad1bf01f75628183f4c_Float_2_Float;
@@ -2815,7 +2817,7 @@ Shader "UberStylizedWater"
             output.ObjectSpaceTangent =                         input.tangentOS.xyz;
             output.ObjectSpacePosition =                        input.positionOS;
             output.WorldSpacePosition =                         TransformObjectToWorld(input.positionOS);
-            output.TimeParameters =                             _TimeParameters.xyz;
+            output.TimeParameters =                             (_UseSeaTime > 0.5 ? float3(_SeaTime, sin(_SeaTime), cos(_SeaTime)) : _TimeParameters.xyz);
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.
         #endif
@@ -2876,7 +2878,7 @@ Shader "UberStylizedWater"
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.
         #endif
-            output.TimeParameters = _TimeParameters.xyz; // This is mainly for LW as HD overwrite this value
+            output.TimeParameters = (_UseSeaTime > 0.5 ? float3(_SeaTime, sin(_SeaTime), cos(_SeaTime)) : _TimeParameters.xyz); // This is mainly for LW as HD overwrite this value
         #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
         #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
         #else
@@ -3338,6 +3340,9 @@ Shader "UberStylizedWater"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _UseSeaTime;
+        float _SeaTime;
+        float4 _Threat;
         float4 _ParallaxMapping_ca6a44575e7e4a939c2f1426afff27a2_Heightmap_1_Texture2D_TexelSize;
         float _Reflection_Strength;
         float _DistanceMask_Fade;
@@ -3434,6 +3439,7 @@ Shader "UberStylizedWater"
         float _InterSec_GradientDissolve;
         UNITY_TEXTURE_STREAMING_DEBUG_VARS;
         CBUFFER_END
+        #include "../../../UnsoundedSea/Art/Shaders/BattleWaterWake.hlsl"
         
         
         // Object and Global properties
@@ -4434,6 +4440,7 @@ Shader "UberStylizedWater"
             float3 _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3 = IN.ObjectSpacePosition;
             #endif
             description.Position = _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3;
+            description.Position += TransformWorldToObjectDir(float3(0, UnsoundedSeaWake(IN.WorldSpacePosition.xz, _Threat, _SeaTime), 0), false);
             return description;
         }
         
@@ -4714,7 +4721,7 @@ Shader "UberStylizedWater"
         
             output.ObjectSpacePosition =                        input.positionOS;
             output.WorldSpacePosition =                         TransformObjectToWorld(input.positionOS);
-            output.TimeParameters =                             _TimeParameters.xyz;
+            output.TimeParameters =                             (_UseSeaTime > 0.5 ? float3(_SeaTime, sin(_SeaTime), cos(_SeaTime)) : _TimeParameters.xyz);
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.
         #endif
@@ -4757,7 +4764,7 @@ Shader "UberStylizedWater"
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.
         #endif
-            output.TimeParameters = _TimeParameters.xyz; // This is mainly for LW as HD overwrite this value
+            output.TimeParameters = (_UseSeaTime > 0.5 ? float3(_SeaTime, sin(_SeaTime), cos(_SeaTime)) : _TimeParameters.xyz); // This is mainly for LW as HD overwrite this value
         #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
         #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
         #else
@@ -5231,6 +5238,9 @@ Shader "UberStylizedWater"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _UseSeaTime;
+        float _SeaTime;
+        float4 _Threat;
         float4 _ParallaxMapping_ca6a44575e7e4a939c2f1426afff27a2_Heightmap_1_Texture2D_TexelSize;
         float _Reflection_Strength;
         float _DistanceMask_Fade;
@@ -5327,6 +5337,7 @@ Shader "UberStylizedWater"
         float _InterSec_GradientDissolve;
         UNITY_TEXTURE_STREAMING_DEBUG_VARS;
         CBUFFER_END
+        #include "../../../UnsoundedSea/Art/Shaders/BattleWaterWake.hlsl"
         
         
         // Object and Global properties
@@ -6336,6 +6347,7 @@ Shader "UberStylizedWater"
             float3 _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3 = IN.ObjectSpaceNormal;
             #endif
             description.Position = _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3;
+            description.Position += TransformWorldToObjectDir(float3(0, UnsoundedSeaWake(IN.WorldSpacePosition.xz, _Threat, _SeaTime), 0), false);
             description.Normal = _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3;
             description.Tangent = IN.ObjectSpaceTangent;
             return description;
@@ -6620,7 +6632,7 @@ Shader "UberStylizedWater"
             output.ObjectSpaceTangent =                         input.tangentOS.xyz;
             output.ObjectSpacePosition =                        input.positionOS;
             output.WorldSpacePosition =                         TransformObjectToWorld(input.positionOS);
-            output.TimeParameters =                             _TimeParameters.xyz;
+            output.TimeParameters =                             (_UseSeaTime > 0.5 ? float3(_SeaTime, sin(_SeaTime), cos(_SeaTime)) : _TimeParameters.xyz);
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.
         #endif
@@ -6663,7 +6675,7 @@ Shader "UberStylizedWater"
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.
         #endif
-            output.TimeParameters = _TimeParameters.xyz; // This is mainly for LW as HD overwrite this value
+            output.TimeParameters = (_UseSeaTime > 0.5 ? float3(_SeaTime, sin(_SeaTime), cos(_SeaTime)) : _TimeParameters.xyz); // This is mainly for LW as HD overwrite this value
         #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
         #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
         #else
@@ -7194,6 +7206,9 @@ Shader "UberStylizedWater"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _UseSeaTime;
+        float _SeaTime;
+        float4 _Threat;
         float4 _ParallaxMapping_ca6a44575e7e4a939c2f1426afff27a2_Heightmap_1_Texture2D_TexelSize;
         float _Reflection_Strength;
         float _DistanceMask_Fade;
@@ -7290,6 +7305,7 @@ Shader "UberStylizedWater"
         float _InterSec_GradientDissolve;
         UNITY_TEXTURE_STREAMING_DEBUG_VARS;
         CBUFFER_END
+        #include "../../../UnsoundedSea/Art/Shaders/BattleWaterWake.hlsl"
         
         
         // Object and Global properties
@@ -8773,6 +8789,7 @@ Shader "UberStylizedWater"
             float3 _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3 = IN.ObjectSpaceNormal;
             #endif
             description.Position = _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3;
+            description.Position += TransformWorldToObjectDir(float3(0, UnsoundedSeaWake(IN.WorldSpacePosition.xz, _Threat, _SeaTime), 0), false);
             description.Normal = _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3;
             description.Tangent = IN.ObjectSpaceTangent;
             return description;
@@ -9358,7 +9375,7 @@ Shader "UberStylizedWater"
             Bindings_MixFog_aadfc52f8da612746841c7c5af3fcea6_float _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf;
             _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf.ObjectSpacePosition = IN.ObjectSpacePosition;
             float3 _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3;
-            SG_MixFog_aadfc52f8da612746841c7c5af3fcea6_float((_ColorLayerAlpha_34e3f5e1269e4ba4bff0b5a898665524_Color_1_Vector4.xyz), _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf, _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3);
+            SG_MixFog_aadfc52f8da612746841c7c5af3fcea6_float((_ColorLayerAlpha_34e3f5e1269e4ba4bff0b5a898665524_Color_1_Vector4.xyz) + UnsoundedSeaWakeFoam(IN.WorldSpacePosition.xz, _Threat, _SeaTime), _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf, _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3);
             Bindings_GetVariable_5951f0cfb2fb4134ea014f63adeff8d9_float _GetVariable_397e978c909c4ad1bf01f75628183f4c;
             float4 _GetVariable_397e978c909c4ad1bf01f75628183f4c_Vector_1_Vector4;
             float _GetVariable_397e978c909c4ad1bf01f75628183f4c_Float_2_Float;
@@ -9395,7 +9412,7 @@ Shader "UberStylizedWater"
             output.ObjectSpaceTangent =                         input.tangentOS.xyz;
             output.ObjectSpacePosition =                        input.positionOS;
             output.WorldSpacePosition =                         TransformObjectToWorld(input.positionOS);
-            output.TimeParameters =                             _TimeParameters.xyz;
+            output.TimeParameters =                             (_UseSeaTime > 0.5 ? float3(_SeaTime, sin(_SeaTime), cos(_SeaTime)) : _TimeParameters.xyz);
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.
         #endif
@@ -9456,7 +9473,7 @@ Shader "UberStylizedWater"
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.
         #endif
-            output.TimeParameters = _TimeParameters.xyz; // This is mainly for LW as HD overwrite this value
+            output.TimeParameters = (_UseSeaTime > 0.5 ? float3(_SeaTime, sin(_SeaTime), cos(_SeaTime)) : _TimeParameters.xyz); // This is mainly for LW as HD overwrite this value
         #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
         #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
         #else
@@ -9922,6 +9939,9 @@ Shader "UberStylizedWater"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _UseSeaTime;
+        float _SeaTime;
+        float4 _Threat;
         float4 _ParallaxMapping_ca6a44575e7e4a939c2f1426afff27a2_Heightmap_1_Texture2D_TexelSize;
         float _Reflection_Strength;
         float _DistanceMask_Fade;
@@ -10018,6 +10038,7 @@ Shader "UberStylizedWater"
         float _InterSec_GradientDissolve;
         UNITY_TEXTURE_STREAMING_DEBUG_VARS;
         CBUFFER_END
+        #include "../../../UnsoundedSea/Art/Shaders/BattleWaterWake.hlsl"
         
         
         // Object and Global properties
@@ -11027,6 +11048,7 @@ Shader "UberStylizedWater"
             float3 _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3 = IN.ObjectSpaceNormal;
             #endif
             description.Position = _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3;
+            description.Position += TransformWorldToObjectDir(float3(0, UnsoundedSeaWake(IN.WorldSpacePosition.xz, _Threat, _SeaTime), 0), false);
             description.Normal = _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3;
             description.Tangent = IN.ObjectSpaceTangent;
             return description;
@@ -11311,7 +11333,7 @@ Shader "UberStylizedWater"
             output.ObjectSpaceTangent =                         input.tangentOS.xyz;
             output.ObjectSpacePosition =                        input.positionOS;
             output.WorldSpacePosition =                         TransformObjectToWorld(input.positionOS);
-            output.TimeParameters =                             _TimeParameters.xyz;
+            output.TimeParameters =                             (_UseSeaTime > 0.5 ? float3(_SeaTime, sin(_SeaTime), cos(_SeaTime)) : _TimeParameters.xyz);
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.
         #endif
@@ -11354,7 +11376,7 @@ Shader "UberStylizedWater"
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.
         #endif
-            output.TimeParameters = _TimeParameters.xyz; // This is mainly for LW as HD overwrite this value
+            output.TimeParameters = (_UseSeaTime > 0.5 ? float3(_SeaTime, sin(_SeaTime), cos(_SeaTime)) : _TimeParameters.xyz); // This is mainly for LW as HD overwrite this value
         #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
         #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
         #else
@@ -11850,6 +11872,9 @@ Shader "UberStylizedWater"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _UseSeaTime;
+        float _SeaTime;
+        float4 _Threat;
         float4 _ParallaxMapping_ca6a44575e7e4a939c2f1426afff27a2_Heightmap_1_Texture2D_TexelSize;
         float _Reflection_Strength;
         float _DistanceMask_Fade;
@@ -11946,6 +11971,7 @@ Shader "UberStylizedWater"
         float _InterSec_GradientDissolve;
         UNITY_TEXTURE_STREAMING_DEBUG_VARS;
         CBUFFER_END
+        #include "../../../UnsoundedSea/Art/Shaders/BattleWaterWake.hlsl"
         
         
         // Object and Global properties
@@ -13429,6 +13455,7 @@ Shader "UberStylizedWater"
             float3 _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3 = IN.ObjectSpaceNormal;
             #endif
             description.Position = _EnableWave_1233e017ccc241d7acae6aef710c659c_Out_0_Vector3;
+            description.Position += TransformWorldToObjectDir(float3(0, UnsoundedSeaWake(IN.WorldSpacePosition.xz, _Threat, _SeaTime), 0), false);
             description.Normal = _EnableWave_6e972da00f7a47099f6f783048aa3709_Out_0_Vector3;
             description.Tangent = IN.ObjectSpaceTangent;
             return description;
@@ -14014,7 +14041,7 @@ Shader "UberStylizedWater"
             Bindings_MixFog_aadfc52f8da612746841c7c5af3fcea6_float _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf;
             _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf.ObjectSpacePosition = IN.ObjectSpacePosition;
             float3 _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3;
-            SG_MixFog_aadfc52f8da612746841c7c5af3fcea6_float((_ColorLayerAlpha_34e3f5e1269e4ba4bff0b5a898665524_Color_1_Vector4.xyz), _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf, _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3);
+            SG_MixFog_aadfc52f8da612746841c7c5af3fcea6_float((_ColorLayerAlpha_34e3f5e1269e4ba4bff0b5a898665524_Color_1_Vector4.xyz) + UnsoundedSeaWakeFoam(IN.WorldSpacePosition.xz, _Threat, _SeaTime), _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf, _MixFog_ac3e2911ed9a4c8d8e9d47152e85d8bf_Out_1_Vector3);
             Bindings_GetVariable_5951f0cfb2fb4134ea014f63adeff8d9_float _GetVariable_397e978c909c4ad1bf01f75628183f4c;
             float4 _GetVariable_397e978c909c4ad1bf01f75628183f4c_Vector_1_Vector4;
             float _GetVariable_397e978c909c4ad1bf01f75628183f4c_Float_2_Float;
@@ -14051,7 +14078,7 @@ Shader "UberStylizedWater"
             output.ObjectSpaceTangent =                         input.tangentOS.xyz;
             output.ObjectSpacePosition =                        input.positionOS;
             output.WorldSpacePosition =                         TransformObjectToWorld(input.positionOS);
-            output.TimeParameters =                             _TimeParameters.xyz;
+            output.TimeParameters =                             (_UseSeaTime > 0.5 ? float3(_SeaTime, sin(_SeaTime), cos(_SeaTime)) : _TimeParameters.xyz);
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.
         #endif
@@ -14112,7 +14139,7 @@ Shader "UberStylizedWater"
         #if UNITY_ANY_INSTANCING_ENABLED
         #else // TODO: XR support for procedural instancing because in this case UNITY_ANY_INSTANCING_ENABLED is not defined and instanceID is incorrect.
         #endif
-            output.TimeParameters = _TimeParameters.xyz; // This is mainly for LW as HD overwrite this value
+            output.TimeParameters = (_UseSeaTime > 0.5 ? float3(_SeaTime, sin(_SeaTime), cos(_SeaTime)) : _TimeParameters.xyz); // This is mainly for LW as HD overwrite this value
         #if defined(SHADER_STAGE_FRAGMENT) && defined(VARYINGS_NEED_CULLFACE)
         #define BUILD_SURFACE_DESCRIPTION_INPUTS_OUTPUT_FACESIGN output.FaceSign =                    IS_FRONT_VFACE(input.cullFace, true, false);
         #else

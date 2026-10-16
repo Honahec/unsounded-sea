@@ -78,8 +78,8 @@ public static class OceanBattleQA
         finally {d.scenario=original;UnityEngine.Object.Destroy(alternateStage.gameObject);UnityEngine.Object.Destroy(alternate);d.Restart();}
         await Task.Delay(200);
         var root=UnityEngine.Object.FindAnyObjectByType<UIDocument>().rootVisualElement;
-        var actor=d.Stage.Actors[1];var screen=d.Stage.battleCamera.WorldToScreenPoint(actor.transform.position+Vector3.up);
-        var point=RuntimePanelUtils.ScreenToPanel(root.panel,new Vector2(screen.x,Screen.height-screen.y));var picked=root.panel.Pick(point);
+        var actor=d.Stage.Actors[1];var viewport=d.Stage.battleCamera.WorldToViewportPoint(actor.transform.position+Vector3.up);
+        var point=root.LocalToWorld(new Vector2(viewport.x*root.resolvedStyle.width,(1-viewport.y)*root.resolvedStyle.height));var picked=root.panel.Pick(point);
         Check(picked!=null&&picked.name=="battle-surface","Model click occluded by UI");
         using(var evt=PointerDownEvent.GetPooled(new Event{type=EventType.MouseDown,button=0,mousePosition=point})){evt.target=picked;picked.SendEvent(evt);}
         Check(d.SelectedEnemy==actor.EnemyId,"3D pointer selection failed");

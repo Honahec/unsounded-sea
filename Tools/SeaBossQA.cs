@@ -32,7 +32,8 @@ public static class SeaBossQA
         finally {ship.localPosition=shipPosition;ship.localRotation=shipRotation;}
         var hit=actor.GetComponent<BoxCollider>();var screen=d.Stage.battleCamera.WorldToScreenPoint(actor.transform.TransformPoint(hit.center));
         Check(Physics.Raycast(d.Stage.battleCamera.ScreenPointToRay(screen),out var rayHit)&&rayHit.collider==hit,"Boss hit volume missed");
-        var point=RuntimePanelUtils.ScreenToPanel(Root.panel,new Vector2(screen.x,Screen.height-screen.y));var picked=Root.panel.Pick(point);
+        var viewport=d.Stage.battleCamera.WorldToViewportPoint(actor.transform.TransformPoint(hit.center));
+        var point=Root.LocalToWorld(new Vector2(viewport.x*Root.resolvedStyle.width,(1-viewport.y)*Root.resolvedStyle.height));var picked=Root.panel.Pick(point);
         Check(picked!=null&&picked.name=="battle-surface","Boss body occluded by UI");
         using(var e=PointerDownEvent.GetPooled(new Event{type=EventType.MouseDown,button=0,mousePosition=point})){e.target=picked;picked.SendEvent(e);}
         Check(d.SelectedEnemy==actor.EnemyId,"Model raycast selection failed");
@@ -85,6 +86,6 @@ public static class SeaBossQA
     }
     public static object State()
     {
-        var d=Director;return new{frame=Time.frameCount,size=Screen.width+"x"+Screen.height,scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene().name,phase=d.View.Phase.ToString(),turn=d.View.Turn,health=d.View.Health,sanity=d.View.Sanity,progress=d.View.ObjectiveProgress,bossHealth=d.View.Enemies[0].Health,actors=d.Stage.Actors.Count,cameras=Camera.allCamerasCount};
+        var d=Director;return new{frame=Time.frameCount,size=d.Stage.battleCamera.pixelWidth+"x"+d.Stage.battleCamera.pixelHeight,scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene().name,phase=d.View.Phase.ToString(),turn=d.View.Turn,health=d.View.Health,sanity=d.View.Sanity,progress=d.View.ObjectiveProgress,bossHealth=d.View.Enemies[0].Health,actors=d.Stage.Actors.Count,cameras=Camera.allCamerasCount};
     }
 }

@@ -11,6 +11,7 @@ namespace UnsoundedSea.Runtime
         public Transform[] actorAnchors;
         public Material selectionMaterial;
         public Renderer ocean;
+        public BattleWater water;
         public AudioSource ambience;
         public AudioSource feedback;
         public AudioClip sealCue, impactCue, sanityCue;
@@ -49,6 +50,7 @@ namespace UnsoundedSea.Runtime
                 actor.Bind(owner, view.Enemies[i].Id, owner.scenario.ActorPrefab(i), selectionMaterial);
                 actors.Add(actor);
             }
+            if (water != null) water.Bind(battleCamera);
             owner.Resolved += Present; RefreshSelection();
         }
         public void RefreshSelection() { foreach (var actor in actors) actor.Select(actor.EnemyId == director.SelectedEnemy); }
@@ -79,7 +81,11 @@ namespace UnsoundedSea.Runtime
                 if (director.Paused && feedback.isPlaying) feedback.Pause();
                 else if (!director.Paused && !feedback.isPlaying) feedback.UnPause();
             }
-            if (director.Paused) return;
+            if (director.Paused)
+            {
+                if (water != null) water.Tick(0, true, GameSettings.ReducedMotion, Vector4.zero);
+                return;
+            }
             age += Time.unscaledDeltaTime;
             var reduced = GameSettings.ReducedMotion;
             vessel.localPosition = shipPosition + Vector3.up * (reduced ? 0 : Mathf.Sin(age * 0.55f) * vesselHeave);
@@ -88,12 +94,16 @@ namespace UnsoundedSea.Runtime
             battleCamera.transform.localPosition = cameraPosition + (reduced ? Vector3.zero : new Vector3(Mathf.Sin(age * 41), Mathf.Cos(age * 37), 0) * (shake * cameraShake));
             if (ocean != null)
             {
-                oceanProperties.SetFloat("_SeaTime", reduced ? age * 0.25f : age);
                 var threat = Vector4.zero;
                 foreach (var actor in actors)
                     if (actor.IsSeaActor && actor.Alive) { var p = actor.transform.position; threat = new Vector4(p.x, p.z, actor.WaterRadius, reduced ? 0 : shake); break; }
-                oceanProperties.SetVector("_Threat", threat);
-                ocean.SetPropertyBlock(oceanProperties);
+                if (water != null) water.Tick(Time.unscaledDeltaTime, false, reduced, threat);
+                else
+                {
+                    oceanProperties.SetFloat("_SeaTime", reduced ? age * 0.25f : age);
+                    oceanProperties.SetVector("_Threat", threat);
+                    ocean.SetPropertyBlock(oceanProperties);
+                }
             }
         }
         private void OnDisable()

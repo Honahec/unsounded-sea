@@ -110,6 +110,9 @@
     }
   ],
   "adaptations": [
-    "Inspector assembly references use installed Unity assembly names; omitted unrelated authoring dependency."
+    "Assembly references use installed Unity assemblies and the included reflection assembly; no authoring plugins required.",
+    "Unity 6000.6: GetEntityId and unsorted FindObjectsByType; URP Fog.hlsl include.",
+    "Shader: per-material _UseSeaTime/_SeaTime in all six passes; _Threat routes to the project-owned BattleWaterWake.hlsl (six vertex calls, three color calls). Regenerating the upstream graph would overwrite these patches.",
+    "Reflections: explicit render request destination; owned disabled Reflection camera; explicit source camera and suspension; preserve configured layers; clear singleton/global texture and release resources on disable; restore culling/quality in finally; retain scene fog; clamp RT dimensions."
   ]
 }

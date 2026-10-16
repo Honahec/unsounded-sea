@@ -4,7 +4,8 @@
   "references": [
     "Unity.RenderPipelines.Universal.Runtime",
     "Unity.RenderPipelines.Universal.Editor",
-    "Unity.RenderPipelines.Core.Runtime"
+    "Unity.RenderPipelines.Core.Runtime",
+    "UberWaterPlannerReflection"
   ],
   "includePlatforms": [
     "Editor"
