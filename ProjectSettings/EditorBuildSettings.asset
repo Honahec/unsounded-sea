@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/UnsoundedSea/Scenes/MainMenu.unity
     guid: 0905f25ace2694b1c9c098c1c896afc3
   - enabled: 1
+    path: Assets/UnsoundedSea/Scenes/Voyage.unity
+    guid: 7f686abb9d8d348ec8342f4f6614d32f
+  - enabled: 1
     path: Assets/UnsoundedSea/Scenes/OceanBattle.unity
     guid: ffba0e8e67fe2479e864bbc2110ea87c
   - enabled: 1

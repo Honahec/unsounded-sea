@@ -126,7 +126,6 @@ public static class OceanBattleSetup
         var director=host.AddComponent<BattleDirector>();director.scenario=scenario;
         var hud=host.AddComponent<OceanBattleHud>();hud.font=AssetDatabase.LoadAssetAtPath<UnityEngine.TextCore.Text.FontAsset>("Assets/Fonts/default_zh.asset");hud.styleSheet=AssetDatabase.LoadAssetAtPath<StyleSheet>(Root+"/Runtime/Battle/OceanBattleHud.uss");hud.menuStyle=AssetDatabase.LoadAssetAtPath<StyleSheet>(Root+"/Runtime/Presentation/GameMenu.uss");
         var scenePath=Root+"/Scenes/OceanBattle.unity";EditorSceneManager.SaveScene(scene,scenePath);
-        var main=EditorSceneManager.OpenScene(Root+"/Scenes/MainMenu.unity");var menu=UnityEngine.Object.FindAnyObjectByType<MainMenu>();var serialized=new SerializedObject(menu);serialized.FindProperty("battleScene").stringValue="OceanBattle";serialized.ApplyModifiedPropertiesWithoutUndo();EditorSceneManager.SaveScene(main);
         EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene(Root+"/Scenes/MainMenu.unity",true),new EditorBuildSettingsScene(scenePath,true)}.Concat(EditorBuildSettings.scenes.Where(x=>x.path!=scenePath&&x.path!=Root+"/Scenes/MainMenu.unity")).ToArray();
         AssetDatabase.SaveAssets();EditorSceneManager.OpenScene(scenePath);return "Built OceanBattle with a replaceable stage, two actors and four-seal objective.";
     }

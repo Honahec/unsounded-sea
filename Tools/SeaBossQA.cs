@@ -144,8 +144,12 @@ public static class SeaBossQA
     }
     public static async Task<object> MenuRoundTrip()
     {
+        if(Root.Q<Button>("battle-menu")==null)Click("battle-pause");
         Click("battle-menu");await Task.Delay(500);Check(Root.Q<Button>("menu-sea-boss")!=null,"No Boss menu entry");
-        Click("menu-start");await Task.Delay(500);Check(Director.View.Enemies.Count==2,"Original battle entry broken");
+        Check(Root.Q<Button>("menu-start")!=null,"No voyage menu entry");
+        Click("menu-sea-boss");await Task.Delay(500);Check(Director.Stage.Actors.Single().IsSeaActor,"Boss shortcut broken");
+        // The title's primary entry now starts a voyage. Load the deck fixture without overwriting a voyage save.
+        UnityEngine.SceneManagement.SceneManager.LoadScene("OceanBattle");await Task.Delay(500);Check(Director.View.Enemies.Count==2,"Original battle scene broken");
         Click("battle-pause");Click("battle-menu");await Task.Delay(500);
         Click("menu-sea-boss");await Task.Delay(500);Check(Director.Stage.Actors.Single().IsSeaActor,"Menu did not load sea Boss");return State();
     }
