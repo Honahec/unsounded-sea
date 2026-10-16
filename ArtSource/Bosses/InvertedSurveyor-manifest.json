@@ -65,12 +65,21 @@
   ],
   "verification": {
     "method": "Parsed GLB accessors and embedded PNG dimensions; archived SHA256 matches browser downloads.",
-    "visual": "Regenerated organic concept and one three-quarter model render inspected; complete multi-view and Unity review pending.",
-    "unity_imported": false,
+    "visual": "Regenerated organic concept, three-quarter render and 1280x720 Unity Play battle camera inspected; full multi-view review pending.",
+    "unity_imported": true,
     "animation_ready": false,
     "target_performance_tested": false
   },
+  "unity": {
+    "model": "Assets/UnsoundedSea/Art/Models/InvertedSurveyor_LOD0.glb",
+    "prefab": "Assets/UnsoundedSea/Art/Prefabs/InvertedSurveyor.prefab",
+    "scene": "Assets/UnsoundedSea/Scenes/BossM03.unity",
+    "archived_lod0_sha256_matches": true,
+    "imported_triangles": 80000,
+    "stage_anchor_scale": 17,
+    "stage_anchor_position": [-25, -25, 255]
+  },
   "notes": [
-    "Regenerated organic creature candidate; LOD0 is archived, not yet imported into Unity."
+    "Regenerated organic creature candidate; archived LOD0 is also imported into the playable encounter."
   ]
 }

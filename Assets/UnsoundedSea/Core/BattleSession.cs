@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace UnsoundedSea.Core
 {
-    public sealed class BattleSession
+    public sealed partial class BattleSession
     {
         private sealed class EnemyState
         {
@@ -31,34 +31,40 @@ namespace UnsoundedSea.Core
         private BattlePhase phase;
         private int turn, health, sanity, actions, block, ward;
         private bool taskUsed;
+        private readonly BossEncounterKind bossKind;
+        private BossEncounterState boss;
         public uint Seed { get; }
         internal BattleDefinition Definition => definition;
+        internal BossEncounterKind BossKind => bossKind;
         public IReadOnlyList<BattleCommand> Commands => history.Select(x => x.Copy()).ToList().AsReadOnly();
 
-        public BattleSession(BattleDefinition definition, uint seed, EffectRegistry effects = null, IEncounterObjective objective = null)
+        public BattleSession(BattleDefinition definition, uint seed, EffectRegistry effects = null, IEncounterObjective objective = null, BossEncounterKind boss = BossEncounterKind.None)
         {
             this.definition = definition ?? throw new ArgumentNullException(nameof(definition));
             this.effects = (effects ?? EffectRegistry.CreateDefault()).Snapshot();
             foreach (var effect in definition.Deck.SelectMany(x => x.Effects)) this.effects.Get(effect.Id);
             this.objective = objective ?? new EncounterObjective(definition.Objective, definition.ObjectiveTarget);
             Seed = seed; deckRandom = new DeterministicRandom(seed); intentRandom = new DeterministicRandom(seed ^ 0x9E3779B9u);
+            bossKind = Require.Defined(boss);
             health = definition.Health; sanity = definition.Sanity;
             enemies = definition.Enemies.Select(x => new EnemyState { Definition = x, Health = x.Health }).ToList();
             toolUses = definition.Tools.ToDictionary(x => x.Id, x => x.Uses, StringComparer.Ordinal);
             for (var i = 0; i < definition.Deck.Count; i++) draw.Add(new CardView(i + 1, definition.Deck[i]));
-            deckRandom.Shuffle(draw); BeginTurn();
+            deckRandom.Shuffle(draw);
+            if (bossKind != BossEncounterKind.None) this.boss = new BossEncounterState(this, bossKind, seed);
+            BeginTurn();
         }
 
         public BattleView View => new BattleView
         {
             Phase = phase, Turn = turn, Health = health, Sanity = sanity, Actions = actions, Block = block, Ward = ward,
+            BossKind = bossKind, BossStage = boss?.Stage ?? 0, BossStatus = boss?.Status ?? "",
+            EncounterTargets = boss?.AllTargets ?? EmptyTargets,
             DrawCount = draw.Count, DiscardCount = discard.Count, ExhaustCount = exhaust.Count,
-            Objective = objective.Description, ObjectiveProgress = objective.Progress, ObjectiveTarget = objective.Target, CanAdvanceObjective = phase == BattlePhase.PlayerTurn && objective.AllowsTaskAction && !taskUsed && actions >= 1,
-            Hand = hand.ToList().AsReadOnly(),
-            Enemies = enemies.Select(e => new EnemyView(e.Definition.Id, e.Definition.Name, e.Health, e.Definition.Health,
-                e.Health == 0 ? "已击退" : e.ActualIntent.Clue,
-                e.Health == 0 ? "不会行动" : e.Interrupted ? "已打断 · 本回合不行动" : e.Confirmed ? Describe(e.ActualIntent) : e.Definition.Candidates,
-                e.Confirmed)).ToList().AsReadOnly(),
+            Objective = boss?.Objective ?? objective.Description, ObjectiveProgress = boss?.Progress ?? objective.Progress,
+            ObjectiveTarget = boss?.Target ?? objective.Target, CanAdvanceObjective = boss == null && phase == BattlePhase.PlayerTurn && objective.AllowsTaskAction && !taskUsed && actions >= 1,
+            Hand = hand.Select(x => x.Snapshot()).ToList().AsReadOnly(),
+            Enemies = enemies.Select(BossEnemyView).ToList().AsReadOnly(),
             Tools = definition.Tools.Select(t => new ToolView(t, toolUses[t.Id])).ToList().AsReadOnly(),
             Evidence = knowledge.Entries, Log = log.ToList().AsReadOnly()
         };
@@ -73,10 +79,17 @@ namespace UnsoundedSea.Core
                 case CommandKind.PlayCard:
                     var card = hand.FirstOrDefault(x => x.InstanceId == command.cardInstanceId);
                     if (card == null) return Reject("该卡牌不在手中。");
+                    if (card.IsEncounter)
+                    {
+                        var encounterResult = boss.Play(card, command.targetId);
+                        if (!encounterResult.Success) return encounterResult;
+                        CheckOutcome();
+                        break;
+                    }
                     if (actions < card.Definition.Cost) return Reject("行动点不足。");
                     // Active costs cannot be absorbed by Ward, and cannot pay the last point of sanity.
                     if (sanity <= card.Definition.SanityCost) return Reject("理智不足以支付代价。");
-                    if (card.Definition.Effects.Any(x => effects.Get(x.Id).RequiresEnemy) && !IsLiving(command.targetId)) return Reject("请选择存活目标。");
+                    if (card.Definition.Effects.Any(x => effects.Get(x.Id).RequiresEnemy) && !IsTargetable(command.targetId)) return Reject("请选择可选取的存活目标。");
                     actions -= card.Definition.Cost; sanity -= card.Definition.SanityCost;
                     hand.Remove(card); // In-flight cards cannot draw themselves from discard.
                     Record($"使用 {card.Definition.Name}；支付 {card.Definition.Cost} 行动 / {card.Definition.SanityCost} 理智。");
@@ -114,14 +127,17 @@ namespace UnsoundedSea.Core
         private void Record(string message) => log.Add($"[{turn}] {message}");
         private EnemyState Find(string id) => enemies.FirstOrDefault(x => x.Definition.Id == id);
         private bool IsLiving(string id) => Find(id)?.Health > 0;
+        private bool IsTargetable(string id) => IsLiving(id) && (boss == null || boss.IsTargetable(id));
         internal bool IsConfirmed(string id) => Find(id)?.Confirmed == true;
 
         private void BeginTurn()
         {
             turn++; SetPhase(BattlePhase.TurnStart); block = 0; ward = 0; taskUsed = false; actions = definition.Actions;
             Draw(definition.DrawCount);
+            boss?.BeginPlayerTurn();
             foreach (var enemy in enemies.Where(x => x.Health > 0))
             {
+                if (boss != null) continue;
                 enemy.ActualIntent = enemy.Definition.Intents[intentRandom.Next(enemy.Definition.Intents.Count)];
                 enemy.Confirmed = enemy.ActualIntent.IsPublic; enemy.Interrupted = false;
                 Record($"{enemy.Definition.Name}：{enemy.ActualIntent.Clue}");
@@ -131,17 +147,17 @@ namespace UnsoundedSea.Core
 
         private void ResolveTurn()
         {
-            SetPhase(BattlePhase.Resolve); discard.AddRange(hand); hand.Clear();
-            foreach (var enemy in enemies.Where(x => x.Health > 0))
+            SetPhase(BattlePhase.Resolve);
+            discard.AddRange(hand.Where(x => !x.IsEncounter)); hand.RemoveAll(x => !x.IsEncounter);
+            if (boss != null)
+            {
+                boss.ResolveEnemyTurn();
+                if (health == 0 || sanity == 0) { CheckOutcome(); return; }
+            }
+            else foreach (var enemy in enemies.Where(x => x.Health > 0))
             {
                 if (enemy.Interrupted) { Record($"{enemy.Definition.Name}的行动已被打断。"); continue; }
-                var intent = enemy.ActualIntent;
-                var protection = intent.Channel == DamageChannel.Health ? block : ward;
-                var absorbed = Math.Min(protection, intent.Amount);
-                var damage = intent.Amount - absorbed;
-                if (intent.Channel == DamageChannel.Health) { block -= absorbed; health = Math.Max(0, health - damage); }
-                else { ward -= absorbed; sanity = Math.Max(0, sanity - damage); }
-                Record($"{enemy.Definition.Name}执行 {Describe(intent)}；抵御 {absorbed}，实际承受 {damage}。");
+                ApplyThreat(enemy.ActualIntent.Channel, enemy.ActualIntent.Amount, enemy.Definition.Name, Describe(enemy.ActualIntent));
                 if (health == 0 || sanity == 0) { CheckOutcome(); return; }
             }
             SetPhase(BattlePhase.TurnEnd); objective.OnTurnResolved();
@@ -151,7 +167,8 @@ namespace UnsoundedSea.Core
         private bool CheckOutcome()
         {
             if (health == 0 || sanity == 0) { SetPhase(BattlePhase.Defeat); return true; }
-            if (objective.IsComplete(enemies.All(x => x.Health == 0))) { SetPhase(BattlePhase.Victory); return true; }
+            if (boss != null && boss.IsVictory) { SetPhase(BattlePhase.Victory); return true; }
+            if (boss == null && objective.IsComplete(enemies.All(x => x.Health == 0))) { SetPhase(BattlePhase.Victory); return true; }
             return false;
         }
 
@@ -165,7 +182,13 @@ namespace UnsoundedSea.Core
             }
         }
         internal void DamageEnemy(string id, int amount)
-        { var enemy = Find(id); if (enemy != null) { enemy.Health = Math.Max(0, enemy.Health - amount); Record($"{enemy.Definition.Name}受到 {amount} 伤害。"); } }
+        {
+            var enemy = Find(id);
+            if (enemy == null || enemy.Health == 0) return;
+            var dealt = boss?.LimitDamage(id, amount, enemy.Health) ?? amount;
+            enemy.Health = Math.Max(0, enemy.Health - dealt); Record($"{enemy.Definition.Name}受到 {dealt} 伤害。");
+            boss?.EnemyDamaged(id);
+        }
         internal void AddBlock(int amount) { block += amount; Record($"获得 {amount} 格挡。"); }
         internal void AddWard(int amount) { ward += amount; Record($"获得 {amount} 理智防护。"); }
         internal void Heal(int amount) { health = Math.Min(definition.Health, health + amount); Record($"恢复至 {health} 生命。"); }

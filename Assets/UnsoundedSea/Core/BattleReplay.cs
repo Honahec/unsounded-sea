@@ -8,24 +8,25 @@ namespace UnsoundedSea.Core
     [Serializable]
     public sealed class BattleReplay
     {
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
         public int version;
         public string contentHash;
         public uint seed;
+        public BossEncounterKind bossKind;
         public List<BattleCommand> commands;
 
         public static BattleReplay Capture(BattleSession session) => new BattleReplay
         {
-            version = CurrentVersion, contentHash = Fingerprint(session.Definition), seed = session.Seed,
-            commands = new List<BattleCommand>(session.Commands)
+            version = CurrentVersion, contentHash = Fingerprint(session.Definition, session.BossKind), seed = session.Seed,
+            bossKind = session.BossKind, commands = new List<BattleCommand>(session.Commands)
         };
 
         public BattleSession Restore(BattleDefinition definition, EffectRegistry effects = null, IEncounterObjective objective = null)
         {
             if (version != CurrentVersion) throw new InvalidDataException("Unsupported replay version.");
-            if (contentHash != Fingerprint(definition)) throw new InvalidDataException("Content changed; this replay cannot be restored safely.");
+            if (contentHash != Fingerprint(definition, bossKind)) throw new InvalidDataException("Content changed; this replay cannot be restored safely.");
             if (commands == null || commands.Count > 100000) throw new InvalidDataException("Invalid command history.");
-            var result = new BattleSession(definition, seed, effects, objective);
+            var result = new BattleSession(definition, seed, effects, objective, bossKind);
             for (var i = 0; i < commands.Count; i++)
             {
                 var accepted = result.Execute(commands[i]);
@@ -35,13 +36,13 @@ namespace UnsoundedSea.Core
         }
 
         // Length-prefixed binary data avoids delimiter collisions and platform/culture dependence.
-        public static string Fingerprint(BattleDefinition definition)
+        public static string Fingerprint(BattleDefinition definition, BossEncounterKind boss = BossEncounterKind.None)
         {
             using (var stream = new MemoryStream())
             {
                 using (var writer = new BinaryWriter(stream, System.Text.Encoding.UTF8, true))
                 {
-                    writer.Write(CurrentVersion); writer.Write(definition.Id); writer.Write(definition.Health);
+                    writer.Write(CurrentVersion); writer.Write((int)boss); writer.Write(definition.Id); writer.Write(definition.Health);
                     writer.Write(definition.Sanity); writer.Write(definition.Actions); writer.Write(definition.DrawCount);
                     writer.Write((int)definition.Objective); writer.Write(definition.ObjectiveTarget);
                     writer.Write(definition.Deck.Count);

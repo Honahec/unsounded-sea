@@ -56,6 +56,18 @@
 .actor-name, .actor-status { -unity-text-align: middle-center; text-shadow: 0 1px 3px #000; }.actor-name { font-size: 19px; }.actor-status { font-size: 13px; color: #80b5a5; }
 .actor-health { height: 4px; margin-top: 5px; background-color: rgba(8,19,22,.7); }.actor-health-fill { height: 4px; background-color: #9b5d50; }
 .actor-label.selected { width: 300px; padding: 10px 14px; border-bottom-width: 2px; border-bottom-color: #d7bd82; background-color: rgba(5,16,18,.82); border-top-left-radius: 22px; border-bottom-right-radius: 22px; }
+.boss-status { position: absolute; left: 26px; top: 70px; max-width: 360px; color: #eee4c9; font-size: 16px; text-shadow: 0 1px 3px #000; }
+.boss-target { position: absolute; min-width: 44px; min-height: 40px; max-width: 170px; padding: 3px 7px; margin: 0; border-width: 1px; border-radius: 12px 3px; border-color: rgba(158,135,85,.65); color: #eee4c9; background-color: rgba(8,19,22,.83); font-size: 13px; -unity-text-align: middle-center; white-space: normal; }
+.boss-target:disabled { opacity: 1; color: #c4c7b5; background-color: rgba(8,19,22,.65); }
+.boss-target.target-ready { border-color: #d7bd82; border-width: 2px; color: #fff0c9; }
+.boss-target:hover, .boss-target:focus { border-color: #eee4c9; background-color: #254b48; }
+.boss-target-prompt { position: absolute; left: 30%; right: 30%; top: 18px; -unity-text-align: middle-center; color: #d7bd82; text-shadow: 0 1px 3px #000; }
+.salt-board { position: absolute; left: 32px; top: 180px; width: 320px; flex-direction: row; flex-wrap: wrap; padding: 10px; background-color: rgba(8,19,22,.9); border-width: 2px; border-color: #8f7951; border-radius: 24px 5px; }
+.boss-target.salt-cell { position: relative; width: 68px; height: 68px; min-width: 68px; margin: 3px; padding: 2px; font-size: 15px; border-radius: 3px; }
+.actor-label.actor-intent { width: 300px; }
+.boss-target.mechanism-dial { width: 90px; height: 90px; min-width: 90px; border-radius: 45px; border-width: 2px; border-color: #b59b62; font-size: 17px; background-color: rgba(12,31,32,.94); }
+.encounter-card .sea-card { border-color: #80b5a5; border-top-width: 3px; }
+.chosen-card .sea-card { translate: 0 -90px; border-color: #f6e8ac; border-width: 3px; }
 .ocean-modal { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(1,8,13,.91); }
 .ocean-sheet { width: 620px; max-height: 92%; padding: 26px 38px; background-color: rgb(15,31,35); border-width: 1px; border-color: #9e8755; }
 .modal-title { font-size: 28px; margin-bottom: 12px; letter-spacing: 3px; }.modal-copy { color: #b9cbc2; margin-bottom: 12px; }.journal { height: 180px; margin-bottom: 14px; }.log-line { font-size: 13px; color: #80b5a5; margin-bottom: 5px; }

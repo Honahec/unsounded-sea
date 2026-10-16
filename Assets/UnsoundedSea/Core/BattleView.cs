@@ -6,7 +6,30 @@ namespace UnsoundedSea.Core
     {
         public int InstanceId { get; }
         public CardSpec Definition { get; }
-        public CardView(int instanceId, CardSpec definition) { InstanceId = instanceId; Definition = definition; }
+        public bool IsEncounter { get; }
+        public bool Enabled { get; internal set; }
+        public string DisabledReason { get; internal set; }
+        public IReadOnlyList<EncounterTargetView> Targets { get; internal set; }
+        public CardView(int instanceId, CardSpec definition, bool isEncounter = false)
+        {
+            InstanceId = instanceId; Definition = definition; IsEncounter = isEncounter; Enabled = true;
+            DisabledReason = ""; Targets = new List<EncounterTargetView>().AsReadOnly();
+        }
+        internal CardView Snapshot()
+        {
+            var copy = new CardView(InstanceId, Definition, IsEncounter) { Enabled = Enabled, DisabledReason = DisabledReason };
+            copy.Targets = new List<EncounterTargetView>(Targets).AsReadOnly();
+            return copy;
+        }
+    }
+    public sealed class EncounterTargetView
+    {
+        public string Id { get; }
+        public string Name { get; }
+        public string Detail { get; }
+        public bool Enabled { get; }
+        public EncounterTargetView(string id, string name, string detail, bool enabled)
+        { Id = id; Name = name; Detail = detail; Enabled = enabled; }
     }
     public sealed class EnemyView
     {
@@ -17,8 +40,9 @@ namespace UnsoundedSea.Core
         public string Clue { get; }
         public string Intent { get; }
         public bool IntentConfirmed { get; }
-        internal EnemyView(string id, string name, int health, int maxHealth, string clue, string intent, bool confirmed)
-        { Id = id; Name = name; Health = health; MaxHealth = maxHealth; Clue = clue; Intent = intent; IntentConfirmed = confirmed; }
+        public bool Targetable { get; }
+        internal EnemyView(string id, string name, int health, int maxHealth, string clue, string intent, bool confirmed, bool targetable = true)
+        { Id = id; Name = name; Health = health; MaxHealth = maxHealth; Clue = clue; Intent = intent; IntentConfirmed = confirmed; Targetable = targetable; }
     }
     public sealed class ToolView
     {
@@ -28,6 +52,10 @@ namespace UnsoundedSea.Core
     }
     public sealed class BattleView
     {
+        public BossEncounterKind BossKind { get; internal set; }
+        public int BossStage { get; internal set; }
+        public string BossStatus { get; internal set; }
+        public IReadOnlyList<EncounterTargetView> EncounterTargets { get; internal set; }
         public BattlePhase Phase { get; internal set; }
         public int Turn { get; internal set; }
         public int Health { get; internal set; }

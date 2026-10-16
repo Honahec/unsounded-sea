@@ -62,6 +62,18 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 
 场景已入库，无需生成脚本才能运行。需要有意重建本场样例时，用 Unity CLI 执行 `Tools/OceanBattleSetup.cs` 的 `OceanBattleSetup.Build`；它会覆盖本场场景与配置，但保留航海标题入口，运行前先保存改动。`Tools/SeaBossSetup.cs` 的 `ImportModel` / `Build` 分别归一化 Boss 并重建海面样例；仅重设海面战构图可调用 `SeaBossSetup.ApplyComposition`，不会重建遭遇或场景。重建后再执行 `Tools/UberWaterSetup.cs` 的 `UberWaterSetup.Build` 恢复新版海面（只更新水体、雾和相应 Prefab 配置）。`Tools/ImportSurveyVessel.cs` 负责选定船体版本的归一化；模型制作和 LFS 规范见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
 
+### M02–M05 特殊 Boss 战
+
+主菜单「禁航海域」进入 `BossM02`–`BossM05` 四个独立场景，不改变航图生成、节点选择或航程存档。每场使用独立 Scenario、Encounter 和舞台 Prefab；机制设计主出处为 [扩展设计](CONTENT_EXPANSION_DESIGN.md#b02b05-共用遭遇牌契约)。
+
+- `BossRuleModule.bossKind` 选择 `BossEncounterKind`；`BattleScenario.CreateSession` 注入 Core 的 `BossEncounterRules`，每次重开创建独立状态。M02 为唱序封匣／击破发声囊，M03 为盐格封栓，M04 为继电器／闸锁／输出窗口，M05 为牵引守卫／关闭航标／撤离。
+- 首回合正常抽牌后授予稳定实例的遭遇牌；保留在手、不进入普通牌堆，阶段和每回合次数通过 `CardView.Enabled / DisabledReason / Targets` 公开。出牌仍使用 `BattleCommand.Play`；无目标的聆听立即执行，其余选牌后选择目标，确认前不扣费，Esc／右键取消。
+- `BattleView.EncounterTargets` 只含公开机关状态；盐格危险位置不直接暴露。`EnemyView.Targetable` 区分可攻击单位和规则本体。召唤槽位休眠时隐藏模型，入场时恢复；M05 公开召唤顺序、下一次召唤与余响。
+- `BossTargetAnchor` 连接场景机关与 HUD。M03 使用可读的 4×4 盐格盘；M04 只在选牌后展示对应极性／闸锁目标；M05 选定守卫后显示其航标。没有绕过遭遇牌的额外机关操作栏。
+
+四个舞台复制共享 `DrownedBellStage`，直接继承沉钟的远景相机、Uber 水面、调查船与同相位随浪运动。四个本体均使用独立海面锚点与巨型世界尺度，调查船保持原尺寸作为对照；M04 不再作为船上小型人形 Boss，只有召唤物和机关留在甲板。名牌偏离主体轮廓，甲板单位的目标条分开排列，唱诗匣标签扩大间距，避免远景缩小后失去可操作性。`Tools/BossExpansionSetup.cs` 的 `ImportModels` 从归档 LOD0 导入并归一化，`Build` 重建四场配置、舞台、场景与构建列表；运行前退出 Play 并保存场景编辑。不会重建共享水面或航海场景。当前召唤单位复用现有角色模型，机关为可操作的基础几何道具；尺度记录与动画、性能状态见 [模型流程](MODEL_IMPORT_WORKFLOW.md)。
+
+
 ## 层级与依赖
 
 ```text
@@ -134,7 +146,7 @@ Project 右键 **Create → Unsounded Sea → Card**。填写唯一 `id`、名�
 
 ## 存档与复现
 
-单场战斗回放存档包含格式版本、完整内容 SHA-256、初始种子和成功命令序列。恢复先验证版本与内容，再从头确定性重放，重建手牌、弃牌、消耗、工具次数、知识、目标和回合。非法操作序列会拒绝恢复，不会替换当前会话。
+单场战斗回放格式当前为 **2**，包含完整内容 SHA-256、`bossKind`、初始种子和成功命令序列；Boss 类型同时进入内容指纹。恢复先验证版本与内容，再从头确定性重放，重建手牌、弃牌、消耗、工具次数、知识、目标、Boss 阶段和回合。非法操作序列会拒绝恢复，不会替换当前会话；不迁移版本 1 的旧战斗回放。
 
 数据指纹覆盖卡组顺序、全部卡牌效果、敌人意图、工具和战斗参数；任何内容改变都会拒绝加载旧回放。修改效果处理算法、随机算法、自定义目标或其他规则时必须提升 `BattleReplay.CurrentVersion`，旧版本迁移尚未提供。自定义注册表/目标的实现本身不进入数据指纹，版本升级是调用方契约。该机制用于本地复现，不是防作弊方案。
 

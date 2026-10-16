@@ -10,8 +10,11 @@ namespace UnsoundedSea.Runtime
         {
             pickingMode = PickingMode.Ignore;
             AddToClassList("enemy-details");
-            Add(Text("征兆", "enemy-detail-heading"));
-            Add(Text(enemy.Clue.Replace("；", "\n").Replace(";", "\n").Trim(), "enemy-clue-lines"));
+            if (!string.IsNullOrWhiteSpace(enemy.Clue))
+            {
+                Add(Text("征兆", "enemy-detail-heading"));
+                Add(Text(enemy.Clue.Replace("；", "\n").Replace(";", "\n").Trim(), "enemy-clue-lines"));
+            }
             var alternatives = enemy.Intent.Split(new[] { " / ", "／", "\n" }, StringSplitOptions.RemoveEmptyEntries);
             Add(Text(enemy.IntentConfirmed ? "已确认行动" : alternatives.Length > 1 ? "可能行动" : "本回合", "enemy-detail-heading"));
             foreach (var alternative in alternatives)
