@@ -5,7 +5,7 @@
 ## 快速运行
 
 1. 打开工程，等待脚本编译完成。
-2. 打开 `Assets/UnsoundedSea/Scenes/MainMenu.unity`（构建列表第 0 位）点击 Play：标题界面提供「开始调查 / 设置 / 退出」。也可直接打开 `Battle.unity` 跳过标题。
+2. 打开 `Assets/UnsoundedSea/Scenes/MainMenu.unity`（构建列表第 0 位）点击 Play：标题界面提供「开始调查 / 设置 / 退出」。也可直接打开 `Battle.unity` 跳过标题。 **Editor 的 Play 运行当前打开的场景，不会因 pull 或构建列表顺序自动切换入口**；`ModelImportReview.unity` 仅供模型审阅，不包含游戏 HUD。
 3. 默认进入蒙面祷告者遭遇。其他遭遇通过 `BattleHud` Inspector 的 `Initial Encounter` 选择：0 公开意图、1 有限调查、2 封门、3 卡牌实验；游戏 HUD 不提供开发用场景切换。
 4. 点击目标名牌选择敌人，再点击底部手牌或右侧调查工具；右下角结束回合。封门遭遇提供独立的「绘制封线」，四次即可完成，不需要击杀。
 5. 右上角「调查档案」（或 J 键）展开证据与行动记录，Esc 收起；无档案打开时 Esc 打开暂停菜单（继续调查 / 设置 / 返回标题）。回放与文件存档接口仍保留在底层；不在游戏 HUD 中放置调试用保存、读取按钮。
