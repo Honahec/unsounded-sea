@@ -11,6 +11,7 @@ namespace UnsoundedSea.Runtime
         [SerializeField] private BattleWater water;
         [SerializeField] private VoyageWake wake;
         [SerializeField] private AudioSource ambience;
+        [SerializeField] private VoyageDestinationPresentation destinations;
         [SerializeField] private Vector3 cameraOffset = new Vector3(25, 17, -29);
         [SerializeField] private Vector3 cameraTarget = new Vector3(0, 0, 4);
         private VoyageSailingPath path;
@@ -28,6 +29,7 @@ namespace UnsoundedSea.Runtime
         public Transform Vessel => vessel;
         public Camera VoyageCamera => voyageCamera;
         public BattleWater Water => water;
+        public VoyageDestinationPresentation Destinations => destinations;
         // Normal travel is continuous, including arrival. Only reduced motion uses a short veil.
         public float TransitionOpacity
         {
@@ -40,7 +42,7 @@ namespace UnsoundedSea.Runtime
             }
         }
 
-        public void SetLocation(Vector2 chartPosition, Vector2 heading)
+        public void SetLocation(Vector2 chartPosition, Vector2 heading, string location = null)
         {
             if (voyageCamera == null || vessel == null || water == null)
                 throw new InvalidOperationException("Assign the voyage camera, vessel and water references.");
@@ -53,13 +55,16 @@ namespace UnsoundedSea.Runtime
             cameraYaw = Mathf.Atan2(routeHeading.x, routeHeading.z) * Mathf.Rad2Deg;
             PlaceCamera(1);
             wake?.Clear();
+            destinations?.SetLocation(location, routePosition, routeHeading);
         }
 
-        public void Begin(Vector2 destination, bool reduceMotion)
+        public void Begin(Vector2 destination, bool reduceMotion, string location = null)
         {
             if (IsPlaying) return;
             if (!initialized) throw new InvalidOperationException("Set the voyage location before sailing.");
             path = new VoyageSailingPath(routePosition, VoyageSailingPath.WorldPoint(destination), routeHeading);
+            path.Evaluate(1, out var arrival, out var heading);
+            destinations?.Begin(location, arrival, heading);
             reducedPassage = reduceMotion; reducedRelocated = false; reducedElapsed = 0; reducedStartProgress = 0;
             progress = 0; speed = 0; IsPlaying = true;
         }
@@ -75,6 +80,7 @@ namespace UnsoundedSea.Runtime
             {
                 progress = Mathf.Clamp01(progress + Mathf.Max(0, deltaTime) / Duration);
                 path.Evaluate(progress, out routePosition, out routeHeading);
+                destinations?.Advance(progress, false, false);
                 return;
             }
             reducedElapsed += Mathf.Max(0, deltaTime);
@@ -89,12 +95,14 @@ namespace UnsoundedSea.Runtime
                 cameraYaw = Mathf.Atan2(routeHeading.x, routeHeading.z) * Mathf.Rad2Deg;
                 PlaceCamera(1); wake?.Clear();
             }
+            destinations?.Advance(progress, true, reducedRelocated);
         }
 
         public void Finish()
         {
             if (!IsPlaying) return;
             IsPlaying = false; speed = 0;
+            destinations?.Finish();
             // Keep the arrival pose. Returning to a previous baseline would visibly teleport the ship.
         }
 
@@ -109,7 +117,7 @@ namespace UnsoundedSea.Runtime
             }
             if (paused) return;
             float dt = Mathf.Max(0.0001f, deltaTime);
-            float targetSpeed = IsPlaying && !reduceMotion ? Vector3.Distance(routePosition, previousPosition) / dt : 0;
+            float targetSpeed = IsPlaying && !reducedPassage ? Vector3.Distance(routePosition, previousPosition) / dt : 0;
             speed = Mathf.Lerp(speed, targetSpeed, 1 - Mathf.Exp(-dt * 4));
             previousPosition = routePosition;
             if (!reduceMotion && !(IsPlaying && reducedPassage))
@@ -119,6 +127,7 @@ namespace UnsoundedSea.Runtime
                 cameraYaw = Mathf.LerpAngle(cameraYaw, yaw, 1 - Mathf.Exp(-dt * 1.4f));
                 PlaceCamera(1 - Mathf.Exp(-dt * 3));
             }
+            destinations?.Tick(water, dt, reduceMotion);
             wake?.Tick(dt, routePosition, routeHeading, speed, water, reduceMotion);
         }
 
@@ -151,6 +160,7 @@ namespace UnsoundedSea.Runtime
         private void OnDisable()
         {
             IsPlaying = false; initialized = false;
+            destinations?.Clear();
             if (water != null) water.Unbind();
             wake?.Clear();
         }

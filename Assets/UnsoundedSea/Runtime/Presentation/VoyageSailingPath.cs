@@ -19,7 +19,7 @@ namespace UnsoundedSea.Runtime
             if (departureHeading.sqrMagnitude < 0.001f) departureHeading = direction;
             first = start + departureHeading * (distance * 0.3f);
             second = end - direction * (distance * 0.3f);
-            Duration = Mathf.Max(12, distance / 5 + 3);
+            Duration = 5f;
         }
 
         public void Evaluate(float progress, out Vector3 position, out Vector3 heading)

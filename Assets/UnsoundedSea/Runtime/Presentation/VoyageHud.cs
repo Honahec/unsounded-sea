@@ -47,7 +47,7 @@ namespace UnsoundedSea.Runtime
                 var current = Session.Current;
                 var previous = Session.Visited.Count > 1
                     ? System.Linq.Enumerable.FirstOrDefault(Session.KnownStops, x => x.Id == Session.Visited[Session.Visited.Count - 2]) : null;
-                sailingPresentation.SetLocation(new Vector2(current.X, current.Y), previous == null ? Vector2.up : new Vector2(current.X - previous.X, current.Y - previous.Y));
+                sailingPresentation.SetLocation(new Vector2(current.X, current.Y), previous == null ? Vector2.up : new Vector2(current.X - previous.X, current.Y - previous.Y), current.Name);
                 Refresh();
             }
             catch (Exception exception) { loadError = exception.Message; Refresh(); Debug.LogException(exception); }
@@ -275,7 +275,7 @@ namespace UnsoundedSea.Runtime
             if (!sailingPresentation.IsPlaying)
             {
                 var to = Session.Selected;
-                sailingPresentation.Begin(new Vector2(to.X, to.Y), GameSettings.ReducedMotion);
+                sailingPresentation.Begin(new Vector2(to.X, to.Y), GameSettings.ReducedMotion, to.Name);
             }
             lastTick = Time.realtimeSinceStartup;
             sailing = root.schedule.Execute(() =>

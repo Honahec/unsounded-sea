@@ -27,7 +27,7 @@ namespace UnsoundedSea.Tests
             path.Evaluate(0.5f, out var middle, out var steering);
             Assert.That(Vector3.Cross(middle, destination).magnitude, Is.GreaterThan(10), "Path is a straight slide instead of a turn");
             Assert.That(Vector3.Dot(steering, destination.normalized), Is.GreaterThan(0));
-            Assert.That(path.Duration, Is.GreaterThanOrEqualTo(12));
+            Assert.That(path.Duration, Is.EqualTo(5));
         }
 
         [Test]
