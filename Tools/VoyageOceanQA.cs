@@ -156,6 +156,7 @@ public static class VoyageOceanQA
         Check(UnityEngine.Object.FindObjectsByType<BattleWater>().Length==0,"Voyage water leaked across scene");
         Check(UnityEngine.Object.FindObjectsByType<PlanarReflectionManager>().Length==0,"Reflection manager leaked");
         Check(UnityEngine.Object.FindObjectsByType<PlanarReflectionVolume>().Length==0,"Reflection volume leaked");
+        Check(UnityEngine.Object.FindObjectsByType<VoyageSceneView>().Length==0,"Voyage destination leaked across scene");
         Check(!Resources.FindObjectsOfTypeAll<Mesh>().Any(m=>m.name=="Voyage wake (runtime)"),"Wake mesh leaked");
     }
     public static async Task<object> Lifecycle()

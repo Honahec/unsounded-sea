@@ -152,6 +152,8 @@ git lfs fsck
 
 ## 当前样例与已知缺口
 
+2026-10-17 航海节点新增货驳与救生艇：通过 Hyper3D MCP 直接生成预算内静态网格，分别 35,000／18,000 三角面，未另制高模或使用 Agent。原始 PBR GLB 保留在运行时目录；提示词、哈希与贴图规格集中在 [节点资产 manifest](../ArtSource/Landmarks/manifest.json)。14 个组合场景与替换入口见 [框架指南](FRAMEWORK.md#航海选路局外)，不逐场复制一套生成文档。
+
 2026-10-16：MCP 探索 → Rodin GLB 下载/Agent 上传 → Agent 参考重建 → 同聊天减面 → Unity CLI 导入 → LFS 同步已跑通。[Agent 聊天](https://hyper3d.ai/workspace/agent?project=5d2ea8e0-e8dc-4bb9-8437-3309d6f1c6ab&thread=3fab207e-1239-4613-9d04-68e5799e8edf&lang=zh)。
 
 | 当前资产 | 母版 → LOD0 三角面 | 已验证 | 未完成 |

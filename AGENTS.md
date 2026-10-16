@@ -8,7 +8,7 @@
 | --- | --- |
 | 产品方向、世界观、卡池、MVP 范围 | [概念设计](Docs/DESIGN_DOC_v0_1.md) |
 | 卡牌/敌人/Boss/道具/事件机制，视觉与信息边界 | [机制与素材设计](Docs/ASSET_MECHANICS_DESIGN.md) → [框架指南](Docs/FRAMEWORK.md) 中相关接口 |
-| 航海海景、船体行进、镜头与尾流 | [框架指南](Docs/FRAMEWORK.md) 的「航海选路（局外）」→ `VoyageSailingPresentation` / `VoyageSailingPath` / `VoyageWake`；复用船与水体，勿改航程规则 |
+| 航海海景、船体行进、镜头与尾流 | [框架指南](Docs/FRAMEWORK.md) 的「航海选路（局外）」→ `VoyageSailingPresentation` / `VoyageSailingPath` / `VoyageWake`；节点外观读 `VoyageScenes.asset` / `VoyageDestinationPresentation`，重建工具 `Tools/VoyageNodeSetup.cs`；复用船与水体，勿改航程规则 |
 | 3D 战斗场景、角色替换、特殊战扩展 | [框架指南](Docs/FRAMEWORK.md) 的「3D 战斗组合与扩展」→ `Runtime/Battle/`；场景重建会覆盖配置，先检查现有编辑 |
 | 规则、UI、存档、内容配置和代码修复 | [框架指南](Docs/FRAMEWORK.md) → 相关代码；涉及验收时再读 [验证记录](Docs/FRAMEWORK_VALIDATION.md) |
 | 模型生成、减面、Unity 导入、模型归档或 LFS | [模型全流程](Docs/MODEL_IMPORT_WORKFLOW.md) → 机制文档中对应资产要求 → 相关 manifest/脚本 |

@@ -208,5 +208,12 @@
     ],
     "shader": "UnsoundedSea/Voyage Landmark",
     "scope": "Play Mode static appearance, waterline, sampled floating motion and scene transitions at 1600x900. Target-device performance not measured."
+  },
+  "lfsVerification": {
+    "date": "2026-10-17",
+    "assetCommit": "b3f9a6aa6551d01dfe9a7f201b717d58352e8aa6",
+    "method": "independent clone fetch from origin, selective LFS fetch, SHA-256 of every downloaded object compared with local files",
+    "verifiedFiles": 122,
+    "allMatch": true
   }
 }

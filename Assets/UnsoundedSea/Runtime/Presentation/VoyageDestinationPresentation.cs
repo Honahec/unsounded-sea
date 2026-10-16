@@ -38,10 +38,20 @@ namespace UnsoundedSea.Runtime
         }
         public void Advance(float progress, bool reduced, bool relocated)
         {
-            current?.SetVisibility(reduced ? (relocated ? 0 : 1) : 1 - Mathf.SmoothStep(0, 1, progress / 0.24f));
-            destination?.SetVisibility(reduced ? (relocated ? 1 : 0) : ArrivalVisibility(progress));
-            // A bank of sea mist hides the middle of the passage; the last two seconds clear toward landfall.
-            if (ownsFog) RenderSettings.fogDensity = reduced ? baselineFog : Mathf.Lerp(baselineFog, 0.045f,
+            if (reduced)
+            {
+                // Mid-passage accessibility changes keep the existing mist until the veil covers relocation.
+                if (relocated)
+                {
+                    current?.SetVisibility(0); destination?.SetVisibility(1);
+                    if (ownsFog) RenderSettings.fogDensity = baselineFog;
+                }
+                return;
+            }
+            current?.SetVisibility(1 - Mathf.SmoothStep(0, 1, progress / 0.24f));
+            destination?.SetVisibility(ArrivalVisibility(progress));
+            // A bank of sea mist hides the middle of the passage; the last two seconds clear toward arrival.
+            if (ownsFog) RenderSettings.fogDensity = Mathf.Lerp(baselineFog, 0.045f,
                 Mathf.SmoothStep(0, 1, progress / 0.3f) * (1 - ArrivalVisibility(progress)));
         }
         public void Finish()
