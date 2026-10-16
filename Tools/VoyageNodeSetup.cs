@@ -181,14 +181,46 @@ public static class VoyageNodeSetup
         for(int i=0;i<12;i++)Beam(p,pos+new Vector3(0,0,i*.32f),pos+new Vector3(.8f,-3,i*.32f+.4f),.025f,timber);
         for(int j=0;j<9;j++)Beam(p,pos+new Vector3(j*.1f,-j*.375f,0),pos+new Vector3(j*.1f,-j*.375f,4),.025f,timber);
     }
-    static void Debris(Transform parent,int count,float radius)
+    static void Splinter(Transform parent,Vector3 position,float width,float length,float thickness,float yaw,int seed)
     {
-        for(int i=0;i<count;i++)
+        // Unequal torn ends and tapered sides give each fragment a different silhouette.
+        var rng=new System.Random(seed);
+        Vector2[] outline={new Vector2(-.5f,-.39f),new Vector2(-.16f,-.54f),new Vector2(.08f,-.35f),new Vector2(.47f,-.46f),
+            new Vector2(.42f,.43f),new Vector2(.13f,.34f),new Vector2(-.08f,.51f),new Vector2(-.48f,.32f)};
+        for(int i=0;i<outline.Length;i++)outline[i]=new Vector2(outline[i].x*width*(.8f+(float)rng.NextDouble()*.4f),outline[i].y*length);
+        var vertices=new List<Vector3>();var uv=new List<Vector2>();var triangles=new List<int>();
+        Action<Vector3,Vector3,Vector3> face=(v0,v1,v2)=>
         {
-            float a=i*2.39996f;float d=3+Mathf.Sqrt(i+1)*radius/Mathf.Sqrt(count);
-            var p=Float(parent,"Drift timber "+i,new Vector3(Mathf.Cos(a)*d,0,Mathf.Sin(a)*d),.3f,1);
-            p.localRotation=Quaternion.Euler(0,i*71,0);
-            Box(p,"Salt-soaked plank",Vector3.zero,new Vector3(.2f,.18f,1.4f+(i%4)*.7f),timber);
+            int n=vertices.Count;vertices.Add(v0);vertices.Add(v1);vertices.Add(v2);
+            foreach(var v in new[]{v0,v1,v2})uv.Add(new Vector2(v.x/width+.5f,v.z/length+.5f));
+            triangles.Add(n);triangles.Add(n+1);triangles.Add(n+2);
+        };
+        for(int i=0;i<outline.Length;i++)
+        {
+            var a=outline[i];var b=outline[(i+1)%outline.Length];
+            var topA=new Vector3(a.x,thickness*.5f,a.y);var topB=new Vector3(b.x,thickness*.5f,b.y);
+            var bottomA=topA-Vector3.up*thickness;var bottomB=topB-Vector3.up*thickness;
+            face(Vector3.up*thickness*.5f,topB,topA);face(-Vector3.up*thickness*.5f,bottomA,bottomB);
+            face(topA,topB,bottomB);face(topA,bottomB,bottomA);
+        }
+        var mesh=new Mesh{name="Torn timber authoring mesh"};mesh.SetVertices(vertices);mesh.SetUVs(0,uv);mesh.SetTriangles(triangles,0);mesh.RecalculateNormals();mesh.RecalculateTangents();mesh.RecalculateBounds();
+        var go=Child("Broken timber",parent,position);go.transform.localRotation=Quaternion.Euler(0,yaw,0);
+        go.AddComponent<MeshFilter>().sharedMesh=mesh;go.AddComponent<MeshRenderer>().sharedMaterial=timber;
+    }
+    static void Wreckage(Transform parent,Vector3 position,float yaw,int kind,float size,int seed)
+    {
+        var p=Float(parent,"Drifting wreckage "+seed,position,.55f*size,1.2f*size);
+        p.localRotation=Quaternion.Euler((seed%7)-3,yaw,(seed%11)-5);
+        var body=p.GetComponent<VoyageSceneFloat>();body.heave=.95f;body.maxTilt=7;body.horizontalDrift=.65f;
+        if(kind==0) // Broad broken hull plank.
+            Splinter(p,Vector3.zero,.5f*size,2.3f*size,.16f*size,0,seed);
+        else if(kind==1) // A short, partly submerged spar with an irregular end.
+            Splinter(p,new Vector3(0,-.07f,0),.27f*size,1.6f*size,.3f*size,0,seed);
+        else // A broken hatch panel: unequal planks still held by a transverse cleat.
+        {
+            Splinter(p,new Vector3(-.3f*size,.03f,0),.52f*size,1.9f*size,.14f*size,-4,seed);
+            Splinter(p,new Vector3(.24f*size,.01f,-.27f*size),.5f*size,1.35f*size,.16f*size,8,seed+1);
+            Splinter(p,new Vector3(0,.14f,-.18f*size),.18f*size,1.12f*size,.12f,94,seed+2);
         }
     }
     static void BuildContent(int index,Transform root)
@@ -203,13 +235,17 @@ public static class VoyageNodeSetup
                 for(int i=0;i<3;i++){Buoy(root,new Vector3(14,0,-15+i*10));Buoy(root,new Vector3(24,0,-15+i*10));}
                 Light(boat,new Vector3(0,7,-9),false,100);break;
             case 1:
-                boat=Hull(root,"DerelictBarge",28);Debris(root,6,16);Light(boat,new Vector3(2,4,-6),false,15);break;
+                boat=Hull(root,"DerelictBarge",28);
+                Wreckage(root,new Vector3(7.3f,-.08f,-4.6f),32,2,1.15f,107);
+                Wreckage(root,new Vector3(9.4f,-.15f,-3.2f),14,0,.68f,113);
+                Wreckage(root,new Vector3(13.1f,-.1f,-7.8f),-18,1,.82f,127);
+                Light(boat,new Vector3(2,4,-6),false,15);break;
             case 2:
                 boat=Hull(root,"SurveyVessel_LOD0",12);Crane(boat,new Vector3(-1.4f,1,-2),3.5f);
                 for(int i=0;i<3;i++)Shape(boat,"Rubber fender",PrimitiveType.Sphere,new Vector3(-1.9f,.2f,-2+i*2),new Vector3(.65f,1,.4f),iron);
                 break;
             case 3:
-                boat=Hull(root,"LostLifeboat",7);Box(boat,"Waxed chest",new Vector3(0,.45f,0),new Vector3(.8f,.5f,1.1f),canvas);Debris(root,4,6);break;
+                boat=Hull(root,"LostLifeboat",7);Box(boat,"Waxed chest",new Vector3(0,.45f,0),new Vector3(.8f,.5f,1.1f),canvas);break;
             case 4:
                 boat=Hull(root,"DerelictBarge",25);Antenna(boat,new Vector3(0,4,4),11);Antenna(boat,new Vector3(0,4,-6),8);
                 Light(boat,new Vector3(2,4,-5),false,45);break;
@@ -226,7 +262,11 @@ public static class VoyageNodeSetup
             case 6:
                 boat=Hull(root,"SurveyVessel_LOD0",18);
                 Beam(boat,new Vector3(0,1,2),new Vector3(-6,3,6),.17f,timber);
-                Net(boat,new Vector3(-2.5f,1,-3));Debris(root,8,13);break;
+                Net(boat,new Vector3(-2.5f,1,-3));
+                Wreckage(root,new Vector3(-6.2f,-.1f,4.7f),-22,0,1.3f,211);
+                Wreckage(root,new Vector3(-7.4f,-.04f,6.2f),8,2,.78f,227);
+                Wreckage(root,new Vector3(-10.6f,-.17f,5.8f),-41,1,.65f,233);
+                Wreckage(root,new Vector3(-6.7f,-.12f,11.9f),31,0,.55f,241);break;
             case 7:
                 boat=Hull(root,"DerelictBarge",30);
                 Box(boat,"Sealed cargo hold",new Vector3(0,3.2f,3),new Vector3(6,2.5f,11),iron);
@@ -247,12 +287,20 @@ public static class VoyageNodeSetup
                 foreach(float x in new[]{-3.3f,1.3f})foreach(float z in new[]{-3f,1f})Beam(boat,new Vector3(x,2,z),new Vector3(x,5,z),.08f,iron);
                 Box(boat,"Tool cabinet",new Vector3(-1,3,-1),new Vector3(2,1.4f,1),brass);Light(boat,new Vector3(-1,4.5f,-1),false,75);break;
             case 11:
-                Debris(root,26,19);Buoy(root,new Vector3(-13,0,10),false,.55f);Buoy(root,new Vector3(13,0,-7),true,.55f);
-                // Three spars trace diverging currents, a readable surface-only encounter.
-                for(int i=0;i<3;i++){var f=Float(root,"Current marker",new Vector3(-6+i*6,0,3+i*2),.4f,2);f.localRotation=Quaternion.Euler(0,25+i*35,0);Beam(f,new Vector3(0,0,-2),new Vector3(0,0,2),.13f,timber);}
+                // Three unequal current streaks leave broad areas of empty water, not a ring of props.
+                Wreckage(root,new Vector3(-10.8f,-.1f,6.3f),-31,2,.85f,307);
+                Wreckage(root,new Vector3(-9.2f,-.16f,8.6f),-18,0,.6f,311);
+                Wreckage(root,new Vector3(-6.7f,-.08f,12.1f),-42,1,.8f,317);
+                Wreckage(root,new Vector3(3.1f,-.06f,-4.9f),63,0,1.1f,331);
+                Wreckage(root,new Vector3(4.9f,-.18f,-5.7f),82,1,.5f,337);
+                Wreckage(root,new Vector3(8.8f,-.09f,-3.2f),52,2,.65f,347);
+                Wreckage(root,new Vector3(14.6f,-.12f,-.7f),74,0,.45f,349);
+                Wreckage(root,new Vector3(6.4f,-.09f,13.8f),22,1,1.2f,353);
+                Wreckage(root,new Vector3(8.7f,-.05f,17.2f),7,0,.65f,359);
+                Buoy(root,new Vector3(-13,0,10),false,.55f);Buoy(root,new Vector3(13,0,-7),true,.55f);
                 break;
             case 12:
-                Buoy(root,Vector3.zero,true,1.7f);Debris(root,5,7);break;
+                Buoy(root,Vector3.zero,true,1.7f);break;
             case 13:
                 boat=Hull(root,"DerelictBarge",38);
                 Shape(boat,"Lightship tower",PrimitiveType.Cylinder,new Vector3(0,6.5f,2),new Vector3(3.6f,3.5f,3.6f),iron);
@@ -282,11 +330,15 @@ public static class VoyageNodeSetup
                 var merged=Child(group.Key.name,body.transform,Vector3.zero);merged.AddComponent<MeshFilter>().sharedMesh=mesh;
                 merged.AddComponent<MeshRenderer>().sharedMaterial=group.Key;
             }
+            var temporary=filters.Select(f=>f.sharedMesh).Where(m=>!EditorUtility.IsPersistent(m)).Distinct().ToArray();
             foreach(var f in filters) UnityEngine.Object.DestroyImmediate(f.gameObject);
+            foreach(var mesh in temporary) UnityEngine.Object.DestroyImmediate(mesh);
             bodyIndex++;
         }
     }
-    public static object Build()
+    public static object Build() => Build(false);
+    public static object RefineDebris() => Build(true);
+    static object Build(bool debrisOnly)
     {
         Guard();Folder(Art);Folder(Art+"/Meshes");shader=Shader.Find("UnsoundedSea/Voyage Landmark");if(!shader)throw new Exception("Landmark shader missing");
         iron=Mat("Salt iron",new Color(.26f,.34f,.32f),.3f);timber=Mat("Wet timber",new Color(.44f,.31f,.19f));
@@ -298,8 +350,10 @@ public static class VoyageNodeSetup
         var catalog=AssetDatabase.LoadAssetAtPath<VoyageSceneCatalog>(Art+"/VoyageScenes.asset");
         if(!catalog){catalog=ScriptableObject.CreateInstance<VoyageSceneCatalog>();AssetDatabase.CreateAsset(catalog,Art+"/VoyageScenes.asset");}
         var entries=new List<VoyageSceneCatalog.Entry>();
+        var revised=new[]{1,3,6,11,12};
         for(int i=0;i<names.Length;i++)
         {
+            if(debrisOnly&&!revised.Contains(i))continue;
             var root=new GameObject(keys[i]);root.AddComponent<VoyageSceneView>();
             try
             {
@@ -309,6 +363,18 @@ public static class VoyageNodeSetup
                 entries.Add(new VoyageSceneCatalog.Entry{location=names[i],prefab=prefab.GetComponent<VoyageSceneView>(),offset=offset,heading=i==3?30:20});
             }
             finally{UnityEngine.Object.DestroyImmediate(root);}
+        }
+        if(debrisOnly)
+        {
+            // Remove only superseded meshes owned by these five generated scenes.
+            var dependencies=new HashSet<string>(AssetDatabase.GetDependencies(catalog.entries.Select(e=>AssetDatabase.GetAssetPath(e.prefab)).ToArray(),true));
+            foreach(var guid in AssetDatabase.FindAssets("t:Mesh",new[]{Art+"/Meshes"}))
+            {
+                string path=AssetDatabase.GUIDToAssetPath(guid),name=Path.GetFileName(path);
+                if(revised.Any(i=>name.StartsWith(keys[i]+"-",StringComparison.Ordinal))&&!dependencies.Contains(path))AssetDatabase.DeleteAsset(path);
+            }
+            AssetDatabase.SaveAssets();
+            return new{updated=entries.Select(e=>e.location).ToArray()};
         }
         catalog.entries=entries.ToArray();EditorUtility.SetDirty(catalog);AssetDatabase.SaveAssets();
         var scene=EditorSceneManager.OpenScene(Root+"Scenes/Voyage.unity");

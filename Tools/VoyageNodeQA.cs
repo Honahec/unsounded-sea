@@ -78,6 +78,34 @@ public static class VoyageNodeQA
         ScreenCapture.CaptureScreenshot(Path.GetFullPath("Logs/VoyageNodes/arrival.png"));
         return new{duration,firstVisible,middleVisibility,maxVisibilityBeforeThree,pausedReveal=true,session.LegsSailed,current=p.Destinations.Current.name};
     }
+    public static async Task<object> DebrisMotion()
+    {
+        var hud=Hud;var p=Sailing;hud.enabled=false;
+        try
+        {
+            string[] locations={"漂流货船","失联救生艇","断桅渔船","潮流观测点","远海浮标"};
+            int[] expected={3,0,4,9,0};
+            for(int i=0;i<locations.Length;i++)
+            {
+                p.SetLocation(new Vector2(50,12),Vector2.up,locations[i]);
+                Check(p.Destinations.Current.GetComponentsInChildren<VoyageSceneFloat>().Count(f=>f.horizontalDrift>0)==expected[i],"Unexpected wreckage count: "+locations[i]);
+            }
+            p.SetLocation(new Vector2(50,12),Vector2.up,"潮流观测点");p.Tick(.016f,false,false);
+            var pieces=p.Destinations.Current.GetComponentsInChildren<VoyageSceneFloat>().Where(f=>f.horizontalDrift>0).ToArray();
+            var start=pieces.Select(f=>f.transform.position).ToArray();
+            for(int i=0;i<25;i++){p.Tick(.04f,false,false);await Task.Delay(40);}
+            float movement=pieces.Select((f,i)=>Vector3.ProjectOnPlane(f.transform.position-start[i],Vector3.up).magnitude).Max();
+            Check(movement>.01f,"Wreckage has no wave-driven horizontal movement");
+            var frozen=pieces.Select(f=>f.transform.position).ToArray();
+            for(int i=0;i<6;i++)p.Tick(.05f,true,false);
+            Check(frozen.SequenceEqual(pieces.Select(f=>f.transform.position)),"Pause moved wreckage");
+            for(int i=0;i<6;i++)p.Tick(.05f,false,true);
+            Check(frozen.SequenceEqual(pieces.Select(f=>f.transform.position)),"Reduced motion moved wreckage");
+            return new{counts=expected,horizontalMovement=movement,pause=true,reducedMotion=true};
+        }
+        finally{hud.enabled=true;}
+    }
+
     public static async Task<object> Record()
     {
         var hud=Hud;hud.enabled=false;typeof(VoyageRuntime).GetProperty("Session").SetValue(null,VoyageSession.Create(18));hud.enabled=true;
