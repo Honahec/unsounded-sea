@@ -222,5 +222,12 @@
       },
       "wave_motion_pause_reduced_motion_verified": true
     }
+  },
+  "lfsVerification": {
+    "date": "2026-10-17",
+    "assetCommit": "06a8acd9783281bea64a0c8574567ece58922d0b",
+    "method": "independent clone fetch from origin, selective LFS fetch, SHA-256 of every downloaded object compared with local files",
+    "verifiedFiles": 87,
+    "allMatch": true
   }
 }
