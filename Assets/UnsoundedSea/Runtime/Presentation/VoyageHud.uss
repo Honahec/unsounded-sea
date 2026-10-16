@@ -68,7 +68,6 @@
 .save-error .primary { min-height: 34px; margin-top: 7px; }
 .voyage-hud .pause, .voyage-hud .settings { left: 50%; top: 50%; translate: -50% -50%; }
 .sailing-fog { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgb(113, 137, 136); }
-.arrival-fog { opacity: 1; transition-property: opacity; transition-duration: 0.3s; }
 .is-sailing .navigation-tools { visibility: hidden; }
 .is-sailing .destination-panel { right: 50%; bottom: 30px; width: 280px; translate: 50% 0; align-items: center; }
 .is-sailing .destination-panel .section-label, .is-sailing .destination-title, .is-sailing .destination-clue { display: none; }
