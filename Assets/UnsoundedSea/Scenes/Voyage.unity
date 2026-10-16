@@ -220,6 +220,7 @@ GameObject:
   - component: {fileID: 1184011517}
   - component: {fileID: 1184011519}
   - component: {fileID: 1184011520}
+  - component: {fileID: 1184011521}
   m_Layer: 0
   m_Name: Voyage Interface
   m_TagString: Untagged
@@ -299,8 +300,22 @@ MonoBehaviour:
   water: {fileID: 639401772}
   wake: {fileID: 639401774}
   ambience: {fileID: 639401773}
+  destinations: {fileID: 1184011521}
   cameraOffset: {x: 25, y: 17, z: -29}
   cameraTarget: {x: 0, y: 0, z: 4}
+--- !u!114 &1184011521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1184011515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f259e536a25424b2eaf5dc581e85a48e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.VoyageDestinationPresentation
+  catalog: {fileID: 11400000, guid: ea5218d2919484b84be1fd377f3fe79e, type: 2}
 --- !u!1 &1703731680
 GameObject:
   m_ObjectHideFlags: 0

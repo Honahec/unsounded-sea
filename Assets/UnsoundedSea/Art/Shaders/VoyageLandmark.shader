@@ -50,7 +50,9 @@ Shader "UnsoundedSea/Voyage Landmark"
                 // Fine screen-door coverage avoids transparent sorting and progressively removes the silhouette.
                 float dither=frac(52.9829189*frac(dot(i.positionCS.xy,float2(0.06711056,0.00583715))));
                 clip(_NodeVisibility-dither-0.00001);
-                float3 normalTS=UnpackNormalScale(SAMPLE_TEXTURE2D(_BumpMap,sampler_BumpMap,i.uv),_BumpScale);
+                // glTF embeds an RGB normal texture, not Unity's DXT5nm packing.
+                float3 normalTS=SAMPLE_TEXTURE2D(_BumpMap,sampler_BumpMap,i.uv).xyz*2-1;
+                normalTS.xy*=_BumpScale; normalTS=normalize(normalTS);
                 float3 n=normalize(i.normal), t=normalize(i.tangent.xyz);
                 float3 b=cross(n,t)*i.tangent.w;
                 InputData data=(InputData)0;

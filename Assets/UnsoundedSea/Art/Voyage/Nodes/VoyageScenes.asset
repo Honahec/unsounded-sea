@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2657073e5c6d4f91bd4bd21c9c734bd, type: 3}
+  m_Name: VoyageScenes
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.VoyageSceneCatalog
+  entries:
+  - location: "\u8865\u7ED9\u6BCD\u8239"
+    prefab: {fileID: 6262618250176031861, guid: 14bc9f17d69584a04a8c62367784f2d2, type: 3}
+    offset: {x: -39, y: 0, z: 30}
+    heading: 20
+  - location: "\u6F02\u6D41\u8D27\u8239"
+    prefab: {fileID: 8616223320825417089, guid: 2cf1bd166c8ce47cb895dad44f3a4403, type: 3}
+    offset: {x: -25, y: 0, z: 17}
+    heading: 20
+  - location: "\u65E0\u65D7\u63A5\u9A73\u8247"
+    prefab: {fileID: 5513796907699990813, guid: fc3ec595c6d8040f0b7d4c5d8431a98e, type: 3}
+    offset: {x: -25, y: 0, z: 17}
+    heading: 20
+  - location: "\u5931\u8054\u6551\u751F\u8247"
+    prefab: {fileID: 6250586220092299505, guid: 83f53d568602640b3a080e7dd11f2592, type: 3}
+    offset: {x: -13, y: 0, z: 10}
+    heading: 30
+  - location: "\u65E7\u65E0\u7EBF\u7535\u8239"
+    prefab: {fileID: 692483769096170688, guid: 219c243261a10486db0dd9b5ca75ac49, type: 3}
+    offset: {x: -25, y: 0, z: 17}
+    heading: 20
+  - location: "\u6F02\u6D6E\u6D4B\u91CF\u7AD9"
+    prefab: {fileID: 7074910100565491125, guid: 2e0a4fc33ef4642a79615bd1a888bb10, type: 3}
+    offset: {x: -25, y: 0, z: 17}
+    heading: 20
+  - location: "\u65AD\u6845\u6E14\u8239"
+    prefab: {fileID: 8174501358715973096, guid: c9007eb58165e474ab899dcace54e845, type: 3}
+    offset: {x: -25, y: 0, z: 17}
+    heading: 20
+  - location: "\u5C01\u8231\u9A73\u8239"
+    prefab: {fileID: 5209822044212779039, guid: 9b12189916d014208a9d91b8e235139f, type: 3}
+    offset: {x: -25, y: 0, z: 17}
+    heading: 20
+  - location: "\u65E0\u4EBA\u4FE1\u53F7\u8247"
+    prefab: {fileID: 7499445002379126710, guid: dc6e2bdcc79a543f9a5cf2a446de3459, type: 3}
+    offset: {x: -25, y: 0, z: 17}
+    heading: 20
+  - location: "\u505C\u6446\u5F15\u822A\u8239"
+    prefab: {fileID: 1931816883207274958, guid: f3f157a932fd04ffe9101450ad6f795d, type: 3}
+    offset: {x: -25, y: 0, z: 17}
+    heading: 20
+  - location: "\u6F02\u6D6E\u4FEE\u68B0\u8239"
+    prefab: {fileID: 2168069421844660382, guid: 41eb7d02c9dc34852b9bade840173ff9, type: 3}
+    offset: {x: -25, y: 0, z: 17}
+    heading: 20
+  - location: "\u6F6E\u6D41\u89C2\u6D4B\u70B9"
+    prefab: {fileID: 5664006659148694043, guid: 093bbd820e47441de9950a4e4ec741a7, type: 3}
+    offset: {x: -18, y: 0, z: 17}
+    heading: 20
+  - location: "\u8FDC\u6D77\u6D6E\u6807"
+    prefab: {fileID: 8133715390752734833, guid: fad1f5001c2ba4b9a90a3604319fbb7c, type: 3}
+    offset: {x: -13, y: 0, z: 10}
+    heading: 20
+  - location: "\u65E0\u58F0\u706F\u8239"
+    prefab: {fileID: 8539665040592962324, guid: 38fad62c110a34f3f8ce138dd13c54ae, type: 3}
+    offset: {x: -40, y: 0, z: 30}
+    heading: 20

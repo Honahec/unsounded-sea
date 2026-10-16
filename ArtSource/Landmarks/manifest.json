@@ -1,0 +1,212 @@
+{
+  "date": "2026-10-17",
+  "note": "Direct game-budget generation. Original PBR GLB is retained unchanged under Assets; no separately generated high-poly master or animation. Reusable rigs and weathered props authored with Unity Editor APIs.",
+  "assets": [
+    {
+      "name": "DerelictBarge",
+      "provider": "Hyper3D Rodin Gen-2.5-High",
+      "generation_id": "0573482b-9ef1-4653-ad4d-2998de41416c",
+      "display_url": "https://hyper3d.ai/workspace/rodin/0573482b-9ef1-4653-ad4d-2998de41416c",
+      "mesh_mode": "Raw",
+      "target_triangles": 35000,
+      "path": "Assets/UnsoundedSea/Art/Models/DerelictBarge.glb",
+      "sha256": "e9741a6ace349672f664d564d74ee0d0adb756401e3cdce3224b31b7b698a694",
+      "bytes": 15803996,
+      "triangles": 35000,
+      "vertices": 49352,
+      "skins": 0,
+      "animations": 0,
+      "bounds": [
+        [
+          [
+            -0.2604416608810425,
+            -0.3659268021583557,
+            -0.9499762058258057
+          ],
+          [
+            0.2623934745788574,
+            0.3651169538497925,
+            0.951119065284729
+          ]
+        ]
+      ],
+      "prompt": "Game environment prop, one complete abandoned 1930s coastal cargo barge, 28 metres long, weathered black iron hull, broad low open wooden cargo deck with several tied-down tarpaulin crates, small aft wheelhouse with dark windows, rusty smokestack, short broken foremast. Strong readable boat silhouette, maritime cosmic horror, salt streaks, flaking dark teal paint, rust, aged timber, restrained realistic PBR textures, no people, no water, no ground, no background, no text, full isolated vessel, bow facing forward, waterline low on hull. Designed for viewing from three-quarter elevated side in a foggy night sea. Detailed believable ship construction. No large sails, no tall antenna, no giant cargo containers.",
+      "geometry_file_format": "glb",
+      "texture_delight": false,
+      "textures": [
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048,
+          "format": "ARGB32"
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048,
+          "format": "ARGB32"
+        },
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048,
+          "format": "ARGB32"
+        }
+      ],
+      "unity_source_bow_axis": "+Z"
+    },
+    {
+      "name": "LostLifeboat",
+      "provider": "Hyper3D Rodin Gen-2.5-High",
+      "generation_id": "5a05c88e-2a46-465e-8a4f-de2f59cc9d4e",
+      "display_url": "https://hyper3d.ai/workspace/rodin/5a05c88e-2a46-465e-8a4f-de2f59cc9d4e",
+      "mesh_mode": "Raw",
+      "target_triangles": 18000,
+      "path": "Assets/UnsoundedSea/Art/Models/LostLifeboat.glb",
+      "sha256": "6e93032de7c68070d88f3a450e249f3aca6e7d69bca9fe3b2b66d446cac35fba",
+      "bytes": 11363364,
+      "triangles": 18000,
+      "vertices": 24223,
+      "skins": 0,
+      "animations": 0,
+      "bounds": [
+        [
+          [
+            -0.29698607325553894,
+            -0.21054203808307648,
+            -0.9496269822120667
+          ],
+          [
+            0.2937559187412262,
+            0.21211205422878265,
+            0.9496429562568665
+          ]
+        ]
+      ],
+      "prompt": "One abandoned vintage clinker-built wooden lifeboat, complete small open rowing boat six metres long, two narrow cross benches, a single waxed canvas covered wooden chest in the center, two old oars inside, chipped ivory outer hull paint stained with dark seaweed and salt, dark aged timber interior ribs, thick rope along gunwale. Lovecraftian maritime survival game environment prop, realistic PBR textures, strong clean recognizable silhouette, no people, no water, no ground, isolated entire boat, no sails, no motor, no text, no background. Boat hull must be closed underneath with a deep curved keel. High quality close-up detail.",
+      "geometry_file_format": "glb",
+      "texture_delight": false,
+      "textures": [
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048,
+          "format": "ARGB32"
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048,
+          "format": "ARGB32"
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048,
+          "format": "ARGB32"
+        }
+      ],
+      "unity_source_bow_axis": "+Z"
+    }
+  ],
+  "scene_catalog": "Assets/UnsoundedSea/Art/Voyage/Nodes/VoyageScenes.asset",
+  "authoring_tool": "Tools/VoyageNodeSetup.cs",
+  "known_limits": [
+    "Generated vessels are static environment assets without rigging or deformable animation.",
+    "Barge is a stylized derelict with a tall central structure, not a naval engineering reconstruction.",
+    "Original embedded textures remain uncompressed; target-device memory and standalone Player profiling remain to be done."
+  ],
+  "unity_validation": {
+    "date": "2026-10-17",
+    "scene": "Assets/UnsoundedSea/Scenes/Voyage.unity",
+    "scene_count": 14,
+    "scenes": [
+      {
+        "location": "补给母船",
+        "prefab": "SupplyTender",
+        "renderers": 22,
+        "triangles": 70232
+      },
+      {
+        "location": "漂流货船",
+        "prefab": "DriftingCargo",
+        "renderers": 8,
+        "triangles": 35840
+      },
+      {
+        "location": "无旗接驳艇",
+        "prefab": "UnflaggedLaunch",
+        "renderers": 3,
+        "triangles": 83264
+      },
+      {
+        "location": "失联救生艇",
+        "prefab": "LostLifeboat",
+        "renderers": 6,
+        "triangles": 18060
+      },
+      {
+        "location": "旧无线电船",
+        "prefab": "RadioShip",
+        "renderers": 4,
+        "triangles": 36888
+      },
+      {
+        "location": "漂浮测量站",
+        "prefab": "SurveyPlatform",
+        "renderers": 8,
+        "triangles": 7748
+      },
+      {
+        "location": "断桅渔船",
+        "prefab": "BrokenMastFishingBoat",
+        "renderers": 10,
+        "triangles": 81856
+      },
+      {
+        "location": "封舱驳船",
+        "prefab": "SealedBarge",
+        "renderers": 4,
+        "triangles": 35540
+      },
+      {
+        "location": "无人信号艇",
+        "prefab": "SignalBoat",
+        "renderers": 4,
+        "triangles": 82384
+      },
+      {
+        "location": "停摆引航船",
+        "prefab": "StoppedPilot",
+        "renderers": 8,
+        "triangles": 91456
+      },
+      {
+        "location": "漂浮修械船",
+        "prefab": "WorkshopShip",
+        "renderers": 5,
+        "triangles": 37072
+      },
+      {
+        "location": "潮流观测点",
+        "prefab": "CurrentObservation",
+        "renderers": 35,
+        "triangles": 11240
+      },
+      {
+        "location": "远海浮标",
+        "prefab": "OffshoreBuoy",
+        "renderers": 8,
+        "triangles": 5404
+      },
+      {
+        "location": "无声灯船",
+        "prefab": "SilentLightship",
+        "renderers": 5,
+        "triangles": 38856
+      }
+    ],
+    "shader": "UnsoundedSea/Voyage Landmark",
+    "scope": "Play Mode static appearance, waterline, sampled floating motion and scene transitions at 1600x900. Target-device performance not measured."
+  }
+}

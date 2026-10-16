@@ -154,3 +154,6 @@ LightingData.asset     binary
 Assets/UnsoundedSea/Art/OceanBattle/OceanMesh.asset filter=lfs diff=lfs merge=lfs -text
 Assets/UnsoundedSea/Art/SeaBoss/DeepOceanMesh.asset filter=lfs diff=lfs merge=lfs -text
 Assets/ThirdParty/** linguist-vendored
+
+# Authored voyage landmark meshes
+Assets/UnsoundedSea/Art/Voyage/Nodes/Meshes/*.asset filter=lfs diff=lfs merge=lfs -text
