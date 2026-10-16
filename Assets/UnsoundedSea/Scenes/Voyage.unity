@@ -119,6 +119,95 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &639401771
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2248198840320186336, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+      propertyPath: m_Name
+      value: Voyage Sea Stage
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+--- !u!114 &639401772 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8993062840840690351, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+  m_PrefabInstance: {fileID: 639401771}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f2272d5f5b244314bcb3c2054fbf8aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.BattleWater
+--- !u!82 &639401773 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 7321147177581629441, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+  m_PrefabInstance: {fileID: 639401771}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &639401774 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6742600317350556871, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+  m_PrefabInstance: {fileID: 639401771}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e4dda0f6f9794e6e9ef960549de9ffa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.VoyageWake
+--- !u!4 &639401775 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4119152779787995209, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
+  m_PrefabInstance: {fileID: 639401771}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1184011515
 GameObject:
   m_ObjectHideFlags: 0
@@ -206,126 +295,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.VoyageSailingPresentation
   voyageCamera: {fileID: 1703731681}
-  vessel: {fileID: 1991579048}
-  water: {fileID: 1991579045}
-  wake: {fileID: 1991579047}
-  ambience: {fileID: 1991579046}
+  vessel: {fileID: 639401775}
+  water: {fileID: 639401772}
+  wake: {fileID: 639401774}
+  ambience: {fileID: 639401773}
   cameraOffset: {x: 25, y: 17, z: -29}
   cameraTarget: {x: 0, y: 0, z: 4}
---- !u!1001 &1454145077
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2248198840320186336, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_Name
-      value: VoyageSeaStage
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
---- !u!1001 &1515876339
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2248198840320186336, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_Name
-      value: VoyageSeaStage
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
 --- !u!1 &1703731680
 GameObject:
   m_ObjectHideFlags: 0
@@ -463,101 +438,10 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!1001 &1991579044
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2248198840320186336, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_Name
-      value: VoyageSeaStage
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3018799185741680873, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
---- !u!114 &1991579045 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8993062840840690351, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-  m_PrefabInstance: {fileID: 1991579044}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f2272d5f5b244314bcb3c2054fbf8aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.BattleWater
---- !u!82 &1991579046 stripped
-AudioSource:
-  m_CorrespondingSourceObject: {fileID: 7321147177581629441, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-  m_PrefabInstance: {fileID: 1991579044}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1991579047 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6742600317350556871, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-  m_PrefabInstance: {fileID: 1991579044}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e4dda0f6f9794e6e9ef960549de9ffa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.VoyageWake
---- !u!4 &1991579048 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4119152779787995209, guid: 9a90861d54f394bd3bb3d60bbdbb7a0e, type: 3}
-  m_PrefabInstance: {fileID: 1991579044}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1703731682}
   - {fileID: 1184011518}
-  - {fileID: 1454145077}
-  - {fileID: 1515876339}
-  - {fileID: 1991579044}
+  - {fileID: 639401771}

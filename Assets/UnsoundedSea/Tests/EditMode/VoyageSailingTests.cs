@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -43,6 +44,8 @@ namespace UnsoundedSea.Tests
             var scene = EditorSceneManager.OpenPreviewScene("Assets/UnsoundedSea/Scenes/Voyage.unity");
             try
             {
+                Assert.That(scene.GetRootGameObjects().Sum(g => g.GetComponentsInChildren<BattleWater>().Length), Is.EqualTo(1), "Duplicate ocean stages");
+                Assert.That(scene.GetRootGameObjects().Sum(g => g.GetComponentsInChildren<VoyageWake>().Length), Is.EqualTo(1), "Duplicate wakes");
                 VoyageSailingPresentation sailing = null;
                 foreach (var root in scene.GetRootGameObjects())
                 {

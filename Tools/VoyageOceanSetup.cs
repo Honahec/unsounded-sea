@@ -37,7 +37,7 @@ public static class VoyageOceanSetup
         EditorUtility.SetDirty(material); AssetDatabase.SaveAssetIfDirty(material);
         var foam = AssetDatabase.LoadAssetAtPath<Material>(Art + "/VesselWake.mat");
         if (foam == null) { foam = new Material(Shader.Find("UnsoundedSea/Voyage Wake")); AssetDatabase.CreateAsset(foam, Art + "/VesselWake.mat"); }
-        foreach (var old in scene.GetRootGameObjects().Where(g => g.name == "Greybox Navigation Stage (placeholder)" || g.name == "Voyage Sea Stage"))
+        foreach (var old in scene.GetRootGameObjects().Where(g => g.name == "Greybox Navigation Stage (placeholder)" || g.name == "Voyage Sea Stage" || g.name == "VoyageSeaStage"))
             UnityEngine.Object.DestroyImmediate(old);
         var root = new GameObject("Voyage Sea Stage");
         var vessel = UnityEngine.Object.Instantiate(source.vessel.gameObject, root.transform).transform;
@@ -64,7 +64,7 @@ public static class VoyageOceanSetup
         ambience.clip = source.ambience.clip; ambience.loop = true; ambience.volume = 0.45f; ambience.playOnAwake = true; ambience.spatialBlend = 0;
         var prefab = PrefabUtility.SaveAsPrefabAsset(root, Art + "/VoyageSeaStage.prefab");
         UnityEngine.Object.DestroyImmediate(root);
-        root = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+        root = (GameObject)PrefabUtility.InstantiatePrefab(prefab); root.name = "Voyage Sea Stage";
         water = root.GetComponent<BattleWater>(); vessel = root.transform.Find("Survey vessel rig");
         wake = root.GetComponentInChildren<VoyageWake>(); ambience = root.GetComponentInChildren<AudioSource>();
         camera.transform.position = new Vector3(25,17,-29); camera.transform.LookAt(new Vector3(0,0,4));
