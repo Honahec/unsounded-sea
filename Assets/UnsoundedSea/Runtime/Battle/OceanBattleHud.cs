@@ -63,7 +63,7 @@ namespace UnsoundedSea.Runtime
             Vital(vitals, "理智", v.Sanity, scenario.encounter.playerSanity, "sanity");
             var pause = Button("battle-pause", "II  航海日志", () => director.SetPaused(true)); top.Add(pause);
 
-            var left = Box("intel-panel"); root.Add(left); left.Add(Text("01   /   甲板上的来客", "eyebrow"));
+            var left = Box("intel-panel"); root.Add(left); left.Add(Text(scenario.enemyHeading, "eyebrow"));
             foreach (var enemy in v.Enemies)
             {
                 var e = enemy; var b = Button("target-" + e.Id, e.Name + (e.Health <= 0 ? "  /  已倒下" : ""), () => director.Select(e.Id), "target-button");
@@ -85,11 +85,14 @@ namespace UnsoundedSea.Runtime
             var right = Box("objective-panel"); root.Add(right);
             right.Add(Text("航 行 目 标", "eyebrow")); right.Add(Text(scenario.objectiveHeading, "objective-title"));
             right.Add(Text(v.Objective, "objective-description"));
-            var seals = Box("seal-row"); right.Add(seals);
+            var seals = Box("seal-row"); seals.EnableInClassList("survival-progress", scenario.encounter.objective == ObjectiveKind.Survive); right.Add(seals);
             for (var i = 0; i < v.ObjectiveTarget; i++) { var s = Text((i + 1).ToString("00"), "seal"); s.EnableInClassList("complete", i < v.ObjectiveProgress); seals.Add(s); }
-            var task = Button("battle-task", scenario.taskLabel + "  /  1 行动", () => director.Submit(BattleCommand.Task()), "task-button");
-            task.SetEnabled(active && v.CanAdvanceObjective && v.Actions > 0); right.Add(task);
-            right.Add(Text("每回合一次。格挡与理智防护在下回合清空。", "fine-print"));
+            if (!string.IsNullOrWhiteSpace(scenario.taskLabel))
+            {
+                var task = Button("battle-task", scenario.taskLabel + "  /  1 行动", () => director.Submit(BattleCommand.Task()), "task-button");
+                task.SetEnabled(active && v.CanAdvanceObjective && v.Actions > 0); right.Add(task);
+            }
+            right.Add(Text(scenario.objectiveHint, "fine-print"));
             right.Add(Text($"格挡  {v.Block:00}     理智防护  {v.Ward:00}", "defenses"));
 
             var center = Box("stage-caption"); center.Add(Text(scenario.location.ToUpperInvariant(), "eyebrow")); root.Add(center);
@@ -116,7 +119,8 @@ namespace UnsoundedSea.Runtime
                 foreach (var actor in director.Stage.Actors)
                 {
                     var a = actor; var enemy = v.Enemies.First(x => x.Id == a.EnemyId);
-                    var plate = Button("actor-" + a.EnemyId, enemy.Name + "\n" + enemy.Health + " / " + enemy.MaxHealth, () => director.Select(a.EnemyId), "actor-label");
+                    var status = string.IsNullOrWhiteSpace(scenario.enemyStatus) ? enemy.Health + " / " + enemy.MaxHealth : scenario.enemyStatus;
+                    var plate = Button("actor-" + a.EnemyId, enemy.Name + "\n" + status, () => director.Select(a.EnemyId), "actor-label");
                     plate.EnableInClassList("selected", a.EnemyId == director.SelectedEnemy); plate.SetEnabled(a.Alive && !director.Paused); root.Add(plate); nameplates.Add(plate);
                 }
             if (director.Paused || v.Phase == BattlePhase.Victory || v.Phase == BattlePhase.Defeat) Modal(v);

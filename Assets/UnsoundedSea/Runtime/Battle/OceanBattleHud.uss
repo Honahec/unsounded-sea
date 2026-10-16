@@ -65,3 +65,4 @@
 .ocean-ui.reduced-motion .sea-card:hover { translate: 0 0; }
 .ocean-ui.reduced-motion Button { transition-duration: 0s; }
 .seal-row { flex-wrap: wrap; }
+.survival-progress .seal { width: 32px; margin-right: 6px; }

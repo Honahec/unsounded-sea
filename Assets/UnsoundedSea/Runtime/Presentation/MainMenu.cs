@@ -12,6 +12,7 @@ namespace UnsoundedSea.Runtime
         [SerializeField] private FontAsset interfaceFont;
         [SerializeField] private StyleSheet menuStyle;
         [SerializeField] private string battleScene = "Battle";
+        [SerializeField] private string seaBossScene = "";
         private VisualElement root;
         private bool settingsOpen;
 
@@ -72,10 +73,13 @@ namespace UnsoundedSea.Runtime
             entries.AddToClassList("menu-entries");
             var canStart = Application.CanStreamedLevelBeLoaded(battleScene);
             entries.Add(Entry("menu-start", "01", "开始调查", canStart ? "登船，前往不存在于海图上的坐标" : "战斗场景未加入构建列表", StartGame, canStart));
-            var settings = Entry("menu-settings", "02", "设置", "音量、显示与界面动效", () => { settingsOpen = true; Build(null); });
+            bool hasBoss = !string.IsNullOrWhiteSpace(seaBossScene);
+            if (hasBoss)
+                entries.Add(Entry("menu-sea-boss", "02", "沉钟海域", "驶向外海，面对海面上的巨大身影", () => SceneManager.LoadScene(seaBossScene), Application.CanStreamedLevelBeLoaded(seaBossScene)));
+            var settings = Entry("menu-settings", hasBoss ? "03" : "02", "设置", "音量、显示与界面动效", () => { settingsOpen = true; Build(null); });
             settings.EnableInClassList("open", settingsOpen);
             entries.Add(settings);
-            entries.Add(Entry("menu-quit", "03", "退出", "离开调查船", Quit));
+            entries.Add(Entry("menu-quit", hasBoss ? "04" : "03", "退出", "离开调查船", Quit));
             column.Add(entries);
             column.Add(Text("方向键或鼠标选择 · Enter 确认", "menu-hint"));
             root.Add(column);
