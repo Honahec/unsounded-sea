@@ -4,29 +4,33 @@
 
 ## 快速运行
 
-1. 打开工程，等待脚本编译完成。
-2. 打开 `Assets/UnsoundedSea/Scenes/MainMenu.unity`（构建列表第 0 位）点击 Play：标题界面提供「开始调查 / 设置 / 退出」。也可直接打开 `Battle.unity` 跳过标题。 **Editor 的 Play 运行当前打开的场景，不会因 pull 或构建列表顺序自动切换入口**；`ModelImportReview.unity` 仅供模型审阅，不包含游戏 HUD。
-3. 默认进入蒙面祷告者遭遇。其他遭遇通过 `BattleHud` Inspector 的 `Initial Encounter` 选择：0 公开意图、1 有限调查、2 封门、3 卡牌实验；游戏 HUD 不提供开发用场景切换。
-4. 点击目标名牌选择敌人，再点击底部手牌或右侧调查工具；右下角结束回合。封门遭遇提供独立的「绘制封线」，四次即可完成，不需要击杀。
-5. 右上角「调查档案」（或 J 键）展开证据与行动记录，Esc 收起；无档案打开时 Esc 打开暂停菜单（继续调查 / 设置 / 返回标题）。回放与文件存档接口仍保留在底层；不在游戏 HUD 中放置调试用保存、读取按钮。
+打开 `Assets/UnsoundedSea/Scenes/MainMenu.unity`，Play 后选择「开始调查」，进入 `OceanBattle.unity`。也可直接打开后者 Play。Editor 运行当前场景；pull 不会自动切换入口。`Battle.unity` 保留为旧规则样例，`ModelImportReview.unity` 仅供美术审阅。
 
-初始化菜单 **Unsounded Sea → Create or Open Battle Scene** 只创建缺失资产，不覆盖已有配置或场景；它不会创建标题场景，标题场景已入库。
+首场「雾海来客」：调查船上同时出现祷告者和空潜水服。每回合 3 行动、抽 5 张牌，点击模型、投影名牌或左侧目标按钮选敌，点击手牌出牌。调查工具每场次数有限。每回合消耗 1 行动刻一段封线，累计 4 段获胜；敌人可以仍然存活。生命或理智归零失败。右上「航海日志」查看证据、暂停、设置或返回标题；终局可重开。
 
-界面使用 `Assets/Fonts/default_zh.ttf`（香萃积雪宋）生成的动态 TextCore SDF 字体 `default_zh.asset`，通过 `Interface Font` 绑定。该字体缺少 ✓、箭头、几何符号与「」，状态一律用文字标签或 USS 绘制的形状表达；新增界面文字后应检查字形覆盖。发布前需确认字体商用授权。
+## 3D 战斗组合与扩展
 
-## 战斗 HUD 与菜单
+```text
+BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
+    → BattleDirector（独立 Session、选敌、命令、反馈锁、重开）
+        → OceanBattleHud（BattleView → UI；Command → Director）
+        → BattleStage（船体、相机、灯光、海面、音响、生成锚点）
+            → BattleActorView（模型实例、碰撞选敌、名牌锚点、静态网格反馈）
+```
 
-`BattlePanel` 以 1440×900 为参考、match 0.5 缩放，16:9 下逻辑画布约 1518×854（1280×720 与 1920×1080 布局一致，720p 时 1 逻辑像素 ≈ 0.84 物理像素）。正文不低于 16，辅助标签不低于 13。
+- **换场景**：复制或创建带 `BattleStage` 的 Prefab，配置 `battleCamera`、`vessel`（所有随船运动的物体父节点）、`actorAnchors` 和选中材质，再替换 Scenario 的 `stagePrefab`。海面与音响可选；当前舞台不支持角色移动/导航。
+- **换角色**：修改 Enemy 的 `presentationPrefab`，或在 Scenario 的 `actorOverrides` 按敌人槽位覆写。模型约定脚底 y=0、正面 +Z、真实米制；锚点决定位置和朝向。同种敌人可以重复引用，规则实例 ID 为 `id:槽位`。出生前校验相机、船体、锚点和模型引用。
+- **换遭遇**：Scenario 指向另一个 Encounter；牌组、资源、敌人意图和工具仍属于规则数据。UI 按快照更新，不依赖两只敌人的名字。新增敌人需增加相应舞台锚点并检查名牌排布。
+- **特殊战入口**：派生 `BattleRuleModule`，为每次会话创建新的 `EffectRegistry` / `IEncounterObjective`。`SealingRuleModule` 已用于雾海封线，不靠敌人全部死亡判胜。模块资产只存配置，不能共享可变进度。需要新命令、敌人阶段策略或即时玩法时仍需扩展 Core 与测试；当前入口不等于这些玩法已实现。
+- **反馈事件**：Director 的 `Resolved(before, after, command)` 通知舞台，`Changed` 通知 UI；短暂反馈期间拒绝连点，规则仍同步确定性结算。暂停冻结舞台运动与环境声；减少动效关闭船体摇晃、镜头震动和角色摆动。
 
-- **构图**：中央留给固定相机的 3D 场景，空白区域 `pickingMode = Ignore`（手牌 ScrollView 本身也不拦截）。左上生命/理智；上中遭遇名、回合、目标（封门显示 4 段进度）；名牌悬于场景上方；左侧「现场观察」只显示征兆、可能行动或已确认意图及本回合调查所得；右侧两件调查工具（次数圆点、问题、代价）；下中手牌；左下行动、格挡/理智防护与牌堆；右下独立的「绘制封线」与结束回合。
-- **视觉语言**：冷色深海半透明底板承载世界信息；纸张卡牌、黄铜标签的工具、纸质档案代表调查员自己的物件。黄铜 = 可用/选中，铜绿 = 已确认/已验证，锈红 = 危险或主动支付理智，海蓝 = 理智。
-- **状态不只靠颜色**：已观察/已验证/传闻/未知、已确认/未确认、当前目标/点击选为目标、行动不足/理智不足、已用尽、本回合已绘制都有文字。定向听筒等局部答案列入「调查所得」，不会把意图标为已确认。
-- **焦点**：刷新后按名称恢复焦点；出牌后焦点落在同位置的下一张可用牌，工具用尽后转到另一件工具，否则落到结束回合。
-- **菜单**：`MainMenu`（标题）与 `SettingsPanel`（设置纸页，标题与暂停共用）样式在 `GameMenu.uss`。`BattleHud` 先加载菜单样式再加载 HUD 样式，以免同优先级的标签重置覆盖 HUD。设置项（主音量、显示模式、垂直同步、界面动效）由 `GameSettings` 存于 PlayerPrefs，属于本机表现偏好，不进入战斗规则或存档；「减少」动效会关闭 HUD 过渡。暂停时遮罩拦截全部场景与 HUD 输入，回合不推进。
+当前海面使用轻量顶点波浪与高光着色，场景雾、月光、暖色甲板灯、Bloom/Vignette 构成海洋氛围；音轨为项目脚本生成的原创合成底噪和动作提示。两只角色仍是无骨骼静态网格，待机、受击、前倾与倒下是整体变换反馈，不能替代正式战斗动画。
 
-HUD 只读取 `BattleView`（含只读的 `ObjectiveProgress / ObjectiveTarget`）并提交 `BattleCommand`；不会读取敌人的真实隐藏意图。阶段切换日志（`阶段：PlayerTurn` 等）只在 HUD 展示层过滤，底层日志不变。
+`OceanBattlePanel` 参考 1600×900；USS 位于 `Runtime/Battle/OceanBattleHud.uss`。四周工具与手牌让出中心 3D 空间，名牌每帧按角色头顶坐标投影；中央指针通过相机射线选择角色。UI 只读取 `BattleView`，未知意图保持候选说明；历史调查保存在日志中。手牌横向滚动支持超过五张；字体使用项目现有 TextCore SDF。
 
-两个场景中的 `Greybox … (placeholder)` 物体只是基础体块、雾与灯光，用于检查构图和中央可见性，不是正式美术；材质在 `Settings/Greybox/`。名牌目前是固定位置的一行，尚未锚定到 3D 敌人坐标；接入正式模型（按下文用 Hyper3D 与 Unity CLI 制作）后应改为投影锚点。
+`MainMenu` 与 `SettingsPanel` 复用原菜单/设置。`GameSettings` 的音量、全屏、垂直同步、减少动效属于设备偏好，不进入规则或回放。旧 `BattleHud` 仅服务 `Battle.unity`，不参与新战斗。
+
+场景已入库，无需生成脚本才能运行。需要有意重建本场样例时，用 Unity CLI 执行 `Tools/OceanBattleSetup.cs` 的 `OceanBattleSetup.Build`；它会覆盖本场场景与配置，并更新标题入口，运行前先保存改动。`Tools/ImportSurveyVessel.cs` 负责选定船体版本的归一化；模型制作和 LFS 规范见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
 
 ## 层级与依赖
 
@@ -50,7 +54,7 @@ UnsoundedSea.Tests.EditMode       NUnit 行为测试，引用 Core / Runtime
 - `IEncounterObjective`：击退、封门、存活目标；可注入其他目标实现。
 - `RunMap`：有向无环节点图，区分进入与完成节点，阻止跳点、回访、悬空连接和不可达节点。
 - `BattleReplay` / `IBattleSaveStore`：规则回放与存储介质分离。
-- `BattleHud`：游戏内 UI Toolkit 组合入口，创建 Session、提交操作并按快照刷新四周 HUD；遭遇配置在 Inspector 中选择。
+- `BattleDirector` / `BattleScenario`：运行时组合入口与可替换配置；`OceanBattleHud` 仅负责表现。
 
 ## 保证的规则
 
@@ -90,7 +94,7 @@ Project 右键 **Create → Unsounded Sea → Card**。填写唯一 `id`、名�
 
 创建 Enemy 和 Encounter 资产。意图的 `clue` 与 `candidateDescription` 必须提供可推断信息；不要在隐藏行动间意外使用泄露答案的 UI 图标。当前敌人从意图列表等概率选择；后续可提取 `IIntentPolicy` 支持循环、权重和阶段策略，始终在 `IntentLocked` 前决策。
 
-同一敌人资产可在遭遇中多次引用，编译时按资产 ID 和下标生成不同实例 ID。`presentationPrefab` 是表现接入点；当前验证 UI 不实例化模型。已绑定样例、独立审阅场景和生产流程见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
+同一敌人资产可在遭遇中多次引用，编译时按资产 ID 和下标生成不同实例 ID。`presentationPrefab` 是表现接入点；新 `BattleStage` 会实例化该字段或 Scenario 覆写。已绑定样例、独立审阅场景和生产流程见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
 
 自定义目标实现 `IEncounterObjective` 并注入 Session；恢复回放时必须注入同样的目标与效果注册表。当前资产菜单提供击退、封门和存活三种配置。
 
@@ -126,6 +130,6 @@ CI 中关闭本项目的交互式 Editor 后：
 unity test . --mode EditMode --filter UnsoundedSea.Tests --output Logs/framework-tests.xml --timeout 600
 ```
 
-本阶段不是完整 MVP：尚未实现完整 18 卡、显影粉/媒介、被注视与回视、跨局档案、事件和奖励内容、地图界面、完整 5–6 节点航程、音效与战斗中的 3D 表现。下一步建议先接入 `RunMap` 的航程协调器，把现有遭遇、奖励选择和补给串联，再根据试玩扩充内容。
+本阶段不是完整 MVP：尚未实现完整 18 卡、显影粉/媒介、被注视与回视、跨局档案、事件和奖励内容、地图界面、完整 5–6 节点航程、正式骨骼动画与目标平台性能优化。下一步建议先接入 `RunMap` 的航程协调器，把现有遭遇、奖励选择和补给串联，再根据试玩扩充内容。
 
 已有测试与编辑器验证的日期、覆盖范围和限制见 [验证记录](FRAMEWORK_VALIDATION.md)。修改后应重新运行相关检查，旧记录不是新修订的验收结论。

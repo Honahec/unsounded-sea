@@ -70,5 +70,12 @@
     "modelOffsetY": -3.0066,
     "sourceBowAxis": "+Z",
     "scene": "Assets/UnsoundedSea/Scenes/OceanBattle.unity"
+  },
+  "lfsVerification": {
+    "date": "2026-10-16",
+    "remoteBranch": "dev/ocean-battle",
+    "assetCommit": "56a27ff469e3f16b3459fa97ffcc60360ede77f2",
+    "method": "independent shallow clone, selective git lfs pull, SHA-256 comparison",
+    "highAndRuntimeMatch": true
   }
 }
