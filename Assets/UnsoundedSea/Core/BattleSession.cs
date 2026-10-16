@@ -53,7 +53,7 @@ namespace UnsoundedSea.Core
         {
             Phase = phase, Turn = turn, Health = health, Sanity = sanity, Actions = actions, Block = block, Ward = ward,
             DrawCount = draw.Count, DiscardCount = discard.Count, ExhaustCount = exhaust.Count,
-            Objective = objective.Description, CanAdvanceObjective = phase == BattlePhase.PlayerTurn && objective.AllowsTaskAction && !taskUsed && actions >= 1,
+            Objective = objective.Description, ObjectiveProgress = objective.Progress, ObjectiveTarget = objective.Target, CanAdvanceObjective = phase == BattlePhase.PlayerTurn && objective.AllowsTaskAction && !taskUsed && actions >= 1,
             Hand = hand.ToList().AsReadOnly(),
             Enemies = enemies.Select(e => new EnemyView(e.Definition.Id, e.Definition.Name, e.Health, e.Definition.Health,
                 e.Health == 0 ? "已击退" : e.ActualIntent.Clue,

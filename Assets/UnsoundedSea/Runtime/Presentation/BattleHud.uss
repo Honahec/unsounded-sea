@@ -1,98 +1,345 @@
+/* THE UNSOUNDED SEA - battle HUD.
+   Logical canvas is about 1518 x 854 at 16:9 (BattlePanel scales from 1440 x 900, match 0.5).
+   Palette
+     ink        rgb(16, 26, 32)      deep ocean plates rgba(12, 26, 34, 0.78)
+     mist text  rgb(190, 205, 202)   ivory rgb(240, 232, 210)
+     paper      rgb(226, 214, 184)   paper ink rgb(36, 44, 44)
+     brass      rgb(198, 162, 96)    brass light rgb(236, 206, 140)   = available / selected
+     verdigris  rgb(122, 186, 164)   = confirmed / verified
+     rust       rgb(196, 100, 76)    paper rust rgb(142, 58, 40)      = danger / sanity price
+     sea blue   rgb(142, 182, 204)   = sanity                                                     */
+
 .battle-hud {
     background-color: rgba(0, 0, 0, 0);
-    color: rgb(237, 232, 212);
+    color: rgb(240, 232, 210);
     font-size: 16px;
 }
-.battle-hud Label { white-space: normal; -unity-text-align: middle-left; }
+/* Single-class reset so later single-class rules can set margins and alignment. */
+.unity-label { white-space: normal; -unity-text-align: middle-left; margin: 0; padding: 0; }
 .battle-hud Button {
     margin: 0;
-    padding: 9px 14px;
-    border-width: 1px;
-    border-color: rgb(113, 139, 141);
-    border-radius: 2px;
-    min-height: 40px;
-    background-color: rgba(31, 53, 62, 0.94);
-    color: rgb(237, 232, 212);
+    padding: 0;
+    border-width: 0;
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0);
+    color: rgb(240, 232, 210);
     white-space: normal;
     -unity-text-align: middle-center;
+    transition-property: translate, scale, background-color, border-color, opacity;
+    transition-duration: 0.12s;
+    transition-timing-function: ease-out;
 }
-.battle-hud Button:hover { border-color: rgb(235, 200, 133); background-color: rgb(55, 80, 86); }
-.battle-hud Button:focus { border-color: rgb(255, 221, 151); border-width: 2px; }
-.battle-hud Button:active { background-color: rgb(75, 97, 100); }
-.battle-hud Button:disabled { opacity: 0.5; }
-.vitals { position: absolute; top: 24px; left: 28px; flex-direction: row; }
-.vital { width: 146px; margin-right: 15px; padding: 9px 12px; background-color: rgba(22, 39, 48, 0.88); border-left-width: 2px; border-left-color: rgb(210, 142, 122); }
-.vital-title { font-size: 12px; color: rgb(206, 215, 207); }
-.vital-value { font-size: 21px; color: rgb(245, 232, 204); margin-top: 1px; }
-.vital-track { height: 3px; background-color: rgb(65, 80, 84); margin-top: 6px; }
-.vital-fill { height: 3px; background-color: rgb(215, 147, 127); }
-.sanity { border-left-color: rgb(133, 192, 185); }
-.sanity .vital-fill { background-color: rgb(133, 192, 185); }
-.encounter-heading { position: absolute; top: 22px; left: 35%; right: 26%; align-items: center; }
-.overline { font-size: 10px; color: rgb(199, 185, 150); letter-spacing: 2px; -unity-text-align: middle-center; }
-.encounter-name { font-size: 25px; color: rgb(245, 231, 198); margin-top: 4px; -unity-text-align: middle-center; }
-.objective { font-size: 13px; color: rgb(210, 224, 219); margin-top: 5px; -unity-text-align: middle-center; }
-.battle-hud .journal-toggle { position: absolute; top: 28px; right: 28px; min-width: 112px; font-size: 14px; background-color: rgba(28, 47, 56, 0.8); }
-.targets { position: absolute; top: 24%; left: 34%; right: 27%; align-items: center; }
-.battle-hud .target { padding: 6px 16px; min-height: 32px; margin-bottom: 6px; background-color: rgba(21, 36, 44, 0.72); border-width: 0; border-bottom-width: 1px; border-bottom-color: rgb(128, 151, 146); font-size: 14px; }
-.battle-hud .target.selected { border-bottom-color: rgb(231, 195, 124); color: rgb(245, 219, 166); }
-.intel { position: absolute; left: 28px; top: 30%; width: 225px; padding: 13px 15px; background-color: rgba(24, 43, 51, 0.87); border-left-width: 1px; border-left-color: rgb(190, 166, 111); }
-.section-label { font-size: 12px; color: rgb(211, 187, 137); margin-bottom: 7px; letter-spacing: 1px; }
-.clue { color: rgb(233, 235, 223); font-size: 15px; }
-.intent { border-top-width: 1px; border-top-color: rgb(78, 106, 112); padding-top: 9px; margin-top: 12px; }
-.intent-label { color: rgb(219, 194, 137); font-size: 11px; margin-bottom: 5px; }
-.intent-text { font-size: 14px; color: rgb(224, 230, 215); }
-.confirmed .intent-label { color: rgb(159, 219, 192); }
-.tools { position: absolute; top: 37%; right: 28px; width: 180px; }
-.battle-hud .tool { margin-bottom: 9px; padding: 11px 8px; font-size: 14px; min-height: 64px; background-color: rgba(30, 52, 61, 0.91); }
-.journal { position: absolute; top: 90px; right: 28px; bottom: 255px; width: 305px; padding: 18px; background-color: rgb(214, 205, 177); border-width: 1px; border-color: rgb(190, 171, 124); }
-.journal-title { font-size: 24px; color: rgb(37, 57, 59); margin-bottom: 14px; }
-.journal ScrollView { flex-grow: 1; }
-.journal .section-label { color: rgb(84, 85, 62); margin-top: 12px; }
-.evidence, .log-entry { color: rgb(42, 60, 60); font-size: 13px; border-bottom-width: 1px; border-bottom-color: rgb(168, 164, 138); padding: 8px 0; }
-.player-status { position: absolute; bottom: 38px; left: 28px; width: 168px; padding: 13px 14px; background-color: rgba(23, 43, 51, 0.9); border-top-width: 1px; border-top-color: rgb(188, 166, 109); }
-.player-status .section-label { margin-bottom: 1px; }
-.action-value { font-size: 44px; color: rgb(241, 211, 148); }
-.defense { font-size: 12px; color: rgb(208, 224, 214); margin-top: 6px; }
-.hand { position: absolute; left: 218px; right: 213px; bottom: 30px; height: 216px; }
-.hand .unity-scroll-view__content-container { padding: 10px 3px 4px; }
-.battle-hud .card { width: 148px; min-width: 148px; height: 192px; margin-right: 9px; padding: 12px 13px; background-color: rgb(223, 214, 185); border-color: rgb(174, 151, 102); border-top-width: 3px; border-top-color: rgb(207, 173, 107); align-items: stretch; }
-.battle-hud .card:hover { background-color: rgb(243, 231, 199); border-color: rgb(255, 222, 151); translate: 0 -7px; }
-.battle-hud .card:focus { border-width: 2px; border-color: rgb(255, 228, 167); }
-.battle-hud .card:disabled { opacity: 0.65; }
-.card-cost { width: 29px; height: 29px; border-radius: 15px; background-color: rgb(37, 69, 75); color: rgb(245, 224, 178); font-size: 21px; -unity-text-align: middle-center; margin-bottom: 9px; }
-.card-name { font-size: 20px; color: rgb(32, 52, 56); border-bottom-width: 1px; border-bottom-color: rgb(170, 155, 118); padding-bottom: 8px; margin-bottom: 9px; }
-.card-description { font-size: 14px; color: rgb(40, 59, 58); flex-grow: 1; }
-.card-price { font-size: 11px; color: rgb(107, 71, 58); margin-top: 5px; }
-.piles { position: absolute; bottom: 12px; left: 225px; font-size: 11px; color: rgb(195, 211, 202); }
-.turn-controls { position: absolute; bottom: 43px; right: 28px; width: 166px; }
-.battle-hud .end-turn { min-height: 58px; font-size: 21px; background-color: rgb(207, 181, 120); color: rgb(31, 49, 53); border-color: rgb(238, 210, 155); }
-.battle-hud .end-turn:hover { background-color: rgb(238, 211, 151); }
-.battle-hud .task { margin-bottom: 12px; font-size: 13px; min-height: 52px; }
-.notice { position: absolute; bottom: 251px; left: 31%; right: 26%; -unity-text-align: middle-center; color: rgb(244, 224, 180); font-size: 13px; }
-.outcome { position: absolute; top: 36%; left: 33%; right: 27%; padding: 25px; align-items: center; background-color: rgba(22, 42, 50, 0.96); border-top-width: 1px; border-bottom-width: 1px; border-color: rgb(193, 165, 105); }
-.outcome-title { color: rgb(244, 220, 164); font-size: 33px; -unity-text-align: middle-center; }
-.outcome-description { font-size: 15px; color: rgb(223, 232, 219); margin: 13px 0 20px; -unity-text-align: middle-center; }
+.battle-hud Button:disabled { opacity: 1; }
+
+/* Shared marks */
+.section-label { font-size: 14px; color: rgb(214, 182, 118); letter-spacing: 2px; }
+.pips { flex-direction: row; align-items: center; }
+.pip { width: 10px; height: 10px; border-radius: 5px; margin-left: 5px; border-width: 1px; border-color: rgb(198, 162, 96); background-color: rgba(0, 0, 0, 0); }
+.pip.filled { background-color: rgb(236, 206, 140); border-color: rgb(236, 206, 140); }
+.level-tag { font-size: 13px; padding: 1px 6px 2px 6px; border-width: 1px; border-radius: 2px; flex-shrink: 0; -unity-text-align: middle-center; }
+.level-observed { color: rgb(240, 232, 210); border-color: rgba(240, 232, 210, 0.6); }
+.level-verified { color: rgb(16, 32, 30); background-color: rgb(122, 186, 164); border-color: rgb(122, 186, 164); }
+.level-rumored { color: rgb(214, 182, 118); border-color: rgba(0, 0, 0, 0); }
+.level-unknown { color: rgb(150, 162, 162); border-color: rgba(150, 162, 162, 0.5); }
+
+/* Upper left: vitals */
+.vitals {
+    position: absolute; top: 22px; left: 26px; width: 300px;
+    padding: 12px 16px 12px 16px;
+    background-color: rgba(12, 26, 34, 0.74);
+    border-top-width: 1px; border-top-color: rgba(198, 162, 96, 0.7);
+}
+.vital.health { margin-bottom: 10px; }
+.vital-line { flex-direction: row; justify-content: space-between; align-items: flex-end; margin-bottom: 5px; }
+.vital-title { font-size: 15px; color: rgb(190, 205, 202); letter-spacing: 2px; }
+.vital-amount { flex-direction: row; align-items: flex-end; }
+.vital-value { font-size: 24px; color: rgb(244, 236, 214); }
+.vital-max { font-size: 15px; color: rgb(170, 186, 184); margin-left: 5px; margin-bottom: 3px; }
+.vital-track { height: 6px; background-color: rgba(70, 88, 94, 0.8); }
+.vital-fill { height: 6px; }
+.vital-tick { position: absolute; top: 0; width: 1px; height: 6px; background-color: rgba(12, 26, 34, 0.9); }
+.health .vital-fill { background-color: rgb(204, 108, 84); }
+.health .vital-title { color: rgb(226, 160, 140); }
+.sanity .vital-fill { background-color: rgb(142, 182, 204); }
+.sanity .vital-title { color: rgb(170, 200, 218); }
+
+/* Upper centre: encounter identity */
+.encounter-heading { position: absolute; top: 18px; left: 30%; right: 30%; align-items: center; }
+.turn-label { font-size: 14px; margin-bottom: 4px; color: rgb(214, 182, 118); letter-spacing: 3px; -unity-text-align: middle-center; text-shadow: 0 1px 3px rgba(4, 10, 14, 0.9); }
+.encounter-name { font-size: 30px; color: rgb(246, 236, 210); letter-spacing: 4px; -unity-text-align: middle-center; text-shadow: 0 2px 6px rgba(4, 10, 14, 0.95); }
+.heading-rule { flex-direction: row; align-items: center; width: 240px; margin: 6px 0 6px 0; }
+.rule-line { flex-grow: 1; height: 1px; background-color: rgba(198, 162, 96, 0.65); }
+.rule-mark { width: 7px; height: 7px; rotate: 45deg; margin: 0 8px; border-width: 1px; border-color: rgb(214, 182, 118); }
+.objective { font-size: 16px; color: rgb(214, 224, 218); -unity-text-align: middle-center; text-shadow: 0 1px 4px rgba(4, 10, 14, 0.95); }
+.objective-row { flex-direction: row; align-items: center; }
+.objective-count { font-size: 16px; color: rgb(236, 206, 140); margin-left: 8px; text-shadow: 0 1px 4px rgba(4, 10, 14, 0.95); }
+.seal-pips { margin-left: 6px; }
+.seal-pips .pip { width: 14px; height: 6px; border-radius: 0; margin-left: 4px; }
+
+/* Archive toggle - a folder tab on the upper right */
+.battle-hud .journal-toggle {
+    position: absolute; top: 22px; right: 26px; width: 170px;
+    padding: 9px 14px 10px 14px; align-items: flex-start;
+    background-color: rgba(12, 26, 34, 0.74);
+    border-left-width: 3px; border-left-color: rgb(198, 162, 96);
+}
+.toggle-title { font-size: 17px; color: rgb(240, 232, 210); }
+.toggle-meta { font-size: 13px; color: rgb(170, 186, 184); margin-top: 2px; }
+.battle-hud .journal-toggle:hover { background-color: rgba(30, 50, 58, 0.9); border-left-color: rgb(236, 206, 140); }
+.battle-hud .journal-toggle:focus { border-width: 1px; border-left-width: 3px; border-color: rgb(236, 206, 140); }
+.battle-hud .journal-toggle.open { background-color: rgb(212, 198, 162); border-left-color: rgb(142, 58, 40); }
+.battle-hud .journal-toggle.open .toggle-title { color: rgb(36, 44, 44); }
+.battle-hud .journal-toggle.open .toggle-meta { color: rgb(84, 80, 62); }
+
+/* Enemy nameplates - floating over the stage, no box */
+.targets { position: absolute; top: 236px; left: 30%; right: 30%; flex-direction: row; justify-content: center; }
+.battle-hud .target {
+    width: 220px; margin: 0 12px; padding: 6px 16px 10px 16px;
+    align-items: center;
+    background-color: rgba(12, 26, 34, 0.42);
+}
+.target-state { font-size: 13px; color: rgb(170, 186, 184); letter-spacing: 2px; -unity-text-align: middle-center; margin-bottom: 2px; }
+.target-name { font-size: 20px; color: rgb(232, 228, 212); -unity-text-align: middle-center; text-shadow: 0 1px 4px rgba(4, 10, 14, 0.95); }
+.target-health { flex-direction: row; align-items: center; margin-top: 6px; width: 100%; }
+.target-track { flex-grow: 1; flex-shrink: 1; height: 5px; background-color: rgba(70, 88, 94, 0.85); }
+.target-fill { height: 5px; background-color: rgb(204, 108, 84); }
+.target-value { font-size: 14px; color: rgb(214, 224, 218); margin-left: 10px; flex-shrink: 0; }
+.bracket { position: absolute; width: 14px; height: 14px; border-color: rgba(0, 0, 0, 0); }
+.bracket.tl { top: 0; left: 0; border-top-width: 2px; border-left-width: 2px; }
+.bracket.tr { top: 0; right: 0; border-top-width: 2px; border-right-width: 2px; }
+.bracket.bl { bottom: 0; left: 0; border-bottom-width: 2px; border-left-width: 2px; }
+.bracket.br { bottom: 0; right: 0; border-bottom-width: 2px; border-right-width: 2px; }
+.battle-hud .target:hover { background-color: rgba(20, 40, 48, 0.66); }
+.battle-hud .target:hover .bracket { border-color: rgba(240, 232, 210, 0.55); }
+.battle-hud .target:hover .target-state { color: rgb(240, 232, 210); }
+.battle-hud .target.selected { background-color: rgba(12, 26, 34, 0.6); }
+.battle-hud .target.selected .bracket { border-color: rgb(236, 206, 140); }
+.battle-hud .target.selected .target-state { color: rgb(236, 206, 140); }
+.battle-hud .target.selected .target-name { color: rgb(250, 236, 200); }
+.battle-hud .target:focus .bracket { border-color: rgb(250, 228, 170); width: 20px; height: 20px; }
+.battle-hud .target:active { scale: 0.98 0.98; }
+.battle-hud .target.defeated { opacity: 0.55; }
+.battle-hud .target.defeated .target-name { color: rgb(150, 162, 162); }
+
+/* Left edge: field observation slip */
+.intel {
+    position: absolute; left: 26px; top: 196px; width: 300px;
+    padding: 14px 16px 16px 16px;
+    background-color: rgba(12, 26, 34, 0.76);
+    border-left-width: 2px; border-left-color: rgba(198, 162, 96, 0.8);
+}
+.intel-header { flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.intel-subject { font-size: 14px; color: rgb(170, 186, 184); }
+.intel-row { margin-bottom: 12px; }
+.intel-row-head { flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.field-label { font-size: 14px; color: rgb(170, 186, 184); letter-spacing: 1px; }
+.field-note { font-size: 13px; color: rgb(170, 186, 184); margin-top: 4px; }
+.clue { font-size: 17px; color: rgb(244, 238, 222); }
+.intent {
+    padding: 10px 12px 12px 12px;
+    background-color: rgba(30, 46, 52, 0.7);
+    border-left-width: 2px; border-left-color: rgba(214, 182, 118, 0.6);
+    transition-property: opacity, translate, background-color;
+    transition-duration: 0.35s;
+    transition-timing-function: ease-out;
+}
+.intent .field-note { margin: 0 0 4px 0; }
+.status-unconfirmed { font-size: 13px; color: rgb(214, 182, 118); padding: 1px 6px 2px 6px; border-width: 1px; border-color: rgba(214, 182, 118, 0.7); border-radius: 2px; }
+.status-confirmed { font-size: 13px; color: rgb(16, 32, 30); padding: 1px 6px 2px 6px; background-color: rgb(122, 186, 164); border-radius: 2px; }
+.intent-option { font-size: 16px; color: rgb(226, 222, 204); margin-top: 4px; }
+.intent-text { font-size: 17px; color: rgb(244, 238, 222); }
+.intent.confirmed { background-color: rgba(36, 70, 64, 0.72); border-left-color: rgb(122, 186, 164); border-left-width: 3px; }
+.intent.revealing { opacity: 0.2; translate: -10px 0; background-color: rgba(122, 186, 164, 0.5); }
+.findings { margin: 12px 0 0 0; }
+.finding { flex-direction: row; align-items: flex-start; margin-top: 6px; }
+.finding .level-tag { margin-right: 8px; }
+.finding-text { font-size: 15px; color: rgb(226, 222, 204); flex-shrink: 1; flex-grow: 1; }
+
+/* Right edge: investigation instruments as brass-tagged equipment slips */
+.tools { position: absolute; top: 196px; right: 26px; width: 236px; }
+.tools .section-label { margin-bottom: 8px; -unity-text-align: middle-right; text-shadow: 0 1px 3px rgba(4, 10, 14, 0.9); }
+.battle-hud .tool {
+    margin-bottom: 10px; padding: 11px 14px 12px 14px;
+    align-items: stretch;
+    background-color: rgb(58, 48, 34);
+    border-width: 1px; border-color: rgb(120, 96, 58);
+    border-top-width: 3px; border-top-color: rgb(198, 162, 96);
+    border-radius: 2px;
+}
+.tool-head { flex-direction: row; justify-content: space-between; align-items: center; }
+.tool-name { font-size: 19px; color: rgb(246, 232, 200); }
+.tool-question { font-size: 15px; color: rgb(222, 206, 172); margin-top: 6px; }
+.tool-foot { flex-direction: row; justify-content: space-between; align-items: center; margin-top: 9px; padding-top: 7px; border-top-width: 1px; border-top-color: rgba(198, 162, 96, 0.35); }
+.tool-cost { font-size: 13px; color: rgb(200, 190, 164); }
+.tool-cost.price { color: rgb(236, 150, 120); }
+.tool-uses { font-size: 13px; color: rgb(236, 206, 140); }
+.tool-spent { font-size: 13px; color: rgb(220, 214, 200); padding: 0 6px 1px 6px; border-width: 1px; border-color: rgba(220, 214, 200, 0.6); }
+.battle-hud .tool:hover { background-color: rgb(78, 64, 42); border-color: rgb(198, 162, 96); border-top-color: rgb(236, 206, 140); translate: -4px 0; }
+.battle-hud .tool:focus { border-color: rgb(250, 228, 170); border-width: 2px; border-top-width: 3px; }
+.battle-hud .tool:active { background-color: rgb(92, 76, 50); translate: -2px 0; }
+.battle-hud .tool:disabled { translate: 0 0; background-color: rgba(34, 38, 38, 0.82); border-color: rgba(110, 112, 104, 0.6); border-top-color: rgba(130, 128, 116, 0.8); }
+.battle-hud .tool:disabled .tool-name { color: rgb(180, 180, 170); }
+.battle-hud .tool:disabled .tool-question,
+.battle-hud .tool:disabled .tool-cost { color: rgb(150, 154, 148); }
+.battle-hud .tool.spent .pip { border-color: rgb(130, 128, 116); }
+
+/* Investigation archive - a paper folder, opened only on demand */
+.journal {
+    position: absolute; top: 96px; right: 280px; width: 356px; bottom: 300px;
+    padding: 18px 20px 14px 22px;
+    background-color: rgb(222, 210, 178);
+    border-width: 1px; border-color: rgb(170, 150, 108);
+    border-left-width: 6px; border-left-color: rgb(142, 58, 40);
+}
+.journal-head { flex-direction: row; justify-content: space-between; align-items: flex-start; padding-bottom: 10px; border-bottom-width: 1px; border-bottom-color: rgb(150, 132, 96); }
+.journal-title { font-size: 24px; color: rgb(32, 42, 42); letter-spacing: 3px; }
+.journal-subtitle { font-size: 13px; color: rgb(96, 88, 66); margin-top: 3px; }
+.battle-hud .journal-close { padding: 5px 12px; font-size: 14px; color: rgb(36, 44, 44); border-width: 1px; border-color: rgb(120, 104, 74); }
+.battle-hud .journal-close:hover { background-color: rgb(236, 226, 198); }
+.battle-hud .journal-close:focus { border-width: 2px; border-color: rgb(142, 58, 40); }
+.journal-entries { flex-grow: 1; margin-top: 4px; }
+.journal-section { font-size: 14px; color: rgb(142, 58, 40); letter-spacing: 2px; margin: 12px 0 4px 0; }
+.journal-empty { font-size: 14px; color: rgb(96, 88, 66); padding: 6px 0; }
+.evidence { padding: 8px 0 10px 0; border-bottom-width: 1px; border-bottom-color: rgb(190, 176, 140); }
+.evidence-head { flex-direction: row; align-items: center; margin-bottom: 4px; }
+.evidence-source { font-size: 13px; color: rgb(96, 88, 66); margin-left: 8px; }
+.evidence-text { font-size: 16px; color: rgb(30, 40, 40); }
+.journal .level-observed { color: rgb(36, 44, 44); border-color: rgb(110, 100, 76); }
+.journal .level-verified { color: rgb(236, 240, 228); background-color: rgb(46, 104, 90); border-color: rgb(46, 104, 90); }
+.journal .level-rumored { color: rgb(142, 58, 40); }
+.journal .level-unknown { color: rgb(110, 104, 90); border-color: rgb(150, 140, 116); }
+.log-entry { flex-direction: row; align-items: flex-start; padding: 5px 0; border-bottom-width: 1px; border-bottom-color: rgb(204, 192, 160); }
+.log-turn { font-size: 13px; color: rgb(142, 58, 40); width: 64px; flex-shrink: 0; margin-top: 1px; }
+.log-text { font-size: 14px; color: rgb(52, 58, 56); flex-shrink: 1; flex-grow: 1; }
+
+/* Lower left: action budget and protections */
+.player-status {
+    position: absolute; bottom: 22px; left: 26px; width: 222px;
+    padding: 12px 14px 14px 14px;
+    background-color: rgba(12, 26, 34, 0.78);
+    border-top-width: 1px; border-top-color: rgba(198, 162, 96, 0.7);
+}
+.action-line { flex-direction: row; justify-content: space-between; align-items: center; }
+.action-value { font-size: 30px; color: rgb(240, 212, 150); margin-top: 1px; }
+.action-pips .pip { width: 18px; height: 18px; border-radius: 9px; margin-left: 7px; border-width: 2px; }
+.defenses { flex-direction: row; margin-top: 10px; padding-top: 10px; border-top-width: 1px; border-top-color: rgba(120, 140, 140, 0.4); }
+.defense { flex-grow: 1; flex-basis: 0; }
+.defense.block { margin-right: 10px; }
+.defense-label { font-size: 13px; color: rgb(170, 186, 184); }
+.defense-value { font-size: 22px; color: rgb(170, 180, 178); }
+.defense-note { font-size: 12px; color: rgb(140, 156, 156); }
+.defense.active.block .defense-value { color: rgb(240, 212, 150); }
+.defense.active.ward .defense-value { color: rgb(170, 200, 218); }
+
+/* Bottom centre: the hand of case cards */
+.hand { position: absolute; left: 270px; right: 270px; bottom: 12px; height: 234px; }
+.hand .unity-scroll-view__content-viewport { overflow: hidden; }
+.hand .unity-scroll-view__content-container { flex-direction: row; justify-content: center; align-items: flex-end; min-width: 100%; padding: 22px 6px 12px 6px; }
+.battle-hud .card {
+    width: 164px; min-width: 164px; height: 194px; margin: 0 6px;
+    padding: 10px 14px 12px 14px;
+    align-items: stretch; justify-content: flex-start;
+    background-color: rgb(226, 214, 184);
+    border-width: 1px; border-color: rgb(168, 146, 102);
+    border-bottom-width: 3px; border-bottom-color: rgb(150, 126, 82);
+    border-radius: 3px;
+}
+.card-top { flex-direction: row; align-items: center; margin-bottom: 8px; }
+.card-cost {
+    width: 34px; height: 34px; border-radius: 17px;
+    background-color: rgb(30, 56, 62); border-width: 2px; border-color: rgb(198, 162, 96);
+    color: rgb(246, 226, 176); font-size: 20px; -unity-text-align: middle-center;
+}
+.card-cost-label { font-size: 13px; color: rgb(96, 88, 66); margin-left: 7px; }
+.card-name { font-size: 21px; color: rgb(28, 38, 40); letter-spacing: 1px; }
+.card-rule { height: 1px; background-color: rgb(160, 140, 100); margin: 7px 0 8px 0; }
+.card-description { font-size: 17px; color: rgb(36, 44, 44); flex-grow: 1; -unity-text-align: upper-left; }
+.card-price { font-size: 13px; color: rgb(142, 58, 40); padding: 4px 6px; margin-top: 4px; background-color: rgba(142, 58, 40, 0.12); border-left-width: 2px; border-left-color: rgb(142, 58, 40); }
+.card-exhaust { font-size: 13px; color: rgb(84, 80, 62); padding: 3px 6px; margin-top: 4px; border-width: 1px; border-color: rgb(160, 140, 100); }
+.card-blocked { font-size: 14px; color: rgb(240, 232, 210); background-color: rgb(110, 52, 40); padding: 3px 0 4px 0; margin-top: 6px; -unity-text-align: middle-center; letter-spacing: 2px; }
+.battle-hud .card:hover { translate: 0 -14px; background-color: rgb(240, 230, 204); border-color: rgb(198, 162, 96); border-bottom-color: rgb(198, 162, 96); }
+.battle-hud .card:focus { translate: 0 -14px; border-width: 2px; border-bottom-width: 3px; border-color: rgb(236, 206, 140); border-bottom-color: rgb(236, 206, 140); }
+.battle-hud .card:active { translate: 0 -8px; scale: 0.98 0.98; background-color: rgb(214, 200, 166); }
+.battle-hud .card:disabled { background-color: rgb(176, 170, 152); border-color: rgb(130, 124, 108); border-bottom-color: rgb(110, 104, 90); }
+.battle-hud .card:disabled .card-cost { background-color: rgba(0, 0, 0, 0); border-color: rgb(110, 52, 40); color: rgb(110, 52, 40); }
+.battle-hud .card:disabled .card-name,
+.battle-hud .card:disabled .card-description { color: rgb(60, 62, 58); }
+.piles { flex-direction: row; justify-content: space-between; margin-top: 10px; padding-top: 8px; border-top-width: 1px; border-top-color: rgba(120, 140, 140, 0.4); }
+.pile { flex-direction: row; align-items: flex-end; }
+.pile-label { font-size: 13px; color: rgb(170, 186, 184); margin-right: 4px; }
+.pile-value { font-size: 16px; color: rgb(236, 230, 210); }
+
+/* Lower right: fixed encounter action and end turn */
+.turn-controls { position: absolute; bottom: 22px; right: 26px; width: 222px; }
+.battle-hud .task {
+    margin-bottom: 10px; padding: 10px 14px 11px 14px; align-items: stretch;
+    background-color: rgba(18, 44, 46, 0.9);
+    border-width: 1px; border-color: rgb(122, 186, 164);
+    border-left-width: 4px;
+}
+.task-head { flex-direction: row; justify-content: space-between; align-items: center; }
+.task-name { font-size: 19px; color: rgb(232, 244, 236); letter-spacing: 2px; }
+.task-note { font-size: 13px; color: rgb(190, 214, 204); margin-top: 5px; }
+.task .seal-pips .pip { border-color: rgb(122, 186, 164); }
+.task .seal-pips .pip.filled { background-color: rgb(122, 186, 164); }
+.battle-hud .task:hover { background-color: rgba(30, 66, 64, 0.95); translate: 0 -2px; }
+.battle-hud .task:focus { border-color: rgb(200, 240, 222); border-width: 2px; border-left-width: 4px; }
+.battle-hud .task:active { background-color: rgba(40, 84, 78, 0.95); translate: 0 0; }
+.battle-hud .task:disabled { background-color: rgba(22, 32, 34, 0.84); border-color: rgba(110, 130, 126, 0.7); }
+.battle-hud .task:disabled .task-name { color: rgb(170, 180, 176); }
+.battle-hud .end-turn {
+    padding: 11px 14px 12px 14px;
+    background-color: rgb(204, 170, 104);
+    border-width: 1px; border-color: rgb(240, 214, 156);
+    border-bottom-width: 3px; border-bottom-color: rgb(140, 108, 58);
+    border-radius: 2px;
+}
+.end-title { font-size: 22px; color: rgb(26, 36, 38); letter-spacing: 4px; -unity-text-align: middle-center; }
+.end-note { font-size: 13px; color: rgb(62, 56, 40); margin-top: 3px; -unity-text-align: middle-center; }
+.battle-hud .end-turn:hover { background-color: rgb(232, 200, 136); translate: 0 -2px; }
+.battle-hud .end-turn:focus { border-width: 2px; border-bottom-width: 3px; border-color: rgb(255, 240, 200); }
+.battle-hud .end-turn:active { background-color: rgb(186, 152, 90); translate: 0 1px; border-bottom-width: 2px; }
+.battle-hud .end-turn:disabled { background-color: rgb(92, 88, 76); border-color: rgb(110, 104, 90); border-bottom-color: rgb(70, 66, 56); }
+.battle-hud .end-turn:disabled .end-title,
+.battle-hud .end-turn:disabled .end-note { color: rgb(190, 186, 172); }
+
+/* Latest record or rejected command, above the hand */
+.notice {
+    position: absolute; bottom: 252px; left: 32%; right: 32%;
+    font-size: 15px; color: rgb(214, 224, 218); -unity-text-align: middle-center;
+    text-shadow: 0 1px 4px rgba(4, 10, 14, 1);
+}
+.notice.error { color: rgb(250, 226, 214); background-color: rgba(110, 44, 32, 0.85); padding: 5px 12px; }
+.notice.hidden { display: none; }
+
+/* Encounter completion band */
+.concluded .hand,
+.concluded .tools,
+.concluded .intel,
+.concluded .piles,
+.concluded .turn-controls,
+.concluded .targets { opacity: 0.4; }
+.concluded .notice { display: none; }
+.outcome {
+    position: absolute; top: 336px; left: 26%; right: 26%;
+    padding: 22px 28px 24px 28px; align-items: center;
+    background-color: rgba(10, 22, 28, 0.9);
+    border-top-width: 1px; border-bottom-width: 1px;
+}
+.outcome.victory { border-color: rgb(122, 186, 164); }
+.outcome.defeat { border-color: rgb(196, 100, 76); background-color: rgba(30, 16, 14, 0.9); }
+.outcome-overline { font-size: 14px; letter-spacing: 3px; -unity-text-align: middle-center; }
+.victory .outcome-overline { color: rgb(122, 186, 164); }
+.defeat .outcome-overline { color: rgb(226, 140, 116); }
+.outcome-title { font-size: 36px; color: rgb(246, 232, 200); margin-top: 6px; letter-spacing: 6px; -unity-text-align: middle-center; }
+.outcome-description { font-size: 17px; color: rgb(220, 226, 216); margin: 10px 0 18px 0; -unity-text-align: middle-center; }
+.outcome-actions { flex-direction: row; justify-content: center; }
+.battle-hud .restart,
+.battle-hud .outcome-journal { padding: 9px 22px; margin: 0 6px; font-size: 17px; border-width: 1px; border-color: rgb(198, 162, 96); }
+.battle-hud .restart { background-color: rgb(204, 170, 104); color: rgb(26, 36, 38); }
+.battle-hud .restart:hover { background-color: rgb(232, 200, 136); }
+.battle-hud .outcome-journal:hover { background-color: rgba(198, 162, 96, 0.2); }
+.battle-hud .restart:focus,
+.battle-hud .outcome-journal:focus { border-width: 2px; border-color: rgb(255, 240, 200); }
+
 .error { padding: 20px; color: rgb(255, 190, 164); background-color: rgb(52, 37, 39); }
-.compact .vitals { left: 18px; top: 18px; }
-.compact .vital { width: 119px; padding: 7px 10px; margin-right: 9px; }
-.compact .vital-value { font-size: 19px; }
-.compact .encounter-heading { top: 17px; }
-.compact .encounter-name { font-size: 22px; }
-.compact .intel { width: 195px; left: 18px; padding: 10px 12px; }
-.compact .clue { font-size: 14px; }
-.compact .intent-text { font-size: 13px; }
-.compact .tools { width: 158px; right: 18px; }
-.compact .tool { font-size: 12px; min-height: 55px; }
-.compact .player-status { left: 18px; bottom: 32px; width: 141px; }
-.compact .action-value { font-size: 35px; }
-.compact .hand { left: 176px; right: 180px; bottom: 25px; height: 187px; }
-.compact .card { width: 130px; min-width: 130px; height: 166px; padding: 9px 10px; margin-right: 7px; }
-.compact .card-cost { width: 25px; height: 25px; font-size: 18px; margin-bottom: 6px; }
-.compact .card-name { font-size: 18px; padding-bottom: 6px; margin-bottom: 7px; }
-.compact .card-description { font-size: 13px; }
-.compact .turn-controls { right: 18px; width: 145px; bottom: 36px; }
-.compact .end-turn { font-size: 18px; min-height: 52px; }
-.compact .piles { left: 183px; bottom: 10px; }
-.compact .notice { bottom: 214px; }
-.compact .journal { bottom: 225px; }

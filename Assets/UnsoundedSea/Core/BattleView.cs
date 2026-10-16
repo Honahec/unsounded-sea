@@ -39,6 +39,8 @@ namespace UnsoundedSea.Core
         public int DiscardCount { get; internal set; }
         public int ExhaustCount { get; internal set; }
         public string Objective { get; internal set; }
+        public int ObjectiveProgress { get; internal set; }
+        public int ObjectiveTarget { get; internal set; }
         public bool CanAdvanceObjective { get; internal set; }
         public IReadOnlyList<CardView> Hand { get; internal set; }
         public IReadOnlyList<EnemyView> Enemies { get; internal set; }
