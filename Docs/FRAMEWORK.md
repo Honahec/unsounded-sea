@@ -112,3 +112,7 @@ unity test . --mode EditMode --filter UnsoundedSea.Tests --output Logs/framework
 ```
 
 本阶段不是完整 MVP：尚未实现完整 18 卡、显影粉/媒介、被注视与回视、跨局档案、事件和奖励内容、地图界面、完整 5–6 节点航程、音效与 3D 美术。下一步建议先接入 `RunMap` 的航程协调器，把现有遭遇、奖励选择和补给串联，再根据试玩扩充内容。
+
+## 3D 模型审阅入口
+
+Prayer / Echo 的减面展示 Prefab 已绑定到 `EnemyDefinition.presentationPrefab`。打开 `Assets/UnsoundedSea/Scenes/ModelImportReview.unity` 查看；当前战斗 UI 尚不实例化该字段。模型来源、Unity CLI 导入校验、制作边界和 Git LFS 协作步骤见 [模型导入流程](MODEL_IMPORT_WORKFLOW.md)。
