@@ -125,7 +125,7 @@ unity command eval --project-path "$UNITY_PROJECT_PATH" -- --code 'UnityEngine.A
 
 | 路径 | 唯一职责 |
 | --- | --- |
-| `ArtSource/Characters/*_High.glb` / `ArtSource/Vessels/*_High.glb` | 已选高模母版，位于 Assets 外，LFS 保存 |
+| `ArtSource/{Characters,Vessels,Bosses}/*_High.glb` | 已选高模母版，位于 Assets 外，LFS 保存 |
 | [母版 manifest](../ArtSource/Characters/manifest.json) / [运行时 manifest](../ArtSource/runtime-manifest.json) | 来源、任务/工件、文件路径、SHA、实测规格；后续修订补充父修订、操作类型、生成参数/提示词或其引用 |
 | `Assets/UnsoundedSea/Art/Models/` / `Prefabs/` | 引擎内低模与表现 Prefab，提交关联 `.meta` |
 | `Assets/UnsoundedSea/Scenes/ModelImportReview.unity` | 可重复检查模型的独立场景 |
@@ -158,11 +158,12 @@ git lfs fsck
 | --- | --- | --- | --- |
 | Prayer | 500,000 → 60,000 | Unity 材质、1.8 m、脚底、Prefab 引用、正面 Play 画面 | 袖内刀/铃分件、动画、全视角与目标设备验收 |
 | Echo | 800,000 → 90,000 | Unity 材质、2.1 m、脚底、Prefab 引用、战斗场景 | 更明显的空壳塌陷、独立铜铃、动画、全视角与目标设备验收 |
+| BellMother | 1,500,000 → 109,998 | Agent 制作、32 m、独立海面锚点、浸没与运行画面 | 触手骨骼动画、主体贴图平台压缩、LOD1/2 |
 | SurveyVessel | 800,000 → 80,000 | Agent 参考制作、保留 UV 减面、18 m 船体、开放甲板、战斗舞台 | 平台贴图压缩、LOD1/2、驾驶玩法 |
 
-两名角色各 1 网格/材质、3 张 4K 纹理，无蒙皮/动画；尚无 LOD1/2 或 LODGroup。内嵌纹理为 ARGB32、13 级 mip，两角色完整纹理链理论约 512 MiB（非 Profiler 实测），尚未 GPU 压缩。后续需提取/重映射为可配置 TextureImporter 资产，按平台选择压缩与尺寸后复核；普通纹理平台覆写不能直接套用到这些内嵌子资产。
+Prayer 与 Echo 各 1 网格/材质、3 张 4K 纹理，无蒙皮/动画；尚无 LOD1/2 或 LODGroup。内嵌纹理为 ARGB32、13 级 mip，两角色完整纹理链理论约 512 MiB（非 Profiler 实测），尚未 GPU 压缩。后续需提取/重映射为可配置 TextureImporter 资产，按平台选择压缩与尺寸后复核；普通纹理平台覆写不能直接套用到这些内嵌子资产。
 
-`OceanBattle.unity` 已同时实例化两名角色与船体；替换约定见 [框架指南](FRAMEWORK.md)。船体来源、实测规格与哈希见 [船体 manifest](../ArtSource/Vessels/manifest.json)，独立发光图保留在母版目录，当前船舷照明由舞台灯具承担。角色原四份高低模的远端 LFS 回读已在 `ffe264e` 验证；船体高低模也已在 `56a27ff` 完成独立远端回读。新战斗的检查范围见 [验证记录](FRAMEWORK_VALIDATION.md)。
+`OceanBattle.unity` 已同时实例化两名角色与船体；替换约定见 [框架指南](FRAMEWORK.md)。船体来源、实测规格与哈希见 [船体 manifest](../ArtSource/Vessels/manifest.json)，独立发光图保留在母版目录，当前船舷照明由舞台灯具承担。角色原四份高低模的远端 LFS 回读已在 `ffe264e` 验证；船体高低模也已在 `56a27ff` 完成独立远端回读。海面 Boss 的来源、哈希与导入规格单独维护在 [Boss manifest](../ArtSource/Bosses/manifest.json)，使用独立材质降低金属感并接入 2K 压缩发光图；原始 GLB 与母版未修改。新战斗的检查范围见 [验证记录](FRAMEWORK_VALIDATION.md)。
 
 ![Unity 中的 LOD0 审阅画面](ArtReferences/unity-lod0-review.jpg)
 

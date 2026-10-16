@@ -78,5 +78,11 @@
     "metallicFactor": 0.45,
     "roughnessFactor": 1.3,
     "emission": "Separate PNG imported at 2048 with CompressedHQ, mipmaps; source GLB unchanged"
+  },
+  "lfsVerification": {
+    "date": "2026-10-16",
+    "method": "Independent shallow clone; git lfs pull from origin; SHA256 comparison",
+    "assetCommit": "32388b6be863a7dc555959a367e5eb55dde487f7",
+    "matchedFiles": 2
   }
 }
