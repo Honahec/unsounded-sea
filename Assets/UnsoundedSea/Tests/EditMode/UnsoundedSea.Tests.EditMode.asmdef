@@ -1,7 +1,15 @@
 {
   "name": "UnsoundedSea.Tests.EditMode",
   "rootNamespace": "UnsoundedSea.Tests",
-  "references": ["UnsoundedSea.Core", "UnsoundedSea.Runtime"],
-  "includePlatforms": ["Editor"],
-  "optionalUnityReferences": ["TestAssemblies"]
+  "references": [
+    "UnsoundedSea.Core",
+    "UnsoundedSea.Runtime",
+    "UberWaterPlannerReflection"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
 }

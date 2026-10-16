@@ -1,0 +1,120 @@
+{
+  "upstream": "https://github.com/MatrixRex/Uber-Stylized-Water",
+  "commit": "1fdd16c6312611fef7fb248dee86cdd3fd456a1e",
+  "license": "MIT",
+  "scope": "Runtime shader, inspector, planar reflections and four textures; excludes demos, templates, Shader Graph authoring plugins.",
+  "files": [
+    {
+      "path": "Shader/UberStylizedWater.shader",
+      "upstreamSha256": "63445669c07c50d57b06a2037b233b87236267bdfb2d6cb1d8e5b2cdbb2d8e66"
+    },
+    {
+      "path": "Shader/UberStylizedWater.shader.meta",
+      "upstreamSha256": "56975c6d3549c08e4c1b145d2cab56a82ae49ff326a5cbca8a48e90bcb30da7b"
+    },
+    {
+      "path": "SubGraphs/CubeMap.hlsl",
+      "upstreamSha256": "75e98d35ec2e6c14056eadbb7a3c89e82bbf2b17810faac0ad12ebe996462637"
+    },
+    {
+      "path": "SubGraphs/CubeMap.hlsl.meta",
+      "upstreamSha256": "e4b3e5f611146326644c9a379d40117ae137aa30a2e3409f890c639f298a394e"
+    },
+    {
+      "path": "Editor/UberStylizedWaterGUI.cs",
+      "upstreamSha256": "f867661047d388e25a30718dfda6bf18061187e4234734a7eb763df22a025bbe"
+    },
+    {
+      "path": "Editor/UberStylizedWaterGUI.cs.meta",
+      "upstreamSha256": "4a20ca2a90bed36ab508327ba1493d8c777d49ac62573fef2bca3e6fc82ae972"
+    },
+    {
+      "path": "Editor/UberStylizedWater.Editor.asmdef",
+      "upstreamSha256": "15c12d4c9dae060ea1b7df95ed63ded1462270480596c413d64e6461bb3cc1cb"
+    },
+    {
+      "path": "Editor/UberStylizedWater.Editor.asmdef.meta",
+      "upstreamSha256": "92242b67562070d7f38b55fb23604f4683c4cebb592ca38093d376d6f140a709"
+    },
+    {
+      "path": "Planner Reflection/PlanarReflectionManager.cs",
+      "upstreamSha256": "0e33d3b9efd6745deb04cd2b09bf2dfbdd48eadfa2b0f088e8041717c67e31bf"
+    },
+    {
+      "path": "Planner Reflection/PlanarReflectionManager.cs.meta",
+      "upstreamSha256": "4a64a5b6052ba0353e165b75186f95dd86b462be660bfcebc3d12fa0f2e44ab1"
+    },
+    {
+      "path": "Planner Reflection/PlanarReflectionVolume.cs",
+      "upstreamSha256": "c08814de18f0beb142545b9c77a9dab8fee4fb267a5ad95470ee056dd4abe5c6"
+    },
+    {
+      "path": "Planner Reflection/PlanarReflectionVolume.cs.meta",
+      "upstreamSha256": "8308c6a7c5521da77527bbeea1be24efa4983bfea103f41a94a67eed917f82e7"
+    },
+    {
+      "path": "Planner Reflection/UberWaterPlannerReflection.asmdef",
+      "upstreamSha256": "7e3efc5153f10803531af264e18a2481e97d4c1e3f745deafa82775e777f5622"
+    },
+    {
+      "path": "Planner Reflection/UberWaterPlannerReflection.asmdef.meta",
+      "upstreamSha256": "ef2611afe0e7deb88a5ffaa9fe0576ba33b2ce9d9e421f3ec1d862f39fb039a6"
+    },
+    {
+      "path": "Third Party/URP_ShaderGraphCustomLighting-main/CustomLighting.hlsl",
+      "upstreamSha256": "51fda297d377312dc3b1519a923bc223c6c9052ce65c8abd0f85a47dd4e8492f"
+    },
+    {
+      "path": "Third Party/URP_ShaderGraphCustomLighting-main/CustomLighting.hlsl.meta",
+      "upstreamSha256": "8214776f1f8373969a387f83bda361ba85adb27b11f833c3ee94724bad5628ca"
+    },
+    {
+      "path": "Third Party/URP_ShaderGraphCustomLighting-main/LICENSE",
+      "upstreamSha256": "3598a821aeac6de84df80655cd2c44ad27c5201ed3e049523b8de0cb6266979f"
+    },
+    {
+      "path": "Third Party/URP_ShaderGraphCustomLighting-main/LICENSE.meta",
+      "upstreamSha256": "a9ed8c5683a18e4acbc48352b3e8898eecf677b00d27366e238ac5fec81fc31e"
+    },
+    {
+      "path": "Textures/Normal 1.png",
+      "upstreamSha256": "49b823e8072e4848e9af63440cfb663c40d04a4fc265214792db00365dd94112"
+    },
+    {
+      "path": "Textures/Normal 1.png.meta",
+      "upstreamSha256": "715d833ffd686e2712706f5c9257c8e01af3df6e0843256f200df3501011625a"
+    },
+    {
+      "path": "Textures/Normal 2.png",
+      "upstreamSha256": "14ffe57b51c476662e83d2c440e808f0a6db4d906493cdc7ef0a7f29321ba914"
+    },
+    {
+      "path": "Textures/Normal 2.png.meta",
+      "upstreamSha256": "3cd7d9ea1ebf47d657aab8587e376c47cca6102d14580ebe297de7dad83aa0ff"
+    },
+    {
+      "path": "Textures/Foam 1.png",
+      "upstreamSha256": "3bf1ec3c79632d81368fd21250a153d6e52acd54d1c4c480ab4bc123e0d79c7a"
+    },
+    {
+      "path": "Textures/Foam 1.png.meta",
+      "upstreamSha256": "b74423395fbf7e918014b78fdcdc9d3f7a5d684c0de7c3ba6d9ce8c506d21114"
+    },
+    {
+      "path": "Textures/Noise 1.png",
+      "upstreamSha256": "9354f4e6fb1b2153738920eb7e8b9b46a9a05dfc0ee998c485f537048d6f0b39"
+    },
+    {
+      "path": "Textures/Noise 1.png.meta",
+      "upstreamSha256": "4f485c1ee1312bea708f858dd00f8f994c3189d7bb4999421d74dac878e31fed"
+    }
+  ],
+  "adaptations": [
+    "Assembly references use installed Unity assemblies and the included reflection assembly; no authoring plugins required.",
+    "Unity 6000.6: GetEntityId and unsorted FindObjectsByType; URP Fog.hlsl include.",
+    "Shader: per-material _UseSeaTime/_SeaTime in all six passes; _Threat routes to the project-owned BattleWaterWake.hlsl (six vertex calls, three color calls). Regenerating the upstream graph would overwrite these patches.",
+    "Reflections: explicit render request destination; owned disabled Reflection camera; explicit source camera and suspension; preserve configured layers; clear singleton/global texture and release resources on disable; restore culling/quality in finally; retain scene fog; clamp RT dimensions.",
+    "Storm sea: four material-configured phase-warped swells, broad asymmetric creature disturbance, matching CPU vessel samples, corrected vertex normals and broken crest foam in project-owned BattleWaterWake.hlsl; all six vertex passes patched.",
+    "Sea lighting: project-owned BattleWaterLighting.hlsl replaces the unattenuated toon highlight and additive crest foam in all three colour passes. Dielectric GGX uses light colour, intensity, shadows and distance; normal variance filters distant glints; diffuse foam covers specular. Uses the existing URP 17.6 Forward+ cluster variants from CubeMap.hlsl. Inspector exposes tint/roughness; legacy Hardness/Size are unused."
+  ]
+}

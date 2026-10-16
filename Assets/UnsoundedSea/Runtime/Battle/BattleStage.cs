@@ -11,12 +11,17 @@ namespace UnsoundedSea.Runtime
         public Transform[] actorAnchors;
         public Material selectionMaterial;
         public Renderer ocean;
+        public BattleWater water;
         public AudioSource ambience;
         public AudioSource feedback;
         public AudioClip sealCue, impactCue, sanityCue;
         public Color fogColor = new Color(0.055f, 0.1f, 0.12f);
         public float fogDensity = 0.023f;
         public float vesselHeave = 0.06f, vesselPitch = 0.35f, vesselRoll = 0.7f, cameraShake = 0.035f;
+        public bool vesselFollowsWater;
+        public Vector2 vesselSampleExtents = new Vector2(2.5f, 7);
+        public float maxWavePitch = 6, maxWaveRoll = 9, vesselYaw = 1.5f;
+        public bool placeholderCombatMotion = true;
         public IReadOnlyList<BattleActorView> Actors => actors;
         private readonly List<BattleActorView> actors = new List<BattleActorView>();
         private BattleDirector director;
@@ -49,17 +54,18 @@ namespace UnsoundedSea.Runtime
                 actor.Bind(owner, view.Enemies[i].Id, owner.scenario.ActorPrefab(i), selectionMaterial);
                 actors.Add(actor);
             }
+            if (water != null) water.Bind(battleCamera);
             owner.Resolved += Present; RefreshSelection();
         }
         public void RefreshSelection() { foreach (var actor in actors) actor.Select(actor.EnemyId == director.SelectedEnemy); }
         private void Present(BattleView before, BattleView after, BattleCommand command)
         {
             for (var i = 0; i < actors.Count; i++)
-                actors[i].Feedback(after.Enemies[i].Health < before.Enemies[i].Health,
-                    command.kind == CommandKind.EndTurn && before.Enemies[i].Health > 0, after.Enemies[i].Health > 0);
+                actors[i].Feedback(placeholderCombatMotion && after.Enemies[i].Health < before.Enemies[i].Health,
+                    placeholderCombatMotion && command.kind == CommandKind.EndTurn && before.Enemies[i].Health > 0, after.Enemies[i].Health > 0);
             if (after.Health < before.Health || after.Sanity < before.Sanity)
             {
-                shake = 1;
+                shake = placeholderCombatMotion ? 1 : 0;
                 var cue = after.Sanity < before.Sanity && sanityCue != null ? sanityCue : impactCue;
                 if (feedback != null && cue != null) feedback.PlayOneShot(cue);
             }
@@ -79,22 +85,52 @@ namespace UnsoundedSea.Runtime
                 if (director.Paused && feedback.isPlaying) feedback.Pause();
                 else if (!director.Paused && !feedback.isPlaying) feedback.UnPause();
             }
-            if (director.Paused) return;
+            if (director.Paused)
+            {
+                if (water != null) water.Tick(0, true, GameSettings.ReducedMotion, Vector4.zero);
+                return;
+            }
             age += Time.unscaledDeltaTime;
             var reduced = GameSettings.ReducedMotion;
-            vessel.localPosition = shipPosition + Vector3.up * (reduced ? 0 : Mathf.Sin(age * 0.55f) * vesselHeave);
-            vessel.localRotation = shipRotation * Quaternion.Euler(reduced ? 0 : Mathf.Sin(age * 0.31f) * vesselPitch, 0, reduced ? 0 : Mathf.Sin(age * 0.47f) * vesselRoll);
             shake = Mathf.MoveTowards(shake, 0, Time.unscaledDeltaTime * 1.8f);
             battleCamera.transform.localPosition = cameraPosition + (reduced ? Vector3.zero : new Vector3(Mathf.Sin(age * 41), Mathf.Cos(age * 37), 0) * (shake * cameraShake));
             if (ocean != null)
             {
-                oceanProperties.SetFloat("_SeaTime", reduced ? age * 0.25f : age);
                 var threat = Vector4.zero;
                 foreach (var actor in actors)
                     if (actor.IsSeaActor && actor.Alive) { var p = actor.transform.position; threat = new Vector4(p.x, p.z, actor.WaterRadius, reduced ? 0 : shake); break; }
-                oceanProperties.SetVector("_Threat", threat);
-                ocean.SetPropertyBlock(oceanProperties);
+                if (water != null) water.Tick(Time.unscaledDeltaTime, false, reduced, threat);
+                else
+                {
+                    oceanProperties.SetFloat("_SeaTime", reduced ? age * 0.25f : age);
+                    oceanProperties.SetVector("_Threat", threat);
+                    ocean.SetPropertyBlock(oceanProperties);
+                }
             }
+            if (vesselFollowsWater && water != null)
+            {
+                if (!reduced) FollowWaves();
+            }
+            else
+            {
+                vessel.localPosition = shipPosition + Vector3.up * (reduced ? 0 : Mathf.Sin(age * 0.55f) * vesselHeave);
+                vessel.localRotation = shipRotation * Quaternion.Euler(reduced ? 0 : Mathf.Sin(age * 0.31f) * vesselPitch, 0, reduced ? 0 : Mathf.Sin(age * 0.47f) * vesselRoll);
+            }
+        }
+        private void FollowWaves()
+        {
+            var parent = vessel.parent;
+            var rest = parent != null ? parent.TransformPoint(shipPosition) : shipPosition;
+            var rotation = parent != null ? parent.rotation * shipRotation : shipRotation;
+            var forward = rotation * Vector3.forward * Mathf.Max(0.1f, vesselSampleExtents.y);
+            var right = rotation * Vector3.right * Mathf.Max(0.1f, vesselSampleExtents.x);
+            float pitch = -Mathf.Atan2(water.SampleDisplacement(rest + forward).y - water.SampleDisplacement(rest - forward).y, forward.magnitude * 2) * Mathf.Rad2Deg;
+            float roll = Mathf.Atan2(water.SampleDisplacement(rest + right).y - water.SampleDisplacement(rest - right).y, right.magnitude * 2) * Mathf.Rad2Deg;
+            var targetRotation = rotation * Quaternion.Euler(Mathf.Clamp(pitch, -maxWavePitch, maxWavePitch), Mathf.Sin(water.SeaTime * 0.24f) * vesselYaw, Mathf.Clamp(roll, -maxWaveRoll, maxWaveRoll));
+            // Continuous response, independent of commands; smooth re-entry after reduced-motion changes.
+            float blend = 1 - Mathf.Exp(-Time.unscaledDeltaTime * 3);
+            vessel.position = Vector3.Lerp(vessel.position, rest + water.SampleDisplacement(rest), blend);
+            vessel.rotation = Quaternion.Slerp(vessel.rotation, targetRotation, blend);
         }
         private void OnDisable()
         {

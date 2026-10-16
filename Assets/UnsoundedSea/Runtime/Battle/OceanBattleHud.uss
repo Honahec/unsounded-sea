@@ -31,14 +31,15 @@
 .vital-fill { height: 3px; background-color: #9b5d50; }
 .sanity .vital-fill { background-color: #80b5a5; }
 .resource-note { position: absolute; left: 4px; top: -28px; width: 290px; font-size: 10px; color: #80b5a5; }
-.hand { position: absolute; left: 345px; right: 170px; bottom: 0; height: 550px; }
+.hand { position: absolute; left: 345px; right: 170px; bottom: -140px; height: 440px; }
 .hand .unity-scroll-view__content-viewport { overflow: hidden; }
-.hand .unity-scroll-view__content-container { min-width: 100%; height: 544px; padding: 0 15px; }
-.fan-track { position: relative; height: 536px; min-width: 620px; }
+.hand .unity-scroll-view__content-container { min-width: 100%; height: 434px; padding: 0 15px; }
+.fan-track { position: relative; height: 426px; min-width: 620px; }
 .card-anchor { position: absolute; bottom: 8px; width: 180px; height: 245px; padding: 0; border-width: 0; background-color: rgba(0,0,0,0); transform-origin: 50% 100%; }
-.sea-card { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 10px 13px; border-radius: 9px 9px 3px 3px; border-width: 1px; border-bottom-width: 3px; border-color: #9e8755; background-color: #d8cbaa; color: #172526; transition-property: translate, scale, rotate, background-color; transition-duration: .14s; -unity-text-align: upper-left; }
-.card-anchor:hover .sea-card, .card-anchor:focus .sea-card { translate: 0 -245px; scale: 1.08; rotate: 0deg; background-color: #eee4c9; }
+.sea-card { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 10px 13px; border-radius: 9px 9px 3px 3px; border-width: 1px; border-bottom-width: 3px; border-color: #9e8755; background-color: #d8cbaa; color: #172526; transform-origin: 50% 100%; transition-property: translate, scale, rotate, background-color; transition-duration: .14s; -unity-text-align: upper-left; }
+.card-anchor.inspecting .sea-card { translate: 0 -150px; scale: 1.1; rotate: 0deg; background-color: #eee4c9; }
 .fan--3 { rotate: -11deg; translate: 0 15px; }.fan--2 { rotate: -7deg; translate: 0 7px; }.fan--1 { rotate: -3deg; translate: 0 2px; }.fan-1 { rotate: 3deg; translate: 0 2px; }.fan-2 { rotate: 7deg; translate: 0 7px; }.fan-3 { rotate: 11deg; translate: 0 15px; }
+
 .card-head { flex-direction: row; justify-content: space-between; align-items: center; }
 .card-cost { width: 29px; height: 29px; border-radius: 15px; background-color: #19383c; color: #eee4c9; font-size: 18px; -unity-text-align: middle-center; }
 .card-type { font-size: 10px; color: #655d4b; }
@@ -50,7 +51,7 @@
 .end-turn SeaUiArt { position: absolute; width: 82px; height: 82px; opacity: .5; }
 .end-label { font-size: 17px; -unity-text-align: middle-center; }
 .end-turn:hover { scale: 1.06; background-color: #816035; }
-.battle-notice { position: absolute; bottom: 242px; left: 30%; right: 30%; padding: 5px 10px; -unity-text-align: middle-center; background-color: rgba(8,19,22,.72); }
+.battle-notice { position: absolute; bottom: 300px; left: 30%; right: 30%; padding: 5px 10px; -unity-text-align: middle-center; background-color: rgba(8,19,22,.72); }
 .actor-label { position: absolute; width: 164px; min-height: 48px; padding: 3px 8px; border-width: 0; background-color: rgba(0,0,0,0); color: #eee4c9; }
 .actor-name, .actor-status { -unity-text-align: middle-center; text-shadow: 0 1px 3px #000; }.actor-name { font-size: 19px; }.actor-status { font-size: 13px; color: #80b5a5; }
 .actor-health { height: 4px; margin-top: 5px; background-color: rgba(8,19,22,.7); }.actor-health-fill { height: 4px; background-color: #9b5d50; }
@@ -62,4 +63,12 @@
 .battle-chart-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 24px; background-color: rgba(1,8,13,.96); }
 .battle-chart-overlay VoyageMapPanel { flex-grow: 1; }
 .battle-chart-close { position: absolute; right: 38px; bottom: 30px; min-width: 128px; min-height: 40px; padding: 8px 14px; border-width: 1px; border-color: #d7bd82; background-color: #19383c; color: #eee4c9; }
-.ocean-ui.reduced-motion Button { transition-duration: 0s; }.ocean-ui.reduced-motion .card-anchor:hover .sea-card, .ocean-ui.reduced-motion .card-anchor:focus .sea-card { translate: 0 -245px; }
+.ocean-ui.reduced-motion Button, .reduced-motion .card, .reduced-motion .sea-card { transition-duration: 0s; }.ocean-ui.reduced-motion .card-anchor.inspecting .sea-card { translate: 0 -150px; }
+
+/* Keep the resting hit area stable while straightening the inspected face. */
+.fan--3.inspecting .sea-card { rotate: 11deg; }
+.fan--2.inspecting .sea-card { rotate: 7deg; }
+.fan--1.inspecting .sea-card { rotate: 3deg; }
+.fan-1.inspecting .sea-card { rotate: -3deg; }
+.fan-2.inspecting .sea-card { rotate: -7deg; }
+.fan-3.inspecting .sea-card { rotate: -11deg; }
