@@ -678,7 +678,7 @@
         "original-synthesis"
       ],
       "peak_dbfs": -8.4,
-      "sha256": "d0de50c0e38375034acc5fd02d0b731735ddc125a9e18b0468a164a236bb4643"
+      "sha256": "93abc112087346f069eac0cd09761aeff7644d74b23f9dd3f7a96af25f48399c"
     },
     {
       "id": "retreat",
@@ -690,7 +690,7 @@
         "original-synthesis"
       ],
       "peak_dbfs": -8.4,
-      "sha256": "44bee35555ab1d38782438654d06ef05062d7189786940e0715b34d51c48305c"
+      "sha256": "48551cd5c1279ef74a3269cc35f1719abe35a33920f58e71608b173905d87d86"
     },
     {
       "id": "defeat",
@@ -702,7 +702,7 @@
         "original-synthesis"
       ],
       "peak_dbfs": -8.4,
-      "sha256": "7c9fff69954cffc3948bb7ec79c4148e9237216f170b616c4bc15d1a8c228254"
+      "sha256": "8829903936fc16a6f8559d0c46c3e982c9f9d16a359f14411888f7ced728720b"
     },
     {
       "id": "turn",
@@ -834,7 +834,7 @@
         "water-waves"
       ],
       "peak_dbfs": -9.37,
-      "sha256": "56c5feda173607ced8edfa8790ac83866a1109d75e36767a865a10330942658d"
+      "sha256": "cd5869dc28f0df5806404e7767243aea4b9a6c669cd0397d1db78637fb31a2b1"
     },
     {
       "id": "wind",
@@ -846,7 +846,7 @@
         "original-synthesis"
       ],
       "peak_dbfs": -15.39,
-      "sha256": "e4a6cd06a2f2a584708ee86a74e88df406b068dd79bbde43e531c1d385be8917"
+      "sha256": "615cb04f21a1f22e19b50e6f023b0087e23ed509bf2749f741999565df8ce368"
     },
     {
       "id": "wake",
@@ -858,7 +858,7 @@
         "original-synthesis"
       ],
       "peak_dbfs": -10.46,
-      "sha256": "1a906036ed44e18614e59a3bda4e13fd2a190e3e98561defc2e9dc6f94a0e858"
+      "sha256": "3d229c0ca180b10c60c1c7b12dd025a5d91681be7bc29564ba97fc6997101445"
     },
     {
       "id": "splash_0",
@@ -908,8 +908,8 @@
       "source_ids": [
         "original-synthesis"
       ],
-      "peak_dbfs": -12.78,
-      "sha256": "b2da27a28821490594a84bba1a3a70510dcad5fc317f28e647a713f44d2cb597"
+      "peak_dbfs": -15.9,
+      "sha256": "e0fd683a7cf6c8d91cb92078b6ace0ef3ccec113a2496b782dd6f8ca96c5dd26"
     },
     {
       "id": "music_harbor_1",
@@ -920,8 +920,8 @@
       "source_ids": [
         "original-synthesis"
       ],
-      "peak_dbfs": -13.95,
-      "sha256": "f317d601e1cfd2bb9bbcb125e24c582a89410aa0ae4d6d72dce7e544b4e6ee24"
+      "peak_dbfs": -12.26,
+      "sha256": "86c35ded86ff8a503399bd5abd44e37db98ae516d24d8c99b75cd13e7817ff6e"
     },
     {
       "id": "music_harbor_2",
@@ -932,8 +932,8 @@
       "source_ids": [
         "original-synthesis"
       ],
-      "peak_dbfs": -23.4,
-      "sha256": "7db85f26c05b657173a456d0f1754a075f309246db5e6dec0d7b167bafc28fb2"
+      "peak_dbfs": -20.69,
+      "sha256": "d9930779895b5e8e7257675570c7282ac4dc49501d30bd1b3e9aa78c1d621403"
     },
     {
       "id": "music_voyage_0",
@@ -944,8 +944,8 @@
       "source_ids": [
         "original-synthesis"
       ],
-      "peak_dbfs": -11.1,
-      "sha256": "f5b67d0c23540a3a2ccac5700a2db205fa9550003d641c44244ae149f29c6edd"
+      "peak_dbfs": -15.84,
+      "sha256": "2d4d93410104fadae9619a2656ff138813b3898624331783ac9f56d8645fc157"
     },
     {
       "id": "music_voyage_1",
@@ -956,8 +956,8 @@
       "source_ids": [
         "original-synthesis"
       ],
-      "peak_dbfs": -14.41,
-      "sha256": "58debcf5e02b11e245b7d9a1af1a2d48c862d0d84e193d23f23e8eb5e06de1d1"
+      "peak_dbfs": -14.25,
+      "sha256": "89e3c6977097ff688ee08b44eac054996c444a280dc8699fdae0198991186bf5"
     },
     {
       "id": "music_voyage_2",
@@ -968,8 +968,8 @@
       "source_ids": [
         "original-synthesis"
       ],
-      "peak_dbfs": -21.84,
-      "sha256": "92a5c8771791d56ab77fc84bcd56572cd7931486eceac4b474dc1d0c922cc0fd"
+      "peak_dbfs": -20.61,
+      "sha256": "4c833e7c578f5b2909ca091aebcbd41d8bd69905302d5babbe4919525ef06fae"
     },
     {
       "id": "music_deck_0",
@@ -980,8 +980,8 @@
       "source_ids": [
         "original-synthesis"
       ],
-      "peak_dbfs": -12.51,
-      "sha256": "fe3a142f7403dcf1bdfcc3d33711ce4fc3d799e73293f0d0e289a6280901b553"
+      "peak_dbfs": -17.96,
+      "sha256": "f830cc34dd71cb8f9a8310abdafebe686bdeccf9769e6f2344264f65e773ff1d"
     },
     {
       "id": "music_deck_1",
@@ -992,8 +992,8 @@
       "source_ids": [
         "original-synthesis"
       ],
-      "peak_dbfs": -15.87,
-      "sha256": "f76bbe4934919d9c3b23ce420b002c7b43c1742eec1b92f71b5ed7b2c173d73c"
+      "peak_dbfs": -16.55,
+      "sha256": "31576b814a2f320a42213ad928b4e1e494a41725855bc97b898bfc831bb2bf47"
     },
     {
       "id": "music_deck_2",
@@ -1004,8 +1004,8 @@
       "source_ids": [
         "original-synthesis"
       ],
-      "peak_dbfs": -15.92,
-      "sha256": "93f5df6b4f650a25fb5f45efd27ed16e95d104e0f96e05ce56106499103ddc6c"
+      "peak_dbfs": -15.24,
+      "sha256": "9176849c8ae828ba408d77c25f13257585645daf757fe4337c008f36281d616e"
     },
     {
       "id": "music_boss_0",
@@ -1016,8 +1016,8 @@
       "source_ids": [
         "original-synthesis"
       ],
-      "peak_dbfs": -10.32,
-      "sha256": "d45974e7b8cf61127bf1809df4ab494469fbc058a04189a1fa665226bcd90caf"
+      "peak_dbfs": -15.48,
+      "sha256": "1a582b037ae79314a1265b0b6d4fdf25f9b34b50a318d9c9e9ed7ea82395e0e6"
     },
     {
       "id": "music_boss_1",
@@ -1028,8 +1028,8 @@
       "source_ids": [
         "original-synthesis"
       ],
-      "peak_dbfs": -13.62,
-      "sha256": "cd5122d841aa011f3db59f70586a3e5074ae37998297945fb04810b8a60bb31e"
+      "peak_dbfs": -13.89,
+      "sha256": "73e29d051d95b5f63ed7049076205e1cb82e21b5a1dbbcef5ff9ec8ceee0e9db"
     },
     {
       "id": "music_boss_2",
@@ -1040,54 +1040,54 @@
       "source_ids": [
         "original-synthesis"
       ],
-      "peak_dbfs": -14.91,
-      "sha256": "20e8d41489409beacb3414cd4ce4594eb8124c98372e1864a3ad4ae2c0f2212a"
+      "peak_dbfs": -13.68,
+      "sha256": "4dfdbfe0260c1e8cb43b9652486b2bb2f70facc6dc1fda76953050de5047be0d"
     }
   ],
-  "recipe_sha256": "4f5cd44c9c0b515e50d176d4c1fc6cd541f77d919624737afd72047330bc902e",
+  "recipe_sha256": "eed80725eaa010ba1c3f768d67222f222a8c0dd33060929f50d98c84ed548746",
   "deliverables": [
     {
       "path": "ArtSource/Audio/Masters/boss.flac",
-      "sha256": "374826e43530aa8944f3b038ab3f1def279c6471676de3e440d3c092867022be",
-      "bytes": 7141676
+      "sha256": "c39788d16cd003bba974ab266ab99a21f44ac04e700986079ccad4a9dc74ec77",
+      "bytes": 6594439
     },
     {
       "path": "ArtSource/Audio/Masters/deck.flac",
-      "sha256": "deffb0ef3a25f380b54ba7531fcf1a79cf4cc092cf2efed9a3c16a613afaab3c",
-      "bytes": 6661036
+      "sha256": "cb612b3fe2c11ce4f18a3ed73e73aded8f834e6373d582877f0f0e99c4a6103d",
+      "bytes": 6313298
     },
     {
       "path": "ArtSource/Audio/Masters/harbor.flac",
-      "sha256": "de6dedf508cc0b980c9c7ee221c7ed4a028456c3374b7a6e7bb60a5eea701dea",
-      "bytes": 4264205
+      "sha256": "51e622c6344dab46982b51f4a98b3bc66433811749d21500552f43b37d5c6f2f",
+      "bytes": 3931235
     },
     {
       "path": "ArtSource/Audio/Masters/voyage.flac",
-      "sha256": "f67a345e23d2e696c93f0fa2911a6aea8d89ed59b5edf18b6c1e8db4e90406b1",
-      "bytes": 6136872
+      "sha256": "5698c3c780bedf97de85f49921ffdca745d2485665ed8491f3821f10578b82b8",
+      "bytes": 5506283
     },
     {
       "path": "ArtSource/Audio/Previews/soundscape-restrained.mp3",
-      "sha256": "b50c987eb2ffb30ba14067f8a35cecf42b1aa418dd9d9208dc5f0b189a205bcc",
+      "sha256": "3bc3e15aa5001830acc79ad44b12963772286c262298718e1a37c2cafd4ef90a",
       "bytes": 1801196
     },
     {
       "path": "ArtSource/Audio/Previews/soundscape-uneasy.mp3",
-      "sha256": "eb13dbcac2571834cac61bf463e1b003bb80e62028db505e8f2d4d1dec56fb14",
+      "sha256": "cf0a902e97e0148b012ffef42dd4b31bb4e54d8b5128bed12cf0cb3d0142b1d0",
       "bytes": 1801196
     }
   ],
   "preview_measurements": {
+    "method": "FFmpeg ebur128=peak=true on exported 75-second MP3s",
     "restrained": {
-      "integrated_lufs": -17.3,
-      "loudness_range_lu": 5.2,
+      "integrated_lufs": -20.7,
+      "loudness_range_lu": 8.8,
       "true_peak_dbtp": -1.7
     },
     "uneasy": {
-      "integrated_lufs": -17.0,
-      "loudness_range_lu": 5.1,
+      "integrated_lufs": -20.3,
+      "loudness_range_lu": 7.9,
       "true_peak_dbtp": -1.7
-    },
-    "method": "FFmpeg ebur128=peak=true on exported 75-second MP3s"
+    }
   }
 }

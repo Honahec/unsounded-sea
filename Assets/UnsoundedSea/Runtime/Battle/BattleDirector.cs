@@ -38,6 +38,7 @@ namespace UnsoundedSea.Runtime
             if (Stage != null) { Stage.gameObject.SetActive(false); Destroy(Stage.gameObject); }
             Stage = Instantiate(scenario.stagePrefab);
             Stage.Bind(this);
+            BattleAudioPresentation.Attach(this);
             wasBusy = Busy;
             ViewRevision++;
             Changed?.Invoke();
@@ -50,6 +51,7 @@ namespace UnsoundedSea.Runtime
             }
             if (wasBusy && !Busy)
             {
+                GetComponent<BattleAudioPresentation>()?.Complete();
                 wasBusy = false;
                 if (View.Phase == BattlePhase.Victory && VoyageRuntime.OwnsEncounter(this))
                 {
@@ -79,6 +81,7 @@ namespace UnsoundedSea.Runtime
             if (!result.Success)
             {
                 Notice = result.Error; NoticeIsError = true; noticeUntil = Time.unscaledTime + 2.5f;
+                SeaAudio.Play("reject", .5f, ui: true);
                 Changed?.Invoke(); return result;
             }
             ViewRevision++;
