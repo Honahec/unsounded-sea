@@ -8,7 +8,7 @@ namespace UnsoundedSea.Runtime
         public const int Capacity = 8;
         public const float Lifetime = 12f;
         public const float Speed = 45f;
-        public const float DefaultAmplitude = 100f;
+        public const float DefaultAmplitude = 80f;
         public const float CombinedHeightLimit = 110f;
         public static float Combine(float height) => height / Mathf.Sqrt(1 + height * height / (CombinedHeightLimit * CombinedHeightLimit));
 
