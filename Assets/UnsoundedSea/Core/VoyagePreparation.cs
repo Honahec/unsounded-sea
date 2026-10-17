@@ -41,6 +41,14 @@ namespace UnsoundedSea.Core
             return stop.Name+"｜"+services+"\n"+details;
         }
 
+        public EnemyStyle PreviewStyle(VoyageStop stop)
+        {
+            if(stop==null)throw new ArgumentNullException(nameof(stop));
+            if(stop.Kind==RunNodeKind.Boss)return EnemyStyle.Boss;
+            if(stop.Kind!=RunNodeKind.Battle)return EnemyStyle.None;
+            return stop.EncounterId.StartsWith("voyage-fog-",StringComparison.Ordinal)?EnemyStyle.Rhythm:EnemyBehavior.StyleForEncounter(stop.EncounterId);
+        }
+
         public IReadOnlyList<ItemSpec> PreviewShopItems(string stopId)
         {
             var stop = PreviewableStop(stopId);

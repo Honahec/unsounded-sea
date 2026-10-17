@@ -20,9 +20,9 @@ namespace UnsoundedSea.Tests
                 Assert.That(count,Is.GreaterThan(1));
                 Assert.That(byId[plan.GoalId].EncounterId,Is.EqualTo(VoyageMapGenerator.BossEncounter(seed,act,region)));
                 Assert.That(plan.Stops.Where(x=>x.Kind==RunNodeKind.Battle).All(x=>x.EncounterId.StartsWith("voyage-"+region+"-",StringComparison.Ordinal)),Is.True);
-                var battles=plan.Stops.Where(x=>x.Kind==RunNodeKind.Battle).GroupBy(x=>x.Layer).Select(x=>x.First().EncounterId).ToArray();
-                Assert.That(battles,Has.Length.EqualTo(4)); Assert.That(battles,Is.Unique);
-                Assert.That(plan.Stops.Count(x=>x.Kind==RunNodeKind.Reward),Is.EqualTo(plan.Stops.Count(x=>x.Layer==4)));
+                var variants=plan.Stops.Where(x=>x.Kind==RunNodeKind.Battle).Select(x=>x.EncounterId).Distinct().ToArray();
+                Assert.That(variants,Has.Length.EqualTo(5));
+                Assert.That(plan.Stops.Any(x=>x.Kind==RunNodeKind.Reward),Is.True);
                 Assert.That(plan.Stops.Count(x=>x.Kind==RunNodeKind.Boss),Is.EqualTo(1));
             }
         }

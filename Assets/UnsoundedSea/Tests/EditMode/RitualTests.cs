@@ -8,15 +8,19 @@ namespace UnsoundedSea.Tests
 {
     public sealed class RitualTests
     {
-        private static void Move(VoyageSession session, int layer)
+        private static void Move(VoyageSession session, int layer, RunNodeKind? desired = null)
         {
             while (session.Current.Layer < layer)
             {
-                if (session.Phase == VoyagePhase.ChoosingRoute) { Assert.That(session.Select(session.Choices[0].Id)); Assert.That(session.SetSail()); Assert.That(session.Arrive()); }
+                if (session.Phase == VoyagePhase.ChoosingRoute)
+                {
+                    var next=desired.HasValue&&session.Current.Layer==layer-1?session.Choices.First(x=>x.Kind==desired.Value):session.Choices[0];
+                    Assert.That(session.Select(next.Id));Assert.That(session.SetSail());Assert.That(session.Arrive());
+                }
                 else if (session.Phase == VoyagePhase.Reward) Assert.That(session.ClaimReward(null));
                 else if (session.Phase == VoyagePhase.Arrived)
                 {
-                    if (session.Current.Kind == RunNodeKind.Battle) { Assert.That(session.BeginEncounter()); Assert.That(session.ResolveEncounter(true, 60, 30)); }
+                    if (session.Current.Kind == RunNodeKind.Battle) { Assert.That(session.BeginEncounter()); Assert.That(session.ResolveEncounter(true, GameBalance.MaxHealth, GameBalance.MaxSanity)); }
                     else { var choice = session.GetNodeChoices().FirstOrDefault(x => x.Enabled && (x.Id == "leave" || x.Id == "depart")) ?? session.GetNodeChoices().FirstOrDefault(x => x.Enabled); if (choice != null) Assert.That(session.ChooseNode(choice.Id)); Assert.That(session.Continue()); }
                 }
             }
@@ -25,7 +29,7 @@ namespace UnsoundedSea.Tests
         [Test] public void RitualLearningPreparationReplayAndExpiryAreExplicit()
         {
             var voyage = VoyageSession.Create(31);
-            Move(voyage, 2);
+            Move(voyage, 2, RunNodeKind.Event);
             Assert.That(voyage.ManageSupport("ritual:learn"));
             Assert.That(voyage.ManageSupport("ritual:learn"), Is.False);
             Assert.That(voyage.ManageSupport("ritual:prepare"), Is.False);

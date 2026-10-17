@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
   id: c017
   displayName: "\u538B\u8231\u91CD\u51FB"
-  description: "\u5BF9\u4E00\u540D\u654C\u4EBA\u9020\u62109\u4F24\u5BB3\uFF1B\u82E5\u5176\u5DF2\u88AB\u573A\u666F\u88C5\u7F6E\u66B4\u9732\uFF0C\u6539\u4E3A18\u4F24\u5BB3\u3002"
+  description: "\u5BF9\u4E00\u540D\u654C\u4EBA\u9020\u621012\u4F24\u5BB3\uFF1B\u82E5\u5176\u5DF2\u88AB\u573A\u666F\u88C5\u7F6E\u66B4\u9732\uFF0C\u6539\u4E3A18\u4F24\u5BB3\u3002"
   actionCost: 2
   sanityCost: 0
   exhaust: 0

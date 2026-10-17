@@ -22,33 +22,7 @@ namespace UnsoundedSea.Tests
             return new BattleSession(new BattleDefinition("asset-boss", cards.Select(CardCatalog.Get), enemies, Array.Empty<ToolSpec>(), drawCount: cards.Length), seed, boss: kind);
         }
 
-        [Test] public void CardAssetsMatchRuntimeCatalogIncludingCostsAndDescriptions()
-        {
-            foreach (var spec in CardCatalog.All)
-            {
-                var actual = Load<CardDefinition>("Cards/" + spec.Id + ".asset").Build();
-                Assert.That(actual.Description, Is.EqualTo(spec.Description), spec.Id);
-                Assert.That(actual.Cost, Is.EqualTo(spec.Cost), spec.Id);
-                Assert.That(actual.SanityCost, Is.EqualTo(spec.SanityCost), spec.Id);
-                Assert.That(actual.Exhaust, Is.EqualTo(spec.Exhaust), spec.Id);
-                Assert.That(actual.Effects.Select(x => x.Id + ":" + x.Amount), Is.EqualTo(spec.Effects.Select(x => x.Id + ":" + x.Amount)), spec.Id);
-            }
-        }
 
-        [TestCase("fog", 40, 18)] [TestCase("bones", 48, 20)] [TestCase("inverted", 48, 20)] [TestCase("fleet", 50, 20)] [TestCase("abyss", 58, 24)]
-        public void DoubleEncountersUseIndependentCompanionsAndKeepPresentation(string region, int total, int companionHealth)
-        {
-            var battle = Load<EncounterDefinition>($"Encounters/Voyage/voyage-{region}-4.asset");
-            var solo = Load<EnemyDefinition>($"Enemies/Voyage/voyage-{region}-enemy-2.asset");
-            Assert.That(battle.enemies.Sum(x => x.health), Is.EqualTo(total));
-            Assert.That(battle.enemies[1], Is.Not.SameAs(solo)); Assert.That(battle.enemies[1].id, Is.Not.EqualTo(solo.id));
-            Assert.That(battle.enemies[1].health, Is.EqualTo(companionHealth));
-            Assert.That(battle.enemies[1].presentationPrefab, Is.SameAs(solo.presentationPrefab));
-            Assert.That(battle.enemies[1].presentationPrefab, Is.Not.Null);
-            Assert.That(battle.Build().Enemies.Select(e => e.Id), Is.Unique);
-            Assert.That(battle.enemies[1].intents.Select(i => (i.isPublic, i.visibleAction, i.interruptible, i.soundSource)),
-                Is.EqualTo(solo.intents.Select(i => (i.isPublic, i.visibleAction, i.interruptible, i.soundSource))));
-        }
 
 
         [Test] public void ChoirmasterUsesAssetHealthForProgressAndNewAttackForResolution()

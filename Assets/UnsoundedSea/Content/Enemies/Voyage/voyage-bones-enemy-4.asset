@@ -15,24 +15,24 @@ MonoBehaviour:
   id: voyage-bones-enemy-4
   displayName: "\u7F1D\u9AA8\u62D6\u7F51\u5BA2"
   health: 28
-  candidateDescription: "\u9AA8\u7F51\u6295\u63B7\uFF1A8 \u751F\u547D\u4F24\u5BB3 / \u6536\u9488\u6574\u7F51\uFF1A0 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
-  intentPolicy: 1
+  candidateDescription: "\u9AA8\u7F51\u6295\u63B7\uFF1A12 \u751F\u547D\u4F24\u5BB3 / \u6536\u9488\u6574\u7F51\uFF1A5 \u7406\u667A\u51B2\u51FB"
+  intentPolicy: 0
   intents:
   - id: cast
     displayName: "\u9AA8\u7F51\u6295\u63B7"
-    clue: "\u80A9\u7F51\u5C55\u5F00\uFF0C\u9AA8\u7247\u78B0\u649E\u58F0\u6765\u81EA\u5DE6\u4FA7\u3002"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 0
-    amount: 8
+    amount: 12
     isPublic: 0
     visibleAction: 1
     interruptible: 0
     soundSource: "\u80A9\u80CC\u62D6\u7F51"
   - id: stitch
     displayName: "\u6536\u9488\u6574\u7F51"
-    clue: "\u7C97\u9AA8\u9488\u56DE\u5230\u7F51\u675F\uFF0C\u6682\u672A\u671D\u5411\u76EE\u6807\u3002"
-    channel: 0
-    amount: 0
-    isPublic: 1
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
+    channel: 1
+    amount: 5
+    isPublic: 0
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: voyage-inverted-3
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EncounterDefinition
   id: voyage-inverted-3
-  displayName: "\u5012\u60AC\u6D77 / \u94C5\u5782\u5B88\u671B\u8005"
-  objective: 0
-  objectiveTarget: 1
+  displayName: "\u5012\u60AC\u6F6E\u5EAD / \u94C5\u5782\u5B88\u671B\u8005"
+  objective: 1
+  objectiveTarget: 3
   playerHealth: 60
   playerSanity: 30
   actionsPerTurn: 3

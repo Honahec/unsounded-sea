@@ -11,6 +11,7 @@ namespace UnsoundedSea.Core
     public enum ObjectiveKind { Defeat, Seal, Survive }
     public enum CommandKind { PlayCard, UseTool, UseCrewSupport, ReorderDeck, AdvanceObjective, EndTurn, UseConsumable }
     public enum CrewSupportKind { Medic, Listener, Engineer, Archivist, Navigator, Gunsmith, Diver, Cook, Cartographer, Decoder }
+    public enum CardCategory { Armed, Defense, Investigation, Intervention, Forbidden }
 
     internal static class Require
     {
@@ -42,11 +43,24 @@ namespace UnsoundedSea.Core
         public int SanityCost { get; }
         public bool Exhaust { get; }
         public IReadOnlyList<EffectSpec> Effects { get; }
-        public CardSpec(string id, string name, string description, int cost, IEnumerable<EffectSpec> effects, int sanityCost = 0, bool exhaust = false)
+        public CardCategory Category { get; }
+        public bool RequiresTarget { get; }
+        public bool HasFallback { get; }
+        public IReadOnlyList<string> BossIds { get; }
+        public CardSpec(string id, string name, string description, int cost, IEnumerable<EffectSpec> effects,
+            int sanityCost = 0, bool exhaust = false, CardCategory? category = null,
+            bool? requiresTarget = null, bool? hasFallback = null, IEnumerable<string> bossIds = null)
         {
             Id = Require.Id(id); Name = Require.Id(name); Description = description ?? "";
             Cost = Require.NonNegative(cost); SanityCost = Require.NonNegative(sanityCost);
             Exhaust = exhaust; Effects = Require.Copy(effects);
+            CardSpec canonical = null;
+            if (!category.HasValue || !requiresTarget.HasValue || !hasFallback.HasValue || bossIds == null)
+                CardCatalog.TryMetadata(Id, Effects.Count == 1 ? Effects[0].Id : null, out canonical);
+            Category = category ?? canonical?.Category ?? CardCategory.Armed;
+            RequiresTarget = requiresTarget ?? canonical?.RequiresTarget ?? false;
+            HasFallback = hasFallback ?? canonical?.HasFallback ?? false;
+            BossIds = Require.Copy(bossIds ?? canonical?.BossIds ?? Array.Empty<string>());
             if (Effects.Count == 0) throw new ArgumentException("Card needs an effect.");
         }
     }

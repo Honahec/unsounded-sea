@@ -8,11 +8,15 @@ namespace UnsoundedSea.Tests
 {
     public sealed class VoyageSupportTests
     {
-        private static void Move(VoyageSession s,int layer)
+        private static void Move(VoyageSession s,int layer,RunNodeKind? desired=null)
         {
             for(var step=0;step<100&&s.Current.Layer<layer;step++)
             {
-                if(s.Phase==VoyagePhase.ChoosingRoute){Assert.That(s.Select(s.Choices[0].Id),Is.True);Assert.That(s.SetSail(),Is.True);Assert.That(s.Arrive(),Is.True);}
+                if(s.Phase==VoyagePhase.ChoosingRoute)
+                {
+                    var next=desired.HasValue&&s.Current.Layer==layer-1?s.Choices.First(x=>x.Kind==desired.Value):s.Choices[0];
+                    Assert.That(s.Select(next.Id),Is.True);Assert.That(s.SetSail(),Is.True);Assert.That(s.Arrive(),Is.True);
+                }
                 else if(s.Phase==VoyagePhase.Reward)Assert.That(s.ClaimReward(null),Is.True);
                 else if(s.Phase==VoyagePhase.Arrived)
                 {
@@ -41,31 +45,31 @@ namespace UnsoundedSea.Tests
         [Test] public void ShopPurchaseAndHiringHaveIndependentOneTimeNodeBudgets()
         {
             var s=VoyageSession.Create(3);Move(s,5);
-            var buy=s.GetSupportChoices().First(x=>x.Id.StartsWith("buy:")&&x.Enabled);
+            var buy=s.GetNodeServices().First(x=>x.Id.StartsWith("buy:")&&x.Enabled);
             Assert.That(s.ManageSupport(buy.Id),Is.True);Assert.That(s.ManageSupport(buy.Id),Is.False);
-            var hire=s.GetSupportChoices().First(x=>x.Id=="hire:listener");Assert.That(hire.Enabled,Is.True);Assert.That(s.ManageSupport(hire.Id),Is.True);Assert.That(s.ManageSupport(hire.Id),Is.False);
+            var hire=s.GetNodeServices().First(x=>x.Id=="hire:listener");Assert.That(hire.Enabled,Is.True);Assert.That(s.ManageSupport(hire.Id),Is.True);Assert.That(s.ManageSupport(hire.Id),Is.False);
             var copy=RoundTrip(s);Assert.That(copy.Inventory,Is.EqualTo(s.Inventory));Assert.That(copy.OwnedEquipment,Is.EqualTo(s.OwnedEquipment));Assert.That(copy.CrewIds,Is.EqualTo(s.CrewIds));Assert.That(copy.Supplies,Is.EqualTo(s.Supplies));
         }
         [Test] public void VoucherOnlyConsumesOnSuccessfulHiring()
         {
-            var s=VoyageSession.Create(4);Move(s,2);Assert.That(s.ManageSupport("voucher"),Is.True);Assert.That(s.ManageSupport("voucher"),Is.False);Assert.That(s.ChooseNode("leave"),Is.False);
+            var s=VoyageSession.Create(4);Move(s,2,RunNodeKind.Event);Assert.That(s.ManageSupport("voucher"),Is.True);Assert.That(s.ManageSupport("voucher"),Is.False);Assert.That(s.ChooseNode("leave"),Is.False);
             Move(s,5);var before=s.Supplies;Assert.That(s.ManageSupport("hire:missing"),Is.False);Assert.That(s.Markers.Any(x=>x.Id=="docking-voucher"),Is.True);
             Assert.That(s.ManageSupport("hire:listener"),Is.True);Assert.That(s.Supplies,Is.EqualTo(before-1));Assert.That(s.Markers,Is.Empty);
         }
         [Test] public void BeaconExpiresAtNextBattleAndCannotBeClaimedAgain()
         {
-            var s=VoyageSession.Create(5);Move(s,7);Assert.That(s.ManageSupport("survey"),Is.True);Assert.That(s.ManageSupport("survey"),Is.False);Assert.That(s.Loadout.SurveyedBeacon,Is.True);
-            Assert.That(RoundTrip(s).Loadout.SurveyedBeacon,Is.True);Move(s,8);Assert.That(s.BeginEncounter(),Is.True);Assert.That(s.Loadout.SurveyedBeacon,Is.True);Assert.That(s.ResolveEncounter(true,50,25),Is.True);Assert.That(s.Markers.Any(x=>x.Id=="surveyed-beacon"),Is.False);
+            var s=VoyageSession.Create(5);Move(s,7,RunNodeKind.Archive);Assert.That(s.ManageSupport("survey"),Is.True);Assert.That(s.ManageSupport("survey"),Is.False);Assert.That(s.Loadout.SurveyedBeacon,Is.True);
+            Assert.That(RoundTrip(s).Loadout.SurveyedBeacon,Is.True);Move(s,8,RunNodeKind.Battle);Assert.That(s.BeginEncounter(),Is.True);Assert.That(s.Loadout.SurveyedBeacon,Is.True);Assert.That(s.ResolveEncounter(true,50,25),Is.True);Assert.That(s.Markers.Any(x=>x.Id=="surveyed-beacon"),Is.False);
         }
         [Test] public void InjuryIsExplicitAndTreatmentDoesNotRequireMedicSupport()
         {
-            var s=VoyageSession.Create(6);Move(s,2);Assert.That(s.ManageSupport("risk:medic"),Is.True);Assert.That(s.ActiveCrew("medic"),Is.False);Assert.That(s.CrewIds,Does.Contain("medic"));
+            var s=VoyageSession.Create(6);Move(s,2,RunNodeKind.Event);Assert.That(s.ManageSupport("risk:medic"),Is.True);Assert.That(s.ActiveCrew("medic"),Is.False);Assert.That(s.CrewIds,Does.Contain("medic"));
             Move(s,5);var before=s.Supplies;Assert.That(s.ManageSupport("treat:medic"),Is.True);Assert.That(s.Supplies,Is.EqualTo(before-2));Assert.That(s.ActiveCrew("medic"),Is.True);Assert.That(s.ManageSupport("treat:medic"),Is.False);Assert.That(RoundTrip(s).InjuredCrew,Is.Empty);
         }
         [Test] public void RescueRequiresExplicitInvitationAndNoAutomaticFifthCrew()
         {
-            var s=VoyageSession.Create(7);Move(s,2);var rescue=s.GetSupportChoices().First(x=>x.Id.StartsWith("rescue:")&&x.Enabled);Assert.That(s.ManageSupport(rescue.Id),Is.True);var rescued=s.EscortedCrew;
-            Assert.That(s.CrewIds.Count,Is.EqualTo(1));Assert.That(s.ManageSupport("accept"),Is.True);Assert.That(s.CrewIds,Does.Contain(rescued));Assert.That(s.EscortedCrew,Is.Null);Assert.That(s.ManageSupport("accept"),Is.False);Assert.That(RoundTrip(s).CrewIds,Is.EqualTo(s.CrewIds));
+            var s=VoyageSession.Create(7);Move(s,2,RunNodeKind.Event);var rescue=s.GetSupportChoices().First(x=>x.Id.StartsWith("rescue:")&&x.Enabled);Assert.That(s.ManageSupport(rescue.Id),Is.True);var rescued=s.EscortedCrew;
+            Assert.That(s.GetNodeServices().Any(x=>x.Id=="accept"),Is.True);Assert.That(s.GetSupportChoices().Any(x=>x.Id=="accept"),Is.False);Assert.That(s.CrewIds.Count,Is.EqualTo(1));Assert.That(s.ManageSupport("accept"),Is.True);Assert.That(s.CrewIds,Does.Contain(rescued));Assert.That(s.EscortedCrew,Is.Null);Assert.That(s.ManageSupport("accept"),Is.False);Assert.That(RoundTrip(s).CrewIds,Is.EqualTo(s.CrewIds));
         }
         [Test] public void TypedStableArchivePersistsButTurnObservationNeverBecomesRunKnowledge()
         {
@@ -77,7 +81,7 @@ namespace UnsoundedSea.Tests
         }
         [Test] public void SpecimenDeliveryIsMutuallyExclusiveAndConsumptive()
         {
-            var s=VoyageSession.Create(9);Move(s,2);Assert.That(s.ManageSupport("specimen"),Is.True);Move(s,7);Assert.That(s.ManageSupport("specimen:hint"),Is.True);Assert.That(s.ManageSupport("specimen:supply"),Is.False);Assert.That(s.Markers.Any(x=>x.Id=="sealed-specimen"),Is.False);Assert.That(RoundTrip(s).Knowledge,Is.EqualTo(s.Knowledge));
+            var s=VoyageSession.Create(9);Move(s,2,RunNodeKind.Event);Assert.That(s.ManageSupport("specimen"),Is.True);Move(s,7,RunNodeKind.Archive);Assert.That(s.ManageSupport("specimen:hint"),Is.True);Assert.That(s.ManageSupport("specimen:supply"),Is.False);Assert.That(s.Markers.Any(x=>x.Id=="sealed-specimen"),Is.False);Assert.That(RoundTrip(s).Knowledge,Is.EqualTo(s.Knowledge));
         }
         [Test] public void IneligibleNewCardsAreNotOfferedBeforeTheirSystemsAreUsable()
         {

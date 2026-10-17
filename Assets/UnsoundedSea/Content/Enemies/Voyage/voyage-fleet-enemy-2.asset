@@ -15,25 +15,25 @@ MonoBehaviour:
   id: voyage-fleet-enemy-2
   displayName: "\u9ED1\u5E06\u4F20\u4EE4"
   health: 30
-  candidateDescription: "\u9ED1\u65D7\u4F20\u4EE4\uFF1A5 \u7406\u667A\u51B2\u51FB / \u65D7\u6746\u6A2A\u626B\uFF1A9 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
-  intentPolicy: 1
+  candidateDescription: "\u65D7\u6746\u6A2A\u626B\uFF1A12 \u751F\u547D\u4F24\u5BB3 / \u9ED1\u65D7\u4F20\u4EE4\uFF1A5 \u7406\u667A\u51B2\u51FB"
+  intentPolicy: 0
   intents:
+  - id: staff
+    displayName: "\u65D7\u6746\u6A2A\u626B"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
+    channel: 0
+    amount: 12
+    isPublic: 0
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
   - id: flag
     displayName: "\u9ED1\u65D7\u4F20\u4EE4"
-    clue: "\u77ED\u6746\u9ED1\u65D7\u9AA4\u7136\u6A2A\u5C55\uFF0C\u94DC\u675F\u5177\u53D1\u51FA\u95F7\u54CD\u3002"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 1
     amount: 5
     isPublic: 0
     visibleAction: 1
     interruptible: 1
     soundSource: "\u4FE1\u53F7\u65D7"
-  - id: staff
-    displayName: "\u65D7\u6746\u6A2A\u626B"
-    clue: "\u7834\u65D7\u6536\u62E2\uFF0C\u77ED\u6746\u964D\u5230\u8170\u4FA7\u3002"
-    channel: 0
-    amount: 9
-    isPublic: 1
-    visibleAction: 1
-    interruptible: 0
-    soundSource: "\u76EE\u6807\u672C\u4F53"
   presentationPrefab: {fileID: 1389224288467057073, guid: 0dedd34eb45374453af7f2bcef3b9706, type: 3}

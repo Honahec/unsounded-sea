@@ -15,7 +15,7 @@ MonoBehaviour:
   id: voyage-bones-enemy-0
   displayName: "\u6F6E\u9AA8\u62FE\u8352\u8005"
   health: 34
-  candidateDescription: "\u522E\u9AA8\u94A9\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u7FFB\u62E3\u9AA8\u7B50\uFF1A0 \u751F\u547D\u4F24\u5BB3"
+  candidateDescription: "\u522E\u9AA8\u94A9\uFF1A10 \u751F\u547D\u4F24\u5BB3 / \u7FFB\u62E3\u9AA8\u7B50\uFF1A10 \u751F\u547D\u4F24\u5BB3"
   intentPolicy: 1
   intents:
   - id: scrape
@@ -31,8 +31,8 @@ MonoBehaviour:
     displayName: "\u7FFB\u62E3\u9AA8\u7B50"
     clue: "\u77ED\u94A9\u6536\u56DE\u7B50\u5185\uFF0C\u53EA\u5269\u9AA8\u7247\u4E92\u76F8\u6469\u64E6\u3002"
     channel: 0
-    amount: 0
-    isPublic: 0
+    amount: 10
+    isPublic: 1
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"

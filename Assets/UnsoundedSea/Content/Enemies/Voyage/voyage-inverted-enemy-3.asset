@@ -15,7 +15,7 @@ MonoBehaviour:
   id: voyage-inverted-enemy-3
   displayName: "\u94C5\u5782\u5B88\u671B\u8005"
   health: 38
-  candidateDescription: "\u94C5\u5760\u6446\u51FB\uFF1A14 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u6821\u51C6\u5782\u7EBF\uFF1A0 \u751F\u547D\u4F24\u5BB3"
+  candidateDescription: "\u94C5\u5760\u6446\u51FB\uFF1A14 \u751F\u547D\u4F24\u5BB3 / \u6821\u51C6\u5782\u7EBF\uFF1A10 \u751F\u547D\u4F24\u5BB3"
   intentPolicy: 1
   intents:
   - id: plumb
@@ -31,8 +31,8 @@ MonoBehaviour:
     displayName: "\u6821\u51C6\u5782\u7EBF"
     clue: "\u94C5\u5760\u9759\u6B62\uFF0C\u53CC\u624B\u53EA\u5728\u8C03\u6574\u80A9\u5E26\u3002"
     channel: 0
-    amount: 0
-    isPublic: 0
+    amount: 10
+    isPublic: 1
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"

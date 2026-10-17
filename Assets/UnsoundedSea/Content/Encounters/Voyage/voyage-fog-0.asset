@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: voyage-fog-0
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EncounterDefinition
   id: voyage-fog-0
-  displayName: "\u96FE\u6D77 / \u96FE\u4E2D\u7F06\u5DE5"
+  displayName: "\u7070\u96FE\u822A\u9053 / \u96FE\u4E2D\u7F06\u5DE5"
   objective: 0
   objectiveTarget: 1
   playerHealth: 60

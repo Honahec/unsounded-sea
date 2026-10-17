@@ -16,7 +16,7 @@ MonoBehaviour:
   stagePrefab: {fileID: 4348822045649142340, guid: 74ac780b23ae6432699e25e00c044e17, type: 3}
   actorOverrides: []
   rules: {fileID: 11400000, guid: e3d123abe83dd43468050d95de501de2, type: 2}
-  chapter: "M05 / \u65E0\u661F\u738B\u5EA7"
+  chapter: "\u65E0\u661F\u6DF1\u6E0A"
   location: "\u9E26\u53F7\u8C03\u67E5\u8239 \xB7 \u7981\u822A\u6D77\u57DF"
   enemyHeading: "M05 / \u65E0\u661F\u738B\u5EA7\u5B88\u671B\u8005"
   objectiveHint: "\u5B88\u536B\u5148\u884C\u52A8\uFF1B\u672C\u4F53\u7406\u667A\u51B2\u51FB\u9010\u56DE\u5408\u589E\u5F3A\uFF0C\u4E0A\u965010\u3002"

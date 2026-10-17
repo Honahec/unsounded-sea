@@ -42,8 +42,14 @@ namespace UnsoundedSea.Core
         public string Intent { get; }
         public bool IntentConfirmed { get; }
         public bool Targetable { get; }
-        internal EnemyView(string id, string name, int health, int maxHealth, string clue, string intent, bool confirmed, bool targetable = true)
-        { Id = id; Name = name; Health = health; MaxHealth = maxHealth; Clue = clue; Intent = intent; IntentConfirmed = confirmed; Targetable = targetable; }
+        public int Surge { get; }
+        public EnemyStyle Style { get; }
+        internal EnemyView(string id, string name, int health, int maxHealth, string clue, string intent,
+            bool confirmed, bool targetable = true, int surge = 0, EnemyStyle style = EnemyStyle.Boss)
+        {
+            Id = id; Name = name; Health = health; MaxHealth = maxHealth; Clue = clue; Intent = intent;
+            IntentConfirmed = confirmed; Targetable = targetable; Surge = surge; Style = style;
+        }
     }
     public sealed class ToolView
     {

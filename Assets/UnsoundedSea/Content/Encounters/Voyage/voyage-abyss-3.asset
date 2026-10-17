@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EncounterDefinition
   id: voyage-abyss-3
   displayName: "\u65E0\u661F\u6DF1\u6E0A / \u672B\u6F6E\u89C1\u8BC1\u8005"
-  objective: 0
-  objectiveTarget: 1
+  objective: 2
+  objectiveTarget: 3
   playerHealth: 60
   playerSanity: 30
   actionsPerTurn: 3

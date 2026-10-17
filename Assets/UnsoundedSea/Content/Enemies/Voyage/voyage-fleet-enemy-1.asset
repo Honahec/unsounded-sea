@@ -15,25 +15,34 @@ MonoBehaviour:
   id: voyage-fleet-enemy-1
   displayName: "\u54D1\u706B\u70AE\u624B"
   health: 34
-  candidateDescription: "\u91CD\u65B0\u88C5\u586B\uFF1A0 \u751F\u547D\u4F24\u5BB3 / \u8FD1\u8237\u8F70\u51FB\uFF1A14 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
-  intentPolicy: 1
+  candidateDescription: "\u91CD\u65B0\u88C5\u586B\uFF1A12 \u751F\u547D\u4F24\u5BB3 / \u84C4\u52BF\u89C2\u5BDF / \u8FD1\u8237\u8F70\u51FB\uFF1A5 \u7406\u667A\u51B2\u51FB"
+  intentPolicy: 0
   intents:
   - id: load
     displayName: "\u91CD\u65B0\u88C5\u586B"
-    clue: "\u949D\u53E3\u94F3\u671D\u4E0B\uFF0C\u706B\u836F\u7B52\u5DF2\u7ECF\u6253\u5F00\u3002"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 0
-    amount: 0
+    amount: 12
     isPublic: 0
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
   - id: shot
     displayName: "\u8FD1\u8237\u8F70\u51FB"
-    clue: "\u77ED\u94F3\u62B5\u80A9\uFF0C\u706B\u95E8\u5192\u51FA\u7EC6\u70DF\u3002"
-    channel: 0
-    amount: 14
-    isPublic: 1
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
+    channel: 1
+    amount: 5
+    isPublic: 0
     visibleAction: 1
     interruptible: 1
     soundSource: "\u524D\u88C5\u94F3"
+  - id: charge
+    displayName: "\u84C4\u52BF\u89C2\u5BDF"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
+    channel: 0
+    amount: 0
+    isPublic: 0
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
   presentationPrefab: {fileID: 24181326265396121, guid: b434e3a37d664445397d634056106b46, type: 3}

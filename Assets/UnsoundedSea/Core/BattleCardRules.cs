@@ -6,32 +6,16 @@ namespace UnsoundedSea.Core
 {
     public sealed partial class BattleSession
     {
-        private static readonly Dictionary<string, int> LegacyCardNumbers = new Dictionary<string, int>(StringComparer.Ordinal)
-        {
-            ["revolver"] = 1, ["contradiction"] = 2, ["cover"] = 19, ["steady"] = 20,
-            ["intuition"] = 21, ["bandage"] = 22, ["notes"] = 37, ["reload"] = 38,
-            ["light"] = 39, ["tear"] = 55
-        };
         private List<CardView> pendingReorder;
 
-        private static int CardNumber(CardSpec card)
-        {
-            if (LegacyCardNumbers.TryGetValue(card.Id, out var legacy)) return legacy;
-            var id = card.Id;
-            if (id.Length == 4 && (id[0] == 'c' || id[0] == 'C') && int.TryParse(id.Substring(1), out var value) && value >= 1 && value <= 96) return value;
-            if (card.Effects.Count == 1)
-            {
-                id = card.Effects[0].Id;
-                if (id.Length == 4 && id[0] == 'c' && int.TryParse(id.Substring(1), out value) && value >= 1 && value <= 96) return value;
-            }
-            return 0;
-        }
+        private static int CardNumber(CardSpec card) => CardCatalog.TryNumber(card, out var number) ? number : 0;
+        private static CardSpec CatalogSpec(CardSpec card) => CardCatalog.TryNumber(card, out var number) ? CardCatalog.All[number - 1] : card;
 
         private IEnumerable<EnemyState> LivingSubjects => enemies.Where(x => x.Health > 0);
-        private static bool IsCatalogCard(CardSpec card) => CardNumber(card) != 0;
-        private static bool IsArmed(CardSpec card) => (CardNumber(card) >= 1 && CardNumber(card) <= 18) || CardNumber(card) == 92;
-        private static bool IsInvestigation(CardSpec card) => (CardNumber(card) >= 37 && CardNumber(card) <= 54) || CardNumber(card) == 91 || CardNumber(card) == 94;
-        private static bool IsForbidden(CardSpec card) => CardNumber(card) >= 73 && CardNumber(card) <= 90;
+        private static bool IsCatalogCard(CardSpec card) => CardCatalog.TryNumber(card, out _);
+        private static bool IsArmed(CardSpec card) => CatalogSpec(card).Category == CardCategory.Armed && IsCatalogCard(card);
+        private static bool IsInvestigation(CardSpec card) => CatalogSpec(card).Category == CardCategory.Investigation && IsCatalogCard(card);
+        private static bool IsForbidden(CardSpec card) => CatalogSpec(card).Category == CardCategory.Forbidden && IsCatalogCard(card);
         private IEnumerable<EnemyState> LivingTargets => enemies.Where(x => x.Health > 0 && IsTargetable(x.Definition.Id));
         private static EncounterTargetView Option(string id, string name, string detail = "") => new EncounterTargetView(id, name, detail, true);
 
@@ -94,9 +78,10 @@ namespace UnsoundedSea.Core
                 var scene = boss?.CardTargets(n) ?? Enumerable.Empty<EncounterTargetView>();
                 return scene.Concat(LivingTargets.Select(x => Option("enemy:" + x.Definition.Id, x.Definition.Name, "无适用媒介时造成 7 伤害")));
             }
-            if (n == 87 && boss == null && taskUsed) return new[] { Option("scene:task", "再次开放任务行动", "不重开一次性奖励") };
-            if ((n == 58 || n == 72) && boss == null && objective.AllowsTaskAction) return new[] { Option("scene:objective", objective.Description, "普通任务进度") };
-            if (n == 86 && boss == null && objective.AllowsTaskAction && knowledge.Entries.Any(x => x.Level == KnowledgeLevel.Verified)) return new[] { Option("scene:objective", objective.Description, "证据条件已满足") };
+            if (n == 87 && boss == null && taskUsed && (HasSecondaryObjective || objective.AllowsTaskAction)) return new[] { Option("scene:task", "再次开放任务行动", "不重开一次性奖励") };
+            if ((n == 58 && CanAdvanceOrdinaryObjective()) || (n == 72 && HasSecondaryObjective && CanAdvanceOrdinaryObjective())) return new[] { Option("scene:objective", objective.Description, "普通任务进度") };
+            if (n == 69 && CanAdvanceOrdinaryObjective(ObjectiveKind.Survive)) return new[] { Option("scene:objective", objective.Description, "撤离进度") };
+            if (n == 86 && CanAdvanceOrdinaryObjective() && knowledge.Entries.Any(x => x.Level == KnowledgeLevel.Verified)) return new[] { Option("scene:objective", objective.Description, "证据条件已满足") };
             if (n == 52) return boss?.GuardAnchorOptions() ?? Enumerable.Empty<EncounterTargetView>();
             if (new[] { 42, 43, 44, 46, 57, 58, 59, 60, 61, 62, 63, 65, 66, 67, 68, 69, 72, 78, 82, 84, 86, 87 }.Contains(n))
                 return boss?.CardTargets(n) ?? Enumerable.Empty<EncounterTargetView>();
@@ -142,6 +127,7 @@ namespace UnsoundedSea.Core
         {
             var n = CardNumber(card.Definition);
             if (phase != BattlePhase.PlayerTurn) return "当前不能出牌。";
+            if (n == 88 && !enemies.Any(x => x.Health > 0 && IsSummon(x))) return "当前没有存活召唤物。";
             if (actions < card.Definition.Cost) return "行动点不足。";
             if (sanity <= card.Definition.SanityCost) return "理智不足以支付代价。";
             if ((n == 65 || n == 81) && health <= (n == 65 ? 4 : 5) || n == 88 && health <= 4) return "生命不足以支付代价。";
@@ -150,15 +136,14 @@ namespace UnsoundedSea.Core
             if (n == 74 && !LivingSubjects.Any(x => CanInvestigate(x.Definition.Id, InvestigationKind.DamageChannel) || CanInvestigate(x.Definition.Id, InvestigationKind.SoundSource)))
                 return "当前没有可追加的问题。";
             if (n == 54 && draw.Count == 0) return "抽牌堆没有可校正的牌。";
-            if (n == 86 && boss == null && !knowledge.Entries.Any(x => x.Level == KnowledgeLevel.Verified)) return "尚未满足证据条件。";
-            if (RequiresChoice(n) && targets.Count == 0 && !HasFallback(n)) return "当前没有合法目标。";
+            if (n == 86 && CanAdvanceOrdinaryObjective() && !knowledge.Entries.Any(x => x.Level == KnowledgeLevel.Verified)) return "尚未满足证据条件。";
+            if (CatalogSpec(card.Definition).RequiresTarget && targets.Count == 0 && !HasFallback(CatalogSpec(card.Definition), n)) return "当前没有合法目标。";
             return null;
         }
-        private static bool RequiresChoice(int n) => new[] { 1,2,3,4,5,7,8,9,10,11,12,14,15,16,17,18,23,28,37,38,39,41,42,43,44,45,46,47,48,49,50,51,52,53,55,56,57,58,59,60,61,62,63,65,66,67,68,69,70,71,72,73,75,76,78,82,83,84,86,87,90,92 }.Contains(n);
-        private bool HasFallback(int n)
+        private bool HasFallback(CardSpec card, int n)
         {
-            if (!new[] { 38,40,42,43,44,47,48,49,52,53,56,59,60,63,66,67,68,69,70 }.Contains(n)) return false;
-            if (!new[] { 42,43,44,52,59,60,63,66,67,68,69 }.Contains(n)) return true;
+            if (!card.HasFallback) return false;
+            if (n != 42 && n != 43 && n != 44 && n != 52 && n != 59 && n != 60 && n != 63 && n != 66 && n != 67 && n != 68 && n != 69) return true;
             return n == 63 || boss?.HasCardMechanic(n) != true;
         }
 
@@ -169,7 +154,7 @@ namespace UnsoundedSea.Core
             var options = card.Targets;
             if (options.Count > 0 && !options.Any(x => x.Enabled && x.Id == target)) return "请选择当前列出的合法目标。";
             if (options.Count == 0 && target != null) return "该卡牌不接受目标。";
-            if (RequiresChoice(CardNumber(card.Definition)) && options.Count == 0 && !HasFallback(CardNumber(card.Definition))) return "当前没有合法目标。";
+            if (CatalogSpec(card.Definition).RequiresTarget && options.Count == 0 && !HasFallback(CatalogSpec(card.Definition), CardNumber(card.Definition))) return "当前没有合法目标。";
             return null;
         }
 
@@ -199,8 +184,20 @@ namespace UnsoundedSea.Core
 
         private void ApplyArmed(int n, int amount, string enemyId, string selection, int instanceId, bool wasCarried)
         {
-            if (n == 6 || n == 13) foreach (var e in LivingTargets.ToList()) WeaponDamage(e.Definition.Id, n == 13 && IsSummon(e) ? amount + 3 : amount, instanceId);
-            else if (n == 9) foreach (var id in selection.Substring("enemies:".Length).Split(',')) WeaponDamage(id, amount, instanceId);
+            if (n == 6 || n == 13)
+            {
+                var targets = LivingTargets.ToList();
+                foreach (var e in targets)
+                {
+                    var damage = n == 6 ? (targets.Count == 1 ? 9 : amount) : (targets.Count == 1 ? 8 : amount);
+                    WeaponDamage(e.Definition.Id, damage + (n == 13 && IsSummon(e) ? 3 : 0), instanceId);
+                }
+            }
+            else if (n == 9)
+            {
+                var ids = selection.Substring("enemies:".Length).Split(',');
+                foreach (var id in ids) WeaponDamage(id, ids.Length == 1 ? 6 : amount, instanceId);
+            }
             else
             {
                 var e = Find(enemyId); var damage = amount;
@@ -211,7 +208,7 @@ namespace UnsoundedSea.Core
                 if (n == 12 && block >= 6) damage += 2;
                 if (n == 14) damage = e.Confirmed ? amount + (wasCarried ? 4 : 0) : 10;
                 if (n == 16 && weaponHits.TryGetValue(enemyId, out var hits) && hits.Any(id => id != instanceId)) damage += 5;
-                if (n == 17 && boss?.IsExposed(enemyId) != true) damage = 9;
+                if (n == 17 && boss?.IsExposed(enemyId) != true) damage = 12;
                 var otherKilled = turnFlags.Contains("enemy-defeated");
                 WeaponDamage(enemyId, damage, instanceId);
                 if (n == 3 && !investigationUsed) AddBlock(5);
@@ -260,11 +257,7 @@ namespace UnsoundedSea.Core
                     var crossChecked = newCardAnswers.Contains(enemyId) && !directionalListeningBlocked && CanInvestigate(enemyId, InvestigationKind.SoundSource);
                     Investigate(enemyId, InvestigationKind.SoundSource, "听声辨位", true); Draw(crossChecked ? 2 : 1); if(crossChecked)InvestigationRefund(); break;
                 case 42:
-                    if(boss==null&&selection!=null)
-                    {
-                        knowledge.Record(new Evidence(enemyId+"/connection","可见痕迹与该目标发声位置存在连接","查验潮痕",KnowledgeLevel.Observed,EvidenceScope.Encounter,enemyId,SubjectType(enemyId),"Connection",definition.Id,turn));
-                        newCardAnswers.Add(enemyId);if(!cardQuestions.TryGetValue(enemyId,out var kinds))cardQuestions[enemyId]=kinds=new HashSet<InvestigationKind>();kinds.Add(InvestigationKind.Connection);
-                    }
+                    if (boss == null && selection != null) RecordOrdinaryConnection(enemyId, "查验潮痕", true);
                     else if (boss?.InspectConnection(selection) != true) Draw(1);
                     break;
                 case 43: if (boss?.MeasureCell(selection) != true) Draw(1); break;
@@ -299,15 +292,40 @@ namespace UnsoundedSea.Core
                 case 54: BeginReorder(); break;
             }
         }
+        private bool CanAdvanceOrdinaryObjective(ObjectiveKind? kind = null) =>
+            boss == null && ObjectiveProgress < ObjectiveTarget &&
+            (!kind.HasValue || ObjectiveKind == kind.Value) &&
+            (HasSecondaryObjective || ObjectiveKind == ObjectiveKind.Seal);
+        private bool AdvanceOrdinaryProgress(int amount)
+        {
+            var before = ObjectiveProgress;
+            if (HasSecondaryObjective) AdvanceOrdinaryObjective(amount);
+            else if (ObjectiveKind == ObjectiveKind.Seal) AdvanceObjective(amount);
+            if (ObjectiveProgress == before) return false;
+            MarkSceneAction();
+            if (ObjectiveKind == ObjectiveKind.Survive)
+            {
+                if (turnFlags.Remove("diver-ward")) AddWard(3);
+                if (currentPaidActions > 0 && !turnFlags.Contains("equipment-refund") && TriggerEquipment("i25", 1))
+                {
+                    actions++; turnFlags.Add("equipment-refund"); Record("返还实际支付的1行动。");
+                }
+            }
+            return true;
+        }
         private void ApplyIntervention(int n, int amount, string enemyId, string selection)
         {
             switch (n)
             {
                 case 55: DamageEnemy(enemyId, amount); Interrupt(enemyId); break;
                 case 56: if (selection != null && selection.StartsWith("enemy:", StringComparison.Ordinal)) DamageEnemy(enemyId, 7); else boss?.ApplyCardAction(n, selection); break;
-                case 57: case 59: case 60: case 61: case 62: case 63: case 65: case 66: case 67: case 68: case 69: if (boss?.ApplyCardAction(n, selection) != true) ApplyInterventionFallback(n); break;
-                case 58: if (boss?.ApplyCardAction(n, selection) != true && boss == null && objective.AllowsTaskAction) { AdvanceObjective(1); MarkSceneAction(); } break;
-                case 72: if (boss?.ApplyCardAction(n, selection) != true && boss == null && objective.AllowsTaskAction) { AdvanceObjective(2); MarkSceneAction(); } break;
+                case 57: case 59: case 60: case 61: case 62: case 63: case 65: case 66: case 67: case 68: if (boss?.ApplyCardAction(n, selection) != true) ApplyInterventionFallback(n); break;
+                case 58: if (boss?.ApplyCardAction(n, selection) != true && CanAdvanceOrdinaryObjective(ObjectiveKind.Seal)) AdvanceOrdinaryProgress(1); break;
+                case 69:
+                    if (boss?.ApplyCardAction(n, selection) == true) break;
+                    if (CanAdvanceOrdinaryObjective(ObjectiveKind.Survive)) AdvanceOrdinaryProgress(1); else ApplyInterventionFallback(n);
+                    break;
+                case 72: if (boss?.ApplyCardAction(n, selection) != true && HasSecondaryObjective && CanAdvanceOrdinaryObjective()) AdvanceOrdinaryProgress(2); break;
                 case 64: sceneDiscount = Math.Max(sceneDiscount, 1); break;
                 case 70: if (enemyId != null) Interrupt(enemyId); else AddWard(2); break;
                 case 71: Retain(selection); turnFlags.Add("draw-after-scene"); break;
@@ -334,8 +352,8 @@ namespace UnsoundedSea.Core
                 case 83: MoveDiscardToHand(selection, x => !IsForbidden(x)); break;
                 case 84: boss?.BindThreat(enemyId, DamageChannel.Sanity); break;
                 case 85: actions++; turnFlags.Add("c085"); break;
-                case 86: if (boss?.ApplyCardAction(n, selection) != true && boss == null && objective.AllowsTaskAction) { AdvanceObjective(1); MarkSceneAction(); } break;
-                case 87: if (boss?.ApplyCardAction(n, selection) != true && boss == null && taskUsed) taskUsed = false; break;
+                case 86: if (boss?.ApplyCardAction(n, selection) != true && CanAdvanceOrdinaryObjective()) AdvanceOrdinaryProgress(1); break;
+                case 87: if (boss?.ApplyCardAction(n, selection) != true && boss == null && taskUsed && (HasSecondaryObjective || objective.AllowsTaskAction)) taskUsed = false; break;
                 case 88: PayHealth(4); foreach (var e in enemies.Where(IsSummon).ToList()) DamageEnemy(e.Definition.Id, 10); break;
                 case 89: AddWard(amount); break;
                 case 90: DamageEnemy(enemyId, amount); break;
@@ -354,7 +372,7 @@ namespace UnsoundedSea.Core
         private void VerifyEvidence(string key) { var old = definition.Archive.FirstOrDefault(x => x.Key == key && x.Level == KnowledgeLevel.Verified); if (old != null) knowledge.Record(old); }
         private void VerifyEvidencePair(string selection) { var keys=selection.Substring(9).Split('|');if(keys.Length!=2)return;var result=EvidenceRelation(knowledge.Entries.First(x=>x.Key==keys[0]),knowledge.Entries.First(x=>x.Key==keys[1]));if(result==null)return;knowledge.Record(result);if(result.Supports.Any(k=>knowledge.Entries.Any(x=>x.Key==k&&x.Scope>=EvidenceScope.Run)))turnFlags.Add("archive-verified"); }
         private void ApplyFocus(string selection) { var pair = selection.Substring("focus:".Length).Split('|'); if (pair.Length != 2) return; Investigate(pair[0], InvestigationKind.VisibleAction, "透镜聚焦", true); Investigate(pair[1], InvestigationKind.SoundSource, "透镜聚焦", true); }
-        private void Confirm(string id, string source) { var e = Find(id); if (e?.ActualIntent == null) return;var fresh=!e.Confirmed; e.Confirmed = true; knowledge.Record(new Evidence(EvidenceKey(id, InvestigationKind.VisibleAction), Describe(e.ActualIntent), source, KnowledgeLevel.Observed,EvidenceScope.Turn,id,SubjectType(id),"VisibleAction",definition.Id,turn));if(fresh)ConfirmationEquipment(); }
+        private void Confirm(string id, string source) { var e = Find(id); if (e?.ActualIntent == null) return;var fresh=!e.Confirmed; e.Confirmed = true; knowledge.Record(new Evidence(EvidenceKey(id, InvestigationKind.VisibleAction), DescribeCurrent(e), source, KnowledgeLevel.Observed,EvidenceScope.Turn,id,SubjectType(id),"VisibleAction",definition.Id,turn));if(fresh)ConfirmationEquipment(); }
         private void RecordThreatCategories(string id)
         {
             var e = Find(id);
@@ -399,7 +417,14 @@ namespace UnsoundedSea.Core
             if (pendingRetain) { if (selection != "retain:skip") Retain(selection); pendingRetain = false; return null; }
             ReorderTop(selection); pendingReorder = null; Draw(1); FinishDeferredDrawEquipment(); return null;
         }
-        private void ReduceNextThreat(string id, DamageChannel channel, int amount, bool requireKnown) { var e = Find(id); if (e == null || requireKnown && !e.Confirmed || e.ActualIntent.Channel != channel) return; boss?.ReduceThreat(id, channel, amount); if (boss == null) e.ActualIntent = new IntentSpec(e.ActualIntent.Id, e.ActualIntent.Name, e.ActualIntent.Clue, e.ActualIntent.Channel, Math.Max(0, e.ActualIntent.Amount - amount), e.ActualIntent.IsPublic, e.ActualIntent.VisibleAction, e.ActualIntent.SoundSource, e.ActualIntent.Interruptible); }
+        private void ReduceNextThreat(string id, DamageChannel channel, int amount, bool requireKnown)
+        {
+            var enemy = Find(id);
+            if (enemy == null || requireKnown && !enemy.Confirmed) return;
+            if (boss != null) boss.ReduceThreat(id, channel, amount);
+            else if (channel == DamageChannel.Health) enemy.HealthThreatReduction += amount;
+            else enemy.SanityThreatReduction += amount;
+        }
         private void TriggerSceneAction() { if (turnFlags.Remove("block-after-scene")) AddBlock(6); if (turnFlags.Remove("draw-after-scene")) Draw(1); if(turnFlags.Contains("defense-played")&&TriggerEquipment("i19",2))AddBlock(4); }
 
         internal void MarkEnemyDefeated() => turnFlags.Add("enemy-defeated");

@@ -5,28 +5,54 @@ namespace UnsoundedSea.Core
 {
     public static class CardCatalog
     {
-        private static CardSpec C(string id, string name, string text, int cost, string effect, int amount, int sanity = 0, bool exhaust = false) =>
-            new CardSpec(id, name, text, cost, new[] { new EffectSpec(effect, amount) }, sanity, exhaust);
+        private static readonly HashSet<int> targeted = new HashSet<int>
+        {
+            1,2,3,4,5,7,8,9,10,11,12,14,15,16,17,18,23,28,37,38,39,41,42,43,44,45,46,47,48,49,50,51,52,53,
+            55,56,57,58,59,60,61,62,63,65,66,67,68,69,70,71,72,73,75,76,78,82,83,84,86,87,90,92
+        };
+        private static readonly HashSet<int> fallback = new HashSet<int> { 38,40,42,43,44,47,48,49,52,53,56,59,60,63,66,67,68,69,70 };
+        private static readonly IReadOnlyDictionary<int, IReadOnlyList<string>> bossIds =
+            new Dictionary<int, IReadOnlyList<string>>
+            {
+                [46] = Array.AsReadOnly(new[] { "M02", "M03", "M04", "M05" }),
+                [57] = Array.AsReadOnly(new[] { "M04" }),
+                [61] = Array.AsReadOnly(new[] { "M02" }),
+                [62] = Array.AsReadOnly(new[] { "M02", "M03", "M04", "M05" }),
+                [65] = Array.AsReadOnly(new[] { "M04" }),
+                [78] = Array.AsReadOnly(new[] { "M02", "M03", "M04" })
+            };
+        private static CardCategory CategoryFor(int number) =>
+            number <= 18 || number == 92 ? CardCategory.Armed :
+            number <= 36 || number == 93 || number == 95 ? CardCategory.Defense :
+            number <= 54 || number == 91 || number == 94 ? CardCategory.Investigation :
+            number <= 72 || number == 96 ? CardCategory.Intervention : CardCategory.Forbidden;
+        private static CardSpec C(string id, string name, string text, int cost, string effect, int amount, int sanity = 0, bool exhaust = false)
+        {
+            var number = int.Parse(effect.Substring(1));
+            return new CardSpec(id, name, text, cost, new[] { new EffectSpec(effect, amount) }, sanity, exhaust,
+                CategoryFor(number), targeted.Contains(number), fallback.Contains(number),
+                bossIds.TryGetValue(number, out var bosses) ? bosses : Array.Empty<string>());
+        }
 
         private static readonly IReadOnlyList<CardSpec> cards = Array.AsReadOnly(new[]
         {
             C("revolver", "左轮射击", "对一名敌人造成6伤害。", 1, "c001", 6),
             C("contradiction", "记录矛盾", "对一名敌人造成5伤害；意图已确认则改为9；若本回合调查牌还曾取得该目标的新答案，改为12。", 1, "c002", 9),
-            C("c003", "绝境一击", "对一名敌人造成15伤害；若本回合未使用调查效果，获得5格挡。", 2, "c003", 15),
+            C("c003", "孤注一击", "对一名敌人造成15伤害；若本回合未使用调查效果，获得5格挡。", 2, "c003", 15),
             C("c004", "近距霰击", "对一名敌人造成12伤害；若其为召唤物，改为16伤害。", 2, "c004", 16),
             C("c005", "水手短刀", "对一名敌人造成3伤害。消耗。", 0, "c005", 3, exhaust: true),
-            C("c006", "铅弹齐射", "对所有敌人各造成5伤害。", 2, "c006", 5),
+            C("c006", "铅弹齐射", "仅一名可攻击敌人时造成9伤害；否则对所有可攻击敌人各造成5伤害。", 2, "c006", 5),
             C("c007", "瞄准关节", "对一名敌人造成5伤害；若其已公开或确认将造成生命伤害，该次伤害减少3，最低为0。", 1, "c007", 5),
             C("c008", "铜壳穿刺", "对一名敌人造成8伤害；若其来源或媒介联系已验证，改为17伤害。", 2, "c008", 17),
-            C("c009", "交叉火线", "选择至多两名不同敌人，各造成4伤害。", 1, "c009", 4),
-            C("c010", "捕鲸矛", "对一名敌人造成10伤害；若其为已正确牵引至锚点的守卫，再造成6伤害。", 2, "c010", 10),
+            C("c009", "交叉火线", "选择一名敌人造成6伤害，或选择两名不同敌人各造成4伤害。", 1, "c009", 4),
+            C("c010", "捕鲸矛", "对一名敌人造成12伤害；若其为已正确牵引至锚点的守卫，再造成6伤害。", 2, "c010", 12),
             C("c011", "顺势补枪", "对一名敌人造成5伤害；若本回合已击退另一名敌人，抽1张牌。", 1, "c011", 5),
             C("c012", "守势反击", "对一名敌人造成5伤害；若出牌前已有至少6格挡，改为7；随后获得3格挡。", 1, "c012", 5),
-            C("c013", "驱散弹幕", "对所有敌人各造成4伤害；对召唤物额外造成3伤害。", 2, "c013", 4),
+            C("c013", "驱散弹幕", "仅一名可攻击敌人时造成8伤害；否则对所有可攻击敌人各造成4伤害。召唤物额外受到3伤害。", 2, "c013", 4),
             C("c014", "确认弱点", "对一名敌人造成10伤害；意图已确认则改为15；若本牌还从上回合保留至今，改为19。", 2, "c014", 15),
             C("c015", "裂索射击", "对一名敌人造成4伤害；若其预告可打断的召唤，取消该召唤。", 1, "c015", 4),
             C("c016", "浸盐枪托", "对一名敌人造成3伤害；若本回合另一张武装牌实例已对它造成实际伤害，再造成5伤害。", 1, "c016", 3),
-            C("c017", "压舱重击", "对一名敌人造成9伤害；若其已被场景装置暴露，改为18伤害。", 2, "c017", 18),
+            C("c017", "压舱重击", "对一名敌人造成12伤害；若其已被场景装置暴露，改为18伤害。", 2, "c017", 18),
             C("c018", "撤离掩护", "对一名敌人造成9伤害，获得7格挡。", 2, "c018", 9),
 
             C("cover", "寻找掩体", "获得10格挡。", 1, "c019", 10),
@@ -169,6 +195,25 @@ namespace UnsoundedSea.Core
             if (id == null) throw new ArgumentNullException(nameof(id));
             return numbers.TryGetValue(id, out var number) ? cards[number - 1] : throw new KeyNotFoundException($"Unknown card: {id}");
         }
+        public static bool TryNumber(CardSpec card, out int number)
+        {
+            if (card == null) throw new ArgumentNullException(nameof(card));
+            if (numbers.TryGetValue(card.Id, out number)) return true;
+            if (card.Effects.Count == 1 && numbers.TryGetValue(card.Effects[0].Id, out number)) return true;
+            number = 0;
+            return false;
+        }
+        internal static bool TryMetadata(string id, string effectId, out CardSpec card)
+        {
+            if ((id != null && numbers.TryGetValue(id, out var number)) ||
+                (effectId != null && numbers.TryGetValue(effectId, out number)))
+            {
+                card = cards[number - 1];
+                return true;
+            }
+            card = null;
+            return false;
+        }
         public static int Number(string id)
         {
             if (id == null) throw new ArgumentNullException(nameof(id));
@@ -177,19 +222,25 @@ namespace UnsoundedSea.Core
 
         public static string Category(string id)
         {
-            var number = Number(id);
-            if (number >= 91) return number==92?"武装":number==93||number==95?"防护":number==96?"干预":"调查";
-            if (number <= 18) return "武装";
-            if (number <= 36) return "防护";
-            if (number <= 54) return "调查";
-            if (number <= 72) return "干预";
-            return "禁忌";
+            switch (Get(id).Category)
+            {
+                case CardCategory.Armed: return "武装";
+                case CardCategory.Defense: return "防护";
+                case CardCategory.Investigation: return "调查";
+                case CardCategory.Intervention: return "干预";
+                default: return "禁忌";
+            }
         }
 
         private static Dictionary<string, int> BuildNumbers()
         {
-            var result = new Dictionary<string, int>(cards.Count, StringComparer.Ordinal);
-            for (var i = 0; i < cards.Count; i++) result.Add(cards[i].Id, i + 1);
+            var result = new Dictionary<string, int>(cards.Count * 2, StringComparer.Ordinal);
+            for (var i = 0; i < cards.Count; i++)
+            {
+                result.Add(cards[i].Id, i + 1);
+                var effectId = cards[i].Effects[0].Id;
+                if (!result.ContainsKey(effectId)) result.Add(effectId, i + 1);
+            }
             return result;
         }
     }

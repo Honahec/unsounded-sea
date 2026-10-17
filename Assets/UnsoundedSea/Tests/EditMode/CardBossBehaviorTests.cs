@@ -105,6 +105,17 @@ namespace UnsoundedSea.Tests
             Play(session, card, target);
             Assert.That(session.View.Hand.Count, Is.EqualTo(before), "Rechecking an already verified source replaces C046.");
         }
+        [TestCase("c006", 3)]
+        [TestCase("c013", 1)]
+        public void AreaWeaponCountsOnlyLivingAttackableEnemiesAndKeepsSummonBonus(string cardId, int remainingHealth)
+        {
+            var session = Session(BossEncounterKind.Watcher, cardId);
+            Play(session, Encounter(session, "E05-01"));
+            var summoned = session.View.Enemies.Single(x => x.Id != "b05-watcher" && x.Health > 0);
+            Play(session, Card(session, cardId));
+            Assert.That(session.View.Enemies.Single(x => x.Id == summoned.Id).Health, Is.EqualTo(remainingHealth));
+            Assert.That(session.View.Enemies.Where(x => x.Id != summoned.Id && x.Id != "b05-watcher").All(x => x.Health == 0), Is.True);
+        }
         private static void EnterLocks(BattleSession session)
         {
             Play(session, Encounter(session, "E04-01"), "R1:positive");

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: voyage-fog-enemy-4
   displayName: "\u6F02\u6876\u7A83\u8D3C"
   health: 22
-  candidateDescription: "\u6876\u7B8D\u51B2\u649E\uFF1A7 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u7F29\u6876\u89C2\u671B\uFF1A0 \u751F\u547D\u4F24\u5BB3"
+  candidateDescription: "\u6876\u7B8D\u51B2\u649E\uFF1A7 \u751F\u547D\u4F24\u5BB3 / \u7F29\u6876\u89C2\u671B"
   intentPolicy: 1
   intents:
   - id: barrel

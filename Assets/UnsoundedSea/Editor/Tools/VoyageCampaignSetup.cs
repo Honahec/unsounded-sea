@@ -16,7 +16,7 @@ namespace UnsoundedSea.Editor
         private const string ScenarioFolder = Root + "/Content/Scenarios/Voyage";
         private const string CatalogPath = Root + "/Resources/VoyageEncounterCatalog.asset";
         private static readonly string[] Regions = { "fog", "bones", "inverted", "fleet", "abyss" };
-        private static readonly string[] RegionTitles = { "雾海", "潮骨海", "倒悬海", "无旗舰群", "无星深渊" };
+        private static readonly string[] RegionTitles = { "灰雾航道", "尸骸之海", "倒悬潮庭", "无灯裂海", "无星深渊" };
         private static readonly EnemyPlan[,] Plans =
         {
             {
@@ -91,8 +91,8 @@ namespace UnsoundedSea.Editor
                         value.displayName = $"{RegionTitles[regionIndex]} / {Plans[regionIndex, variant].DisplayName}";
                         value.objective = ObjectiveKind.Defeat;
                         value.objectiveTarget = 1;
-                        value.playerHealth = 60;
-                        value.playerSanity = 30;
+                        value.playerHealth = GameBalance.MaxHealth;
+                        value.playerSanity = GameBalance.MaxSanity;
                         value.actionsPerTurn = 3;
                         value.drawPerTurn = 5;
                         value.deck = deck;
@@ -160,32 +160,78 @@ namespace UnsoundedSea.Editor
         {
             for (var region = 0; region < Regions.Length; region++)
             {
-                for (var variant = 0; variant < 5; variant++) CreateEnemy(region, variant, preservePresentation: true);
-                var encounter = Load<EncounterDefinition>($"{EncounterFolder}/voyage-{Regions[region]}-4.asset");
-                encounter.enemies = new[] { Load<EnemyDefinition>($"{EnemyFolder}/voyage-{Regions[region]}-enemy-4.asset"), CreateCompanion(region) };
-                EditorUtility.SetDirty(encounter);
-                AssetDatabase.SaveAssetIfDirty(encounter);
+                for (var variant = 0; variant < 5; variant++)
+                {
+                    CreateEnemy(region, variant, preservePresentation: true);
+                    var encounter = Load<EncounterDefinition>($"{EncounterFolder}/voyage-{Regions[region]}-{variant}.asset");
+                    encounter.displayName = $"{RegionTitles[region]} / {Plans[region, variant].DisplayName}";
+                    encounter.objective = region > 0 && variant == 3 ? EnemyBehavior.SecondaryObjectiveKind(encounter.id) : ObjectiveKind.Defeat;
+                    encounter.objectiveTarget = region > 0 && variant == 3 ? 3 : 1;
+                    encounter.playerHealth = GameBalance.MaxHealth;
+                    encounter.playerSanity = GameBalance.MaxSanity;
+                    if (variant == 4)
+                        encounter.enemies = new[] { Load<EnemyDefinition>($"{EnemyFolder}/voyage-{Regions[region]}-enemy-4.asset"), CreateCompanion(region) };
+                    EditorUtility.SetDirty(encounter);
+                    AssetDatabase.SaveAssetIfDirty(encounter);
+                    var scenario = Load<BattleScenario>($"{ScenarioFolder}/voyage-{Regions[region]}-{variant}.asset");
+                    scenario.chapter = $"航程 / {RegionTitles[region]}";
+                    scenario.enemyHeading = encounter.displayName;
+                    EditorUtility.SetDirty(scenario);
+                    AssetDatabase.SaveAssetIfDirty(scenario);
+                }
             }
+            var fog = Load<BattleScenario>(Root + "/Content/Scenarios/FogVisitors.asset");
+            fog.enemyStatus = "封门后撤离";
+            EditorUtility.SetDirty(fog);
+            AssetDatabase.SaveAssetIfDirty(fog);
+            var regionBosses = new[] { ("M02.asset", 1), ("M03.asset", 2), ("M04.asset", 3), ("M05.asset", 4) };
+            foreach (var item in regionBosses)
+            {
+                var scenario = Load<BattleScenario>($"{Root}/Content/Scenarios/{item.Item1}");
+                scenario.chapter = RegionTitles[item.Item2];
+                EditorUtility.SetDirty(scenario);
+                AssetDatabase.SaveAssetIfDirty(scenario);
+            }
+            var catalog = Load<VoyageEncounterCatalog>(CatalogPath);
+            var serialized = new SerializedObject(catalog);
+            var entries = serialized.FindProperty("entries");
+            for (var i = 0; i < entries.arraySize; i++)
+            {
+                var entry = entries.GetArrayElementAtIndex(i);
+                var id = entry.FindPropertyRelative("id").stringValue;
+                var group = entry.FindPropertyRelative("group");
+                for (var region = 0; region < Regions.Length; region++)
+                    if (id.StartsWith($"voyage-{Regions[region]}-", StringComparison.Ordinal) ||
+                        group.stringValue == new[] { "雾海", "潮骨海", "倒悬海", "无旗舰群", "无星深渊" }[region])
+                        group.stringValue = RegionTitles[region];
+            }
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(catalog);
+            AssetDatabase.SaveAssetIfDirty(catalog);
         }
 
         private static EnemyDefinition CreateCompanion(int region)
         {
             var plan = Plans[region, 2];
-            var health = new[] { 18, 20, 20, 20, 24 }[region];
-            var amounts = new[] { new[] { 5, 3 }, new[] { 4, 7 }, new[] { 4, 7 }, new[] { 4, 7 }, new[] { 4, 8 } }[region];
+            var health = new[] { 18, 20, 20, 20, 20 }[region];
+            var amounts = new[] { new[] { 5, 3 }, new[] { 4, 7 }, new[] { 4, 7 }, new[] { 4, 7 }, new[] { 5, 12 } }[region];
             var id = $"voyage-{Regions[region]}-companion";
             return Asset<EnemyDefinition>(EnemyFolder, id, value =>
             {
+                var intents = plan.Intents.Select((intent, i) => CombatBalanceSetup.CopyIntent(intent, amounts[i])).ToArray();
+                if (region > 0) intents = HiddenIntents(intents, false);
                 value.id = id; value.displayName = plan.DisplayName + "（随行）"; value.health = health;
-                value.intentPolicy = IntentPolicy.Cycle;
-                value.intents = plan.Intents.Select((intent, i) => CombatBalanceSetup.CopyIntent(intent, amounts[i])).ToArray();
+                value.intentPolicy = region == 0 ? IntentPolicy.Cycle : IntentPolicy.Random;
+                value.intents = intents;
                 value.candidateDescription = DescribeIntents(value.intents);
                 value.presentationPrefab = Load<EnemyDefinition>($"{EnemyFolder}/voyage-{Regions[region]}-enemy-2.asset").presentationPrefab;
             });
         }
 
-        private static string DescribeIntents(IntentData[] intents) => string.Join(" / ", intents.Select(intent =>
-            $"{intent.displayName}：{intent.amount} {(intent.channel == DamageChannel.Sanity ? "理智冲击" : "生命伤害")}{(intent.isPublic ? "（公开）" : string.Empty)}"));
+        private static string DescribeIntents(IntentData[] intents) => string.Join(" / ", intents
+            .OrderBy(intent => intent.channel == DamageChannel.Health ? 0 : 1)
+            .Select(intent => intent.amount == 0 ? intent.displayName :
+                $"{intent.displayName}：{intent.amount} {(intent.channel == DamageChannel.Sanity ? "理智冲击" : "生命伤害")}"));
 
         private static EnemyDefinition CreateEnemy(int region, int variant, bool preservePresentation = false)
         {
@@ -196,14 +242,42 @@ namespace UnsoundedSea.Editor
             if (preservePresentation) Load<EnemyDefinition>($"{EnemyFolder}/{id}.asset");
             return Asset<EnemyDefinition>(EnemyFolder, id, value =>
             {
+                var style = region == 0 ? EnemyStyle.Boss : EnemyBehavior.StyleForEncounter($"voyage-{Regions[region]}-{variant}");
+                var intents = region == 0 ? plan.Intents : style == EnemyStyle.Rhythm
+                    ? RhythmIntents(plan.Intents) : HiddenIntents(plan.Intents, variant == 1);
+                if (region == 2 && variant == 4) intents[0].amount = 8;
                 value.id = id;
                 value.displayName = plan.DisplayName;
                 value.health = plan.Health;
-                value.candidateDescription = DescribeIntents(plan.Intents);
-                value.intentPolicy = IntentPolicy.Cycle;
-                value.intents = plan.Intents;
+                value.candidateDescription = DescribeIntents(intents);
+                value.intentPolicy = style == EnemyStyle.Hidden ? IntentPolicy.Random : IntentPolicy.Cycle;
+                value.intents = intents;
                 if (!preservePresentation) value.presentationPrefab = prefab;
             });
+        }
+        private static IntentData[] RhythmIntents(IntentData[] source) => source.Select((intent, index) =>
+        {
+            var copy = CombatBalanceSetup.CopyIntent(intent, intent.amount > 0 ? intent.amount : 8 + index * 2);
+            copy.isPublic = true;
+            return copy;
+        }).ToArray();
+
+        private static IntentData[] HiddenIntents(IntentData[] source, bool includeCharge)
+        {
+            var health = source.FirstOrDefault(intent => intent.channel == DamageChannel.Health) ?? source[0];
+            var sanity = source.FirstOrDefault(intent => intent.channel == DamageChannel.Sanity) ?? source[source.Length - 1];
+            var clue = "姿态与声响互相矛盾，尚不能判断它会伤及身体还是理智。";
+            var result = new List<IntentData>
+            {
+                CombatBalanceSetup.CopyIntent(health, 12),
+                CombatBalanceSetup.CopyIntent(sanity, 5)
+            };
+            result[0].channel = DamageChannel.Health; result[1].channel = DamageChannel.Sanity;
+            result[0].clue = result[1].clue = clue;
+            result[0].isPublic = result[1].isPublic = false;
+            if (includeCharge)
+                result.Add(Intent("charge", "蓄势观察", clue, DamageChannel.Health, 0, false, false, true));
+            return result.ToArray();
         }
 
         private sealed class EnemyPlan
@@ -308,8 +382,8 @@ namespace UnsoundedSea.Editor
                 value.displayName = name;
                 value.objective = objective;
                 value.objectiveTarget = target;
-                value.playerHealth = 60;
-                value.playerSanity = 30;
+                value.playerHealth = GameBalance.MaxHealth;
+                value.playerSanity = GameBalance.MaxSanity;
                 value.actionsPerTurn = 3;
                 value.drawPerTurn = 5;
                 value.deck = deck;

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: voyage-inverted-2
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EncounterDefinition
   id: voyage-inverted-2
-  displayName: "\u5012\u60AC\u6D77 / \u955C\u6F6E\u8BB0\u5F55\u5458"
+  displayName: "\u5012\u60AC\u6F6E\u5EAD / \u955C\u6F6E\u8BB0\u5F55\u5458"
   objective: 0
   objectiveTarget: 1
   playerHealth: 60
