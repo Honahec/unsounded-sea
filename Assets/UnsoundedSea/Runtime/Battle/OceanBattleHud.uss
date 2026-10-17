@@ -41,10 +41,11 @@
 .vital-fill { height: 6px; border-radius: 3px; background-color: #ac7566; }
 .sanity .vital-fill { background-color: #80b5a5; }
 .vital-protection { min-height: 18px; padding-top: 4px; font-size: 13px; color: #b6c9b7; text-shadow: 0 2px 5px #040a0c; }
-.hand { position: absolute; left: 310px; right: 310px; bottom: -140px; height: 440px; }
+/* Extra headroom above resting cards so a lifted (inspected) card is never clipped by the hand viewport. */
+.hand { position: absolute; left: 310px; right: 310px; bottom: -140px; height: 510px; }
 .hand .unity-scroll-view__content-viewport { overflow: hidden; }
-.hand .unity-scroll-view__content-container { min-width: 100%; height: 434px; padding: 0 15px; }
-.fan-track { position: relative; height: 426px; }
+.hand .unity-scroll-view__content-container { min-width: 100%; height: 504px; padding: 0 15px; }
+.fan-track { position: relative; height: 496px; }
 .card-anchor { position: absolute; bottom: 8px; width: 180px; height: 245px; padding: 0; border-width: 0; background-color: rgba(0,0,0,0); transform-origin: 50% 100%; }
 .sea-card { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 10px 13px; border-radius: 9px 9px 3px 3px; border-width: 1px; border-bottom-width: 3px; border-color: #9e8755; background-color: #d8cbaa; color: #172526; transform-origin: 50% 100%; transition-property: translate, scale, rotate, background-color, opacity; transition-duration: .14s; -unity-text-align: upper-left; }
 .card-anchor.inspecting .sea-card { translate: 0 -150px; scale: 1.1; rotate: 0deg; background-color: #eee4c9; }
