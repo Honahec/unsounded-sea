@@ -333,10 +333,6 @@ namespace UnsoundedSea.Runtime
             var stop = session.Selected ?? session.Current;
             if (session.Phase == VoyagePhase.ChoosingRoute && session.Selected == null)
             {
-                if (session.CanEditDeck)
-                {
-                    panel.Add(Action("open-action-book", "整备行动簿", "primary", () => { deckOpen = true; Refresh(); }));
-                }
                 BuildNodeServices(panel,session,saved);
                 return;
             }
@@ -388,8 +384,6 @@ namespace UnsoundedSea.Runtime
                             panel.Add(Text(session.EventTitle, "event-title"));
                         var nodeChoices = session.GetNodeChoices();
                         AddNodeChoiceGroup(panel, "本节点选项", nodeChoices, saved, false);
-                        if (session.CanEditDeck)
-                            panel.Add(Action("arrival-action-book", "整备行动簿", "secondary", () => { deckOpen = true; Refresh(); }));
                         if (nodeChoices.Count == 0 && session.GetNodeServices().Count == 0)
                             panel.Add(Action("arrival-continue", "记录并继续", "primary", () => Change(Session.Continue), saved && session.CanContinue));
                         BuildNodeServices(panel, session, saved);
@@ -556,7 +550,9 @@ namespace UnsoundedSea.Runtime
         {
             var services=session.GetNodeServices();
             if(services.Count==0)return;
-            panel.Add(Text("接驳服务","section-label"));
+            var heading = Text("接驳服务", "node-services-title");
+            heading.name = "node-services-title";
+            panel.Add(heading);
             foreach(var choice in services)
             {
                 var entry=choice;

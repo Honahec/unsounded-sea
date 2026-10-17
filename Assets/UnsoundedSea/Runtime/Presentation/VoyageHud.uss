@@ -15,6 +15,7 @@
 .current-location { position: absolute; left: 0; top: 0; width: 260px; }
 .location-name { font-size: 23px; color: #e5e2d6; letter-spacing: 2px; text-shadow: 0 2px 5px #040a0c; }
 .section-label { margin-top: 7px; margin-bottom: 5px; font-size: 12px; color: #a9b6ad; letter-spacing: 2px; }
+.node-services-title { margin-top: 16px; margin-bottom: 10px; padding-bottom: 8px; font-size: 20px; color: #d7bd82; letter-spacing: 2px; border-bottom-width: 1px; border-bottom-color: rgba(158, 135, 85, 0.4); }
 .panel-title { margin-bottom: 4px; font-size: 20px; color: #e5e2d6; }
 .body { margin-bottom: 9px; font-size: 15px; color: #e2dcc6; }
 .muted { margin-bottom: 7px; font-size: 13px; color: #a9b6ad; }
@@ -116,8 +117,10 @@
 .support-tabs { flex-direction: row; flex-shrink: 0; margin-bottom: 12px; }
 .voyage-hud .support-tabs Button { flex-grow: 1; margin-right: 6px; padding: 8px 10px; white-space: nowrap; border-width: 0; border-bottom-width: 2px; background-color: transparent; font-size: 17px; letter-spacing: 3px; }
 .voyage-hud .support-tabs Button.selected { color: #efdbab; border-bottom-color: #c2a16d; background-color: rgba(95, 103, 74, 0.18); }
-.support-scroll { flex-grow: 1; flex-shrink: 1; min-height: 0; }
-.support-illustration { position: absolute; left: 0; right: 0; top: 0; bottom: 0; opacity: 0.17; -unity-background-scale-mode: scale-and-crop; }
+.support-scroll { flex-grow: 1; flex-shrink: 1; min-height: 0; padding: 16px 20px; background-color: rgba(8, 19, 22, 0.96); border-top-width: 1px; border-top-color: rgba(158, 135, 85, 0.3); }
+.support-illustration { position: absolute; left: 0; right: 0; top: 0; bottom: 0; opacity: 0.06; -unity-background-scale-mode: scale-and-crop; }
+.support-illustration-veil { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(8, 19, 22, 0.88); }
+.support-scroll .body, .support-scroll .node-choice-description { color: #eee4c9; }
 .support-entry { padding: 10px 2px; border-bottom-width: 1px; border-bottom-color: rgba(158, 135, 85, 0.3); }
 .support-entry .node-choice-description { margin-top: 6px; font-size: 14px; }
 .voyage-hud .support-entry Button { align-self: flex-start; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 38px; border-width: 0; border-left-width: 2px; border-left-color: #a48b58; background-color: transparent; -unity-text-align: middle-left; }

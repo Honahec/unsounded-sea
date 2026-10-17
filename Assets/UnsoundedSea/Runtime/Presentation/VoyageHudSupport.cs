@@ -44,6 +44,7 @@ namespace UnsoundedSea.Runtime
             art.AddToClassList("support-illustration");
             art.style.backgroundImage = Resources.Load<Texture2D>("SupportArt/" + SupportImages[supportTab]);
             sheet.Insert(0, art);
+            sheet.Insert(1, Element("support-illustration-veil"));
             switch (supportTab)
             {
                 case 0:
