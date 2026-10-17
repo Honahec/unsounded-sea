@@ -69,6 +69,34 @@ namespace UnsoundedSea.Runtime
             progress = 0; speed = 0; IsPlaying = true;
         }
 
+        // Arrival from the title is presentation only: it never selects or consumes a route.
+        public void BeginEntrance()
+        {
+            var end = routePosition;
+            routePosition = end - routeHeading * 24;
+            path = new VoyageSailingPath(routePosition, end, routeHeading);
+            previousPosition = routePosition; progress = speed = 0; IsPlaying = true;
+            reducedPassage = false;
+            vessel.position = routePosition + water.SampleDisplacement(routePosition);
+            destinations?.Current?.SetVisibility(0);
+            wake?.Clear(); PlaceCamera(1);
+        }
+
+        public void AdvanceEntrance(float progress, float deltaTime)
+        {
+            this.progress = Mathf.Clamp01(progress);
+            path.Evaluate(this.progress, out routePosition, out routeHeading);
+            destinations?.Current?.SetVisibility(Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.25f, 1, this.progress)));
+            Tick(deltaTime, false, false);
+        }
+
+        public void FinishEntrance()
+        {
+            path.Evaluate(1, out routePosition, out routeHeading);
+            IsPlaying = false; speed = 0;
+            destinations?.Current?.SetVisibility(1);
+        }
+
         public void Advance(float deltaTime, bool reduceMotion)
         {
             if (!IsPlaying) return;

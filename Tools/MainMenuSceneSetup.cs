@@ -113,6 +113,8 @@ public static class MainMenuSceneSetup
         presentation.water = water;
         presentation.menuCamera = camera;
         presentation.vessel = vessel.transform;
+        presentation.lighthouse = lighthouse.transform;
+        presentation.departureWakeMaterial = AssetDatabase.LoadAssetAtPath<Material>(Root + "Art/Voyage/VesselWake.mat");
         RenderSettings.skybox = AssetDatabase.LoadAssetAtPath<Material>(Root + "Art/SeaBoss/StormSky.mat");
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.ExponentialSquared;
@@ -121,5 +123,28 @@ public static class MainMenuSceneSetup
 
         EditorSceneManager.SaveScene(scene);
         return new { scene = ScenePath, vessel = VesselPath, lighthouse = LighthousePath, ocean = WaterStagePath };
+    }
+
+    public static string ConfigureDeparture()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Stop Play first.");
+        var original = SceneManager.GetActiveScene();
+        var scene = SceneManager.GetSceneByPath(ScenePath); bool opened = !scene.isLoaded;
+        if (!opened && scene.isDirty) throw new InvalidOperationException("Unsaved MainMenu scene edits.");
+        if (opened) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+        try
+        {
+            var presentation = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<MainMenuSeaPresentation>()).Single();
+            presentation.lighthouse = presentation.transform.Find("Lighthouse");
+            presentation.departureWakeMaterial = AssetDatabase.LoadAssetAtPath<Material>(Root + "Art/Voyage/VesselWake.mat");
+            if (presentation.lighthouse == null || presentation.departureWakeMaterial == null) throw new InvalidOperationException("Missing departure assets.");
+            EditorUtility.SetDirty(presentation); EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
+            return "Configured existing title lighthouse and shared voyage wake; other open scenes preserved.";
+        }
+        finally
+        {
+            if (opened) EditorSceneManager.CloseScene(scene, true);
+            if (original.IsValid() && original.isLoaded) SceneManager.SetActiveScene(original);
+        }
     }
 }

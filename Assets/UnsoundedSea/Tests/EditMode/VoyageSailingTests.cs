@@ -9,6 +9,20 @@ namespace UnsoundedSea.Tests
 {
     public sealed class VoyageSailingTests
     {
+        [Test]
+        public void TitleDepartureUsesTheAuthoredLighthouseAndVoyageWake()
+        {
+            var scene = EditorSceneManager.OpenPreviewScene("Assets/UnsoundedSea/Scenes/MainMenu.unity");
+            try
+            {
+                var sea = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<MainMenuSeaPresentation>()).Single();
+                Assert.That(sea.lighthouse, Is.Not.Null);
+                Assert.That(PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(sea.lighthouse), Does.EndWith("Lighthouse.prefab"));
+                Assert.That(sea.departureWakeMaterial, Is.EqualTo(AssetDatabase.LoadAssetAtPath<Material>("Assets/UnsoundedSea/Art/Voyage/VesselWake.mat")));
+                Assert.That(sea.menuCamera.transform.IsChildOf(sea.vessel), Is.False);
+            }
+            finally { EditorSceneManager.ClosePreviewScene(scene); }
+        }
         [TestCase(-45)] [TestCase(45)] [TestCase(115)]
         public void PassageTurnsTowardItsDestinationAndStopsAtBothEnds(float turn)
         {
