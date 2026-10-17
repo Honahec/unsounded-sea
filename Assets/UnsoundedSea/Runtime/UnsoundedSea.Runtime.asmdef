@@ -4,6 +4,7 @@
   "references": [
     "UnsoundedSea.Core",
     "UberWaterPlannerReflection",
-    "Unity.Newtonsoft.Json"
+    "Unity.Newtonsoft.Json",
+    "Unity.InputSystem"
   ]
 }

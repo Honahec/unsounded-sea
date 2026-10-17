@@ -32,8 +32,6 @@
 .status-badge { flex-direction: row; align-items: center; margin-right: 10px; }
 .status-badge Label { font-size: 12px; color: #d7bd82; white-space: nowrap; }
 .status-icon { width: 24px; height: 24px; margin-right: 4px; }
-.sanity-tick { position: absolute; top: -3px; bottom: -3px; width: 2px; background-color: #d7bd82; }
-.sanity-tick-label { position: absolute; top: 8px; left: -12px; width: 40px; font-size: 11px; color: #d7bd82; white-space: nowrap; }
 .crew-selection { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(1,8,13,.9); }
 .crew-selection-sheet { width: 600px; max-width: 92%; max-height: 90%; padding: 28px; background-color: #0f1f23; border-width: 1px; border-color: #9e8755; align-items: stretch; }
 .crew-choice { min-height: 130px; margin-top: 10px; padding: 14px 18px; border-width: 1px; border-color: #9e8755; background-color: #132c30; color: #eee4c9; }
@@ -196,7 +194,7 @@
 
 /* Full-art cards keep their upper third unobstructed; the lower text sits on a local inset wash. */
 .illustrated-card { padding: 0; overflow: hidden; background-color: #0f1d21; -unity-background-scale-mode: scale-and-crop; }
-.illustrated-cost { position: absolute; left: 7px; top: 7px; width: 36px; height: 36px; margin: 0; padding: 0; border-radius: 18px; background-color: rgba(15,29,33,.96); color: #ffeec0; font-size: 23px; white-space: nowrap; -unity-text-align: middle-center; }
+.illustrated-card #illustrated-cost, .illustrated-cost { position: absolute; left: 7px; top: 7px; width: 36px; height: 36px; margin: 0; padding: 0; border-radius: 18px; background-color: rgba(15,29,33,.96); color: #ffeec0; font-size: 23px; white-space: nowrap; -unity-text-align: middle-center; }
 .illustrated-rules { position: absolute; left: 9px; right: 9px; top: 34%; bottom: 12px; min-height: 0; padding: 6px; overflow: hidden; border-radius: 9px; background-color: rgba(5,15,19,.66); }
 .illustrated-title { flex-shrink: 0; margin: 0; color: #f6deab; font-size: 16px; -unity-font-style: bold; white-space: normal; }
 .illustrated-description { flex-grow: 1; flex-shrink: 1; max-height: 74px; margin: 3px 0 0; overflow: hidden; color: #f1efde; font-size: 12px; white-space: normal; }
@@ -204,5 +202,6 @@
 .card-anchor.inspecting .illustrated-rules { top: 34%; }
 .card-anchor.inspecting .illustrated-description { max-height: none; font-size: 12px; }
 
-.sanity-threshold { position: absolute; top: -2px; bottom: -2px; width: 2px; translate: -1px 0; background-color: #d7bd82; }
-.sanity-threshold-label { position: absolute; left: 50%; top: -19px; translate: -50% 0; color: #eee4c9; font-size: 11px; white-space: nowrap; text-shadow: 0 1px 3px #081316; }
+.sanity-threshold { position: absolute; top: -3px; bottom: -3px; width: 2px; translate: -1px 0; background-color: #d7bd82; }
+.sanity-state { padding: 1px 6px; flex-shrink: 0; font-size: 11px; color: #f2bc9d; white-space: nowrap; border-width: 1px; border-radius: 3px; border-color: rgba(242,188,157,.6); }
+.sanity-state.critical { color: #fff0e6; background-color: rgba(122,52,44,.85); border-color: #f2bc9d; }

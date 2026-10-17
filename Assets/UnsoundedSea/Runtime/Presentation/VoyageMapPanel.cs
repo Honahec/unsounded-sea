@@ -37,7 +37,20 @@ namespace UnsoundedSea.Runtime
             chartScroll.contentContainer.style.alignItems = Align.Stretch;
             chartScroll.Add(Chart);
             Add(chartScroll);
-            chartScroll.schedule.Execute(() => chartScroll.ScrollTo(Chart.Q<Button>("node-" + session.Current.Id)));
+            // Open centred on the current stop so the previous and next layers are both in view without scrolling.
+            var focusId = "node-" + (session.Phase == VoyagePhase.Sailing && session.Selected != null ? session.Selected.Id : session.Current.Id);
+            void Centre(GeometryChangedEvent _)
+            {
+                var node = Chart.Q<Button>(focusId);
+                var viewport = chartScroll.contentViewport.resolvedStyle.height;
+                var height = Chart.resolvedStyle.height;
+                if (node == null || float.IsNaN(viewport) || viewport <= 0 || float.IsNaN(height) || height <= 0) return;
+                var y = node.resolvedStyle.top;
+                if (float.IsNaN(y)) return;
+                chartScroll.scrollOffset = new Vector2(0, Mathf.Clamp(y - viewport * .5f, 0, Mathf.Max(0, height - viewport)));
+                Chart.UnregisterCallback<GeometryChangedEvent>(Centre);
+            }
+            Chart.RegisterCallback<GeometryChangedEvent>(Centre);
             var legend = new VisualElement { pickingMode = PickingMode.Ignore };
             legend.AddToClassList("map-legend");
             AddLegend(legend, "current", "在此"); AddLegend(legend, "available", "可航行");

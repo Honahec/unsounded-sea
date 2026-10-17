@@ -90,16 +90,6 @@ namespace UnsoundedSea.Runtime
         public static string BossTag(CardSpec card)=>BossTag(card.BossIds);
         public static string BossTag(ItemSpec item)=>BossTag(item.BossIds);
         public static string CardDescription(CardSpec card)=>Describe(card.Name+"："+card.Description)+(BossTag(card)==""?"":"\n"+BossTag(card));
-        public static void SanityTicks(VisualElement track,int max)
-        {
-            foreach(var threshold in new[]{12,5})
-            {
-                if(max<threshold)continue;
-                var tick=new VisualElement {name="sanity-threshold-"+threshold,pickingMode=PickingMode.Position,tooltip=SanityThresholds};
-                tick.AddToClassList("sanity-tick");tick.style.left=Length.Percent(100f*threshold/max);
-                var label=new Label(threshold==12?"动摇":"临界");label.AddToClassList("sanity-tick-label");tick.Add(label);track.Add(tick);
-            }
-        }
         public static void Status(VisualElement parent,string name,string motif,string text,string description)
         {
             var badge=new VisualElement {name=name,pickingMode=PickingMode.Position,tooltip=Describe(description)};badge.AddToClassList("status-badge");

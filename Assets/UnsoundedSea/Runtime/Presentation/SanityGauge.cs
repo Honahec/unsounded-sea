@@ -3,29 +3,36 @@ using UnityEngine.UIElements;
 
 namespace UnsoundedSea.Runtime
 {
+    /// <summary>Single source for sanity thresholds: unlabeled ticks on a bar plus a state word when not stable.</summary>
     internal static class SanityGauge
     {
-        public const string RuleTooltip = "理智13–30为稳定，6–12为动摇，1–5为临界，0时无法继续。阈值只提供决策提示，不改变费用、效果或伤害。";
+        public const string RuleTooltip = "理智 13–30 稳定，6–12 动摇，1–5 临界，0 时无法继续。阈值只提示风险，不改变费用、效果或伤害；主动支付后至少剩 1。";
 
         public static void AddMarks(VisualElement track, int max)
         {
             if (track == null || max <= 0) return;
-            AddMark(track, 12, max, "动摇");
-            AddMark(track, 5, max, "临界");
+            foreach (var value in new[] { 12, 5 })
+            {
+                if (max < value) continue;
+                var mark = new VisualElement { name = "sanity-mark-" + value, pickingMode = PickingMode.Ignore };
+                mark.AddToClassList("sanity-threshold");
+                mark.style.left = Length.Percent(Mathf.Clamp01(value / (float)max) * 100);
+                track.Add(mark);
+            }
             track.tooltip = RuleTooltip;
         }
 
         public static string State(int value) => value <= 0 ? "无法继续" : value <= 5 ? "临界" : value <= 12 ? "动摇" : "稳定";
 
-        private static void AddMark(VisualElement track, int value, int max, string label)
+        /// <summary>Only unstable states deserve screen space; 稳定 stays in the tooltip.</summary>
+        public static Label StateTag(int value)
         {
-            var mark = new VisualElement { name = "sanity-mark-" + value, pickingMode = PickingMode.Ignore };
-            mark.AddToClassList("sanity-threshold");
-            mark.style.left = Length.Percent(Mathf.Clamp01(value / (float)max) * 100);
-            var text = new Label(label) { pickingMode = PickingMode.Ignore };
-            text.AddToClassList("sanity-threshold-label");
-            mark.Add(text);
-            track.Add(mark);
+            var state = State(value);
+            if (state == "稳定") return null;
+            var tag = new Label(state) { pickingMode = PickingMode.Ignore };
+            tag.AddToClassList("sanity-state");
+            tag.EnableInClassList("critical", value <= 5);
+            return tag;
         }
     }
 }

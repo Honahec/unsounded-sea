@@ -38,19 +38,22 @@ namespace UnsoundedSea.Runtime
             }
             catch (Exception exception) { root.Add(Text("菜单加载失败：" + exception.Message, "menu-error")); Debug.LogException(exception); }
         }
+        private void Update() => HotkeyRelay.Poll(root, HandleKey);
+
         private void OnDisable()
         {
             root?.UnregisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
             root?.Clear();
         }
 
-        private void OnKey(KeyDownEvent evt)
+        private void OnKey(KeyDownEvent evt) { if (HotkeyRelay.Dispatch(root, evt.keyCode, HandleKey)) evt.StopPropagation(); }
+        private bool HandleKey(KeyCode key)
         {
-            if (evt.keyCode != KeyCode.Escape) return;
+            if (key != KeyCode.Escape) return false;
             if (choosingCrew) { choosingCrew = false; Build("menu-start"); }
             else if (debugSelectionOpen) { debugSelectionOpen = false; Build("menu-debug"); }
-            else return;
-            evt.StopPropagation();
+            else return false;
+            return true;
         }
 
         private static Label Text(string text, string className)

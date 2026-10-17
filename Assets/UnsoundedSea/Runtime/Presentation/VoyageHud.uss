@@ -130,10 +130,6 @@
 .reward-item-kind { margin-right: 10px; padding: 1px 6px; font-size: 11px; color: #80b5a5; border-width: 1px; border-radius: 3px; border-color: #80b5a5; }
 .reward-item-name { font-size: 16px; color: #eee4c9; }
 
-.sanity-chip { min-width: 220px; }
-.sanity-gauge { position: relative; width: 92px; height: 7px; margin-right: 8px; overflow: visible; background-color: rgba(128, 181, 165, 0.2); }
-.sanity-gauge-fill { height: 7px; background-color: #80b5a5; }
-.sanity-mark { position: absolute; top: -3px; width: 1px; height: 13px; background-color: #eee4c9; }
 .voyage-status-seal { flex-direction: row; align-items: center; margin-right: 9px; padding: 3px 8px; border-width: 1px; border-radius: 14px; border-color: rgba(158, 135, 85, 0.55); background-color: rgba(4, 12, 14, 0.76); }
 .status-seal-icon { width: 19px; height: 19px; margin-right: 5px; }
 .status-seal-label { color: #d7bd82; font-size: 12px; white-space: nowrap; }
@@ -161,13 +157,7 @@
 .reduced-motion .region-transition { transition-duration: 0s; translate: 0 0; }
 .voyage-hud .action-book-card.new-card { border-color: #80b5a5; }
 .voyage-header { height: auto; align-items: flex-start; }
-.voyage-status-badges { flex-direction: row; margin-top: 21px; }
-.voyage-sanity-track { position: relative; width: 240px; height: 4px; margin-top: 6px; background-color: #253d3c; }
-.voyage-sanity-fill { height: 4px; background-color: #80b5a5; }
 .voyage-utilities Button { flex-direction: row; align-items: center; }
-.node-options-scroll { max-height: 500px; min-height: 0; }
-.voyage-navigation { max-height: 78%; }
-.node-options-scroll > .unity-scroll-view__content-viewport { min-height: 0; }
 .voyage-hud .node-choice-title { white-space: normal; }
 .reward-open .voyage-navigation { max-width: 94%; max-height: 88%; }
 .reward-open .destination-panel > .primary, .reward-open .destination-panel > .secondary { min-width: 270px; white-space: nowrap; }
@@ -185,3 +175,32 @@
 .perilous-badge SeaUiArt { width: 24px; height: 24px; }
 .perilous-label, .reward-picks { font-size: 13px; color: #d7bd82; }
 .reward-picks { margin-bottom: 15px; }
+
+/* Layout: header facts, then the location name, then one full-height right column read top to bottom. */
+.voyage-header { top: 22px; }
+.expedition-progress { font-size: 15px; }
+.resource-strip { margin-top: 10px; flex-direction: row; align-items: center; }
+.resource-chip { height: 32px; margin-right: 10px; padding: 0 12px 0 5px; }
+.resource-chip .sanity-state { margin-left: 8px; }
+.voyage-status-seal { height: 32px; margin-right: 10px; }
+.voyage-workspace { top: 116px; bottom: 28px; }
+.location-name { margin-top: 4px; }
+.voyage-navigation.column { top: 0; bottom: 0; width: 340px; flex-direction: column; }
+.voyage-column-scroll { flex-grow: 1; flex-shrink: 1; min-height: 0; }
+.voyage-column-scroll > .unity-scroll-view__content-viewport { min-height: 0; }
+.voyage-column-scroll .unity-scroller--vertical { width: 10px; margin-left: 6px; }
+.voyage-column-scroll .unity-scroller--vertical .unity-base-slider { margin-top: 0; margin-bottom: 0; }
+.voyage-column-scroll .unity-scroller__low-button, .voyage-column-scroll .unity-scroller__high-button { display: none; }
+.voyage-column-scroll .unity-scroller--vertical .unity-base-slider__dragger { width: 6px; margin-left: 1px; }
+.voyage-navigation.column .route-list { margin-bottom: 10px; }
+.voyage-navigation.column .destination-panel { padding-right: 4px; }
+.voyage-hud .column-primary { flex-shrink: 0; margin-top: 12px; }
+.voyage-navigation.column .section-label { margin-top: 14px; margin-bottom: 6px; }
+.voyage-navigation.column .node-choice, .voyage-navigation.column .region-choice { margin-top: 0; margin-bottom: 8px; }
+.destination-panel > .secondary { margin-top: 0; margin-bottom: 8px; }
+
+/* Reward equipment detail sits in the empty space right of the card row. */
+.reward-detail { position: absolute; width: 300px; padding: 18px 20px; background-color: rgba(8,19,22,.92); border-width: 1px; border-left-width: 3px; border-color: rgba(158,135,85,.6); border-left-color: #80b5a5; }
+.reward-detail-kind { align-self: flex-start; padding: 1px 6px; font-size: 11px; color: #80b5a5; border-width: 1px; border-radius: 3px; border-color: #80b5a5; }
+.reward-detail-name { margin-top: 10px; font-size: 20px; color: #eee4c9; letter-spacing: 2px; }
+.reward-detail-body { margin-top: 10px; font-size: 15px; color: #c8d2c8; white-space: normal; }

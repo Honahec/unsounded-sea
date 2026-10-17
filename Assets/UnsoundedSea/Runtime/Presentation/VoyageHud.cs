@@ -58,6 +58,7 @@ namespace UnsoundedSea.Runtime
         }
         private void Update()
         {
+            HotkeyRelay.Poll(root, HandleKey);
             sailingPresentation?.Tick(Time.unscaledDeltaTime,
                 paused || settingsOpen || journalOpen || chartOpen || deckOpen || supportOpen || replacingReward || Session?.DebriefPending==true || Session?.RegionIntroPending==true || !string.IsNullOrEmpty(saveError) || !string.IsNullOrEmpty(loadError),
                 GameSettings.ReducedMotion);
@@ -69,22 +70,21 @@ namespace UnsoundedSea.Runtime
             root?.UnregisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
             root?.Clear();
         }
-        private void OnKey(KeyDownEvent evt)
+        private void OnKey(KeyDownEvent evt) { if (HotkeyRelay.Dispatch(root, evt.keyCode, HandleKey)) evt.StopImmediatePropagation(); }
+        private bool HandleKey(KeyCode key)
         {
             if(Session?.DebriefPending==true||Session?.RegionIntroPending==true)
             {
-                if(evt.keyCode==KeyCode.Escape)DismissFlow();
-                if(evt.keyCode!=KeyCode.Tab&&evt.keyCode!=KeyCode.Return&&evt.keyCode!=KeyCode.KeypadEnter&&evt.keyCode!=KeyCode.Space)evt.StopImmediatePropagation();
-                return;
+                if(key==KeyCode.Escape)DismissFlow();
+                return key!=KeyCode.Tab&&key!=KeyCode.Return&&key!=KeyCode.KeypadEnter&&key!=KeyCode.Space;
             }
             if(replacingReward)
             {
-                if(evt.keyCode==KeyCode.Escape)CancelReplacement();
-                if(evt.keyCode!=KeyCode.Tab&&evt.keyCode!=KeyCode.Return&&evt.keyCode!=KeyCode.KeypadEnter&&evt.keyCode!=KeyCode.Space&&evt.keyCode!=KeyCode.LeftArrow&&evt.keyCode!=KeyCode.RightArrow&&evt.keyCode!=KeyCode.UpArrow&&evt.keyCode!=KeyCode.DownArrow)evt.StopImmediatePropagation();
-                return;
+                if(key==KeyCode.Escape)CancelReplacement();
+                return key!=KeyCode.Tab&&key!=KeyCode.Return&&key!=KeyCode.KeypadEnter&&key!=KeyCode.Space&&key!=KeyCode.LeftArrow&&key!=KeyCode.RightArrow&&key!=KeyCode.UpArrow&&key!=KeyCode.DownArrow;
             }
-            if (settingsOpen || root.panel?.focusController.focusedElement is TextField) return;
-            if (evt.keyCode == KeyCode.Escape)
+            if (settingsOpen || root.panel?.focusController.focusedElement is TextField) return false;
+            if (key == KeyCode.Escape)
             {
                 if (supportOpen) supportOpen = false;
                 else if (deckOpen) deckOpen = false;
@@ -92,25 +92,24 @@ namespace UnsoundedSea.Runtime
                 else if (chartOpen && !paused) chartOpen = false;
                 else paused = !paused;
             }
-            else if (deckOpen && evt.keyCode == KeyCode.S)
+            else if (deckOpen && key == KeyCode.S)
             {
                 var save = root.Q<Button>("action-book-save");
-                if (save?.enabledSelf != true) return;
+                if (save?.enabledSelf != true) return false;
                 actionBookSave?.Invoke();
-                evt.StopPropagation();
-                return;
+                return true;
             }
-            else if (evt.keyCode == KeyCode.B)
+            else if (key == KeyCode.B)
             {
                 if (deckOpen) deckOpen = false;
-                else if (supportOpen || paused || journalOpen || chartOpen || Session?.Phase == VoyagePhase.Reward) return;
+                else if (supportOpen || paused || journalOpen || chartOpen || Session?.Phase == VoyagePhase.Reward) return false;
                 else deckOpen = true;
             }
-            else if (deckOpen || supportOpen) return;
-            else if (evt.keyCode == KeyCode.M && !paused && !journalOpen && Session?.Phase != VoyagePhase.Sailing) chartOpen = !chartOpen;
-            else if (evt.keyCode == KeyCode.J && !paused) journalOpen = !journalOpen;
-            else return;
-            Refresh(); evt.StopPropagation();
+            else if (deckOpen || supportOpen) return false;
+            else if (key == KeyCode.M && !paused && !journalOpen && Session?.Phase != VoyagePhase.Sailing) chartOpen = !chartOpen;
+            else if (key == KeyCode.J && !paused) journalOpen = !journalOpen;
+            else return false;
+            Refresh(); return true;
         }
         private static VisualElement Element(string style)
         {
@@ -222,6 +221,18 @@ namespace UnsoundedSea.Runtime
 
             var navigation = Element("voyage-navigation");
             navigation.EnableInClassList("choosing-route", session.Phase == VoyagePhase.ChoosingRoute);
+            // Ordinary node states use one full-height column read top to bottom; sailing and rewards keep their centred layouts.
+            var useColumn = session.Phase != VoyagePhase.Sailing && session.Phase != VoyagePhase.Reward;
+            navigation.EnableInClassList("column", useColumn);
+            VisualElement host = navigation;
+            if (useColumn)
+            {
+                var column = new ScrollView(ScrollViewMode.Vertical) { name = "voyage-column-scroll" };
+                column.AddToClassList("voyage-column-scroll");
+                column.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+                navigation.Add(column); ScrollWheel.ForwardFrom(navigation, column);
+                host = column;
+            }
             if (!chartOpen && session.Phase == VoyagePhase.ChoosingRoute)
             {
                 var routes = Element("route-list");
@@ -243,15 +254,18 @@ namespace UnsoundedSea.Runtime
                     choice.EnableInClassList("selected", chosen);
                     routes.Add(choice);
                 }
-                navigation.Add(routes);
+                host.Add(routes);
             }
             var destinationPanel = Element("destination-panel");
             BuildDestination(destinationPanel, session, chart);
-            if(session.Phase==VoyagePhase.Arrived || session.Phase==VoyagePhase.ChoosingRoute&&session.CanEditDeck)
-            {
-                var nodeScroll=new ScrollView(ScrollViewMode.Vertical){name="node-options-scroll"};nodeScroll.AddToClassList("node-options-scroll");nodeScroll.Add(destinationPanel);navigation.Add(nodeScroll);ScrollWheel.ForwardFrom(navigation,nodeScroll);
-            }
-            else navigation.Add(destinationPanel);
+            host.Add(destinationPanel);
+            if (useColumn)
+                foreach (var id in new[] { "set-sail", "arrival-investigate", "resume-encounter", "arrival-continue", "voyage-finish" })
+                {
+                    var primary = destinationPanel.Q<Button>(id);
+                    if (primary == null) continue;
+                    primary.RemoveFromHierarchy(); primary.AddToClassList("column-primary"); navigation.Add(primary);
+                }
             workspace.Add(navigation);
             root.Add(workspace);
             if (!string.IsNullOrEmpty(notice))
@@ -418,15 +432,54 @@ namespace UnsoundedSea.Runtime
                 cards.Add(button);
             }
             panel.Add(cards);
+            // Equipment has no card face, so hovering or focusing it shows its effect in the empty right-hand space.
+            var detail = Element("reward-detail"); detail.name = "reward-detail";
+            var detailKind = Text("装备", "reward-detail-kind"); var detailName = Text("", "reward-detail-name"); var detailBody = Text("", "reward-detail-body");
+            detail.Add(detailKind); detail.Add(detailName); detail.Add(detailBody);
+            void ShowDetail(ItemSpec shown)
+            {
+                if (shown == null) { detail.style.display = DisplayStyle.None; return; }
+                detailName.text = shown.Name;
+                var tag = BossApplicability.ItemLabel(shown);
+                detailBody.text = shown.Description + (string.IsNullOrEmpty(tag) ? "" : "\n\n" + tag);
+                detail.style.display = DisplayStyle.Flex;
+            }
+            var selectedItem = session.RewardItems.FirstOrDefault(x => selectedReward == "item:" + x.Id);
+            ShowDetail(selectedItem);
+            root.Add(detail);
+            // Place beside the card row when the screen has room, otherwise below the reward actions (narrow ratios).
+            void PlaceDetail(GeometryChangedEvent _)
+            {
+                var row = cards.worldBound; var width = root.resolvedStyle.width;
+                if (float.IsNaN(width) || row.width <= 0) return;
+                var room = width - row.xMax - 56;
+                if (room >= 220)
+                {
+                    detail.style.left = row.xMax + 28; detail.style.width = Mathf.Min(320, room);
+                    detail.style.top = row.center.y; detail.style.translate = new Translate(0, Length.Percent(-50));
+                }
+                else
+                {
+                    var below = panel.worldBound;
+                    detail.style.width = 320; detail.style.left = Mathf.Max(24, row.center.x - 160);
+                    detail.style.top = below.yMax + 14; detail.style.translate = new Translate(0, 0);
+                }
+            }
+            cards.RegisterCallback<GeometryChangedEvent>(PlaceDetail);
+            panel.RegisterCallback<GeometryChangedEvent>(PlaceDetail);
             foreach (var item in session.RewardItems)
             {
                 var id = item.Id;
+                var shownItem = item;
                 var itemButton = Action("reward-item-" + id, string.Empty, "reward-item",
                     () => { selectedReward = "item:" + id; Refresh(); }, saved);
                 itemButton.EnableInClassList("selected", selectedReward == "item:" + id);
                 itemButton.Add(Text("装备", "reward-item-kind"));
                 itemButton.Add(Text(item.Name, "reward-item-name"));
-                itemButton.tooltip = item.Name + "：" + item.Description;
+                itemButton.RegisterCallback<PointerEnterEvent>(_ => ShowDetail(shownItem));
+                itemButton.RegisterCallback<FocusInEvent>(_ => ShowDetail(shownItem));
+                itemButton.RegisterCallback<PointerLeaveEvent>(_ => ShowDetail(selectedItem));
+                itemButton.RegisterCallback<FocusOutEvent>(_ => ShowDetail(selectedItem));
                 var applicability = BossApplicability.ItemLabel(item);
                 if (!string.IsNullOrEmpty(applicability)) UiKeywords.Attach(itemButton, applicability);
                 panel.Add(itemButton);
@@ -710,15 +763,10 @@ namespace UnsoundedSea.Runtime
         private static void SanityResource(VisualElement parent, VoyageSession session)
         {
             var chip = Element("resource-chip"); chip.AddToClassList("sanity-chip");
-            chip.pickingMode = PickingMode.Position;
-            var state = SanityGauge.State(session.Sanity);
-            chip.tooltip = string.IsNullOrEmpty(state) ? SanityGauge.RuleTooltip : state + "\n" + SanityGauge.RuleTooltip;
+            chip.pickingMode = PickingMode.Position; chip.tooltip = "理智\n" + SanityGauge.RuleTooltip;
             var icon = new SeaUiArt("eye"); icon.AddToClassList("resource-icon"); chip.Add(icon);
-            var gauge = Element("sanity-gauge");
-            var fill = Element("sanity-gauge-fill"); fill.style.width = Length.Percent(session.Sanity / 30f * 100f); gauge.Add(fill);
-            SanityGauge.AddMarks(gauge, 30);
-            chip.Add(gauge);
-            chip.Add(Text($"{session.Sanity}/30" + (string.IsNullOrEmpty(state) ? "" : " · " + state), "resource-value"));
+            chip.Add(Text($"{session.Sanity}/30", "resource-value"));
+            var state = SanityGauge.StateTag(session.Sanity); if (state != null) chip.Add(state);
             parent.Add(chip);
         }
 

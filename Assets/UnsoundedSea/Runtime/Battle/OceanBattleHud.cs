@@ -70,40 +70,41 @@ namespace UnsoundedSea.Runtime
             playedCardFeedback = before.Hand.FirstOrDefault(card => card.InstanceId == command.cardInstanceId)?.Definition.Name;
         }
 
-        private void Key(KeyDownEvent evt)
+        private void Key(KeyDownEvent evt) { if (HotkeyRelay.Dispatch(root, evt.keyCode, HandleKey)) evt.StopPropagation(); }
+        private bool HandleKey(KeyCode key)
         {
-            if (pointerHeld) { if (evt.keyCode == KeyCode.Escape) CancelDrag(); evt.StopImmediatePropagation(); return; }
-            if (director.View?.PendingChoice != null) { evt.StopPropagation(); return; }
+            if (pointerHeld) { if (key == KeyCode.Escape) CancelDrag(); return true; }
+            if (director.View?.PendingChoice != null) { return true; }
             if (inspectedCard != 0)
             {
-                if (evt.keyCode == KeyCode.Escape) CloseInspection();
-                evt.StopPropagation(); return;
+                if (key == KeyCode.Escape) CloseInspection();
+                return true;
             }
-            if (evt.keyCode == KeyCode.B) ToggleActionBook();
-            else if (bookOpen) { if (evt.keyCode != KeyCode.Escape) return; ToggleActionBook(); }
-            else if (evt.keyCode == KeyCode.Escape && chartOpen) CloseChart();
-            else if (evt.keyCode == KeyCode.Escape && !string.IsNullOrEmpty(selectedSupport)) { selectedSupport = null; Render(); }
-            else if (evt.keyCode == KeyCode.Escape && selectedEncounterCard != 0) { selectedEncounterCard = 0; Render(); }
-            else if (evt.keyCode == KeyCode.M && !showSettings) ToggleChart();
-            else if (evt.keyCode == KeyCode.J && !showSettings)
+            if (key == KeyCode.B) ToggleActionBook();
+            else if (bookOpen) { if (key != KeyCode.Escape) return false; ToggleActionBook(); }
+            else if (key == KeyCode.Escape && chartOpen) CloseChart();
+            else if (key == KeyCode.Escape && !string.IsNullOrEmpty(selectedSupport)) { selectedSupport = null; Render(); }
+            else if (key == KeyCode.Escape && selectedEncounterCard != 0) { selectedEncounterCard = 0; Render(); }
+            else if (key == KeyCode.M && !showSettings) ToggleChart();
+            else if (key == KeyCode.J && !showSettings)
             {
                 journalOpen = !director.Paused || !journalOpen;
                 if (director.Paused != journalOpen) director.SetPaused(journalOpen); else Render();
             }
-            else if (evt.keyCode == KeyCode.D)
+            else if (key == KeyCode.D)
             {
                 var focused = root.panel?.focusController.focusedElement as VisualElement;
                 if (focused == null || focused.name == null || !focused.name.StartsWith("card-", StringComparison.Ordinal) ||
-                    !int.TryParse(focused.name.Substring(5), out var id) || !director.View.Hand.Any(card => card.InstanceId == id)) return;
+                    !int.TryParse(focused.name.Substring(5), out var id) || !director.View.Hand.Any(card => card.InstanceId == id)) return false;
                 inspectedCard = id; Render();
             }
-            else if (evt.keyCode == KeyCode.Escape)
+            else if (key == KeyCode.Escape)
             {
                 if (showSettings) { showSettings = false; Render(); }
                 else { journalOpen = false; director.SetPaused(!director.Paused); }
             }
-            else return;
-            evt.StopPropagation();
+            else return false;
+            return true;
         }
         private void ToggleActionBook()
         {
@@ -723,17 +724,15 @@ namespace UnsoundedSea.Runtime
         private static void Vital(VisualElement parent, string title, int value, int max, string cls, int guard, string guardName)
         {
             var el = Box("vital"); el.AddToClassList(cls);
-            var row = Box("vital-heading"); row.Add(Text(title, "vital-label"));
+            var row = Box("vital-heading");
+            var icon = new SeaUiArt(cls == "sanity" ? "eye" : "heart") { pickingMode = PickingMode.Ignore }; icon.AddToClassList("vital-icon"); row.Add(icon);
+            row.Add(Text(title, "vital-label"));
+            if (cls == "sanity") { var state = SanityGauge.StateTag(value); if (state != null) row.Add(state); }
             var number = Text($"{value} / {max}", "vital-value"); number.name = "battle-" + cls; row.Add(number); el.Add(row);
             var track = Box("vital-track"); var fill = Box("vital-fill");
             fill.style.width = Length.Percent(max > 0 ? Mathf.Clamp01((float)value / max) * 100 : 0);
             track.Add(fill);
-            if (cls == "sanity")
-            {
-                UiRules.SanityTicks(track, max);
-                el.tooltip = UiRules.SanityThresholds;
-                row.Add(Text(SanityGauge.State(value), "sanity-state"));
-            }
+            if (cls == "sanity") { SanityGauge.AddMarks(track, max); el.tooltip = SanityGauge.RuleTooltip; }
             el.Add(track);
             var protection = Text(guard > 0 ? $"{guardName}  {guard}" : string.Empty, "vital-protection");
             protection.name = "battle-" + cls + "-guard"; el.Add(protection);
@@ -797,6 +796,7 @@ namespace UnsoundedSea.Runtime
         private static string KnowledgeLabel(KnowledgeLevel level) => level == KnowledgeLevel.Verified ? "已验证" : level == KnowledgeLevel.Observed ? "已观察" : level == KnowledgeLevel.Rumored ? "传闻" : "未知";
         private void LateUpdate()
         {
+            HotkeyRelay.Poll(root, HandleKey);
             RenderedFrames++;
             PositionLabels();
             TickMotion();

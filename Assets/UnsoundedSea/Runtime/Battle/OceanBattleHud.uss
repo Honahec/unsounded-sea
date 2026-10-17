@@ -29,15 +29,18 @@
 .action-budget { flex-direction: row; justify-content: space-between; align-items: center; min-height: 42px; margin-bottom: 10px; }
 .action-label { font-size: 15px; color: #c6b58e; }
 .action-value { font-size: 23px; color: #eee4c9; text-shadow: 0 2px 5px #040a0c; }
-.battle-vitals { position: absolute; left: 36px; bottom: 20px; width: 260px; }
-.vital { margin-bottom: 6px; }
-.vital-heading { flex-direction: row; align-items: center; justify-content: space-between; min-height: 30px; }
+.battle-vitals { position: absolute; left: 36px; bottom: 24px; width: 270px; }
+.vital { margin-top: 12px; }
+.vital:first-child { margin-top: 0; }
+.vital-heading { flex-direction: row; align-items: center; min-height: 30px; }
+.vital-icon { width: 22px; height: 22px; margin-right: 8px; flex-shrink: 0; }
 .vital-label { font-size: 16px; color: #cbd1c5; text-shadow: 0 2px 5px #040a0c; }
-.vital-value { font-size: 21px; color: #eee4c9; text-shadow: 0 2px 5px #040a0c; }
-.vital-track { height: 3px; margin-top: 4px; background-color: rgba(128,181,165,.25); }
-.vital-fill { height: 3px; background-color: #ac7566; }
+.vital-heading .sanity-state { margin-left: 8px; }
+.vital-value { margin-left: auto; font-size: 21px; color: #eee4c9; white-space: nowrap; text-shadow: 0 2px 5px #040a0c; }
+.vital-track { position: relative; height: 6px; margin-top: 6px; overflow: visible; border-radius: 3px; background-color: rgba(4,12,14,.75); }
+.vital-fill { height: 6px; border-radius: 3px; background-color: #ac7566; }
 .sanity .vital-fill { background-color: #80b5a5; }
-.vital-protection { min-height: 21px; padding-top: 4px; font-size: 13px; color: #b6c9b7; text-shadow: 0 2px 5px #040a0c; }
+.vital-protection { min-height: 18px; padding-top: 4px; font-size: 13px; color: #b6c9b7; text-shadow: 0 2px 5px #040a0c; }
 .hand { position: absolute; left: 310px; right: 310px; bottom: -140px; height: 440px; }
 .hand .unity-scroll-view__content-viewport { overflow: hidden; }
 .hand .unity-scroll-view__content-container { min-width: 100%; height: 434px; padding: 0 15px; }
@@ -129,8 +132,6 @@
 .sea-card { transition-duration: .2s; transition-timing-function: ease-out-cubic; }
 .ocean-ui.reduced-motion .end-turn SeaUiArt, .ocean-ui.reduced-motion .sea-card { transition-duration: 0s; }
 
-.sanity-state { margin-left: 8px; color: #80b5a5; font-size: 12px; }
-.sanity .vital-track { margin-bottom: 18px; }
 .watched { min-height: 40px; flex-direction: row; align-items: center; color: #80b5a5; }
 .watched SeaUiArt { width: 24px; height: 24px; margin-right: 7px; }
 .watched-value { font-size: 18px; color: #eee4c9; }
