@@ -11,6 +11,9 @@ namespace UnsoundedSea.Runtime
     {
         public DeckMotionStyle style;
         [Range(0.5f, 1.5f)] public float amplitude = 1;
+        [Range(0.5f, 2.5f)] public float idleAmplitude = 1.8f;
+        [Range(0.5f, 2.5f)] public float attackAmplitude = 1.5f;
+        [Range(0.5f, 2.5f)] public float hitAmplitude = 1.6f;
         [Min(0.4f)] public float attackDuration = 1.45f;
         [Min(0.3f)] public float hitDuration = 0.75f;
         // Zero endpoint tangents give a held anticipation, fast release and a soft overshoot.
@@ -126,10 +129,12 @@ namespace UnsoundedSea.Runtime
             var a = t < 0 ? 0 : strike.Evaluate(t);
             var f = t < 0 ? 0 : followThrough.Evaluate(t);
             ActionImpact = t < .32f || t > .62f || observing ? 0 : Mathf.Max(0, f);
+            a *= attackAmplitude; f *= attackAmplitude;
             var speed = style == DeckMotionStyle.Heavy ? 1.05f : style == DeckMotionStyle.Uncanny ? .87f : 1.65f;
-            var breath = Mathf.Sin(age * speed + phase);
-            var sway = Mathf.Sin(age * .67f + phase * 1.3f);
-            var lag = Mathf.Sin(age * speed + phase - .55f);
+            var breath = Mathf.Sin(age * speed + phase) * idleAmplitude;
+            var sway = Mathf.Sin(age * .67f + phase * 1.3f) * idleAmplitude;
+            var lag = Mathf.Sin(age * speed + phase - .55f) * idleAmplitude;
+            var hit = strength * hitAmplitude;
             var weight = reduced ? 0 : amplitude * (1 - death);
             var arm = style == DeckMotionStyle.Veiled ? .035f : style == DeckMotionStyle.Ritual ? .28f : .65f;
             float twist = style == DeckMotionStyle.Skirmisher ? 11 : style == DeckMotionStyle.Heavy ? 3 : 6;
@@ -141,15 +146,15 @@ namespace UnsoundedSea.Runtime
                 Vector3 angles;
                 switch (joint.role)
                 {
-                    case 0: angles = new Vector3(breath * .65f + a * lean * .45f - strength * 3.5f, a * twist * .3f, sway * .65f + strength * 1.2f); break;
-                    case 1: angles = new Vector3(lag * .95f + f * lean * .55f - strength * 5, a * twist * .7f, -sway * .35f - strength * 2); break;
+                    case 0: angles = new Vector3(breath * .65f + a * lean * .45f - hit * 3.5f, a * twist * .3f, sway * .65f + hit * 1.2f); break;
+                    case 1: angles = new Vector3(lag * .95f + f * lean * .55f - hit * 5, a * twist * .7f, -sway * .35f - hit * 2); break;
                     case 2: angles = new Vector3(lag * .25f + f * 1.2f, 0, 0); break;
-                    case 3: angles = new Vector3(-lag * .55f - f * 2 + strength * 2, -a * 2, sway * .3f); break;
-                    case 4: angles = new Vector3(-breath * .35f - f + strength * 2.5f, Mathf.Sin(age * .43f + phase) * 1.4f, -sway * .4f); break;
+                    case 3: angles = new Vector3(-lag * .55f - f * 2 + hit * 2, -a * 2, sway * .3f); break;
+                    case 4: angles = new Vector3(-breath * .35f - f + hit * 2.5f, Mathf.Sin(age * .43f + phase) * 1.4f * idleAmplitude, -sway * .4f); break;
                     case 5: angles = new Vector3(-f * 3 * arm, f * 2 * arm, lag * .4f * arm); break;
                     case 6: angles = new Vector3(-a * 5 * arm, -f * 2 * arm, -breath * .5f * arm); break;
-                    case 7: angles = new Vector3((lag * 1.2f - f * 12 + strength * 3) * arm, 0, -f * 3 * arm); break;
-                    case 8: angles = new Vector3((breath - a * 22 + strength * 4) * arm, -a * 5 * arm, f * 4 * arm); break;
+                    case 7: angles = new Vector3((lag * 1.2f - f * 12 + hit * 3) * arm, 0, -f * 3 * arm); break;
+                    case 8: angles = new Vector3((breath - a * 22 + hit * 4) * arm, -a * 5 * arm, f * 4 * arm); break;
                     case 9: angles = new Vector3((-lag - f * 8) * arm, 0, 0); break;
                     default: angles = new Vector3((-breath - f * 16) * arm, 0, 0); break;
                 }

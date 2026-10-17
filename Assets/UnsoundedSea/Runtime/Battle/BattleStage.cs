@@ -71,6 +71,13 @@ namespace UnsoundedSea.Runtime
             {
                 var actor = new GameObject(view.Enemies[i].Name).AddComponent<BattleActorView>();
                 actor.transform.SetParent(view.Enemies.Count == 1 && singleActorAnchor != null ? singleActorAnchor : actorAnchors[i], false);
+                var placement = actor.transform.parent.GetComponent<BattleAnchor>();
+                if (placement == null || placement.environment == BattleEnvironment.Deck)
+                {
+                    var up = actor.transform.parent.up;
+                    var facing = Vector3.ProjectOnPlane(battleCamera.transform.position - actor.transform.position, up);
+                    if (facing.sqrMagnitude > .0001f) actor.transform.rotation = Quaternion.LookRotation(facing, up);
+                }
                 actor.Bind(owner, view.Enemies[i].Id, owner.scenario.ActorPrefab(i), selectionMaterial);
                 if(actor.IsSeaActor&&water!=null)actor.ConfigureSeaEmergence(water.SurfaceHeight);
                 actor.ConfigureMotion(placeholderCombatMotion);

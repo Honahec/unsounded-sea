@@ -43,7 +43,8 @@ public static class DeckEnemyPlacement
         var type=AppDomain.CurrentDomain.GetAssemblies().Select(a=>a.GetType("Unity.Pipeline.Editor.Commands.Capture.CaptureCommands")).First(t=>t!=null);
         File.WriteAllBytes(Dir+"/"+name+".png",(byte[])type.GetMethod("EncodeScreenToPng",All).Invoke(null,new object[]{Screen.width,Screen.height}));
     }
-    public static async Task<object> Verify()
+    public static Task<object> VerifyFacing()=>Verify(true);
+    public static async Task<object> Verify(bool allOrdinary=false)
     {
         Check(Application.isPlaying,"Enter Play first.");Directory.CreateDirectory(Dir);
         var viewType=typeof(Editor).Assembly.GetType("UnityEditor.GameView");var view=EditorWindow.GetWindow(viewType);var size=(int)viewType.GetProperty("selectedSizeIndex",All).GetValue(view);
@@ -56,12 +57,13 @@ public static class DeckEnemyPlacement
             var prefab=AssetDatabase.LoadAssetAtPath<BattleStage>(Path);
             Check(prefab.singleActorAnchor==prefab.actorAnchors[1],"Solo slot is not the original right-hand slot.");
             Check(prefab.actorAnchors[0].localPosition==new Vector3(-1.15f,1.45f,1.3f)&&prefab.actorAnchors[1].localPosition==new Vector3(1.15f,1.45f,2.3f),"Original paired layout changed.");
-            foreach(var encounter in new[]{"voyage-fog-2","voyage-fog-4"})
+            var encounters=allOrdinary?new[]{"fog","bones","inverted","fleet","abyss"}.SelectMany(region=>Enumerable.Range(0,5).Select(i=>"voyage-"+region+"-"+i)).ToArray():new[]{"voyage-fog-2","voyage-fog-4"};
+            foreach(var encounter in encounters)
             {
                 VoyageRuntime.StartDebugEncounter(encounter,"fog",false);
                 await Wait(()=>!GameSceneLoader.IsLoading&&UnityEngine.Object.FindAnyObjectByType<BattleDirector>()?.Stage!=null);
                 var director=UnityEngine.Object.FindAnyObjectByType<BattleDirector>();var stage=director.Stage;
-                foreach(var dimensions in new[]{new Vector2Int(1920,1080),new Vector2Int(2560,1080),new Vector2Int(1600,1200)})
+                foreach(var dimensions in allOrdinary?new[]{new Vector2Int(1920,1080)}:new[]{new Vector2Int(1920,1080),new Vector2Int(2560,1080),new Vector2Int(1600,1200)})
                 {
                     await Resize(dimensions.x,dimensions.y);Physics.SyncTransforms();
                     var root=director.GetComponent<UIDocument>().rootVisualElement;var labels=new List<Rect>();
@@ -69,6 +71,8 @@ public static class DeckEnemyPlacement
                     {
                         var actor=stage.Actors[i];var expected=stage.Actors.Count==1?stage.actorAnchors[1]:stage.actorAnchors[i];
                         Check(actor.transform.parent==expected,"Actor uses the wrong anchor.");
+                        var facing=Vector3.ProjectOnPlane(stage.battleCamera.transform.position-actor.transform.position,actor.transform.up);
+                        Check(Vector3.Angle(actor.transform.forward,facing)<2,"Deck enemy does not face the player camera.");
                         var collider=actor.GetComponent<BoxCollider>();var ray=new Ray(stage.battleCamera.transform.position,collider.bounds.center-stage.battleCamera.transform.position);
                         Check(collider.Raycast(ray,out _,100),"Enemy collider is not selectable.");
                         var label=root.Q<Button>("actor-"+actor.EnemyId);Check(label!=null,"Missing enemy label.");var rect=label.worldBound;
@@ -82,7 +86,7 @@ public static class DeckEnemyPlacement
             Check(errors.Count==0,string.Join("; ",errors));
             var after=Directory.GetFiles(Application.persistentDataPath,"voyage*.json*").ToDictionary(p=>p,File.ReadAllBytes);
             Check(formal.Count==after.Count&&formal.All(p=>after.TryGetValue(p.Key,out var bytes)&&p.Value.SequenceEqual(bytes)),"Formal saves changed.");
-            var report=new{success=true,results,runtimeErrors=errors.Count,formalSavesUnchanged=true};File.WriteAllText(Dir+"/result.json",JsonConvert.SerializeObject(report,Formatting.Indented));return report;
+            var report=new{success=true,results,runtimeErrors=errors.Count,formalSavesUnchanged=true};File.WriteAllText(Dir+(allOrdinary?"/facing-result.json":"/result.json"),JsonConvert.SerializeObject(report,Formatting.Indented));return report;
         }
         finally
         {
