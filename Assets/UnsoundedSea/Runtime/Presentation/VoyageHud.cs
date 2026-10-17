@@ -659,12 +659,12 @@ namespace UnsoundedSea.Runtime
                 sheet.Add(Text("战后小结","destination-title"));
                 var scroll=new ScrollView(ScrollViewMode.Vertical){name="debrief-scroll"};scroll.AddToClassList("debrief-scroll");
                 var result=Session.Debrief;
-                scroll.Add(Text("承伤","section-label"));
+                scroll.Add(Text("战损","section-label"));
                 scroll.Add(Text($"生命 {result.HealthDamage?.ToString()??"未记录"} · 理智 {result.SanityDamage?.ToString()??"未记录"}","body"));
-                scroll.Add(Text("用掉的道具","section-label"));
+                scroll.Add(Text("消耗道具","section-label"));
                 scroll.Add(Text(result.SpentItems.Count==0?"无":string.Join("、",result.SpentItems.GroupBy(x=>x).Select(x=>SupportCatalog.Item(x.Key).Name+" ×"+x.Count())),"body"));
-                scroll.Add(Text("归档的证据","section-label"));
-                if(result.ArchivedEvidence.Count==0)scroll.Add(Text("本场没有形成可归档的已验证证据。","body"));
+                scroll.Add(Text("归档证据","section-label"));
+                if(result.ArchivedEvidence.Count==0)scroll.Add(Text("无新增证据","body"));
                 foreach(var evidence in result.ArchivedEvidence)scroll.Add(Text(evidence.Text+"\n来源："+evidence.Source,"body"));
                 sheet.Add(scroll);ScrollWheel.ForwardFrom(sheet,scroll);
             }
