@@ -14,7 +14,7 @@ namespace UnsoundedSea.Runtime
         public BattleStage Stage { get; private set; }
         public string SelectedEnemy { get; private set; }
         public bool Paused { get; private set; }
-        public bool Busy => Time.unscaledTime < feedbackUntil || (Stage != null && Stage.HasPendingSeaAttack);
+        public bool Busy => Time.unscaledTime < feedbackUntil || (Stage != null && (Stage.HasPendingSeaAttack || Stage.HasPendingDeckMotion));
         public string Notice { get; private set; }
         public event Action Changed;
         public event Action<BattleView, BattleView, BattleCommand> Resolved;

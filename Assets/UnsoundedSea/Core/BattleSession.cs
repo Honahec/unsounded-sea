@@ -26,6 +26,7 @@ namespace UnsoundedSea.Core
         private readonly Dictionary<string, int> toolUses;
         private readonly HashSet<string> usedSupports = new HashSet<string>(StringComparer.Ordinal);
         private readonly List<BattleCommand> history = new List<BattleCommand>();
+        private readonly List<ResolvedEnemyAction> resolvedEnemyActions = new List<ResolvedEnemyAction>();
         private readonly List<string> log = new List<string>();
         private readonly KnowledgeState knowledge = new KnowledgeState();
         private readonly IEncounterObjective objective;
@@ -68,6 +69,7 @@ namespace UnsoundedSea.Core
                 RefreshCardViews();
                 return new BattleView
                 {
+                    ResolvedEnemyActions = resolvedEnemyActions.ToList().AsReadOnly(),
                     Phase = phase, Turn = turn, Health = health, Sanity = sanity, Actions = actions, Block = block, Ward = ward, Watched = watched,
                     BossKind = bossKind, BossStage = boss?.Stage ?? 0, BossStatus = boss?.Status ?? "",
                     EncounterTargets = boss?.AllTargets ?? EmptyTargets,
@@ -153,10 +155,12 @@ namespace UnsoundedSea.Core
                     actions -= taskCost; sceneDiscount = 0; taskUsed = true; sceneActionUsed = true; AdvanceObjective(1); TriggerSceneAction(); CheckOutcome();
                     break;
                 case CommandKind.EndTurn:
+                    resolvedEnemyActions.Clear();
                     ResolveTurn();
                     break;
                 default: return Reject("未知操作。");
             }
+            if (command.kind != CommandKind.EndTurn) resolvedEnemyActions.Clear();
             history.Add(command);
             return new CommandResult(true);
         }
@@ -203,7 +207,7 @@ namespace UnsoundedSea.Core
             else foreach (var enemy in enemies.Where(x => x.Health > 0))
             {
                 if (enemy.Interrupted) { Record($"{enemy.Definition.Name}的行动已被打断。"); continue; }
-                ApplyThreat(enemy.ActualIntent.Channel, enemy.ActualIntent.Amount, enemy.Definition.Name, Describe(enemy.ActualIntent));
+                ApplyEnemyThreat(enemy, enemy.ActualIntent.Channel, enemy.ActualIntent.Amount, Describe(enemy.ActualIntent));
                 if (health == 0 || sanity == 0) { CheckOutcome(); return; }
             }
             retained.Clear();

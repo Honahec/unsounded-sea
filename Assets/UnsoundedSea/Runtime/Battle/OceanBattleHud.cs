@@ -260,7 +260,7 @@ namespace UnsoundedSea.Runtime
                     {
                         plate.style.left = previousPosition.x; plate.style.top = previousPosition.y;
                     }
-                    plate.RegisterCallback<GeometryChangedEvent>(_ => PositionLabels());
+                    // Projection runs in LateUpdate; a geometry callback here recursively relayouts moving labels.
                     plate.Add(Text(enemy.Name, "actor-name"));
                     if (!hideHealth)
                     {

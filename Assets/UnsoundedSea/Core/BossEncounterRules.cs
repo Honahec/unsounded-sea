@@ -19,6 +19,13 @@ namespace UnsoundedSea.Core
                 enemy.Confirmed);
         }
 
+        private void ApplyEnemyThreat(EnemyState enemy, DamageChannel channel, int amount, string description = null)
+        {
+            if (health == 0 || sanity == 0) return;
+            resolvedEnemyActions.Add(new ResolvedEnemyAction(enemy.Definition.Id, channel, amount));
+            ApplyThreat(channel, amount, enemy.Definition.Name, description);
+        }
+
         private void ApplyThreat(DamageChannel channel, int amount, string source, string description = null)
         {
             if (health == 0 || sanity == 0) return;
@@ -219,10 +226,10 @@ namespace UnsoundedSea.Core
                 if (main.Health > 0 && !main.Interrupted)
                 {
                     if (main.ActualIntent.Name.StartsWith("召唤")) { if (!cancelSummon) SpawnB02(); }
-                    else s.ApplyThreat(main.ActualIntent.Channel, main.ActualIntent.Amount, main.Definition.Name);
+                    else s.ApplyEnemyThreat(main, main.ActualIntent.Channel, main.ActualIntent.Amount);
                 }
                 cancelSummon = false;
-                foreach (var e in activeSummons.Where(x => !x.Interrupted)) { if (e.Definition.Id == s.enemies[2].Definition.Id) { main.Health = Math.Min(main.Definition.Health, main.Health + 6); s.Record("潮囊信使令发声囊恢复 6。"); } else s.ApplyThreat(DamageChannel.Health, 3, e.Definition.Name); }
+                foreach (var e in activeSummons.Where(x => !x.Interrupted)) { if (e.Definition.Id == s.enemies[2].Definition.Id) { s.resolvedEnemyActions.Add(new ResolvedEnemyAction(e.Definition.Id, DamageChannel.Sanity, 0)); main.Health = Math.Min(main.Definition.Health, main.Health + 6); s.Record("潮囊信使令发声囊恢复 6。"); } else s.ApplyEnemyThreat(e, DamageChannel.Health, 3); }
             }
             private void SpawnB02()
             {
@@ -236,20 +243,20 @@ namespace UnsoundedSea.Core
                 var main = s.enemies[0];
                 if (!main.Interrupted)
                 {
-                    if (s.turn % 2 == 1) s.ApplyThreat(DamageChannel.Health, main.ActualIntent.Amount, main.Definition.Name);
-                    else { s.ApplyThreat(DamageChannel.Sanity, main.ActualIntent.Amount, main.Definition.Name); var slot = s.enemies.Skip(1).FirstOrDefault(x => x.Health == 0); if (slot != null) { slot.Health = slot.Definition.Health; RevealSummonSource(slot); } }
+                    if (s.turn % 2 == 1) s.ApplyEnemyThreat(main, DamageChannel.Health, main.ActualIntent.Amount);
+                    else { s.ApplyEnemyThreat(main, DamageChannel.Sanity, main.ActualIntent.Amount); var slot = s.enemies.Skip(1).FirstOrDefault(x => x.Health == 0); if (slot != null) { slot.Health = slot.Definition.Health; RevealSummonSource(slot); } }
                 }
-                foreach (var e in activeMoths.Where(x => !x.Interrupted)) s.ApplyThreat(DamageChannel.Sanity, e.ActualIntent.Amount, e.Definition.Name);
+                foreach (var e in activeMoths.Where(x => !x.Interrupted)) s.ApplyEnemyThreat(e, DamageChannel.Sanity, e.ActualIntent.Amount);
             }
             private void ResolveFlagBearer()
             {
                 var soldierWasActive = s.enemies[1].Health > 0;
                 if (!cancelMainThisTurn && !s.enemies[0].Interrupted)
-                    s.ApplyThreat(s.enemies[0].ActualIntent.Channel, s.enemies[0].ActualIntent.Amount, s.enemies[0].Definition.Name);
+                    s.ApplyEnemyThreat(s.enemies[0], s.enemies[0].ActualIntent.Channel, s.enemies[0].ActualIntent.Amount);
                 cancelMainThisTurn = false;
                 if (s.turn == 2 && s.enemies[1].Health == 0 && !cancelSummon) { s.enemies[1].Health = s.enemies[1].Definition.Health; RevealSummonSource(s.enemies[1]); }
                 cancelSummon = false;
-                if (soldierWasActive && s.enemies[1].Health > 0 && !s.enemies[1].Interrupted) s.ApplyThreat(DamageChannel.Health, s.enemies[1].ActualIntent.Amount, s.enemies[1].Definition.Name);
+                if (soldierWasActive && s.enemies[1].Health > 0 && !s.enemies[1].Interrupted) s.ApplyEnemyThreat(s.enemies[1], DamageChannel.Health, s.enemies[1].ActualIntent.Amount);
                 if (stage == 2 && --alarm == 0) { s.ApplyThreat(DamageChannel.Health, 12, "闸廊警报"); alarm = 3; }
             }
 
@@ -273,7 +280,7 @@ namespace UnsoundedSea.Core
                 {
                     var name = BaseId(e.Definition.Id).Substring("b05-guard-".Length);
                     sailBurst |= name == "sail"; eyeBurst |= name == "eye";
-                    if (e.ActualIntent.Amount > 0) s.ApplyThreat(e.ActualIntent.Channel, e.ActualIntent.Amount, e.Definition.Name);
+                    if (e.ActualIntent.Amount > 0) s.ApplyEnemyThreat(e, e.ActualIntent.Channel, e.ActualIntent.Amount);
                 }
                 summonStep++; if (summonStep % 2 == 0) s.ApplyThreat(DamageChannel.Sanity, activeAtStart == 3 ? 6 : 3, "无星余响");
                 SpawnWatcher(activeAtStart);

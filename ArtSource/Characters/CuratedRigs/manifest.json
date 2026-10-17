@@ -1,13 +1,13 @@
 {
   "date": "2026-10-17",
-  "status": "curated_binding_candidates",
+  "status": "runtime_deck_animation",
   "asset_count": 25,
   "selection_counts": {
     "rigtrials": 10,
     "hybrid": 5,
     "hyper3d": 10
   },
-  "scope": "One selected rig per ordinary humanoid; source static models, Prayer, Echo and encounter references unchanged. Combat animation deferred.",
+  "scope": "25 selected humanoid rigs now used by voyage enemy definitions; DeckActorMotion supplies bounded idle, attack and additive hit curves. Existing binding limitations remain; no model regeneration or locomotion.",
   "provider_request_provenance": {
     "endpoint": "https://api.hyper3d.com/api/v2/rigging",
     "bone_template": "unity",

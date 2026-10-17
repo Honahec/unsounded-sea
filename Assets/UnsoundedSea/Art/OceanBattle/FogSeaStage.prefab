@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8876094013962742099}
   - component: {fileID: 2942664312781876802}
+  - component: {fileID: 4321490684095721147}
   m_Layer: 0
   m_Name: FogSeaStage
   m_TagString: Untagged
@@ -59,12 +60,43 @@ MonoBehaviour:
   - {fileID: 124975955645170575}
   selectionMaterial: {fileID: 2100000, guid: 40be4d4ee9c654d378f6d07054be2b00, type: 2}
   ocean: {fileID: 1386595732245795998}
+  water: {fileID: 4321490684095721147}
   ambience: {fileID: 5649500377577269126}
   feedback: {fileID: 8831141261382360945}
   sealCue: {fileID: 8300000, guid: 39760686b332a4360bcc8dc8fde92d08, type: 3}
   impactCue: {fileID: 8300000, guid: 96f93d5de192d47ffa6d3bc586455053, type: 3}
-  fogColor: {r: 0.16, g: 0.23, b: 0.25, a: 1}
-  fogDensity: 0.032
+  sanityCue: {fileID: 0}
+  skybox: {fileID: 2100000, guid: 9ee7037a7b4b04d9cbd76e3c21fb765a, type: 2}
+  fogColor: {r: 0.24, g: 0.34, b: 0.36, a: 1}
+  fogDensity: 0.007
+  vesselHeave: 0.06
+  vesselPitch: 0.35
+  vesselRoll: 0.7
+  cameraShake: 0.035
+  vesselFollowsWater: 0
+  vesselSampleExtents: {x: 2.5, y: 7}
+  maxWavePitch: 6
+  maxWaveRoll: 9
+  vesselYaw: 1.5
+  placeholderCombatMotion: 1
+--- !u!114 &4321490684095721147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 20808376424380771}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f2272d5f5b244314bcb3c2054fbf8aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.BattleWater
+  surface: {fileID: 1386595732245795998}
+  reflectionScale: 0.5
+  reflectionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967279
+  impactSprayMaterial: {fileID: 0}
 --- !u!1 &388739343547882460
 GameObject:
   m_ObjectHideFlags: 0
@@ -385,7 +417,7 @@ GameObject:
   - component: {fileID: 3883589148412184577}
   - component: {fileID: 512456449788131449}
   - component: {fileID: 1386595732245795998}
-  m_Layer: 0
+  m_Layer: 4
   m_Name: Open ocean
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -414,7 +446,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 752712202877970734}
-  m_Mesh: {fileID: 4300000, guid: d65f31deb0bb54de3a972ddcc457c21a, type: 2}
+  m_Mesh: {fileID: 4300000, guid: 671f2ef6e8dcd42e4912ab3f2cac231a, type: 2}
 --- !u!23 &1386595732245795998
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -423,7 +455,7 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 752712202877970734}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -440,7 +472,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 4ab51dd7208234537b4d33ce537e88e9, type: 2}
+  - {fileID: 2100000, guid: 44c9f7ed09485461e8f5cfd1449f3fa1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1057,7 +1089,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.08
-  far clip plane: 220
+  far clip plane: 1800
   field of view: 52
   orthographic: 0
   orthographic size: 5
