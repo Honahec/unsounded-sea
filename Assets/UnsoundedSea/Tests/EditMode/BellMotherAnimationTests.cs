@@ -45,13 +45,35 @@ namespace UnsoundedSea.Tests
             {
                 var motion = instance.GetComponent<BellMotherRigidMotion>();
                 var bodyBefore = motion.body.localRotation;
+                var bodyHeightBefore = motion.body.localPosition.y;
                 var tentacleBefore = motion.tentacles[0].localRotation;
                 motion.PlayAttack();
                 motion.Tick(0.30f);
                 Assert.That(Quaternion.Angle(bodyBefore, motion.body.localRotation), Is.GreaterThan(1));
                 Assert.That(Quaternion.Angle(tentacleBefore, motion.tentacles[0].localRotation), Is.GreaterThan(1));
+                Assert.That(motion.body.localPosition.y, Is.LessThanOrEqualTo(bodyHeightBefore));
                 Assert.That(motion.ActionImpact, Is.GreaterThan(0));
                 Assert.That(instance.GetComponentsInChildren<SkinnedMeshRenderer>(true), Is.Empty);
+            }
+            finally { Object.DestroyImmediate(instance); }
+        }
+
+        [Test]
+        public void HitUsesHeavyRecoilWithoutBouncyOvershoot()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+            var instance = Object.Instantiate(prefab);
+            try
+            {
+                var motion = instance.GetComponent<BellMotherRigidMotion>();
+                var bodyRotationBefore = motion.body.localRotation;
+                var bodyHeightBefore = motion.body.localPosition.y;
+                motion.PlayHit();
+                motion.Tick(0.12f);
+                Assert.That(motion.body.localPosition.y, Is.LessThan(bodyHeightBefore));
+                Assert.That(Quaternion.Angle(bodyRotationBefore, motion.body.localRotation), Is.LessThan(8f));
+                motion.Tick(0.24f);
+                Assert.That(motion.ActiveAction, Is.EqualTo("Idle"));
             }
             finally { Object.DestroyImmediate(instance); }
         }

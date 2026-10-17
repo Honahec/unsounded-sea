@@ -6,8 +6,8 @@
 
 - Hyper3D BANG 任务 `a69dfe2b-089e-4ca1-9987-0d36ec94312c` 从原始沉钟之母拆出 12 个网格，Blender 建立身体、冠部和 6 个触手 pivot；低模从 1,500,000 降至 119,992 三角面，源网格未覆盖。
 - Unity 通过 `BellMotherBangSetup.Build` 生成 32 m 的 `BellMother.prefab`；Prefab 包含 12 个 MeshRenderer、6 个触手部件、无 SkinnedMeshRenderer。`BellMotherRigidMotion` 负责短前摇、攻击、命中和死亡动作，避免整块网格蒙皮拉伸。
-- Play Mode 打开 `SeaBossBattle.unity`，Game View 1280×720 正常显示船、海面与巨兽；运行时触发 `BellMotherRigidMotion.PlayAttack()`，0.3 秒内身体和触手均发生旋转，画面无明显撕裂或材质丢失。截图只保留在本地临时目录，不作为运行时资源。
-- BellMother 动画专项 **3 通过／0 失败**，沉钟规则回归 `SeaBossTests` **6 通过／0 失败**；未修改生命、伤害、撤离进度等规则。尚未验收独立 Player、目标硬件性能、平台纹理压缩和 LOD1/2。
+- Play Mode 打开 `SeaBossBattle.unity`，Game View 1280×720 正常显示船、海面与巨兽；运行时触发 `BellMotherRigidMotion.PlayAttack()`，攻击在约 0.24 秒前摇后进入 0.20 秒低位拍击，身体高度不抬升，交替触手向水面方向收拢，随后平滑回收。`PlayHit()` 改为约 0.30 秒的一次性后仰和下沉，不再连续 Q 弹。`BellMotherAnimationTests` 共 4 项通过；画面截图只保留在本地临时目录，不作为运行时资源。水面波纹反馈仍由后续特效阶段接入。
+- BellMother 动画专项 **4 通过／0 失败**，沉钟规则回归 `SeaBossTests` **6 通过／0 失败**；未修改生命、伤害、撤离进度等规则。尚未验收独立 Player、目标硬件性能、平台纹理压缩和 LOD1/2。
 
 ## M02–M05 Boss 战
 
