@@ -12,6 +12,10 @@ namespace UnsoundedSea.Runtime
         public Transform body;
         public Transform crown;
         public Transform[] tentacles;
+        [Tooltip("Attachment points in each tentacle transform's local space, baked by BellMotherBangSetup.")]
+        public Vector3[] tentacleRoots;
+        [Tooltip("Outer end samples in each tentacle transform's local space.")]
+        public Vector3[] tentacleTips;
 
         public string ActiveAction { get; private set; } = "Idle";
         public float ActionElapsed { get; private set; }
@@ -21,6 +25,8 @@ namespace UnsoundedSea.Runtime
         private Quaternion bodyRotation, crownRotation;
         private Vector3[] tentaclePositions;
         private Quaternion[] tentacleRotations;
+        private Vector3[] attackAnchors, attackAxes;
+        private Quaternion[] attackRotations;
         private bool paused;
         private float idleTime;
 
@@ -67,6 +73,25 @@ namespace UnsoundedSea.Runtime
 
         public void PlayAttack()
         {
+            // Freeze the current attachment positions. The imported transform
+            // origins are not anatomical joints, so rotate about the baked root
+            // and compensate translation instead of lifting the whole part.
+            if (tentacleRoots == null || tentacleTips == null || tentacles == null ||
+                tentacleRoots.Length != tentacles.Length || tentacleTips.Length != tentacles.Length)
+                return;
+            attackAnchors = new Vector3[tentacles.Length];
+            attackAxes = new Vector3[tentacles.Length];
+            attackRotations = new Quaternion[tentacles.Length];
+            for (var i = 0; i < tentacles.Length; i++)
+            {
+                var part = tentacles[i];
+                attackRotations[i] = part.localRotation;
+                attackAnchors[i] = part.localPosition + part.localRotation * Vector3.Scale(tentacleRoots[i], part.localScale);
+                var outward = part.localRotation * Vector3.Scale(tentacleTips[i] - tentacleRoots[i], part.localScale);
+                // Cross(outward, up) raises the outer end for every radial
+                // direction, including mirrored left/right and rear tentacles.
+                attackAxes[i] = Vector3.Cross(outward, Vector3.up).normalized;
+            }
             sequence = Sequence.Attack;
             ActiveAction = "Attack";
             ActionElapsed = 0;
@@ -120,44 +145,36 @@ namespace UnsoundedSea.Runtime
 
         private void UpdateAttack()
         {
-            // The attack is a clear raise-and-slap: the tentacles lift first,
-            // then swing down through the water while the shell stays heavy and
-            // low. A positive body lift makes this huge creature look like it is
-            // jumping out of the sea, so the shell never leaves its waterline.
-            const float telegraph = 0.24f;
-            const float strike = 0.20f;
-            const float recover = 0.42f;
+            const float raise = 0.32f;
+            const float hold = 0.06f;
+            const float strike = 0.18f;
+            const float recover = 0.38f;
+            const float raisedAngle = 48f;
+            const float contactAngle = -8f;
             var t = ActionElapsed;
-            if (t < telegraph)
+            if (t < raise)
+                ApplyAttackPose(raisedAngle * Smooth(t / raise));
+            else if (t < raise + hold)
+                ApplyAttackPose(raisedAngle);
+            else if (t < raise + hold + strike)
             {
-                var u = Smooth(t / telegraph);
-                ApplyAttackPose(Mathf.Lerp(0, -3.2f, u), Mathf.Lerp(0, -1.2f, u), Mathf.Lerp(0, -1.4f, u),
-                    Mathf.Lerp(0, -5f, u), Mathf.Lerp(0, -2.5f, u), Mathf.Lerp(0, -2f, u),
-                    Mathf.Lerp(0, -0.045f, u), Mathf.Lerp(0, 4f, u), Mathf.Lerp(0, 28f, u), Mathf.Lerp(0, 0.36f, u));
-                return;
+                var u = (t - raise - hold) / strike;
+                ApplyAttackPose(Mathf.Lerp(raisedAngle, contactAngle, u * u));
             }
-            if (t < telegraph + strike)
+            else if (t < raise + hold + strike + recover)
             {
-                var u = Smooth((t - telegraph) / strike);
-                // Impact peaks as the tentacles finish the downward slap.  The
-                // body only compresses and rolls a little, so the silhouette
-                // reads as mass meeting water instead of a vertical leap.
-                var snap = Mathf.Sin(u * Mathf.PI);
-                ActionImpact = Mathf.Max(ActionImpact, snap);
-                ApplyAttackPose(Mathf.Lerp(-3.2f, 2.8f, u), Mathf.Lerp(-1.2f, 1.5f, u), Mathf.Lerp(-1.4f, 2.2f, u),
-                    Mathf.Lerp(-5f, 8f, u), Mathf.Lerp(-2.5f, 4f, u), Mathf.Lerp(-2f, 5f, u),
-                    Mathf.Lerp(-0.045f, -0.16f, u), Mathf.Lerp(4f, -24f, u), Mathf.Lerp(28f, -32f, u), Mathf.Lerp(0.36f, -0.14f, u));
-                return;
+                var elapsed = t - raise - hold - strike;
+                ActionImpact = Mathf.Clamp01(1f - elapsed / 0.18f);
+                ApplyAttackPose(Mathf.Lerp(contactAngle, 0, Smooth(elapsed / recover)));
             }
-            if (t < telegraph + strike + recover)
+            else
             {
-                var u = Smooth((t - telegraph - strike) / recover);
-                ApplyAttackPose(Mathf.Lerp(2.8f, 0, u), Mathf.Lerp(1.5f, 0, u), Mathf.Lerp(2.2f, 0, u),
-                    Mathf.Lerp(8f, 0, u), Mathf.Lerp(4f, 0, u), Mathf.Lerp(5f, 0, u),
-                    Mathf.Lerp(-0.16f, 0, u), Mathf.Lerp(-24f, 0, u), Mathf.Lerp(-32f, 0, u), Mathf.Lerp(-0.14f, 0, u));
-                return;
+                ApplyAttackPose(0);
+                sequence = Sequence.Idle;
+                ActiveAction = "Idle";
+                ActionElapsed = 0;
+                ActionImpact = 0;
             }
-            ResetIdle();
         }
 
         private void UpdateHit()
@@ -207,35 +224,14 @@ namespace UnsoundedSea.Runtime
             }
         }
 
-        private void ApplyAttackPose(float bodyPitch, float bodyYaw, float bodyRoll,
-            float crownPitch, float crownYaw, float crownRoll, float bodyLift, float slap, float tentacleRaise, float tentacleLift)
+        private void ApplyAttackPose(float angle)
         {
-            if (tentacles == null) return;
-            if (tentaclePositions == null || tentaclePositions.Length != tentacles.Length) CaptureRestPose();
-            if (body != null)
-            {
-                body.localPosition = bodyPosition + Vector3.up * bodyLift;
-                body.localRotation = bodyRotation * Quaternion.Euler(bodyPitch, bodyYaw, bodyRoll);
-            }
-            if (crown != null)
-            {
-                crown.localPosition = crownPosition + Vector3.up * (bodyLift * 0.7f);
-                crown.localRotation = crownRotation * Quaternion.Euler(crownPitch, crownYaw, crownRoll);
-            }
             for (var i = 0; i < tentacles.Length; i++)
             {
-                if (tentacles[i] == null) continue;
-                var phase = i * 0.82f;
-                var wave = Mathf.Sin(idleTime * 1.8f + phase);
-                var side = (i & 1) == 0 ? -1f : 1f;
-                // Alternate the fan so the six rigid sections read as a broad
-                // slap across the surface instead of a synchronized jump.
-                var fan = slap * (0.72f + (i % 3) * 0.10f);
-                var angle = bodyRoll * 0.16f + wave * 0.35f + fan * side;
-                var pitch = tentacleRaise + bodyPitch * 0.18f + wave * 0.8f + slap * (0.35f + (i % 2) * 0.12f);
-                var lift = tentacleLift * (0.82f + (i % 3) * 0.08f);
-                tentacles[i].localPosition = tentaclePositions[i] + Vector3.up * (bodyLift * 0.20f + lift);
-                tentacles[i].localRotation = tentacleRotations[i] * Quaternion.Euler(pitch, bodyYaw * 0.12f, angle);
+                var part = tentacles[i];
+                var rotation = Quaternion.AngleAxis(angle, attackAxes[i]) * attackRotations[i];
+                part.localRotation = rotation;
+                part.localPosition = attackAnchors[i] - rotation * Vector3.Scale(tentacleRoots[i], part.localScale);
             }
         }
 

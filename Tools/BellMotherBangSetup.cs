@@ -60,6 +60,7 @@ public static class BellMotherBangSetup
                 .ToArray();
             if (motion.body == null || motion.crown == null || motion.tentacles.Any(x => x == null))
                 throw new InvalidOperationException("BANG pivot hierarchy is incomplete.");
+            ConfigureAttackJoints(motion);
             motion.CaptureRestPose();
 
             foreach (var renderer in root.GetComponentsInChildren<Renderer>(true))
@@ -79,5 +80,51 @@ public static class BellMotherBangSetup
             return $"Bell Mother BANG rigid prefab ready: {PrefabPath}; 12 parts, scale {scale:0.###}, height {BattleActorView.MeasureLocalBounds(prefab.transform).size.y:0.###}m.";
         }
         finally { UnityEngine.Object.DestroyImmediate(root); }
+    }
+
+    // Calibrate in model space, then store points in each part's local space.
+    // The inner/outer 5% averages avoid selecting a single noisy surface vertex.
+    static void ConfigureAttackJoints(BellMotherRigidMotion motion)
+    {
+        motion.tentacleRoots = new Vector3[motion.tentacles.Length];
+        motion.tentacleTips = new Vector3[motion.tentacles.Length];
+        for (var i = 0; i < motion.tentacles.Length; i++)
+        {
+            var part = motion.tentacles[i];
+            var parent = part.parent;
+            var center = parent.InverseTransformPoint(motion.body.position);
+            var points = part.GetComponentsInChildren<MeshFilter>().SelectMany(filter =>
+                filter.sharedMesh.vertices.Select(v => parent.InverseTransformPoint(filter.transform.TransformPoint(v))))
+                .OrderBy(v => new Vector2(v.x - center.x, v.z - center.z).sqrMagnitude).ToArray();
+            if (points.Length < 20) throw new InvalidOperationException("Missing readable tentacle geometry: " + part.name);
+            var count = Mathf.Max(1, points.Length / 20);
+            var inner = Vector3.zero;
+            var outer = Vector3.zero;
+            for (var j = 0; j < count; j++)
+            {
+                inner += points[j];
+                outer += points[points.Length - 1 - j];
+            }
+            inner /= count;
+            outer /= count;
+            if (Vector3.ProjectOnPlane(outer - inner, Vector3.up).magnitude < 0.1f)
+                throw new InvalidOperationException("Ambiguous tentacle axis: " + part.name);
+            motion.tentacleRoots[i] = part.InverseTransformPoint(parent.TransformPoint(inner));
+            motion.tentacleTips[i] = part.InverseTransformPoint(parent.TransformPoint(outer));
+        }
+    }
+
+    public static string UpdateAttackJoints()
+    {
+        if (EditorApplication.isPlaying) throw new InvalidOperationException("Exit Play Mode first.");
+        var root = PrefabUtility.LoadPrefabContents(PrefabPath);
+        try
+        {
+            var motion = root.GetComponent<BellMotherRigidMotion>();
+            ConfigureAttackJoints(motion);
+            PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+            return "Baked six root/outer-tip pairs; preserved meshes, materials and imported hierarchy.";
+        }
+        finally { PrefabUtility.UnloadPrefabContents(root); }
     }
 }
