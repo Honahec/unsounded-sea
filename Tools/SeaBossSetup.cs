@@ -66,7 +66,7 @@ public static class SeaBossSetup
     {
         if(EditorApplication.isPlaying)throw new InvalidOperationException("Stop Play first.");
         var path=Art+"/DrownedBellStage.prefab";var root=PrefabUtility.LoadPrefabContents(path);
-        try {ConfigureComposition(root.GetComponent<BattleStage>());PrefabUtility.SaveAsPrefabAsset(root,path);}
+        try {ConfigureComposition(root.GetComponent<BattleStage>());UnsoundedSea.Editor.BossAtmosphereSetup.ConfigureBellMotherStage(root.GetComponent<BattleStage>());PrefabUtility.SaveAsPrefabAsset(root,path);}
         finally {PrefabUtility.UnloadPrefabContents(root);}
         return "Exterior sea battle composition saved: 260 m separation, 208 m Boss, 18 m vessel.";
     }
@@ -132,6 +132,7 @@ public static class SeaBossSetup
         // No objective chime on each survival tick: the creature's low bell remains the focal sound.
         stage.sealCue=null;
         ConfigureComposition(stage);
+        UnsoundedSea.Editor.BossAtmosphereSetup.ConfigureBellMotherStage(stage);
         var stagePrefab=PrefabUtility.SaveAsPrefabAsset(go,Art+"/DrownedBellStage.prefab").GetComponent<BattleStage>();UnityEngine.Object.DestroyImmediate(go);
         var enemy=Asset<EnemyDefinition>(Root+"/Content/Enemies/bell-mother.asset",e=>
         {

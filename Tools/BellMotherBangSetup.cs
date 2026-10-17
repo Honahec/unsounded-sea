@@ -68,6 +68,7 @@ public static class BellMotherBangSetup
                 renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
                 renderer.receiveShadows = true;
             }
+            UnsoundedSea.Editor.BossAtmosphereSetup.ConfigureBellMotherSurface(root);
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             if (prefab == null) throw new InvalidOperationException("Could not save " + PrefabPath);
             var enemy = AssetDatabase.LoadAssetAtPath<EnemyDefinition>(EnemyPath);

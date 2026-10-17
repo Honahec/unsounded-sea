@@ -79,6 +79,7 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 
 ### 海面配置
 
+- 沉钟之母／黑潮压舱者共用 `BellMother` 和 `DrownedBellStage`。`BossAtmosphereSetup.ApplyBellMother` 只更新外观：从当前 BANG GLB 复制 PBR 贴图引用，金属度 0.18、粗糙度倍率 1.35、法线强度 0.65；舞台显式绑定 `M01Sky`、反射 Cubemap 与环境光，雾色匹配天空地平线，避免沿用航程／调试入口的环境和浅蓝雾覆盖表皮。`BellMotherBangSetup.Build` 与 `SeaBossSetup.Build` 保留此配置，不改变模型、支点、动作或规则。
 - 普通战斗的 `FogSeaStage` 已接入 Uber 水面、半分辨率平面反射和 `StormSky`；重建 `OceanBattleSetup.Build` 后再运行 `Tools/DeckOceanSetup.cs` 的 `Apply`，单独更新该 Prefab／`DeckOcean.mat`，不改场景或航海／Boss 材质。近景基础浪高为 0.18／0.09 m，StormStrength 0.1，无巨兽扰流；保持甲板小幅摇晃与原镜头，避免直接继承巨浪振幅。暂停冻结水体时钟与反射，减少动效将水速降到 1/4；舞台关闭恢复先前天空盒。
 - `BattleStage.water` 可选接入 `BattleWater`，`surface` 指向同一海面 Renderer；使用 `Art/SeaBoss/DeepOcean.mat` 和 `DeepOceanMesh.asset`。水面保持水平、单位缩放，放在 Water（4）层，反射层排除水面；一场战斗只启用一个平面反射水体。当前网格为固定战斗镜头设计，不是无限海洋。
 - `BattleWater` 在每场开始克隆材质并创建反射组件，停用时恢复原材质、清理相机和 RT。`_SeaTime` 驱动全部水面动画，暂停冻结时钟及反射；减少动效时以 1/4 速率连续推进，不跳变相位。`_Threat` 负责常态巨兽扰流；每个水体独立维护最多 8 个有寿命的拍击波，`SeaImpactWave` 与 `BattleWaterWake.hlsl` 共用同一波形、时钟和来源参数，波峰、尾随波谷、法线与破碎泡沫一起向外传播。默认拍击振幅参数 80 m，宽度参数 70 m、传播速度 45 m/s，双触手叠加后平滑限幅至 110 m 以下；当前巨兽约 208 m 总高，近场浪峰按其 1/4–2/5 设计，远处逐渐衰减。材质不透明且关闭折射/岸边渐隐时启用 `_SeaZWrite`，避免浪墙内部前后面错误覆盖；高浪淡出平面倒影并使用环境反射。`SeaImpactSpray` 负责触水点的弹道水花与水雾，跟随水体时钟暂停并在解绑时清理；`Tools/SeaImpactSetup.cs` 只给现有舞台配置水花材质；其他巨兽可把自身入水事件接到 `BattleWater.EmitImpact`。避免直接修改共享材质。

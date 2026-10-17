@@ -15,6 +15,70 @@ namespace UnsoundedSea.Editor
         static readonly string[] Names = { "TideBonesChoirmaster", "InvertedSurveyor", "UnlitFlagBearer", "StarlessWatcher" };
         static readonly Color[] Horizons = { new Color(.25f,.34f,.31f), new Color(.24f,.34f,.39f), new Color(.32f,.30f,.25f), new Color(.19f,.25f,.34f) };
         static readonly Color[] Zeniths = { new Color(.045f,.075f,.065f), new Color(.04f,.065f,.095f), new Color(.065f,.06f,.05f), new Color(.025f,.04f,.085f) };
+        // Drowned Bell and Storm Gauntlet share this actor and stage. Keep their look
+        // explicit: voyage/debug entry must not inherit another scene's sky or probes.
+        public static string ApplyBellMother()
+        {
+            Check();
+            const string actorPath = Root + "Art/Prefabs/BellMother.prefab";
+            const string stagePath = Root + "Art/SeaBoss/DrownedBellStage.prefab";
+            foreach (var path in new[] { actorPath, stagePath })
+                if (EditorUtility.IsDirty(AssetDatabase.LoadAssetAtPath<GameObject>(path)))
+                    throw new InvalidOperationException("Unsaved prefab edits: " + path);
+            var actor = PrefabUtility.LoadPrefabContents(actorPath);
+            try { ConfigureBellMotherSurface(actor); PrefabUtility.SaveAsPrefabAsset(actor, actorPath); }
+            finally { PrefabUtility.UnloadPrefabContents(actor); }
+            var stage = PrefabUtility.LoadPrefabContents(stagePath);
+            try { ConfigureBellMotherStage(stage.GetComponent<BattleStage>()); PrefabUtility.SaveAsPrefabAsset(stage, stagePath); }
+            finally { PrefabUtility.UnloadPrefabContents(stage); }
+            return "Bell Mother / Storm Gauntlet: source PBR textures retained, neutral storm haze and explicit stage lighting.";
+        }
+
+        public static void ConfigureBellMotherSurface(GameObject actor)
+        {
+            if (!AssetDatabase.IsValidFolder(Output)) AssetDatabase.CreateFolder(Root + "Art/Bosses", "Atmosphere");
+            var source = AssetDatabase.LoadAssetAtPath<GameObject>(Root + "Art/Models/BellMother_BANG_LOD0.glb");
+            var originals = source.GetComponentsInChildren<Renderer>(true).SelectMany(r => r.sharedMaterials)
+                .Distinct().ToDictionary(m => m.name);
+            foreach (var renderer in actor.GetComponentsInChildren<Renderer>(true))
+                renderer.sharedMaterials = renderer.sharedMaterials.Select(existing =>
+                {
+                    var original = originals[existing.name];
+                    var path = Output + "/BellMother_" + original.name + ".mat";
+                    var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+                    if (material == null) { material = new Material(original); AssetDatabase.CreateAsset(material, path); }
+                    material.CopyPropertiesFromMaterial(original); material.name = original.name;
+                    material.SetFloat("metallicFactor", .18f);
+                    material.SetFloat("roughnessFactor", 1.35f);
+                    material.SetFloat("normalTexture_scale", .65f);
+                    EditorUtility.SetDirty(material); AssetDatabase.SaveAssetIfDirty(material);
+                    return material;
+                }).ToArray();
+        }
+
+        public static void ConfigureBellMotherStage(BattleStage stage)
+        {
+            if (!AssetDatabase.IsValidFolder(Output)) AssetDatabase.CreateFolder(Root + "Art/Bosses", "Atmosphere");
+            var path = Output + "/M01Sky.mat";
+            var sky = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (sky == null) { sky = new Material(AssetDatabase.LoadAssetAtPath<Material>(Root + "Art/SeaBoss/StormSky.mat")); AssetDatabase.CreateAsset(sky, path); }
+            sky.SetColor("_Horizon", new Color(.22f, .28f, .29f));
+            EditorUtility.SetDirty(sky); AssetDatabase.SaveAssetIfDirty(sky);
+            stage.skybox = sky; stage.fogColor = sky.GetColor("_Horizon");
+            stage.battleCamera.clearFlags = CameraClearFlags.Skybox;
+            var environment = stage.GetComponent<BattleEnvironmentLighting>() ?? stage.gameObject.AddComponent<BattleEnvironmentLighting>();
+            environment.sky = new Color(.17f, .20f, .21f);
+            environment.equator = new Color(.09f, .11f, .11f);
+            environment.ground = new Color(.025f, .035f, .035f);
+            environment.reflection = BakeReflection(1, sky); environment.reflectionIntensity = .35f;
+            foreach (var light in stage.GetComponentsInChildren<Light>())
+            {
+                if (light.name == "Moon through fog") light.color = new Color(.72f, .76f, .73f);
+                if (light.name == "Sea creature soft fill") light.color = new Color(.64f, .68f, .62f);
+                if (light.name == "Sea creature rim") { light.color = new Color(.63f, .69f, .72f); light.intensity = 300; }
+            }
+        }
+
         public static string Apply()
         {
             Check();

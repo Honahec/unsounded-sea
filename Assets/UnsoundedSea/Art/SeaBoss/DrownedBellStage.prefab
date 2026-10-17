@@ -596,7 +596,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 0.38, g: 0.69, b: 0.67, a: 1}
+  m_Color: {r: 0.64, g: 0.68, b: 0.62, a: 1}
   m_Intensity: 400
   m_Range: 300
   m_SpotAngle: 30
@@ -701,6 +701,8 @@ MonoBehaviour:
   showSelectionRing: 0
   heave: 0.22
   waterRadius: 91
+  emergeDepth: 0
+  emergeDuration: 2.4
 --- !u!1 &2829935205172334178
 GameObject:
   m_ObjectHideFlags: 0
@@ -1345,7 +1347,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 1
-  m_Color: {r: 0.55, g: 0.73, b: 0.76, a: 1}
+  m_Color: {r: 0.72, g: 0.76, b: 0.73, a: 1}
   m_Intensity: 1.8
   m_Range: 12
   m_SpotAngle: 30
@@ -2027,6 +2029,7 @@ GameObject:
   - component: {fileID: 6927056962710888796}
   - component: {fileID: 8139019866066109063}
   - component: {fileID: 2216325621577066811}
+  - component: {fileID: 3323299195571641439}
   m_Layer: 0
   m_Name: DrownedBellStage
   m_TagString: Untagged
@@ -2077,6 +2080,7 @@ MonoBehaviour:
   vessel: {fileID: 3062612982008768920}
   actorAnchors:
   - {fileID: 4548282515221985200}
+  singleActorAnchor: {fileID: 0}
   selectionMaterial: {fileID: 2100000, guid: 40be4d4ee9c654d378f6d07054be2b00, type: 2}
   ocean: {fileID: 7266299976294850346}
   water: {fileID: 2216325621577066811}
@@ -2085,7 +2089,8 @@ MonoBehaviour:
   sealCue: {fileID: 0}
   impactCue: {fileID: 8300000, guid: 96f93d5de192d47ffa6d3bc586455053, type: 3}
   sanityCue: {fileID: 8300000, guid: 48f0151987bec456aa34f4a6bb956a36, type: 3}
-  fogColor: {r: 0.3, g: 0.45, b: 0.48, a: 1}
+  skybox: {fileID: 2100000, guid: 2e677a7539ed147388b2094db534a8e1, type: 2}
+  fogColor: {r: 0.21999997, g: 0.27999997, b: 0.28999996, a: 1}
   fogDensity: 0.0025
   vesselHeave: 0.12
   vesselPitch: 0.55
@@ -2115,6 +2120,23 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967279
   impactSprayMaterial: {fileID: 2100000, guid: 7d804d139b5c84e2f94ca51c20288656, type: 2}
+--- !u!114 &3323299195571641439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7132153636046312248}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 311a7acab009a40a687e9166d4f121e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.BattleEnvironmentLighting
+  sky: {r: 0.17, g: 0.2, b: 0.21, a: 1}
+  equator: {r: 0.09, g: 0.11, b: 0.11, a: 1}
+  ground: {r: 0.025, g: 0.035, b: 0.035, a: 1}
+  reflection: {fileID: 8900000, guid: f56ff4d743c854dab8093f93b6a55c03, type: 2}
+  reflectionIntensity: 0.35
 --- !u!1 &7457013176256575744
 GameObject:
   m_ObjectHideFlags: 0
@@ -2661,8 +2683,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 2
-  m_Color: {r: 0.52, g: 0.69, b: 0.84, a: 1}
-  m_Intensity: 450
+  m_Color: {r: 0.63, g: 0.69, b: 0.72, a: 1}
+  m_Intensity: 300
   m_Range: 250
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.802082
