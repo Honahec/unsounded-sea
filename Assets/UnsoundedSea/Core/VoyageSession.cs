@@ -92,6 +92,10 @@ namespace UnsoundedSea.Core
         public IReadOnlyList<string> ToolIds=>tools.AsReadOnly(); public IReadOnlyList<string> LearnedToolIds=>learnedTools.AsReadOnly();
         public bool CanEditDeck=>initialPreparation&&phase==VoyagePhase.ChoosingRoute&&visited.Count==1 || phase==VoyagePhase.Arrived&&CurrentFull.Kind==RunNodeKind.Supply;
         public IReadOnlyList<CardSpec> RewardCards=>phase==VoyagePhase.Reward?BuildRewards():Array.Empty<CardSpec>();
+        public int RewardPicksRemaining => phase == VoyagePhase.Reward ? 1 : 0;
+        public string EventTitle => CurrentFull.Kind == RunNodeKind.Event ? CurrentFull.Name : "";
+        public EnemyStyle PreviewStyle(VoyageStop stop) => stop?.Kind == RunNodeKind.Boss ? EnemyStyle.Boss : EnemyStyle.Hidden;
+        public IReadOnlyList<VoyageNodeChoice> GetNodeServices() => Array.Empty<VoyageNodeChoice>();
         public IReadOnlyList<VoyageStop> KnownStops=>plan.Stops.Where(x=>knownStopIds.Contains(x.Id)).Select(ToKnownStop).ToList().AsReadOnly();
         public IReadOnlyList<VoyageRoute> KnownRoutes=>plan.Stops.SelectMany(x=>x.Next.Where(y=>knownRouteKeys.Contains(RouteKey(x.Id,y))).Select(y=>new VoyageRoute(x.Id,y))).ToList().AsReadOnly();
         public IReadOnlyList<VoyageStop> Choices=>phase==VoyagePhase.ChoosingRoute?CurrentFull.Next.Where(IsKnownRouteFromCurrent).Where(x=>!visited.Contains(x)).Select(x=>ToKnownStop(byId[x])).ToList().AsReadOnly():Array.Empty<VoyageStop>();
@@ -221,9 +225,10 @@ namespace UnsoundedSea.Core
             }
             log.Add(CurrentFull.Name+"："+outcome);nodeResolved=true; Record(VoyageActionKind.ChooseNode,value:id); return true;
         }
-        public bool ClaimReward(string cardId)
+        public bool ClaimReward(string cardId, string replaceDeckCardId = null)
         {
             if(phase!=VoyagePhase.Reward)return false;
+            if(replaceDeckCardId!=null)return false;
             if(cardId!=null&&cardId.StartsWith("item:",StringComparison.Ordinal)){if(!ClaimItemReward(cardId.Substring(5)))return false;}
             else if(cardId==null){Supplies=Math.Min(8,Supplies+1);} else {var card=RewardCards.FirstOrDefault(x=>x.Id==cardId);if(card==null)return false;learned.Add(card.Id);}
             map.CompleteCurrent();
