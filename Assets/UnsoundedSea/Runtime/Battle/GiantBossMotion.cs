@@ -139,7 +139,7 @@ namespace UnsoundedSea.Runtime
                 released=true;ReleaseCount++;
                 var point=Origin;
                 if (water!=null) point.y=water.SurfaceHeight(point);
-                if (!ritual && !observing && (kind == BossEncounterKind.Choirmaster || kind == BossEncounterKind.Watcher))
+                if (!ritual && !observing && kind == BossEncounterKind.Watcher)
                     SurfaceReleased?.Invoke(point,waveAmplitude);
                 if (kind == BossEncounterKind.FlagBearer && !ritual && !observing)
                     effects?.PoleContact(GameSettings.ReducedMotion ? StrikeTarget : PoleTip);

@@ -8188,6 +8188,10 @@ PrefabInstance:
       value: M03Stage
       objectReference: {fileID: 0}
     - target: {fileID: 8139019866066109063, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+      propertyPath: skybox
+      value: 
+      objectReference: {fileID: 2100000, guid: 884e3571850a04227b64cb98841c56e9, type: 2}
+    - target: {fileID: 8139019866066109063, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
       propertyPath: fogColor.b
       value: 0.08
       objectReference: {fileID: 0}
@@ -8231,13 +8235,38 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3062612982008768920, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3713628446559497707}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7132153636046312248, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3824215163113885227}
   m_SourcePrefab: {fileID: 100100000, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
 --- !u!4 &1251058641301717912 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3062612982008768920, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
   m_PrefabInstance: {fileID: 4313376914964818432}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6423908242347538744 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7132153636046312248, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+  m_PrefabInstance: {fileID: 4313376914964818432}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3824215163113885227
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6423908242347538744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 311a7acab009a40a687e9166d4f121e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.BattleEnvironmentLighting
+  sky: {r: 0.15, g: 0.21625, b: 0.25724998, a: 1}
+  equator: {r: 0.107999995, g: 0.153, b: 0.17549999, a: 0.45}
+  ground: {r: 0.018, g: 0.029249998, b: 0.042749997, a: 0.45}
+  reflection: {fileID: 8900000, guid: 5d8251ab5167547818511ac24e628e35, type: 2}
+  reflectionIntensity: 0.35
 --- !u!4 &6628710310488197980 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6927056962710888796, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}

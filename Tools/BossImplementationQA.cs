@@ -96,6 +96,9 @@ public static class BossImplementationQA
             Director.seed = 0; Director.Restart(); await Ready();
             var d = Director; var impacts = d.Stage.water.ImpactCount;
             var motion = d.Stage.Actors[0].GiantMotion;
+            var contactSeen = false; var earlyPresentation = false; var presentations = 0;
+            motion.VesselImpact += () => contactSeen = true;
+            d.PresentedEnemyAction += action => { presentations++; if (!contactSeen) earlyPresentation = true; };
             var result = d.Submit(BattleCommand.EndTurn()); Check(result.Success, result.Error);
             Check(d.Stage.DelaysHudUntilImpact, "Boss HUD advanced before the hit.");
             Check(d.GetComponent<UIDocument>().rootVisualElement.Query<Label>().ToList().Any(l => l.text == "60 / 60"), "Health was shown before the physical hit landed.");
@@ -109,10 +112,12 @@ public static class BossImplementationQA
             await Ready();
             var effects = motion.GetComponent<GiantBossEffects>();
             var waves = d.Stage.water.ImpactCount - impacts;
-            Check(waves == (number == 2 ? 1 : 0), "Wrong physical effect for M0" + number + ": sea impacts=" + waves);
+            Check(waves == 0, "Wrong physical effect for M0" + number + ": sea impacts=" + waves);
+            Check(!earlyPresentation && presentations == 1, "Resources advanced before contact or more than once.");
+            if (number == 2) Check(effects.SonicReleaseCount == 1, "Airborne sound front was not released.");
             if (number == 3) Check(effects.WindReleaseCount == 1, "Wind was not released.");
             if (number == 4) Check(effects.PoleContactCount == 1 && closest < 5, "Pole missed vessel: " + closest);
-            report.Add("M0" + number + " waves=" + waves + " wind=" + effects.WindReleaseCount + " pole=" + effects.PoleContactCount + " nearestTip=" + closest);
+            report.Add("M0" + number + " waves=" + waves + " sonic=" + effects.SonicReleaseCount + " wind=" + effects.WindReleaseCount + " pole=" + effects.PoleContactCount + " nearestTip=" + closest);
         }
         var text = string.Join("\n", report); File.WriteAllText(Dir + "/attacks.txt", text); return text;
     }

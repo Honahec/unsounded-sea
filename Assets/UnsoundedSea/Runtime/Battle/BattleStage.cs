@@ -156,7 +156,7 @@ namespace UnsoundedSea.Runtime
                 if (giant != null)
                 {
                     if (action.Kind == EnemyActionKind.Ritual || action.Kind == EnemyActionKind.Attack &&
-                        (director.View.BossKind == BossEncounterKind.Surveyor || director.View.BossKind == BossEncounterKind.FlagBearer))
+                        (director.View.BossKind == BossEncounterKind.Choirmaster || director.View.BossKind == BossEncounterKind.Surveyor || director.View.BossKind == BossEncounterKind.FlagBearer))
                         yield return new WaitUntil(() => vesselImpactSerial > vesselHit);
                     else
                         yield return new WaitUntil(() => giant.ReleaseCount > release);
