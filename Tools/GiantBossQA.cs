@@ -21,6 +21,26 @@ public static class GiantBossQA
         var d=Director();d.scenario=AssetDatabase.LoadAssetAtPath<BattleScenario>("Assets/UnsoundedSea/Content/Scenarios/M0"+(index+2)+".asset");d.Restart();
         return "Selected M0"+(index+2);
     }
+    public static async Task<string> AtmosphereReview()
+    {
+        if(!VoyageRuntime.IsValidationSession)throw new Exception("Begin an isolated validation session first.");
+        var report=new System.Collections.Generic.List<string>();
+        for(int index=0;index<4;index++)
+        {
+            Select(index);await WaitReady();await Task.Delay(150);
+            var d=Director();
+            if(RenderSettings.skybox!=d.Stage.skybox)throw new Exception("Entry sky leaked into boss stage.");
+            foreach(var material in d.Stage.Actors[0].GetComponentsInChildren<SkinnedMeshRenderer>().SelectMany(r=>r.sharedMaterials))
+                foreach(var property in new[]{"baseColorTexture","metallicRoughnessTexture","normalTexture"})
+                {
+                    var texture=material.GetTexture(property);
+                    if(texture==null||!AssetDatabase.GetAssetPath(texture).StartsWith("Assets/UnsoundedSea/Art/Textures/RuntimeModels/"))
+                        throw new Exception("Missing externalized texture: "+material.name+"/"+property);
+                }
+            report.Add("M0"+(index+2)+": "+Snapshot(index));
+        }
+        return string.Join("\n",report);
+    }
     public static string Snapshot(int index)
     {
         var d=Director();var actor=d.Stage.Actors[0];var motion=actor.GiantMotion;

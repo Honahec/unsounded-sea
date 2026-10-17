@@ -29,7 +29,7 @@ namespace UnsoundedSea.Tests
                 for (var i = 1; i < 3; i++)
                     Assert.That(motions[i].joints.Select((joint, index) => Quaternion.Angle(joint.bone.localRotation, motions[0].joints[index].bone.localRotation)).Max(), Is.GreaterThan(1), "Action silhouettes must differ");
                 for (var frame = 0; frame < 40; frame++) foreach (var motion in motions) motion.Tick(.1f);
-                Assert.That(waves, Is.EqualTo(new[] { number == 2 ? 1 : 0, 0, 0 }));
+                Assert.That(waves, Is.EqualTo(new[] { 0, 0, 0 }));
                 Assert.That(motions.All(m => !m.Busy), Is.True);
             }
             finally { foreach (var actor in actors) Object.DestroyImmediate(actor); }
@@ -115,7 +115,7 @@ namespace UnsoundedSea.Tests
                 }
                 Assert.That(displacement, Is.GreaterThan(.005f), "Bones must actually deform the mesh");
                 Assert.That(motion.Busy, Is.False);
-                Assert.That(waves, Is.EqualTo(number == 2 ? 1 : 0));
+                Assert.That(waves, Is.Zero);
                 Assert.That(Vector3.Distance(rootPosition, motion.transform.localPosition), Is.LessThan(.0001f), "No whole-boss jumping");
                 for (int i = 0; i < bones; i++) Assert.That(Quaternion.Angle(motion.joints[i].bone.localRotation, idle.joints[i].bone.localRotation), Is.LessThan(.03f));
                 motion.PlayHit(); motion.Tick(.1f);
@@ -158,8 +158,8 @@ namespace UnsoundedSea.Tests
             Assert.That(replay.View.Enemies.Select(e => e.Health), Is.EqualTo(session.View.Enemies.Select(e => e.Health)));
         }
 
-        [TestCase(3)] [TestCase(4)]
-        public void WindAndPoleHaveTheirOwnContactAndNeverEmitSeaWaves(int number)
+        [TestCase(2)] [TestCase(3)] [TestCase(4)]
+        public void AirborneAndPoleAttacksContactTheVesselWithoutSeaWaves(int number)
         {
             var scenario = Scenario(number); var stage = Object.Instantiate(scenario.stagePrefab);
             var actor = Object.Instantiate(scenario.ActorPrefab(0), stage.actorAnchors[0]);
@@ -169,6 +169,7 @@ namespace UnsoundedSea.Tests
                 GameSettings.ReducedMotion = false;
                 var motion = actor.GetComponentInChildren<GiantBossMotion>(); motion.BindEffects(null, stage.vessel);
                 var waves = 0; motion.SurfaceReleased += (_, __) => waves++;
+                var contacts = 0; motion.VesselImpact += () => contacts++;
                 var distanceAtContact = float.PositiveInfinity;
                 motion.VesselImpact += () => distanceAtContact = Vector3.Distance(motion.PoleTip, motion.StrikeTarget);
                 var position = actor.transform.localPosition;
@@ -176,9 +177,15 @@ namespace UnsoundedSea.Tests
                 for (var i = 0; i < 200; i++) motion.Tick(.025f);
                 var effects = motion.GetComponent<GiantBossEffects>();
                 Assert.That(waves, Is.Zero);
+                Assert.That(contacts, Is.EqualTo(1));
                 Assert.That(motion.Busy, Is.False);
                 Assert.That(actor.transform.localPosition, Is.EqualTo(position));
-                if (number == 3)
+                if (number == 2)
+                {
+                    Assert.That(effects.SonicReleaseCount, Is.EqualTo(1));
+                    Assert.That(actor.GetComponentsInChildren<LineRenderer>().Length, Is.EqualTo(3));
+                }
+                else if (number == 3)
                 {
                     Assert.That(effects.WindReleaseCount, Is.EqualTo(1));
                     Assert.That(actor.GetComponentsInChildren<LineRenderer>().Length, Is.EqualTo(7));

@@ -50,7 +50,7 @@ Deemos Agent 是可选生产工具，不是每件资产的必经步骤。高模�
 
 1. **取输入**：从 `3430ecc` 恢复四份未绑定的 `Assets/UnsoundedSea/Art/Models/*_BANG_LOD0.glb` 到独立输入目录，通过 `git show <revision>:<path> | git lfs smudge` 取得真实二进制。不要拿当前蒙皮输出再次绑定，也不要直接覆盖运行时目录。`BossBangBuild.py` 是更上游的高模减面工具，不是日常动画调参入口。
 2. **绑定**：在 arch 的 Blender 5.2.2 执行 `blender -b --python Tools/GiantBossRig.py -- INPUT_DIR OUTPUT_DIR`。脚本检查输入 SHA，按正侧视图识别部件，再建立解剖支点与短骨骼链；硬壳单骨刚性权重，囊体／悬摆／旗布／帷幕局部渐变权重。旗杆与旗布只按原面拆开，保留 UV，不重网格化。必须通过面与 UV 签名一致、权重归一、真实变形和归零恢复检查。
-3. **导入**：复制输出到本机，退出 Play、保存编辑；Unity CLI 执行 `Tools/GiantBossSetup.cs` 的 `Import`（参数为输出目录；默认 `Logs/GiantBosses`），再执行 `Build`。保留 GLB `.meta`，重新计算归一尺寸与底部原点：增加 armature 会改变 glTF 子节点 ID，旧嵌套 Prefab 缩放覆盖可能失效，不能照抄。`Build` 会重设四个 Boss 的动作、构图和舞台参数；手调前先检查差异，不运行全遭遇重建工具。
+3. **导入**：复制输出到本机，退出 Play、保存编辑；Unity CLI 执行 `Tools/GiantBossSetup.cs` 的 `Import`（参数为输出目录；默认 `Logs/GiantBosses`），再执行 `Build`。保留 GLB `.meta`，重新计算归一尺寸与底部原点：增加 armature 会改变 glTF 子节点 ID，旧嵌套 Prefab 缩放覆盖可能失效，不能照抄。只改天空／表面参数时，使用 `UnsoundedSea.Editor.BossAtmosphereSetup.Apply`，不重新绑定或导入；独立材质从当前 GLB 导入材质复制外部压缩贴图引用，环境反射 Cubemap 随资产走 LFS。`Build` 会重设四个 Boss 的动作、构图和舞台参数；手调前先检查差异，不运行全遭遇重建工具。
 4. **运行与归档**：动画由 `GiantBossMotion` 程序曲线驱动真实骨骼，GLB 没有内嵌 clips；不要把 `animations: 0` 当作静态模型。先验收 `GiantBossAnimationTests`，再在 Play 中运行 `GiantBossQA.Record(index)` / `Hit(index)`，index 为 0–3。材质图片按字节比较，最终镜头检查重量、接缝、波浪和船的响应。流程、动作设计与边界分别见[框架](FRAMEWORK.md#m02m05-巨兽骨骼表现)和[验证记录](FRAMEWORK_VALIDATION.md#m02m05-boss-战)。输出与母版按 LFS 归档，忽略的 Logs 只放临时帧和完整日志。
 
 ### M05 五守卫资产
@@ -193,7 +193,7 @@ git lfs fsck
 | Echo | 800,000 → 90,000 | Unity 材质、2.1 m、脚底、Prefab 引用、战斗场景 | 更明显的空壳塌陷、独立铜铃、大幅动作、全视角与目标设备验收 |
 | BellMother | 1,500,000 → 119,992 | BANG 12 部件、6 触手 pivot、32 m、独立海面锚点、Unity 刚性战斗反馈 | 主体贴图平台压缩、LOD1/2、最终部件动画与性能验收 |
 | SurveyVessel | 800,000 → 80,000 | Agent 参考制作、保留 UV 减面、18 m 船体、开放甲板、战斗舞台 | 平台贴图压缩、LOD1/2、驾驶玩法 |
-| M02–M05 Boss 候选 | 具体规格见各自 manifest | BANG 分件、解剖蒙皮、idle／攻击／受击、四场镜头与浪／雾反馈、Standalone 纹理压缩 | 美术定稿、完整多视角、大幅动作精修、目标设备性能验收 |
+| M02–M05 Boss 候选 | 具体规格见各自 manifest | BANG 分件、解剖蒙皮、idle／攻击／受击、四场镜头与声压／风流／直刺／理智反馈、Standalone 纹理压缩 | 美术定稿、完整多视角、大幅动作精修、目标设备性能验收 |
 | M05 五守卫 | 规格只见各自 manifest | Anchor 高模与真实 BANG 高模已归档；其余四份生产中 | 全部导入、Prefab 引用、六槽构图、水下上升、精神脉冲与目标设备验收 |
 
 Prayer 与 Echo 原静态源各 1 网格/材质、3 张 4K 纹理；当前 Prefab 已改用归档绑定生成的蒙皮副本。绑定来源与 UV 恢复检查集中在 [DeckRigs manifest](../ArtSource/Characters/DeckRigs-manifest.json)，复现使用 `PrepareHyper3DRigs.py`（`skip_preview` 可省去诊断渲染）；祷告者再用 `PrayerSkirtRig.py` 添加独立的八组裙摆骨骼和渐变权重，最后执行 `DeckAnimationSetup.Apply`。ArtSource 原始 GLB 不变，当前运行时 GLB 是上述纹理外置派生版，哈希与贴图规格由运行时纹理 manifest 维护；尚无 LOD1/2 或 LODGroup。目标设备显存、帧耗及非 Standalone 平台压缩仍需另验。

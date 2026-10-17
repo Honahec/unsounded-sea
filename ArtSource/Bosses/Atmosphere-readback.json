@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-18",
+  "remote": "https://github.com/Honahec/unsounded-sea.git",
+  "revision": "b803d9c449279a81cfb1c42e542cc72113b99b95",
+  "method": "Independent shallow clone with empty dedicated LFS storage; fetch from origin and compare SHA-256 with local binaries.",
+  "files": [
+    {
+      "path": "Assets/UnsoundedSea/Art/Bosses/Atmosphere/M02Reflection.cubemap",
+      "sha256": "5365164304cfedf113f56897745af0d21ed745295d8d577eee4ad5968d8fbc48",
+      "bytes": 2098270,
+      "match": true
+    },
+    {
+      "path": "Assets/UnsoundedSea/Art/Bosses/Atmosphere/M03Reflection.cubemap",
+      "sha256": "326f07f63ab272e955e93391017f814ae8ed3f1dd328ece579d67bae4b3fa873",
+      "bytes": 2098270,
+      "match": true
+    },
+    {
+      "path": "Assets/UnsoundedSea/Art/Bosses/Atmosphere/M04Reflection.cubemap",
+      "sha256": "e30e177568ae390d05a0d63ebfa7444a17b9647eac3c75da69df8dd584cff3c0",
+      "bytes": 2098270,
+      "match": true
+    },
+    {
+      "path": "Assets/UnsoundedSea/Art/Bosses/Atmosphere/M05Reflection.cubemap",
+      "sha256": "c181e82a69f948e511feefa72828fff69d6f80472dc4eae2c04e8194a7d341fb",
+      "bytes": 2098270,
+      "match": true
+    },
+    {
+      "path": "Docs/ArtReferences/boss-atmosphere-review.jpg",
+      "sha256": "ca609a34a7ff4633c5bbf3632e0c7915023fd994d8ca353157fa307dff7ab01a",
+      "bytes": 111385,
+      "match": true
+    },
+    {
+      "path": "Docs/ArtReferences/boss-airborne-attack.jpg",
+      "sha256": "58f36556ffd1a74c360532dacbb7d14b0ab49793d572786be396acb5508603e9",
+      "bytes": 147619,
+      "match": true
+    }
+  ]
+}

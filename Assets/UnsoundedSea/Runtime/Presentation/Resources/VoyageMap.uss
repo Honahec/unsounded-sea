@@ -12,11 +12,10 @@
     border-bottom-width: 3px;
     border-color: rgb(139, 112, 65);
 }
-.map-heading { height: 36px; padding: 0 8px; flex-direction: row; justify-content: space-between; align-items: center; border-bottom-width: 1px; border-bottom-color: rgba(185, 151, 89, 0.48); }
-.map-title { color: rgb(232, 214, 169); font-size: 18px; letter-spacing: 4px; }
-.map-note { color: rgb(111, 170, 153); font-size: 11px; letter-spacing: 1px; }
+.map-heading { min-height: 48px; flex-shrink: 0; padding: 4px 8px 12px; flex-direction: row; align-items: center; border-bottom-width: 1px; border-bottom-color: rgba(185, 151, 89, 0.48); }
+.voyage-map-panel .map-title { margin: 0; color: rgb(232, 214, 169); font-size: 22px; letter-spacing: 2px; white-space: nowrap; }
 .map-empty { flex-grow: 1; color: rgb(165, 174, 149); font-size: 15px; letter-spacing: 2px; -unity-text-align: middle-center; }
-.map-chart-scroll { flex-grow: 1; min-height: 0; margin: 5px 0 3px; }
+.map-chart-scroll { flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-height: 0; margin: 10px 0; }
 .map-chart-scroll .unity-scroll-view__content-viewport { background-color: rgba(10, 36, 38, 0.76); }
 .map-chart-scroll .unity-scroll-view__vertical-scroller { width: 18px; }
 .nautical-chart { height: 1280px; flex-shrink: 0; overflow: hidden; background-color: rgba(10, 36, 38, 0.76); }
@@ -38,12 +37,12 @@
 .chart-ship { position: absolute; width: 8px; height: 19px; translate: -50% -145%; rotate: 18deg; background-color: rgb(232, 214, 169); border-top-left-radius: 7px; border-top-right-radius: 7px; border-width: 2px; border-color: rgb(88, 55, 28); }
 .chart-compass { position: absolute; left: 18px; bottom: 15px; width: 74px; height: 74px; opacity: 0.68; }
 .chart-fog { position: absolute; right: 3%; top: 17%; bottom: 17%; width: 68px; padding-left: 17px; color: rgba(169, 188, 171, 0.58); border-left-width: 1px; border-left-color: rgba(147, 176, 163, 0.35); font-size: 12px; letter-spacing: 4px; white-space: normal; -unity-text-align: middle-center; }
-.map-legend { height: 29px; flex-direction: row; justify-content: center; align-items: center; border-top-width: 1px; border-top-color: rgba(185, 151, 89, 0.38); }
-.map-legend-item { margin: 0 7px; flex-direction: row; align-items: center; }
-.map-legend-mark { width: 9px; height: 9px; margin-right: 4px; border-radius: 5px; border-width: 1px; border-color: rgb(149, 157, 135); background-color: rgb(16, 44, 44); }
+.map-legend { min-height: 48px; flex-shrink: 0; padding: 8px 0 2px; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; border-top-width: 1px; border-top-color: rgba(185, 151, 89, 0.38); }
+.map-legend-item { margin: 5px 14px; flex-shrink: 0; flex-direction: row; align-items: center; }
+.map-legend-mark { width: 12px; height: 12px; flex-shrink: 0; margin-right: 8px; border-radius: 6px; border-width: 1px; border-color: rgb(149, 157, 135); background-color: rgb(16, 44, 44); }
 .map-legend-mark.current { border-color: rgb(113, 188, 165); background-color: rgb(35, 91, 81); }
 .map-legend-mark.available { border-color: rgb(224, 194, 121); }
 .map-legend-mark.selected { border-color: rgb(232, 214, 169); background-color: rgb(111, 75, 34); }
 .map-legend-mark.visited { border-color: rgb(85, 151, 131); }
-.map-legend-label { color: rgb(190, 188, 163); font-size: 13px; }
+.voyage-map-panel .map-legend-label { margin: 0; color: rgb(190, 188, 163); font-size: 14px; white-space: nowrap; }
 .map-perilous-badge { position: absolute; right: -12px; top: -12px; width: 24px; height: 24px; }

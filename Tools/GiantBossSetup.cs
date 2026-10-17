@@ -38,6 +38,7 @@ public static class GiantBossSetup
         for(int i=0;i<Names.Length;i++)Actor(i);
         for(int i=0;i<Names.Length-1;i++)Stage(i);
         ConfigureM05Stage();
+        UnsoundedSea.Editor.BossAtmosphereSetup.Apply();
         return "Updated four boss actors and their existing stages; M05 uses its dedicated frontal six-slot composition.";
     }
     public static string BuildM05()
@@ -48,6 +49,7 @@ public static class GiantBossSetup
         RequireM05Assets();
         Actor(3);
         ConfigureM05Stage();
+        UnsoundedSea.Editor.BossAtmosphereSetup.ApplyBoss(5);
         return "Configured only M05: frontal Watcher, vessel, and five fixed sea guard slots.";
     }
     static void RequireM05Assets()

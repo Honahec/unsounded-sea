@@ -19,10 +19,9 @@ namespace UnsoundedSea.Runtime
 
             var heading = new VisualElement { pickingMode = PickingMode.Ignore };
             heading.AddToClassList("map-heading");
-            var title = new Label($"第 {session?.Act ?? 0} 幕 · {RegionName(session?.RegionId)}航路图") { pickingMode = PickingMode.Ignore };
+            var title = new Label(session == null ? "海图" : $"{RegionName(session.RegionId)} · 海图") { pickingMode = PickingMode.Ignore };
             title.AddToClassList("map-title"); heading.Add(title);
-            var note = new Label(session == null ? "无远征记录" : $"航点 {session.VisitedThisAct} / {VoyageSession.ActLength} · 仅绘已知水域") { pickingMode = PickingMode.Ignore };
-            note.AddToClassList("map-note"); heading.Add(note); Add(heading);
+            Add(heading);
 
             if (session == null)
             {

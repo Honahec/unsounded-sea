@@ -15,13 +15,15 @@ namespace UnsoundedSea.Runtime
         private bool wideCharge;
         private int serial;
         private BossWindEffect wind;
+        private BossSonicEffect sonic;
+        public int SonicReleaseCount => sonic == null ? 0 : sonic.LaunchCount;
         public int WindReleaseCount => wind == null ? 0 : wind.LaunchCount;
         public int PoleContactCount { get; private set; }
         // Field initialization also restores valid slots after an Editor domain reload.
         private readonly Pulse[] pulses = { new Pulse(), new Pulse(), new Pulse(), new Pulse() };
         public int ParticleCount => mist == null ? 0 : mist.particleCount;
         public event Action VesselImpact;
-        public bool Busy => Array.Exists(pulses, pulse => pulse.active) || wind != null && wind.Busy;
+        public bool Busy => Array.Exists(pulses, pulse => pulse.active) || wind != null && wind.Busy || sonic != null && sonic.Busy;
         private sealed class Pulse { public Vector3 origin, target; public float time; public bool active; }
         public void Initialize(Material material, Color color, BattleWater surface, Transform vessel, bool bodyWideCharge)
         {
@@ -79,6 +81,15 @@ namespace UnsoundedSea.Runtime
         public void Release(Vector3 origin,bool ritual,bool observing, BossEncounterKind kind = BossEncounterKind.None)
         {
             var target=boat!=null?boat.position:origin+Vector3.back*200;
+            if (kind == BossEncounterKind.Choirmaster && !ritual && !observing)
+            {
+                if (sonic == null)
+                {
+                    sonic = gameObject.AddComponent<BossSonicEffect>();
+                    sonic.Contact += () => { Hit(boat != null ? boat.position : target, .8f); VesselImpact?.Invoke(); };
+                }
+                sonic.Launch(origin, boat != null ? boat.TransformPoint(new Vector3(0,1,0)) : target); return;
+            }
             if (kind == BossEncounterKind.Surveyor && !ritual && !observing)
             {
                 if (wind == null)
@@ -106,6 +117,7 @@ namespace UnsoundedSea.Runtime
         {
             if(mist==null)return;
             wind?.Tick(dt, GameSettings.ReducedMotion);
+            sonic?.Tick(dt, GameSettings.ReducedMotion);
             age+=dt;chargeClock+=dt;ambientClock+=dt;
             if(charging && chargeClock>.045f)
             {

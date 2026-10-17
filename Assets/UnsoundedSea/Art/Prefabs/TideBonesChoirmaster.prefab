@@ -40,6 +40,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8325659759326853866}
     m_Modifications:
+    - target: {fileID: -8208854459462747987, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7cbfb1831a0bb42199ef3acfcad3e776, type: 2}
+    - target: {fileID: -6541353171429695573, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: f0a8b2b3e4977467182df7e046b65f1d, type: 2}
+    - target: {fileID: -6394637022556072321, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: bb8c20c9748774f5b995a8508730a779, type: 2}
     - target: {fileID: -3932943137778357505, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalScale.x
       value: 9.479138
@@ -92,10 +104,38 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2771076789750599098, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 23098d1d644d44e39827e4cf05e43d54, type: 2}
+    - target: {fileID: -2487109386580081712, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 48e4f1912a1d34325904e0753c494bb4, type: 2}
     - target: {fileID: -1724898737691362094, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_Name
       value: TideBonesChoirmaster_BANG_LOD0
       objectReference: {fileID: 0}
+    - target: {fileID: -960509897715067994, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 303aefcc3de0744dc8953aeb54c5ab65, type: 2}
+    - target: {fileID: 1816954199285058165, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: b094b1ed00265498697e00561803c3d2, type: 2}
+    - target: {fileID: 1830084918463207694, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8aac134f4ea3f4f64be256402a095b7d, type: 2}
+    - target: {fileID: 3583198413172727663, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 92b32b9c36f0c408da8076954d03dac2, type: 2}
+    - target: {fileID: 6885076607404288648, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a601229a2bb4745598156b62246606d6, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -165,18 +205,18 @@ MonoBehaviour:
   joints:
   - bone: {fileID: 1627424283536222080}
     idleEuler: {x: 0.45, y: 0, z: 0.25}
-    attackEuler: {x: 3.6, y: 0, z: 0}
+    attackEuler: {x: 1.5, y: 0, z: 0}
     followEuler: {x: 1.3, y: 0, z: 0}
     hitEuler: {x: -1.1, y: 0, z: 0.25}
-    idleShift: {x: 0, y: 0.003, z: 0}
-    attackShift: {x: 0, y: -0.018, z: 0}
+    idleShift: {x: 0, y: 0.012, z: 0}
+    attackShift: {x: 0, y: 0, z: -0.008}
     hitShift: {x: 0, y: -0.008, z: 0}
     breathScale: {x: 0, y: 0, z: 0}
     phase: 0
     lag: 0
   - bone: {fileID: 2343701187503271832}
-    idleEuler: {x: 0, y: 0.3, z: 1.6}
-    attackEuler: {x: 0, y: 0, z: 18}
+    idleEuler: {x: 0, y: 0.3, z: 2.8}
+    attackEuler: {x: 0, y: 0, z: 10}
     followEuler: {x: 0, y: 0, z: 4}
     hitEuler: {x: 0, y: 0, z: 0}
     idleShift: {x: 0, y: 0, z: 0}
@@ -186,8 +226,8 @@ MonoBehaviour:
     phase: 0.63
     lag: 0.12
   - bone: {fileID: 1603839980414847263}
-    idleEuler: {x: 0, y: -0.3, z: -1.4}
-    attackEuler: {x: 0, y: 0, z: -16}
+    idleEuler: {x: 0, y: -0.3, z: -2.8}
+    attackEuler: {x: 0, y: 0, z: -10}
     followEuler: {x: 0, y: 0, z: -4}
     hitEuler: {x: 0, y: 0, z: 0}
     idleShift: {x: 0, y: 0, z: 0}
@@ -204,13 +244,13 @@ MonoBehaviour:
     idleShift: {x: 0, y: 0, z: 0}
     attackShift: {x: 0, y: 0, z: 0}
     hitShift: {x: 0, y: 0, z: 0}
-    breathScale: {x: 0.018, y: 0.022, z: 0.018}
+    breathScale: {x: 0.028, y: 0.035, z: 0.028}
     phase: 1.89
     lag: 0.13
   - bone: {fileID: 7364731954893175542}
     idleEuler: {x: 0.7, y: 0.2, z: 0}
-    attackEuler: {x: 15, y: 0, z: 0}
-    followEuler: {x: 3, y: 0, z: 0}
+    attackEuler: {x: 5, y: 0, z: 0}
+    followEuler: {x: 1.3, y: 0, z: 0}
     hitEuler: {x: -1.5, y: 0.3, z: 0}
     idleShift: {x: 0, y: 0, z: 0}
     attackShift: {x: 0, y: 0, z: 0}
@@ -240,12 +280,12 @@ MonoBehaviour:
     breathScale: {x: 0, y: 0, z: 0}
     phase: 3.78
     lag: 0.35
-  effectOrigin: {fileID: 7364731954893175542}
+  effectOrigin: {fileID: 2696093157041741225}
   mistMaterial: {fileID: 2100000, guid: a2c1f2c084a4f410490d7472b0acc685, type: 2}
   effectColor: {r: 0.76, g: 0.8, b: 0.69, a: 1}
   duration: 2.8
   contactTime: 1.596
-  waveAmplitude: 65
+  waveAmplitude: 0
   breathPeriod: 7.5
   strike:
     serializedVersion: 2
@@ -340,6 +380,219 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0.76
       value: 0.6
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  resonance:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.28
+      value: 0.45
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.55
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.72
+      value: 0.8
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  calling:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.36
+      value: 0.85
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.62
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.82
+      value: 0.45
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  poleDrive:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.28
+      value: -0.12
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.42
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.57
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.67
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  poleDraw:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.3
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.42
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.57
+      value: 0
       inSlope: 0
       outSlope: 0
       tangentMode: 0
