@@ -10,6 +10,7 @@
 | 卡牌/敌人/Boss/道具/事件机制，视觉与信息边界 | [机制与素材设计](Docs/ASSET_MECHANICS_DESIGN.md) → [框架指南](Docs/FRAMEWORK.md) 中相关接口 |
 | 航海海景、船体行进、镜头与尾流 | [框架指南](Docs/FRAMEWORK.md) 的「航海选路（局外）」→ `VoyageSailingPresentation` / `VoyageSailingPath` / `VoyageWake`；节点外观读 `VoyageScenes.asset` / `VoyageDestinationPresentation`，重建工具 `Tools/VoyageNodeSetup.cs`；复用船与水体，勿改航程规则 |
 | 3D 战斗场景、角色替换、特殊战扩展 | [框架指南](Docs/FRAMEWORK.md) 的「3D 战斗组合与扩展」→ `Runtime/Battle/`；场景重建会覆盖配置，先检查现有编辑 |
+| 界面视觉、布局、文字与交互 | [UI 设计规范](Docs/UI_DESIGN_GUIDE.md) → [框架指南](Docs/FRAMEWORK.md) 中相关界面 → 对应 `.uss`／HUD 代码 |
 | 规则、UI、存档、内容配置和代码修复 | [框架指南](Docs/FRAMEWORK.md) → 相关代码；涉及验收时再读 [验证记录](Docs/FRAMEWORK_VALIDATION.md) |
 | 模型生成、减面、Unity 导入、模型归档或 LFS | [模型全流程](Docs/MODEL_IMPORT_WORKFLOW.md) → 机制文档中对应资产要求 → 相关 manifest/脚本 |
 | 沉钟之母分件、支点/骨骼取舍、攻击与受击动画 | [动画设计](Docs/BELL_MOTHER_ANIMATION_DESIGN.md) → `BellMotherRigidMotion` / `BellMotherBangSetup`；复用模型不必重跑生成流程 |
@@ -22,6 +23,7 @@
 - `DESIGN_DOC_v0_1.md`：产品概念、世界观、完整原型卡池与范围；不复制技术手册。
 - `ASSET_MECHANICS_DESIGN.md`：具体机制提案、素材职责、美术与玩法验收标准；区分“现有”和“提案”。
 - `FRAMEWORK.md`：已实现架构、接口、扩展方法和回放契约；事实以当前代码/配置为准，冲突时修正文档。
+- `UI_DESIGN_GUIDE.md`：界面视觉、布局适配、文字、按钮与验收清单的统一规范；不复制接口实现。
 - `FRAMEWORK_VALIDATION.md`：带日期和范围的验证结果；历史通过不代表当前修改通过。
 - `MODEL_IMPORT_WORKFLOW.md`：模型制作全流程与简短当前状态；`DEEMOS_AGENT.md` 只维护网页操作。
 - `BELL_MOTHER_ANIMATION_DESIGN.md`：沉钟之母分件与动画的设计取舍、复现入口及未实施的骨骼升级方案；不复制规格或验证流水账。

@@ -169,6 +169,7 @@ namespace UnsoundedSea.Tests
         {
             var s = new BattleSession(Definition(BossEncounterKind.Watcher), 3, boss: BossEncounterKind.Watcher);
             Play(s, "E05-01"); Play(s, "E05-01");
+            Assert.That(s.View.Enemies.Where(x => x.Id.StartsWith("b05-guard") && x.Health > 0).Select(x => x.Intent), Is.All.Empty, "Freshly summoned guards show no intent.");
             s.Execute(BattleCommand.EndTurn());
             Assert.That(s.View.Health, Is.EqualTo(100), "New guards do not attack on their summon turn.");
             Assert.That(s.View.Sanity, Is.EqualTo(98));
@@ -185,7 +186,7 @@ namespace UnsoundedSea.Tests
             {
                 (96, 98), (96, 93), (96, 91)
             }), "Each action publishes its exact post-mitigation resources in guard-then-boss order.");
-            Assert.That(s.View.Enemies.Single(x => x.Id.EndsWith("bell")).Intent, Does.Contain("本回合停手"));
+            Assert.That(s.View.Enemies.Single(x => x.Id.EndsWith("bell")).Intent, Is.Empty);
         }
 
         [Test] public void ReplayIncludesBossIdentityAndRestoresSummonedGuardState()

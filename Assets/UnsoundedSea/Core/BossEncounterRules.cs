@@ -15,7 +15,7 @@ namespace UnsoundedSea.Core
             if (boss != null) return boss.EnemyView(enemy);
             return new EnemyView(enemy.Definition.Id, enemy.Definition.Name, enemy.Health, enemy.Definition.Health,
                 enemy.Health == 0 ? "已击退" : enemy.ActualIntent.Clue,
-                enemy.Health == 0 ? "不会行动" : enemy.Interrupted ? "已打断 · 本回合不行动" : enemy.Confirmed ? Describe(enemy.ActualIntent) : enemy.Definition.Candidates,
+                enemy.Health == 0 ? "" : enemy.Interrupted ? "已打断" : !enemy.Confirmed ? enemy.Definition.Candidates : enemy.ActualIntent.Amount == 0 ? "" : Describe(enemy.ActualIntent),
                 enemy.Confirmed);
         }
 
@@ -291,7 +291,7 @@ namespace UnsoundedSea.Core
                 var name = BaseId(e.Definition.Id).Substring("b05-guard-".Length);
                 var amount = name == "anchor" ? 5 : name == "lamp" ? 4 : name == "bell" ? (age % 2 == 1 ? 5 : 0) : name == "sail" ? (!sailBurst ? 7 : 4) : !eyeBurst ? 4 : 3;
                 var channel = name == "bell" || name == "eye" && !eyeBurst ? DamageChannel.Sanity : DamageChannel.Health;
-                SetPublicIntent(e, channel, amount, amount == 0 ? "本回合停手" : name == "anchor" ? "铁锚撞击" : name == "lamp" ? "裂灯灼击" : name == "bell" ? "铜钟震响" : name == "sail" ? "折帆撕扯" : !eyeBurst ? "闭眼凝视" : "眼棘穿刺");
+                SetPublicIntent(e, channel, amount, amount == 0 ? IdleIntent : name == "anchor" ? "铁锚撞击" : name == "lamp" ? "裂灯灼击" : name == "bell" ? "铜钟震响" : name == "sail" ? "折帆撕扯" : !eyeBurst ? "闭眼凝视" : "眼棘穿刺");
             }
             private void ResolveWatcher()
             {
@@ -530,13 +530,17 @@ namespace UnsoundedSea.Core
                 return e != null && e.Health > 0 && !(kind == BossEncounterKind.Surveyor && BaseId(id) == "b03-surveyor") && !(kind == BossEncounterKind.Watcher && BaseId(id) == "b05-watcher");
             }
 
+            // Idle turns are recorded in the log but show no intent on the nameplate.
+            private const string IdleIntent = "本回合停手";
             private string WatcherIntent() => $"无星凝视：{WatcherDamage(s.turn)} 点理智冲击";
 
             public EnemyView EnemyView(EnemyState e)
             {
                 var dormant = e.Health == 0 && !completed.Contains(e.Definition.Id + ":closed") && !victory;
-                var intent = e.Health == 0 ? kind == BossEncounterKind.Watcher && dormant ? "尚未召唤" : dormant ? "未入场／休眠" : "已永久解除" : e.Interrupted ? "已打断：本回合不行动" : e.ActualIntent == null ? "公开规则行动" : e.ActualIntent.Amount == 0 ? e.ActualIntent.Name : Describe(e.ActualIntent);
+                var intent = e.Health == 0 ? kind == BossEncounterKind.Watcher && dormant ? "尚未召唤" : dormant ? "未入场／休眠" : "已永久解除" : e.Interrupted ? "已打断" : e.ActualIntent == null ? "公开规则行动" : e.ActualIntent.Amount == 0 ? (e.ActualIntent.Name == IdleIntent ? "" : e.ActualIntent.Name) : Describe(e.ActualIntent);
                 if (kind == BossEncounterKind.Watcher && e == s.enemies[0]) intent = WatcherIntent();
+                // Guards rise on the turn they are summoned and only join the next enemy phase.
+                else if (kind == BossEncounterKind.Watcher && e.Health > 0 && summonedTurn.TryGetValue(e.Definition.Id, out var summoned) && summoned >= s.turn) intent = "";
                 return new EnemyView(e.Definition.Id, e.Definition.Name, e.Health, e.Definition.Health, "", intent, e.Health > 0, IsTargetable(e.Definition.Id));
             }
         }
