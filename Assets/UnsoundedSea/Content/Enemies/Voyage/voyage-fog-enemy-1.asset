@@ -26,4 +26,4 @@ MonoBehaviour:
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
-  presentationPrefab: {fileID: 6704615743245087124, guid: 7fcaa3caef0644be996c5b1d24b80ef3, type: 3}
+  presentationPrefab: {fileID: 6170950852908003018, guid: db8f13aff1b5f47b8a13a9706e43e3c9, type: 3}

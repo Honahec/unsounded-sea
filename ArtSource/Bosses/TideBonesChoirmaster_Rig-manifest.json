@@ -1,0 +1,194 @@
+{
+  "asset": "TideBonesChoirmaster",
+  "method": "Anatomical armature on assembled BANG parts; rigid shell weights and localized soft chains",
+  "input_sha256": "e52c5facb59d9ed6b4c723b89ee1cbdec956e14e136b3471ec07487906716e0f",
+  "output_sha256": "0745370c48d5ab0d4b4333994605a079d4e4c845ce28c90e549150cf4a8a6d18",
+  "bones": [
+    {
+      "name": "GB_Body",
+      "head_blender": [
+        0,
+        0.05,
+        0.65
+      ],
+      "parent": null
+    },
+    {
+      "name": "GB_Head",
+      "head_blender": [
+        0,
+        -0.6,
+        0.63
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_Gullet",
+      "head_blender": [
+        0,
+        -0.2,
+        0.8
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_Fin_L",
+      "head_blender": [
+        -0.14,
+        -0.14,
+        0.5
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_Fin_R",
+      "head_blender": [
+        0.14,
+        -0.14,
+        0.5
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_Tail",
+      "head_blender": [
+        0,
+        0.38,
+        0.7
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_TailTip",
+      "head_blender": [
+        0,
+        0.66,
+        0.5
+      ],
+      "parent": "GB_Tail"
+    }
+  ],
+  "meshes": [
+    {
+      "mesh": "Part_01_Mesh",
+      "bang_part": 1,
+      "bones": [
+        "Body"
+      ],
+      "triangles": 39893
+    },
+    {
+      "mesh": "Part_02_Mesh",
+      "bang_part": 2,
+      "bones": [
+        "Body",
+        "Gullet"
+      ],
+      "triangles": 19651
+    },
+    {
+      "mesh": "Part_03_Mesh",
+      "bang_part": 3,
+      "bones": [
+        "Fin_R"
+      ],
+      "triangles": 6657
+    },
+    {
+      "mesh": "Part_04_Mesh",
+      "bang_part": 4,
+      "bones": [
+        "Fin_L"
+      ],
+      "triangles": 6645
+    },
+    {
+      "mesh": "Part_05_Mesh",
+      "bang_part": 5,
+      "bones": [
+        "TailTip"
+      ],
+      "triangles": 4531
+    },
+    {
+      "mesh": "Part_06_Mesh",
+      "bang_part": 6,
+      "bones": [
+        "Head"
+      ],
+      "triangles": 5359
+    },
+    {
+      "mesh": "Part_07_Mesh",
+      "bang_part": 7,
+      "bones": [
+        "Tail"
+      ],
+      "triangles": 3212
+    },
+    {
+      "mesh": "Part_08_Mesh",
+      "bang_part": 8,
+      "bones": [
+        "Head"
+      ],
+      "triangles": 2612
+    },
+    {
+      "mesh": "Part_09_Mesh",
+      "bang_part": 9,
+      "bones": [
+        "TailTip"
+      ],
+      "triangles": 443
+    },
+    {
+      "mesh": "Part_10_Mesh",
+      "bang_part": 10,
+      "bones": [
+        "Tail"
+      ],
+      "triangles": 992
+    }
+  ],
+  "triangle_uv_signature_before": "b1a3fb8e4c7b39e32c451fdd79bf2bde75a1eeb089ec971d318f874e8deb39e9",
+  "triangle_uv_signature_after": "b1a3fb8e4c7b39e32c451fdd79bf2bde75a1eeb089ec971d318f874e8deb39e9",
+  "max_influences": 2,
+  "weight_sum_error": 5.750769282997226e-08,
+  "pose_test_displacement": 0.1149470365582711,
+  "bind_restore_error": 0.0,
+  "embedded_clips": 0,
+  "animation_driver": "GiantBossMotion; authored curves in GiantBossSetup",
+  "target_device_performance_tested": false,
+  "input_revision": "3430ecc",
+  "input_path": "Assets/UnsoundedSea/Art/Models/TideBonesChoirmaster_BANG_LOD0.glb",
+  "blender_version": "5.2.2",
+  "embedded_images": [
+    {
+      "bytes": 6167414,
+      "sha256": "59920ce4a8c583fc9bfa1c9435f8d63cfd7566d934ab3440580ffdf52f777656"
+    },
+    {
+      "bytes": 5959072,
+      "sha256": "f5e319c53eeca72ed44ebd54fcb846729576e3fc289f434395c6a51445e8f5c4"
+    },
+    {
+      "bytes": 4233124,
+      "sha256": "7176374e2d13f44da6c96b494eea8e08026a792a7c4ecd5e988e1066cf462dc5"
+    }
+  ],
+  "embedded_images_identical_to_bang_lod0": true,
+  "unity_validation": {
+    "editor": "6000.6.5f1",
+    "platform": "macOS Metal",
+    "date": "2026-10-17",
+    "editmode_suite": {
+      "passed": 215,
+      "failed": 0
+    },
+    "live_enemy_turns": 2,
+    "hit_overlay_reviewed": true,
+    "pause_verified": true,
+    "review": "Docs/ArtReferences/giant-boss-M02-motion.jpg"
+  }
+}

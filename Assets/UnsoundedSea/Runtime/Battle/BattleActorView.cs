@@ -20,12 +20,16 @@ namespace UnsoundedSea.Runtime
         private float height, impulse, attack, fall, age;
         private Animator animator;
         private BellMotherRigidMotion rigidMotion;
+        private DeckActorMotion deckMotion;
+        public GiantBossMotion GiantMotion { get; private set; }
+        public bool HasPendingDeckMotion => deckMotion != null && deckMotion.Busy;
+        public float DeckActionImpact => deckMotion == null ? 0 : deckMotion.ActionImpact;
         private Coroutine actionSequence;
         private bool skeletalPresentation;
         private bool rigidPresentation;
         private bool legacyMotion;
 
-        public bool HasSkeletalPresentation => skeletalPresentation || rigidPresentation;
+        public bool HasSkeletalPresentation => skeletalPresentation || rigidPresentation || deckMotion != null || GiantMotion != null;
 
         public void Bind(BattleDirector owner, string id, GameObject prefab, Material ringMaterial)
         {
@@ -35,6 +39,10 @@ namespace UnsoundedSea.Runtime
             bodyPosition = body.localPosition; bodyRotation = body.localRotation;
             animator = body.GetComponentInChildren<Animator>();
             rigidMotion = body.GetComponentInChildren<BellMotherRigidMotion>();
+            GiantMotion = IsSeaActor ? body.GetComponentInChildren<GiantBossMotion>() : null;
+            if (GiantMotion != null) GiantMotion.Initialize();
+            deckMotion = IsSeaActor ? null : body.GetComponentInChildren<DeckActorMotion>();
+            if (deckMotion != null) deckMotion.Initialize(id);
             skeletalPresentation = animator != null && animator.runtimeAnimatorController != null;
             rigidPresentation = rigidMotion != null;
             if (skeletalPresentation)
@@ -72,6 +80,14 @@ namespace UnsoundedSea.Runtime
             foreach (var renderer in root.GetComponentsInChildren<Renderer>())
             {
                 var local = renderer.localBounds;
+                // A skin's culling bounds can be expressed relative to its root bone and
+                // deliberately padded for motion. Use baked geometry for selection/labels.
+                if (renderer is SkinnedMeshRenderer skin)
+                {
+                    var baked = new Mesh();
+                    try { skin.BakeMesh(baked, true); baked.RecalculateBounds(); local = baked.bounds; }
+                    finally { if (Application.isPlaying) Destroy(baked); else DestroyImmediate(baked); }
+                }
                 for (var i = 0; i < 8; i++)
                 {
                     var corner = local.center + Vector3.Scale(local.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1));
@@ -97,9 +113,22 @@ namespace UnsoundedSea.Runtime
             var local = transform.InverseTransformPoint(ray.GetPoint(distance));
             return local.x * local.x + local.z * local.z <= ringRadius * ringRadius;
         }
-        public void Feedback(bool damaged, bool attacking, bool alive)
+        public void Feedback(bool damaged, bool attacking, bool alive, bool ritual = false, bool observing = false, float delay = 0)
         {
             Alive = alive;
+            if (GiantMotion != null)
+            {
+                if (!alive) GiantMotion.Retire();
+                else { if (damaged) GiantMotion.PlayHit(); if (attacking) GiantMotion.PlayAttack(ritual, observing); }
+                return;
+            }
+            if (deckMotion != null)
+            {
+                deckMotion.SetAlive(alive);
+                if (damaged) deckMotion.PlayHit();
+                if (attacking) deckMotion.PlayAttack(ritual, observing, delay);
+                return;
+            }
             if (skeletalPresentation)
             {
                 if (actionSequence != null) StopCoroutine(actionSequence);
@@ -140,14 +169,22 @@ namespace UnsoundedSea.Runtime
 
         private void Update()
         {
-            if (body == null) return;
+            if (body == null || director == null) return;
+            if (deckMotion != null) deckMotion.Tick(Time.unscaledDeltaTime, director.Paused, GameSettings.ReducedMotion);
             if (animator != null) animator.speed = director.Paused ? 0 : 1;
             if (rigidMotion != null) rigidMotion.SetPaused(director.Paused);
+            if (GiantMotion != null) { GiantMotion.SetPaused(director.Paused); GiantMotion.Tick(Time.unscaledDeltaTime); }
             if (director.Paused) return;
             var dt = Time.unscaledDeltaTime; age += dt;
             impulse = Mathf.MoveTowards(impulse, 0, dt * 2.2f); attack = Mathf.MoveTowards(attack, 0, dt * (IsSeaActor ? 0.8f : 1.4f));
             fall = Mathf.MoveTowards(fall, Alive ? 0 : 1, dt * 0.9f);
             var reduced = GameSettings.ReducedMotion;
+            if (deckMotion != null || GiantMotion != null)
+            {
+                body.localPosition = bodyPosition;
+                body.localRotation = bodyRotation;
+                return;
+            }
             if ((skeletalPresentation || rigidPresentation) && !legacyMotion)
             {
                 body.localPosition = bodyPosition + Vector3.up * (-fall * height);

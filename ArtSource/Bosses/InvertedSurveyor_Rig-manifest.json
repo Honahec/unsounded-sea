@@ -1,0 +1,186 @@
+{
+  "asset": "InvertedSurveyor",
+  "method": "Anatomical armature on assembled BANG parts; rigid shell weights and localized soft chains",
+  "input_sha256": "6ae17694ba9702a32be54238a756ee66eedfe2717c409b6b2cc5932196d42414",
+  "output_sha256": "56984d233fe65871478020732cc0fcf251c4c1a53610a8ec4b3530d3da6f0925",
+  "bones": [
+    {
+      "name": "GB_Body",
+      "head_blender": [
+        0,
+        0,
+        0.82
+      ],
+      "parent": null
+    },
+    {
+      "name": "GB_Arch_L",
+      "head_blender": [
+        -0.2,
+        0,
+        0.8
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_Arch_R",
+      "head_blender": [
+        0.2,
+        0,
+        0.8
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_Pendulum",
+      "head_blender": [
+        -0.1,
+        -0.1,
+        0.18
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_PendulumTip",
+      "head_blender": [
+        -0.1,
+        -0.1,
+        -0.35
+      ],
+      "parent": "GB_Pendulum"
+    },
+    {
+      "name": "GB_Pendant_R",
+      "head_blender": [
+        0.19,
+        -0.2,
+        -0.1
+      ],
+      "parent": "GB_Arch_R"
+    },
+    {
+      "name": "GB_Pendant_Back",
+      "head_blender": [
+        -0.04,
+        0.18,
+        -0.29
+      ],
+      "parent": "GB_Body"
+    }
+  ],
+  "meshes": [
+    {
+      "mesh": "Part_01_Mesh",
+      "bang_part": 1,
+      "bones": [
+        "Body"
+      ],
+      "triangles": 39155
+    },
+    {
+      "mesh": "Part_02_Mesh",
+      "bang_part": 2,
+      "bones": [
+        "Arch_L"
+      ],
+      "triangles": 19862
+    },
+    {
+      "mesh": "Part_03_Mesh",
+      "bang_part": 3,
+      "bones": [
+        "Arch_R"
+      ],
+      "triangles": 17061
+    },
+    {
+      "mesh": "Part_04_Mesh",
+      "bang_part": 4,
+      "bones": [
+        "Pendulum",
+        "PendulumTip"
+      ],
+      "triangles": 8053
+    },
+    {
+      "mesh": "Part_05_Mesh",
+      "bang_part": 5,
+      "bones": [
+        "Pendant_R"
+      ],
+      "triangles": 1806
+    },
+    {
+      "mesh": "Part_06_Mesh",
+      "bang_part": 6,
+      "bones": [
+        "Body"
+      ],
+      "triangles": 1418
+    },
+    {
+      "mesh": "Part_07_Mesh",
+      "bang_part": 7,
+      "bones": [
+        "Arch_L"
+      ],
+      "triangles": 657
+    },
+    {
+      "mesh": "Part_08_Mesh",
+      "bang_part": 8,
+      "bones": [
+        "Arch_R"
+      ],
+      "triangles": 754
+    },
+    {
+      "mesh": "Part_09_Mesh",
+      "bang_part": 9,
+      "bones": [
+        "Pendant_Back"
+      ],
+      "triangles": 1229
+    }
+  ],
+  "triangle_uv_signature_before": "040b07d106709f34acdc5664e3d08bb8838e121919ed83fbb499443388926a19",
+  "triangle_uv_signature_after": "040b07d106709f34acdc5664e3d08bb8838e121919ed83fbb499443388926a19",
+  "max_influences": 2,
+  "weight_sum_error": 0,
+  "pose_test_displacement": 0.18824957906508355,
+  "bind_restore_error": 0.0,
+  "embedded_clips": 0,
+  "animation_driver": "GiantBossMotion; authored curves in GiantBossSetup",
+  "target_device_performance_tested": false,
+  "input_revision": "3430ecc",
+  "input_path": "Assets/UnsoundedSea/Art/Models/InvertedSurveyor_BANG_LOD0.glb",
+  "blender_version": "5.2.2",
+  "embedded_images": [
+    {
+      "bytes": 5445251,
+      "sha256": "4557245a0b9c999b54680b80c326c078f6416f2e8660db154db66b81186cd8c8"
+    },
+    {
+      "bytes": 5473361,
+      "sha256": "d3aaae3f1b334564cc8528cbce8f82d9fa08269e0a4aa7285c436b6cf5ca66ac"
+    },
+    {
+      "bytes": 3695084,
+      "sha256": "42dd314f4609aba2c54f1b5053bfcabf3c308257a36110da80abac7601ce644c"
+    }
+  ],
+  "embedded_images_identical_to_bang_lod0": true,
+  "unity_validation": {
+    "editor": "6000.6.5f1",
+    "platform": "macOS Metal",
+    "date": "2026-10-17",
+    "editmode_suite": {
+      "passed": 215,
+      "failed": 0
+    },
+    "live_enemy_turns": 2,
+    "hit_overlay_reviewed": true,
+    "pause_verified": true,
+    "review": "Docs/ArtReferences/giant-boss-M03-motion.jpg"
+  }
+}

@@ -8045,6 +8045,34 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2827891348155755500, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+      propertyPath: field of view
+      value: 63
+      objectReference: {fileID: 0}
+    - target: {fileID: 4756507697045552667, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 63
+      objectReference: {fileID: 0}
+    - target: {fileID: 4756507697045552667, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4756507697045552667, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9685408
+      objectReference: {fileID: 0}
+    - target: {fileID: 4756507697045552667, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.038937733
+      objectReference: {fileID: 0}
+    - target: {fileID: 4756507697045552667, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.24559136
+      objectReference: {fileID: 0}
+    - target: {fileID: 4756507697045552667, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.009873378
+      objectReference: {fileID: 0}
     - target: {fileID: 6927056962710888796, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -8088,6 +8116,18 @@ PrefabInstance:
     - target: {fileID: 7132153636046312248, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
       propertyPath: m_Name
       value: M03Stage
+      objectReference: {fileID: 0}
+    - target: {fileID: 8139019866066109063, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+      propertyPath: fogColor.b
+      value: 0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 8139019866066109063, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+      propertyPath: fogColor.g
+      value: 0.075
+      objectReference: {fileID: 0}
+    - target: {fileID: 8139019866066109063, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
+      propertyPath: fogColor.r
+      value: 0.045
       objectReference: {fileID: 0}
     - target: {fileID: 8139019866066109063, guid: 0020cf3ddc9bd44eab3d52d177379bad, type: 3}
       propertyPath: actorAnchors.Array.size

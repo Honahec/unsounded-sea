@@ -44,7 +44,14 @@ Deemos Agent 是可选生产工具，不是每件资产的必经步骤。高模�
 
 当前采用 BANG 分件 → Blender 低模与支点 → Unity 刚性部件动画，未使用柔性骨骼蒙皮。整网格骨骼试验的取舍、当前生产步骤、根部约束与重量感设计，以及后续骨骼链方案，统一见[沉钟之母动画设计](BELL_MOTHER_ANIMATION_DESIGN.md)。规格以 [BANG manifest](../ArtSource/Bosses/BellMother_BANG-manifest.json) 为准，测试范围见[验证记录](FRAMEWORK_VALIDATION.md#沉钟之母-bang-分件与刚性动作流程)。
 
-M02–M05 同样使用私有 API 的 BANG 分件，保留源母版、运行时低模与独立 `Body/Part_XX` 支点。`Tools/BossBangBuild.py` 复用沉钟之母的减面、导出和预览步骤，读取各自原 manifest 的预算；用 `Blender -b --python Tools/BossBangBuild.py -- TideBonesChoirmaster`（或另外三个模型名）重建，再经 Unity CLI 执行 `BossExpansionSetup.ImportModels` 更新原 Prefab，保留 GUID、海面锚点、镜头和战斗规则。分件结果与 SHA 以 `ArtSource/Bosses/*_BANG-manifest.json` 为准；原未分件 LOD0 只保留在 ArtSource，不再重复留在 Assets。当前支点位于部件中心，尚未做解剖关节校准、蒙皮或战斗动作；不挂载沉钟之母专用动画组件。导入、材质、尺度与四场实机回合检查见 [BANG Unity 验证](../ArtSource/Bosses/BANG-unity-validation.json)；这不代表动画或目标设备性能通过。
+### M02–M05：BANG 分件后的解剖绑定
+
+使用同学上传的 BANG 结果，没有重新生成造型或贴图。原生成来源仍在各 `*-manifest.json`；`*_BANG-manifest.json` 记录分件母版与当前运行时输出，`*_Rig-manifest.json` 记录关节、权重、输入版本、UV／图片校验与动画验收。四个绑定报告：[领唱者](../ArtSource/Bosses/TideBonesChoirmaster_Rig-manifest.json)、[司衡者](../ArtSource/Bosses/InvertedSurveyor_Rig-manifest.json)、[执旗者](../ArtSource/Bosses/UnlitFlagBearer_Rig-manifest.json)、[守望者](../ArtSource/Bosses/StarlessWatcher_Rig-manifest.json)。旧 [BANG 静态检查](../ArtSource/Bosses/BANG-unity-validation.json) 只代表绑定前状态。
+
+1. **取输入**：从 `3430ecc` 恢复四份未绑定的 `Assets/UnsoundedSea/Art/Models/*_BANG_LOD0.glb` 到独立输入目录，通过 `git show <revision>:<path> | git lfs smudge` 取得真实二进制。不要拿当前蒙皮输出再次绑定，也不要直接覆盖运行时目录。`BossBangBuild.py` 是更上游的高模减面工具，不是日常动画调参入口。
+2. **绑定**：在 arch 的 Blender 5.2.2 执行 `blender -b --python Tools/GiantBossRig.py -- INPUT_DIR OUTPUT_DIR`。脚本检查输入 SHA，按正侧视图识别部件，再建立解剖支点与短骨骼链；硬壳单骨刚性权重，囊体／悬摆／旗布／帷幕局部渐变权重。旗杆与旗布只按原面拆开，保留 UV，不重网格化。必须通过面与 UV 签名一致、权重归一、真实变形和归零恢复检查。
+3. **导入**：复制输出到本机，退出 Play、保存编辑；Unity CLI 执行 `Tools/GiantBossSetup.cs` 的 `Import`（参数为输出目录；默认 `Logs/GiantBosses`），再执行 `Build`。保留 GLB `.meta`，重新计算归一尺寸与底部原点：增加 armature 会改变 glTF 子节点 ID，旧嵌套 Prefab 缩放覆盖可能失效，不能照抄。`Build` 会重设四个 Boss 的动作、构图和舞台参数；手调前先检查差异，不运行全遭遇重建工具。
+4. **运行与归档**：动画由 `GiantBossMotion` 程序曲线驱动真实骨骼，GLB 没有内嵌 clips；不要把 `animations: 0` 当作静态模型。先验收 `GiantBossAnimationTests`，再在 Play 中运行 `GiantBossQA.Record(index)` / `Hit(index)`，index 为 0–3。材质图片按字节比较，最终镜头检查重量、接缝、波浪和船的响应。流程、动作设计与边界分别见[框架](FRAMEWORK.md#m02m05-巨兽骨骼表现)和[验证记录](FRAMEWORK_VALIDATION.md#m02m05-boss-战)。输出与母版按 LFS 归档，忽略的 Logs 只放临时帧和完整日志。
 
 ### 下载后的最低检查
 
@@ -103,13 +110,13 @@ unity command run_script --project-path "$UNITY_PROJECT_PATH" --timeout 180 --fo
 
 **新增或替换模型：**先更新导入配置/脚本的名称、路径、SHA、预算和验收预期；当前 `ImportSources` 会拒绝覆盖不同哈希文件。应通过单独的 Unity CLI/AssetDatabase 更新步骤替换目标内容、保留 `.meta` GUID、重导入并检查子资产引用及 Prefab。不要删掉已编辑的场景来强迫初始化脚本重建；已有场景的重新绑定需要显式处理。同步更新 manifest 和验收结果。
 
-**普通敌人运行时静态接入：**25 种归档源已通过 `Assets/UnsoundedSea/Editor/Tools/OrdinaryEnemyStaticSetup.cs` 导入 `Art/Characters/OrdinaryStatic`，表现 Prefab 位于 `Art/Prefabs/OrdinaryStatic`，供 25 个普通遭遇使用。`VoyageCampaignSetup.Setup` 同时生成这些资产和遭遇目录；仅保存本次资产，不全局保存无关编辑。导入文件与归档源逐字节匹配，完整运行时路径／SHA／规格维护在 [运行时 manifest](../ArtSource/runtime-manifest.json)。普通战仍为静态网格反馈，不宣称具备骨骼动画。
+**普通敌人运行时静态接入：**25 种归档源已通过 `Assets/UnsoundedSea/Editor/Tools/OrdinaryEnemyStaticSetup.cs` 导入 `Art/Characters/OrdinaryStatic`，表现 Prefab 位于 `Art/Prefabs/OrdinaryStatic`，作为静态源和回溯样例保留，普通遭遇现已引用下方 CuratedRigs。静态导入入口保留；`VoyageCampaignSetup.Setup` 现配置骨骼表现和遭遇目录，仅保存本次资产，不全局保存无关编辑。导入文件与归档源逐字节匹配，完整运行时路径／SHA／规格维护在 [运行时 manifest](../ArtSource/runtime-manifest.json)。当前战斗驱动与接入入口见[框架指南](FRAMEWORK.md#3d-战斗组合与扩展)。
 
-**普通敌人绑定保留集：**25 个普通人形敌人已按同角度诊断从两批绑定中择优，统一到 `Assets/UnsoundedSea/Art/{Models,Prefabs}/CuratedRigs/`：旧版 10 个、新版 10 个、合并版 5 个，每个角色只保留一个模型；来源、选择理由、SHA 和延后问题集中在 [保留集 manifest](../ArtSource/Characters/CuratedRigs/manifest.json)。`ArtSource/Characters/CuratedRigs/` 仅保存元数据与验收依据，不重复存放模型。旧 `RigTrials`、`Hyper3DRigs` 的原始返回、Blender 文件、运行时候选、独立测试动画和旧审阅场景已从当前树清理；绑定候选保持独立，普通关卡引用上方静态模型；Prayer／Echo 不变。
+**普通敌人绑定保留集：**25 个普通人形敌人已按同角度诊断从两批绑定中择优，统一到 `Assets/UnsoundedSea/Art/{Models,Prefabs}/CuratedRigs/`：旧版 10 个、新版 10 个、合并版 5 个，每个角色只保留一个模型；来源、选择理由、SHA 和延后问题集中在 [保留集 manifest](../ArtSource/Characters/CuratedRigs/manifest.json)。`ArtSource/Characters/CuratedRigs/` 仅保存元数据与验收依据，不重复存放模型。旧 `RigTrials`、`Hyper3DRigs` 的原始返回、Blender 文件、运行时候选、独立测试动画和旧审阅场景已从当前树清理；25 个保留集 Prefab 已接入普通关卡并配置 `DeckActorMotion`；Prayer／Echo 使用下方复用绑定。
 
 5 个合并版保留新版上肢，迁移旧版下肢关节／权重，并在骨盆平滑过渡；修正新版权重中把靴部固定到 Root 的情况，屈膝牵拉减少。依据见 [质量审阅](../ArtSource/Characters/CuratedRigs/quality-review.json)、[合并版诊断图](ArtReferences/curated-rig-hybrids.jpg) 和 [Unity 检查](../ArtSource/Characters/CuratedRigs/unity-validation.json)。复现工具为 `Tools/CompareHumanoidRigs.py`、`Tools/CombineHumanoidRigs.py`；恢复当前独立 Prefab 可通过 Unity CLI 执行 `Tools/CurateHumanoidRigs.cs` 的 `CurateHumanoidRigs.Consolidate`，参数为 `ArtSource/Characters/CuratedRigs/manifest.json`。历史比较输入只留 SHA 与历史修订；远端永久清理后，不保证淘汰版本可恢复。
 
-本批不制作战斗动画。10 个旧版 GLB 为复用已有 LFS 对象而保留原内嵌测试片段，独立 Prefab 不带动画驱动；它们不代表战斗动作可用。Unity 检查涵盖真实导入网格的胸部、肘部、膝部可恢复变形、材质、尺度和脚底；大幅动作、持物刚性、衣摆、藏手约束与设备性能继续延后。glTFast 当前导入每顶点四权重，GLB 保留完整权重。
+绑定筛选阶段未制作战斗动画；现已接入有限幅度的站桩 idle／攻击／受击。10 个旧版 GLB 为复用已有 LFS 对象而保留原内嵌测试片段，内嵌片段不参与战斗，由 Prefab 上的 `DeckActorMotion` 驱动；不以旧测试片段作为验收依据。Unity 检查涵盖真实导入网格的胸部、肘部、膝部可恢复变形、材质、尺度和脚底；大幅动作、持物刚性、衣摆、藏手约束与设备性能继续延后。glTFast 当前导入每顶点四权重，GLB 保留完整权重。
 
 **LFS 额度：**删除当前文件、历史改写和本地 `git lfs prune` 都不会直接清除 GitHub 远端存储。实际清除需 [GitHub Support 或删除重建仓库](https://docs.github.com/en/repositories/working-with-files/managing-large-files/removing-files-from-git-large-file-storage)。本次的保留对象与历史清理候选见 [LFS 清理清单](../ArtSource/Characters/CuratedRigs/lfs-cleanup.json)；未改写共享分支历史、未删除远端仓库，后续推送前检查额度，并单独验证远端回读。
 
@@ -174,17 +181,17 @@ git lfs fsck
 
 | 当前资产 | 母版 → LOD0 三角面 | 已验证 | 未完成 |
 | --- | --- | --- | --- |
-| Prayer | 500,000 → 60,000 | Unity 材质、1.8 m、脚底、Prefab 引用、正面 Play 画面 | 袖内刀/铃分件、动画、全视角与目标设备验收 |
-| Echo | 800,000 → 90,000 | Unity 材质、2.1 m、脚底、Prefab 引用、战斗场景 | 更明显的空壳塌陷、独立铜铃、动画、全视角与目标设备验收 |
+| Prayer | 500,000 → 60,000 | Unity 材质、1.8 m、脚底、Prefab 引用、正面 Play 画面 | 袖内刀/铃分件、大幅动作、全视角与目标设备验收 |
+| Echo | 800,000 → 90,000 | Unity 材质、2.1 m、脚底、Prefab 引用、战斗场景 | 更明显的空壳塌陷、独立铜铃、大幅动作、全视角与目标设备验收 |
 | BellMother | 1,500,000 → 119,992 | BANG 12 部件、6 触手 pivot、32 m、独立海面锚点、Unity 刚性战斗反馈 | 主体贴图平台压缩、LOD1/2、最终部件动画与性能验收 |
 | SurveyVessel | 800,000 → 80,000 | Agent 参考制作、保留 UV 减面、18 m 船体、开放甲板、战斗舞台 | 平台贴图压缩、LOD1/2、驾驶玩法 |
-| M02–M05 Boss 候选 | 具体规格见下方各自 manifest | Agent 生成、高低模归档、LOD0 Unity 导入、Prefab／四场战斗镜头、来源哈希一致 | 美术定稿、完整多视角、骨骼动画、纹理平台压缩与性能验收 |
+| M02–M05 Boss 候选 | 具体规格见各自 manifest | BANG 分件、解剖蒙皮、idle／攻击／受击、四场镜头与浪／雾反馈 | 美术定稿、完整多视角、大幅动作精修、纹理平台压缩与性能验收 |
 
-Prayer 与 Echo 各 1 网格/材质、3 张 4K 纹理，无蒙皮/动画；尚无 LOD1/2 或 LODGroup。内嵌纹理为 ARGB32、13 级 mip，两角色完整纹理链理论约 512 MiB（非 Profiler 实测），尚未 GPU 压缩。后续需提取/重映射为可配置 TextureImporter 资产，按平台选择压缩与尺寸后复核；普通纹理平台覆写不能直接套用到这些内嵌子资产。
+Prayer 与 Echo 原静态源各 1 网格/材质、3 张 4K 纹理；当前 Prefab 已改用归档绑定生成的蒙皮副本。新副本来源、哈希与 UV 恢复检查集中在 [DeckRigs manifest](../ArtSource/Characters/DeckRigs-manifest.json)，复现使用 `PrepareHyper3DRigs.py`（`skip_preview` 可省去诊断渲染）；祷告者再用 `PrayerSkirtRig.py` 添加独立的八组裙摆骨骼和渐变权重，最后执行 `DeckAnimationSetup.Apply`。未改原始 GLB；尚无 LOD1/2 或 LODGroup。内嵌纹理为 ARGB32、13 级 mip，两角色完整纹理链理论约 512 MiB（非 Profiler 实测），尚未 GPU 压缩。后续需提取/重映射为可配置 TextureImporter 资产，按平台选择压缩与尺寸后复核；普通纹理平台覆写不能直接套用到这些内嵌子资产。
 
-Prayer 的首个 Hyper3D API 绑定候选已完成，保留手臂收拢的造型，未替换上述静态运行时资产。上传模型的 UV 被服务重新展开；审阅脚本通过重合三角面的角点恢复原 UV，再复用原材质，未修改自动骨骼与权重。弯臂压力测试会牵拉长袍下摆，较大转身出现衣摆穿插；按当前用户确认的方向，攻击和受击可以保持双手藏在衣内，以躯干和重心表现，具体动作范围等关卡设计后再定，不预先要求抽手动作。参数、来源、规格与检查结果见 [候选 manifest](../ArtSource/Characters/Prayer_Rigging-manifest.json)，[三姿势对照](ArtReferences/prayer-rigging-review.jpg) 为 Blender 诊断渲染，不代表 Unity 动画或性能验收。Echo 也已完成首个绑定候选：同样的弯臂、转身诊断未见 Prayer 的大面积衣摆牵拉，但尚未验证大幅动作、头盔／领圈刚性、多视角和 Unity 播放；未替换运行时模型。来源与实测见 [Echo 候选 manifest](../ArtSource/Characters/Echo_Rigging-manifest.json)，画面见 [三姿势对照](ArtReferences/echo-rigging-review.jpg)。
+Prayer／Echo 的首轮 Hyper3D 自动绑定审阅分别记录于 [Prayer 候选 manifest](../ArtSource/Characters/Prayer_Rigging-manifest.json) 和 [Echo 候选 manifest](../ArtSource/Characters/Echo_Rigging-manifest.json)；[Prayer 三姿势](ArtReferences/prayer-rigging-review.jpg)／[Echo 三姿势](ArtReferences/echo-rigging-review.jpg) 是当时的 Blender 诊断，不是当前战斗验收。服务重展 UV 后，通过重合三角面角点恢复原 UV／材质。Prayer 的大幅弯臂曾牵拉袍身，因此当前保持藏手，以专用裙摆骨骼的妖风强摆表达攻击，胸背只作小幅跟随；Echo 使用较慢的前压与受击回稳。当前动作曲线见[机制文档](ASSET_MECHANICS_DESIGN.md#甲板敌人的战斗动作设计与当前实现)，Unity 证据见[验证记录](FRAMEWORK_VALIDATION.md#甲板敌人战斗动画与普通战海面)。大幅肢体动作、头盔／领圈刚性、多视角与目标设备性能仍需另验。
 
-M02–M05 的高模与减面版保留在 `ArtSource/Bosses/`；减面版另存 `Assets/UnsoundedSea/Art/Models/` 并接入 `BossM02`–`BossM05`，导入副本与归档 SHA-256 一致。来源、实测规格和 Prefab 路径：[M02](../ArtSource/Bosses/TideBonesChoirmaster-manifest.json)、[M03](../ArtSource/Bosses/InvertedSurveyor-manifest.json)、[M04](../ArtSource/Bosses/UnlitFlagBearer-manifest.json)、[M05](../ArtSource/Bosses/StarlessWatcher-manifest.json)。M03 已重生成，M04 使用新项目重试；M05 轮廓仍偏人形，尚未美术定稿。没有重新生成水面，四场复用现有水体与调查船。具体运行范围见 [验证记录](FRAMEWORK_VALIDATION.md#m02m05-boss-战)。
+M02–M05 原始高低模和 BANG 母版保留在 `ArtSource/Bosses/`；当前 `Assets/UnsoundedSea/Art/Models/*_BANG_LOD0.glb` 是绑定后的运行时模型，不能再与旧未绑定低模比较文件哈希。原生成来源：[M02](../ArtSource/Bosses/TideBonesChoirmaster-manifest.json)、[M03](../ArtSource/Bosses/InvertedSurveyor-manifest.json)、[M04](../ArtSource/Bosses/UnlitFlagBearer-manifest.json)、[M05](../ArtSource/Bosses/StarlessWatcher-manifest.json)；当前规格与检查见上方分件／绑定报告。M05 轮廓仍偏人形，尚未美术定稿。四场复用现有水体与调查船。
 
 `OceanBattle.unity` 已同时实例化两名角色与船体；替换约定见 [框架指南](FRAMEWORK.md)。船体来源、实测规格与哈希见 [船体 manifest](../ArtSource/Vessels/manifest.json)，独立发光图保留在母版目录，当前船舷照明由舞台灯具承担。角色原四份高低模的远端 LFS 回读已在 `ffe264e` 验证；船体高低模也已在 `56a27ff` 完成独立远端回读。海面 Boss 的来源、哈希与导入规格单独维护在 [Boss manifest](../ArtSource/Bosses/manifest.json)，使用独立材质降低金属感并接入 2K 压缩发光图；原始 GLB 与母版未修改。新战斗的检查范围见 [验证记录](FRAMEWORK_VALIDATION.md)。
 

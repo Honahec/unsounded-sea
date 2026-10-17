@@ -67,8 +67,18 @@ namespace UnsoundedSea.Core
         public IReadOnlyList<EncounterTargetView> Options { get; }
         internal PendingCardChoiceView(string prompt, IReadOnlyList<EncounterTargetView> options) { Prompt = prompt; Options = options; }
     }
+    public sealed class ResolvedEnemyAction
+    {
+        public string EnemyId { get; }
+        public DamageChannel Channel { get; }
+        public int Amount { get; }
+        public ResolvedEnemyAction(string enemyId, DamageChannel channel, int amount)
+        { EnemyId = enemyId; Channel = channel; Amount = amount; }
+    }
     public sealed class BattleView
     {
+        // Only actions already executed by the last successful EndTurn; never future intent.
+        public IReadOnlyList<ResolvedEnemyAction> ResolvedEnemyActions { get; internal set; }
         public BossEncounterKind BossKind { get; internal set; }
         public int BossStage { get; internal set; }
         public string BossStatus { get; internal set; }

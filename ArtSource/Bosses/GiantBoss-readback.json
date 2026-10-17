@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-17",
+  "remote_revision": "940243b55ece3bd072ac9d2f6b9f66c1c67d4131",
+  "scope": "Four skinned runtime GLBs and six review images; fresh remote sparse clone with independent LFS store",
+  "verification": "SHA-256 of downloaded working files and LFS objects matches remote pointers and source checkout; local full git lfs fsck passed. Remote full fsck is inapplicable to intentionally omitted assets.",
+  "files": [
+    {
+      "file": "Assets/UnsoundedSea/Art/Models/TideBonesChoirmaster_BANG_LOD0.glb",
+      "sha256": "0745370c48d5ab0d4b4333994605a079d4e4c845ce28c90e549150cf4a8a6d18",
+      "matched": true
+    },
+    {
+      "file": "Assets/UnsoundedSea/Art/Models/InvertedSurveyor_BANG_LOD0.glb",
+      "sha256": "56984d233fe65871478020732cc0fcf251c4c1a53610a8ec4b3530d3da6f0925",
+      "matched": true
+    },
+    {
+      "file": "Assets/UnsoundedSea/Art/Models/UnlitFlagBearer_BANG_LOD0.glb",
+      "sha256": "37b1f87c931ef86404dfafb93a0c8b3219f42dc2c53ecd8a4c0b47502c0e15be",
+      "matched": true
+    },
+    {
+      "file": "Assets/UnsoundedSea/Art/Models/StarlessWatcher_BANG_LOD0.glb",
+      "sha256": "8d460a4da9a66d4953b9b87943744e2783992954d027d5b66820eb755f1afa08",
+      "matched": true
+    },
+    {
+      "file": "Docs/ArtReferences/giant-boss-M04-motion.jpg",
+      "sha256": "dcd06f68a87863f8a9f290ae0a744735045dd0ced8fb7ffacd324d44853a44d8",
+      "matched": true
+    },
+    {
+      "file": "Docs/ArtReferences/giant-boss-M03-motion.jpg",
+      "sha256": "747ada635109d742300623ca90e1714b7821ff9210c0211427b72acc4fefdc93",
+      "matched": true
+    },
+    {
+      "file": "Docs/ArtReferences/giant-boss-M05-motion.jpg",
+      "sha256": "2da9067a3c48666b5a956fcafea9b1ba3399b9ef109719189c4d1c939a35fb03",
+      "matched": true
+    },
+    {
+      "file": "Docs/ArtReferences/giant-boss-hit.jpg",
+      "sha256": "24ea3b8b2d78964d2513316c5b14dc10e7cab40c7126dc0c8bd1ab798e49a5f7",
+      "matched": true
+    },
+    {
+      "file": "Docs/ArtReferences/giant-boss-M02-motion.jpg",
+      "sha256": "16679b6dfd6c063d4e6e2fa555c664fe7c16578ed0d74c4e6fb9b0476c4130d9",
+      "matched": true
+    },
+    {
+      "file": "Docs/ArtReferences/giant-boss-ui.jpg",
+      "sha256": "ccdd5a524a6eb534323262f06e4286618436c9e0929a2240d4f4a8c310b75d16",
+      "matched": true
+    }
+  ]
+}

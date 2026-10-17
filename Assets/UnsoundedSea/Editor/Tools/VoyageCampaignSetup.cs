@@ -64,7 +64,7 @@ namespace UnsoundedSea.Editor
             if (stage == null) throw new InvalidOperationException("FogSeaStage prefab is missing BattleStage.");
             if (stage.actorAnchors == null || stage.actorAnchors.Length < 2)
                 throw new InvalidOperationException("FogSeaStage needs at least two actor anchors for voyage encounters.");
-            OrdinaryEnemyStaticSetup.Setup();
+            DeckAnimationSetup.Apply();
             var allTools = new[]
             {
                 Load<ToolDefinition>(Root + "/Content/Tools/lantern.asset"),
@@ -190,8 +190,8 @@ namespace UnsoundedSea.Editor
         {
             var id = $"voyage-{Regions[region]}-enemy-{variant}";
             var plan = Plans[region, variant];
-            var prefab = preservePresentation ? null : OrdinaryEnemyStaticSetup.LoadPrefab(plan.ModelName);
-            if (!preservePresentation && prefab == null) throw new InvalidOperationException($"Missing normalized static prefab for {plan.ModelName}.");
+            var prefab = preservePresentation ? null : DeckAnimationSetup.LoadOrdinary(plan.ModelName);
+            if (!preservePresentation && prefab == null) throw new InvalidOperationException($"Missing animated prefab for {plan.ModelName}.");
             if (preservePresentation) Load<EnemyDefinition>($"{EnemyFolder}/{id}.asset");
             return Asset<EnemyDefinition>(EnemyFolder, id, value =>
             {

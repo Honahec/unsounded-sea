@@ -11,7 +11,7 @@
     "basis": "API output is not published to public ASSETS or shared with other users.",
     "policy": "https://docs.hyper3d.ai/en/legal/data-retention-policy"
   },
-  "method": "BANG semantic split; independent rigid part pivots; Blender decimation",
+  "method": "BANG semantic split; Blender decimation; anatomical skin and localized cloth chains",
   "parts": 10,
   "part_mapping": [
     {
@@ -219,27 +219,31 @@
     "animations": 0
   },
   "runtime_spec": {
-    "bytes": 20358892,
+    "bytes": 22515044,
     "triangles": 89995,
     "vertices": 107686,
     "meshes": 10,
     "materials": 10,
     "images": 3,
-    "skins": 0,
+    "skins": 1,
     "animations": 0
   },
   "outputs": {
     "source": "ArtSource/Bosses/TideBonesChoirmaster_BANG_High.glb",
     "glb": "Assets/UnsoundedSea/Art/Models/TideBonesChoirmaster_BANG_LOD0.glb",
-    "preview": "ArtSource/Bosses/TideBonesChoirmaster_BANG-preview.png"
+    "preview": "ArtSource/Bosses/TideBonesChoirmaster_BANG-preview.png",
+    "rig_report": "ArtSource/Bosses/TideBonesChoirmaster_Rig-manifest.json"
   },
   "sha256": {
     "source": "3ad7a5949d21bcbc7ef755a4e9b4c73769396b9252abda391a4fd4a8bf1c99a3",
-    "glb": "e52c5facb59d9ed6b4c723b89ee1cbdec956e14e136b3471ec07487906716e0f",
+    "glb": "0745370c48d5ab0d4b4333994605a079d4e4c845ce28c90e549150cf4a8a6d18",
     "preview": "b42a3e60b925df7a442905317d7e377bb1662d0cfaaeecd2ce68960497ed5046"
   },
-  "animation_ready": false,
+  "animation_ready": true,
   "notes": [
-    "Part pivots preserve the assembled silhouette. Anatomical joint calibration and combat animation are not included."
-  ]
+    "Part mapping above describes the archived unskinned BANG input, not anatomical joints.",
+    "Runtime uses GiantBossMotion procedural skeletal curves; no embedded clips. Joint/weight/UV checks and limitations are in the rig report.",
+    "Original embedded PBR images retained byte-for-byte. Target-device performance and final art approval remain unverified."
+  ],
+  "partition_output_sha256": "e52c5facb59d9ed6b4c723b89ee1cbdec956e14e136b3471ec07487906716e0f"
 }

@@ -146,7 +146,8 @@ def prepare(work, name, spec):
     report_path.write_text(json.dumps(report, indent=2) + '\n')
     root.scale = (height / float(np.ptp(positions[:, 1])),) * 3
     root.location.z = height / 2
-    render(work, name, height)
+    if not spec.get("skip_preview", False):
+        render(work, name, height)
     print('PREPARED', name, report['joints'], 'bones', report['animations'], 'clips', flush=True)
 
 
