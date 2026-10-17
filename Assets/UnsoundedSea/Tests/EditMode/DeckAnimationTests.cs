@@ -125,6 +125,32 @@ namespace UnsoundedSea.Tests
             Assert.That(stage.skybox, Is.Not.Null);
         }
 
+        [Test] public void GunnerKeepsBothGripsFixedRelativeToItsChestThroughRecoilAndHits()
+        {
+            var go = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/MisfireGunner.prefab"));
+            try
+            {
+                var motion = go.GetComponent<DeckActorMotion>(); motion.Initialize("grip-test");
+                var bones = go.GetComponentInChildren<SkinnedMeshRenderer>().bones;
+                var chest = bones.Single(b => b.name == "chest");
+                var hands = bones.Where(b => b.name == "hand.L" || b.name == "hand.R").ToArray();
+                Assert.That(hands, Has.Length.EqualTo(2));
+                var rest = hands.Select(h => chest.InverseTransformPoint(h.position)).ToArray();
+                foreach (bool reduced in new[] { false, true })
+                {
+                    motion.PlayAttack(false, false);
+                    for (int frame = 0; frame < 30; frame++)
+                    {
+                        if (frame == 8) motion.PlayHit();
+                        motion.Tick(.07f, false, reduced);
+                        for (int hand = 0; hand < 2; hand++)
+                            Assert.That(Vector3.Distance(rest[hand], chest.InverseTransformPoint(hands[hand].position)), Is.LessThan(.0001f), hands[hand].name);
+                    }
+                }
+            }
+            finally { Object.DestroyImmediate(go); }
+        }
+
         private static BattleDefinition Definition(int damage = 8, int health = 60) => new BattleDefinition("animation-events",
             new[] { new CardSpec("interrupt", "Interrupt", "", 0, new[] { new EffectSpec("interrupt", 1) }) },
             new[] { "first", "second" }.Select(id => new EnemySpec(id, id, 30, "hidden", new[] {

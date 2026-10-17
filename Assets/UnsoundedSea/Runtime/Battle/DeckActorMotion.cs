@@ -137,8 +137,8 @@ namespace UnsoundedSea.Runtime
             var hit = strength * hitAmplitude;
             var weight = reduced ? 0 : amplitude * (1 - death);
             var arm = style == DeckMotionStyle.Veiled ? .035f : style == DeckMotionStyle.Ritual ? .28f : .65f;
-            float twist = style == DeckMotionStyle.Skirmisher ? 11 : style == DeckMotionStyle.Heavy ? 3 : 6;
-            float lean = style == DeckMotionStyle.Heavy ? 8 : style == DeckMotionStyle.Uncanny ? 10 : 7;
+            float twist = style == DeckMotionStyle.Gunner ? 0 : style == DeckMotionStyle.Skirmisher ? 11 : style == DeckMotionStyle.Heavy ? 3 : 6;
+            float lean = style == DeckMotionStyle.Gunner ? -5 : style == DeckMotionStyle.Heavy ? 8 : style == DeckMotionStyle.Uncanny ? 10 : 7;
             if (ritual) { lean *= -.55f; twist *= .25f; arm *= .55f; }
             if (observing) { a *= .2f; f *= .2f; }
             foreach (var joint in joints)
@@ -158,7 +158,8 @@ namespace UnsoundedSea.Runtime
                     case 9: angles = new Vector3((-lag - f * 8) * arm, 0, 0); break;
                     default: angles = new Vector3((-breath - f * 16) * arm, 0, 0); break;
                 }
-                if (style == DeckMotionStyle.Gunner && joint.role >= 5) angles *= .4f;
+                // The gun is fused to both hands: recoil comes from the torso, without separating grips.
+                if (style == DeckMotionStyle.Gunner && joint.role >= 5) angles = Vector3.zero;
                 angles *= weight;
                 if (joint.role < 2) angles.x += death * (reduced ? 4 : 15);
                 // Axes are character-space, independent of the imported bone roll and anchor yaw.

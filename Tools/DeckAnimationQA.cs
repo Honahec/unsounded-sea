@@ -26,7 +26,7 @@ public static class DeckAnimationQA
         var bytes=(byte[])type.GetMethod("EncodeScreenToPng",BindingFlags.Static|BindingFlags.Public|BindingFlags.NonPublic).Invoke(null,new object[]{Screen.width,Screen.height});
         File.WriteAllBytes("Logs/UiExperience/DeckMotion/"+name+".png",bytes);
     }
-    public static async Task<object> Readability()
+    public static async Task<object> Readability(string encounterOnly = null)
     {
         Check(Application.isPlaying,"Enter Play first.");const string dir="Logs/UiExperience/DeckMotion";Directory.CreateDirectory(dir);
         var background=Application.runInBackground;Application.runInBackground=true;
@@ -37,7 +37,7 @@ public static class DeckAnimationQA
         try
         {
             GameSettings.ReducedMotion=false;
-            foreach(var encounter in new[]{"voyage-fog-0","voyage-fog-2","voyage-fleet-1","voyage-fog-3"})
+            foreach(var encounter in new[]{"voyage-fog-0","voyage-fog-2","voyage-fleet-1","voyage-fog-3"}.Where(id=>encounterOnly==null||id==encounterOnly))
             {
                 VoyageRuntime.StartDebugEncounter(encounter,"fog",false);
                 await Wait(()=>!GameSceneLoader.IsLoading&&UnityEngine.Object.FindAnyObjectByType<BattleDirector>()?.Stage!=null);
@@ -102,7 +102,7 @@ public static class DeckAnimationQA
             Check(errors.Count==0,string.Join("; ",errors));
             var after=Directory.GetFiles(Application.persistentDataPath,"voyage*.json*").ToDictionary(p=>p,File.ReadAllBytes);
             Check(formal.Count==after.Count&&formal.All(p=>after.TryGetValue(p.Key,out var bytes)&&p.Value.SequenceEqual(bytes)),"Formal saves changed.");
-            var report=new{success=true,results,runtimeErrors=errors.Count,formalSavesUnchanged=true};File.WriteAllText(dir+"/result.json",JsonConvert.SerializeObject(report,Formatting.Indented));return report;
+            var report=new{success=true,results,runtimeErrors=errors.Count,formalSavesUnchanged=true};File.WriteAllText(dir+"/"+(encounterOnly??"result")+".json",JsonConvert.SerializeObject(report,Formatting.Indented));return report;
         }
         catch(Exception error){File.WriteAllText(dir+"/error.txt",error.ToString());throw;}
         finally
