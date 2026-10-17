@@ -8,6 +8,8 @@ namespace UnsoundedSea.Runtime
     {
         private const string VolumeKey = "settings.volume";
         private const string MusicVolumeKey = "settings.musicVolume";
+        private const string AmbienceVolumeKey = "settings.ambienceVolume";
+        private const string NarrowDynamicsKey = "settings.narrowDynamics";
         private const string EffectsVolumeKey = "settings.effectsVolume";
         private const string FullscreenKey = "settings.fullscreen";
         private const string ResolutionKey = "settings.resolution";
@@ -35,6 +37,16 @@ namespace UnsoundedSea.Runtime
         {
             get => Mathf.Clamp(PlayerPrefs.GetInt(MusicVolumeKey, VolumeSteps), 0, VolumeSteps);
             set { PlayerPrefs.SetInt(MusicVolumeKey, Mathf.Clamp(value, 0, VolumeSteps)); Save(); }
+        }
+        public static int AmbienceVolume
+        {
+            get => Mathf.Clamp(PlayerPrefs.GetInt(AmbienceVolumeKey, VolumeSteps), 0, VolumeSteps);
+            set { PlayerPrefs.SetInt(AmbienceVolumeKey, Mathf.Clamp(value, 0, VolumeSteps)); Save(); }
+        }
+        public static bool NarrowDynamics
+        {
+            get => PlayerPrefs.GetInt(NarrowDynamicsKey, 0) == 1;
+            set { PlayerPrefs.SetInt(NarrowDynamicsKey, value ? 1 : 0); Save(); }
         }
         public static int EffectsVolume
         {
@@ -65,6 +77,7 @@ namespace UnsoundedSea.Runtime
         public static void ResetDefaults()
         {
             PlayerPrefs.DeleteKey(VolumeKey); PlayerPrefs.DeleteKey(MusicVolumeKey); PlayerPrefs.DeleteKey(EffectsVolumeKey);
+            PlayerPrefs.DeleteKey(AmbienceVolumeKey); PlayerPrefs.DeleteKey(NarrowDynamicsKey);
             PlayerPrefs.DeleteKey(FullscreenKey); PlayerPrefs.DeleteKey(ResolutionKey);
             PlayerPrefs.DeleteKey(VSyncKey); PlayerPrefs.DeleteKey(ReducedMotionKey);
             Save();
@@ -72,7 +85,7 @@ namespace UnsoundedSea.Runtime
 
         public static void ApplyAudioSource(AudioSource source, bool music)
         {
-            if (source == null) return;
+            if (source == null || source.GetComponent<SeaAudioVoice>() != null) return;
             var state = SourceVolumes.GetValue(source, item => new SourceState(item));
             source.volume = state.Volume * (music ? MusicVolume : EffectsVolume) / VolumeSteps;
         }

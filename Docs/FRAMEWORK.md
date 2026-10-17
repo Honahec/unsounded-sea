@@ -108,11 +108,21 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 `BattleDirector.ViewRevision` 仅在规则成功结算或重开时递增；动作解锁只刷新按钮可操作性，不重建 HUD、不闪烁禁用色。状态重建保留可恢复焦点与手牌、工具、日志滚动位置。日志可滚动查看完整可见历史，不再截断为最后 12 条。调查工具使用规则快照 `ToolView.Enabled / DisabledReason / Targets`，工具区域短句标明聚焦目标，已回答问题直接禁用。
 
 
-`MainMenu` 与 `SettingsPanel` 共用深墨绿、旧黄铜与象牙文字样式；Esc 打开简短暂停菜单，J 单独打开航海日志。覆盖存档警告、放弃后果和错误不省略。设置提供总音量、音乐／环境声、音效、1280×720／1600×900／1920×1080、显示模式、垂直同步与减少动效；音量百分比固定留宽且不换行，设置内容可滚动。`GameSettings` 属于设备偏好，不进入规则或回放。旧 `BattleHud.cs / .uss` 和对应 meta 已删除；清理入口 `Tools/UiExperienceSetup.cs` 先检查依赖及未保存场景。
+`MainMenu` 与 `SettingsPanel` 共用深墨绿、旧黄铜与象牙文字样式；Esc 打开简短暂停菜单，J 单独打开航海日志。覆盖存档警告、放弃后果和错误不省略。设置提供总音量、音乐、环境、音效、柔和动态、1280×720／1600×900／1920×1080、显示模式、垂直同步与减少动效；音量百分比固定留宽且不换行，设置内容可滚动。`GameSettings` 属于设备偏好，不进入规则或回放。旧 `BattleHud.cs / .uss` 和对应 meta 已删除；清理入口 `Tools/UiExperienceSetup.cs` 先检查依赖及未保存场景。
 
 四个 UI 入口通过 `UiFont` 从现有中文源字体创建共用的运行时动态 SDF 字体，保留采样尺寸、图集尺寸和渲染模式。新增字形只填入运行时图集，不修改导入的 `default_zh.asset`；切场景复用，新的 Play 会话重置缓存。不要通过恢复正在使用的字体资产来清理字形缓存，这可能让 TextCore 已缓存的字形失去图集引用。
 
 场景已入库，无需生成脚本才能运行。需要有意重建本场样例时，用 Unity CLI 执行 `Tools/OceanBattleSetup.cs` 的 `OceanBattleSetup.Build`；它会覆盖本场场景与配置，但保留航海标题入口，运行前先保存改动。`Tools/SeaBossSetup.cs` 的 `ImportModel` / `Build` 分别归一化 Boss 并重建海面样例；仅重设海面战构图可调用 `SeaBossSetup.ApplyComposition`，不会重建遭遇或场景。重建后再执行 `Tools/UberWaterSetup.cs` 的 `UberWaterSetup.Build` 恢复新版海面（只更新水体、雾和相应 Prefab 配置）。`Tools/ImportSurveyVessel.cs` 负责选定船体版本的归一化；模型制作和 LFS 规范见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
+
+### 声音表现
+
+`Runtime/Audio/SeaAudio` 在启动时读取 `Resources/SeaAudioBank`，跨场景保留一个声音管理器。四组配乐各有三条等长分轨，以 DSP 时钟同步启动、约 2.8 秒交叉淡化；音乐、环境、动作／界面使用显式声部分类，由 `GameSettings` 分别缩放，总音量由 AudioListener 控制。`SeaAudioVoice` 排除旧的 loop 分类缩放，防止重复衰减。当前固定 20 个一次性声部、两套三轨音乐和三个环境循环，共 29 个 AudioSource；使用受控立体声声像，尚未实现 AudioMixer 或真实三维距离衰减。柔和动态限制单声部增益，不是母线压缩器。
+
+标题、航海和战斗表现每帧交接公开音乐上下文；`VoyageSailingPresentation.Speed` 平滑驱动尾流水声，停船回落，减少动效不将瞬移距离转换为高速。海与风持续播放，近舷水拍／木结构变体使用独立表现随机数。暂停冻结非界面声音，跨场景清理旧动作尾音；音乐／海声不随每次出牌或节点重启。
+
+`BattleAudioPresentation` 消费成功 `Resolved`，按稳定 cardId、公开角色身份与前后资源快照选择声音；普通敌人等待现有动作接触状态，定向 Boss 消费 `PresentedEnemyAction`，沉钟水花独立消费 `SurfaceStruck`。逐次快照区分格挡、理智防护、实伤和主动代价，失败命令不播放成功动作。原舞台通用海声与提示仅在运行时停用，旧 Prefab 音频引用保留兼容。规则随机数、存档与回放指纹不包含音频资产。
+
+制作来源、许可证和素材规格分别见 [声音来源](../ArtSource/Audio/CREDITS.txt)、[manifest](../ArtSource/Audio/manifest.json) 和[离线检查](../ArtSource/Audio/audio-check.json)。用 `Tools/build_audio.py` 重生成、`Tools/check_audio.py` 检查；再在非 Play 状态经 Unity CLI 执行 `Tools/AudioSetup.cs` 的 `Apply` 更新导入设置与音库，不重建场景。长配乐／环境以 Streaming Vorbis 加载，短音效以单声道 PCM 预载。真实命令与音量／暂停验收入口为 `Tools/AudioQA.cs`；设备性能、20 分钟疲劳测试及五海域专属配器仍待验证／扩展。
 
 ### 八场 Boss／目标战
 

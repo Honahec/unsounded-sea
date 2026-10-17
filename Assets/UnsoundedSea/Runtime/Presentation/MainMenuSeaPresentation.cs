@@ -24,6 +24,8 @@ namespace UnsoundedSea.Runtime
 
         private void OnEnable()
         {
+            if (Application.isPlaying && menuCamera != null && menuCamera.GetComponent<AudioListener>() == null)
+                menuCamera.gameObject.AddComponent<AudioListener>();
             if (water == null || menuCamera == null) return;
             if (vessel != null) { vesselRestPosition = vessel.position; vesselRestRotation = vessel.rotation; }
             cameraRestPosition = menuCamera.transform.position; cameraRestRotation = menuCamera.transform.rotation;
@@ -33,6 +35,9 @@ namespace UnsoundedSea.Runtime
 
         private void Update()
         {
+            float departureSpeed = departing && !GameSettings.ReducedMotion
+                ? 7 * Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.25f, 1, departureProgress)) : 0;
+            SeaAudio.World("harbor", GameSceneLoader.IsLoading && !departing, departureSpeed);
             if (water == null) return;
             water.Tick(Time.unscaledDeltaTime, false, GameSettings.ReducedMotion, Vector4.zero);
             if (vessel == null) return;

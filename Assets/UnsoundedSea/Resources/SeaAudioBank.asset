@@ -1,0 +1,200 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4958c93fd617c4cacba4fb8d22ae410a, type: 3}
+  m_Name: SeaAudioBank
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.SeaAudioBank
+  cues:
+  - id: bell
+    clips:
+    - {fileID: 8300000, guid: 0b3f648a5a33b4cbc82295f71c6df3b5, type: 3}
+    gain: 0.85
+  - id: block
+    clips:
+    - {fileID: 8300000, guid: 473c60e6e9360424e8bc8350daf3289d, type: 3}
+    - {fileID: 8300000, guid: e65e1e850da624a6199b0956003213d1, type: 3}
+    - {fileID: 8300000, guid: b37eb34e9417447d4904391810d2a650, type: 3}
+    gain: 0.85
+  - id: card
+    clips:
+    - {fileID: 8300000, guid: ba8b65ff715d3402ba616f7bb1737348, type: 3}
+    - {fileID: 8300000, guid: b7b12e55af8eb4fd982cb3181126c552, type: 3}
+    - {fileID: 8300000, guid: 17f2772bb8e014230b7e1dc68619051c, type: 3}
+    gain: 0.85
+  - id: cloth
+    clips:
+    - {fileID: 8300000, guid: 06212a63668f64b2a853e43dcdbc9ee6, type: 3}
+    - {fileID: 8300000, guid: fa7dcea0e83c34805a24fc9f7fed02aa, type: 3}
+    - {fileID: 8300000, guid: 7ebca3378fb4c4653b62b5708b54ecb0, type: 3}
+    gain: 0.85
+  - id: confirm
+    clips:
+    - {fileID: 8300000, guid: 039cbc65e2f9742ab9c016a5c2dc3340, type: 3}
+    gain: 0.85
+  - id: creak
+    clips:
+    - {fileID: 8300000, guid: d408ccaa4da3a4080ac9e445aa089720, type: 3}
+    - {fileID: 8300000, guid: 5278b9fa6d1f349578ae3f7fd944cb9f, type: 3}
+    - {fileID: 8300000, guid: 963a7ae34e2194fd68cb076840087ef9, type: 3}
+    gain: 0.85
+  - id: defeat
+    clips:
+    - {fileID: 8300000, guid: 2542f3783f6b44d43a0daadedd0df52f, type: 3}
+    gain: 0.85
+  - id: emerge
+    clips:
+    - {fileID: 8300000, guid: 5ae9f944e7fb645f7bb8fce76042f1ad, type: 3}
+    gain: 0.85
+  - id: guard
+    clips:
+    - {fileID: 8300000, guid: 505f522f165254e7f8275ce8990bf02c, type: 3}
+    gain: 0.85
+  - id: heal
+    clips:
+    - {fileID: 8300000, guid: 48b57fb473b4c428691f3523c8727d73, type: 3}
+    gain: 0.85
+  - id: hit_body
+    clips:
+    - {fileID: 8300000, guid: bfbf38662acd44c7dadfeee4d06f7ac3, type: 3}
+    - {fileID: 8300000, guid: b523b11cc738e433493e63cbde3fafda, type: 3}
+    - {fileID: 8300000, guid: 9c50d72f8619742e582dea48d8b15278, type: 3}
+    gain: 0.85
+  - id: hit_bone
+    clips:
+    - {fileID: 8300000, guid: b4a053dc394f142749a50e1d5315c1a9, type: 3}
+    - {fileID: 8300000, guid: 8f71562e221e44e76b9b2816e2cca35a, type: 3}
+    - {fileID: 8300000, guid: 7cd317bb892f8482381cfed70b2c86f2, type: 3}
+    gain: 0.85
+  - id: hit_giant
+    clips:
+    - {fileID: 8300000, guid: 2171e802af3e348499f51cd3e41fb641, type: 3}
+    - {fileID: 8300000, guid: a80ab6a303e5d4d4daf03f08d5be4d8a, type: 3}
+    - {fileID: 8300000, guid: 8e4f6096a6649455f8aef79723272173, type: 3}
+    gain: 0.85
+  - id: hit_metal
+    clips:
+    - {fileID: 8300000, guid: e8f773a662ae74b44b4829f1777b96b9, type: 3}
+    - {fileID: 8300000, guid: aae46b37656dd48a88705e267271037b, type: 3}
+    - {fileID: 8300000, guid: f204d4d54baa74db6a11361623a98d72, type: 3}
+    gain: 0.85
+  - id: hull
+    clips:
+    - {fileID: 8300000, guid: c3767ca5c3480425bab5259d20e30781, type: 3}
+    - {fileID: 8300000, guid: dacfedf04a45142858c23210c8c8808f, type: 3}
+    - {fileID: 8300000, guid: 79630148e2b5d4d2bbb7218c0c9c0c26, type: 3}
+    gain: 0.85
+  - id: insight
+    clips:
+    - {fileID: 8300000, guid: 75b8b15dc9dae4c14bd4313b84fb5a49, type: 3}
+    gain: 0.85
+  - id: interrupt
+    clips:
+    - {fileID: 8300000, guid: bbc7df32f6ddc491c95fadf1cdb3eb25, type: 3}
+    gain: 0.85
+  - id: lap
+    clips:
+    - {fileID: 8300000, guid: a8df516d9423940e08ada233c54a666b, type: 3}
+    - {fileID: 8300000, guid: ebb2f5997f4924ae0811d1658544896b, type: 3}
+    - {fileID: 8300000, guid: 46f021d9dac224e529b61da6d45f9ec6, type: 3}
+    - {fileID: 8300000, guid: 98897992f249d48d68669271315fde35, type: 3}
+    gain: 0.85
+  - id: mechanism
+    clips:
+    - {fileID: 8300000, guid: 431fa8465f5314f919cae97b39ad50c7, type: 3}
+    gain: 0.85
+  - id: pay
+    clips:
+    - {fileID: 8300000, guid: 3271fa17b66ec4bc6bc7e338b04368c8, type: 3}
+    gain: 0.85
+  - id: pressure
+    clips:
+    - {fileID: 8300000, guid: 56ae18c5ea7a846daa75ca0da6f42d4d, type: 3}
+    gain: 0.85
+  - id: reject
+    clips:
+    - {fileID: 8300000, guid: daeeb334bbf6b4356a78a514ea745716, type: 3}
+    gain: 0.85
+  - id: reload
+    clips:
+    - {fileID: 8300000, guid: 21009143d8d0d4d01bff8148f06f2688, type: 3}
+    gain: 0.85
+  - id: retreat
+    clips:
+    - {fileID: 8300000, guid: eaa338c7143dd4b82a41c729e3d14ed4, type: 3}
+    gain: 0.85
+  - id: ritual
+    clips:
+    - {fileID: 8300000, guid: bc67fd5685bd145789dd63efa66cbb67, type: 3}
+    gain: 0.85
+  - id: sanity
+    clips:
+    - {fileID: 8300000, guid: dc30369434adb44aabea14754735a928, type: 3}
+    gain: 0.85
+  - id: seal
+    clips:
+    - {fileID: 8300000, guid: 71352108fd2a44b2aba7125b48f59c66, type: 3}
+    gain: 0.85
+  - id: shot
+    clips:
+    - {fileID: 8300000, guid: 3aa978133528448799a4d9f7c780b139, type: 3}
+    - {fileID: 8300000, guid: 6bcbf8864109b4f21b9264ea34ab3c28, type: 3}
+    - {fileID: 8300000, guid: b29e7880ae0664ab19f6023fed33e4f9, type: 3}
+    gain: 0.85
+  - id: slash
+    clips:
+    - {fileID: 8300000, guid: feb311d49e69249fca513fea630c11d7, type: 3}
+    gain: 0.85
+  - id: splash
+    clips:
+    - {fileID: 8300000, guid: 7bf1f9157204e45f2aeed6e6f2fd2bea, type: 3}
+    - {fileID: 8300000, guid: 47c1009b55c69420497fa91367a75343, type: 3}
+    - {fileID: 8300000, guid: b9073ca709af14e7cb27ea149c7a3730, type: 3}
+    gain: 0.85
+  - id: turn
+    clips:
+    - {fileID: 8300000, guid: b476fbf741bbc4dfebae91d23fe25932, type: 3}
+    gain: 0.85
+  - id: victory
+    clips:
+    - {fileID: 8300000, guid: e69a0a72368b84f5da50a3721ef75195, type: 3}
+    gain: 0.85
+  - id: ward
+    clips:
+    - {fileID: 8300000, guid: 2cf58d232761249a4b9460052bb6ac99, type: 3}
+    gain: 0.85
+  - id: windstrike
+    clips:
+    - {fileID: 8300000, guid: 0bcb8ab2dc1054e21841a986c228a7cd, type: 3}
+    gain: 0.85
+  music:
+  - id: harbor
+    stems:
+    - {fileID: 8300000, guid: 203da3c1d801f4654877afd2e111d2db, type: 3}
+    - {fileID: 8300000, guid: 6e9bcbab7e67a420f9a6c59fcf48b420, type: 3}
+    - {fileID: 8300000, guid: 78dba1eab108949bcb7a71f9c449d55e, type: 3}
+  - id: voyage
+    stems:
+    - {fileID: 8300000, guid: 23118aa3fcf484f7eb5bb32cc2b9a206, type: 3}
+    - {fileID: 8300000, guid: 49b96e7e62c2b4995ae80c938fcf96ad, type: 3}
+    - {fileID: 8300000, guid: d568e28bf52df44c29df088f6713a4f0, type: 3}
+  - id: deck
+    stems:
+    - {fileID: 8300000, guid: 210a7d60b74e0428c89c81255ea8dbe4, type: 3}
+    - {fileID: 8300000, guid: ab0a40acaee9b4f72889e1697060b695, type: 3}
+    - {fileID: 8300000, guid: 17e3dac70bb674152a6cd1966613d06d, type: 3}
+  - id: boss
+    stems:
+    - {fileID: 8300000, guid: 2fb3129b112c84acea0dceca70c34988, type: 3}
+    - {fileID: 8300000, guid: bc6a2e8efe2ce4d7c920065f22dae4fd, type: 3}
+    - {fileID: 8300000, guid: f3cf3df636a0543baa16ed4d8704ff46, type: 3}
+  sea: {fileID: 8300000, guid: 0433012f1340d478ebe743abf4aa9187, type: 3}
+  wind: {fileID: 8300000, guid: dfae8c021512c44a18757548a8953156, type: 3}
+  wake: {fileID: 8300000, guid: 6bd51d7e4904e49899ea6de85af28336, type: 3}

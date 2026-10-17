@@ -31,7 +31,7 @@ namespace UnsoundedSea.Runtime
         }
         private Button Option(string id, string text, string className, Action action)
         {
-            var button = new Button(() => { action(); Changed(id); }) { name = id, text = text };
+            var button = new Button(() => { action(); SeaAudio.Play("confirm", .45f, ui: true); Changed(id); }) { name = id, text = text };
             button.AddToClassList(className);
             return button;
         }
@@ -94,6 +94,8 @@ namespace UnsoundedSea.Runtime
             ScrollWheel.ForwardFrom(this, rows);
             rows.Add(Row("总音量", Volume("volume", GameSettings.Volume, value => GameSettings.Volume = value)));
             rows.Add(Row("音乐", Volume("music-volume", GameSettings.MusicVolume, value => GameSettings.MusicVolume = value)));
+            rows.Add(Row("环境", Volume("ambience-volume", GameSettings.AmbienceVolume, value => GameSettings.AmbienceVolume = value)));
+            rows.Add(Row("动态范围", Choice("audio-dynamics", new[] { "标准", "柔和" }, GameSettings.NarrowDynamics ? 1 : 0, i => GameSettings.NarrowDynamics = i == 1)));
             rows.Add(Row("音效", Volume("effects-volume", GameSettings.EffectsVolume, value => GameSettings.EffectsVolume = value)));
             rows.Add(Row("分辨率", Choice("resolution", GameSettings.ResolutionLabels, GameSettings.Resolution, i => GameSettings.Resolution = i)));
             rows.Add(Row("显示", Choice("display", new[] { "全屏", "窗口" }, GameSettings.Fullscreen ? 0 : 1, i => GameSettings.Fullscreen = i == 0)));

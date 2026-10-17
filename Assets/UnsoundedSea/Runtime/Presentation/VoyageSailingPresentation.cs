@@ -138,7 +138,12 @@ namespace UnsoundedSea.Runtime
         {
             if (!initialized) return;
             water.Tick(deltaTime, paused, reduceMotion, Vector4.zero);
-            if (ambience != null)
+            if (SeaAudio.Ready)
+            {
+                if (ambience != null) { ambience.Stop(); ambience.enabled = false; }
+                SeaAudio.World("voyage", paused, reduceMotion ? 0 : speed);
+            }
+            else if (ambience != null)
             {
                 if (paused && ambience.isPlaying) ambience.Pause();
                 else if (!paused && !ambience.isPlaying) ambience.UnPause();

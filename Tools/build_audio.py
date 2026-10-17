@@ -58,7 +58,7 @@ def tone(freq, seconds, kind='bow', pan=0):
     phase = 2*np.pi*freq*t + .012*np.sin(t*2*np.pi*4.6)
     x = np.zeros(len(t))
     for h in range(1, 10):
-        amp = (1/h**1.55) * (1 if kind=='bow' else (1 if h%2 else .24))
+        amp = (1/h**2.25) * (1 if kind=='bow' else (1 if h%2 else .18))
         x += amp*np.sin(h*phase + h*.17*np.sin(t*.7))
     x *= (.86+.06*np.sin(t*1.4)+.03*np.sin(t*3.2))
     x = fade(normalized(x, .14), min(.8, seconds*.2), min(1.6, seconds*.4))
@@ -187,7 +187,8 @@ def score():
         roots=[38,38,34,36,38,41,39,33]
         for b in range(bars):
             root=roots[(b//4)%len(roots)];freq=440*2**((root-69)/12)
-            add(layers[0],tone(freq,beat*5,'bow',-.22),b*4*beat,.75)
+            if scene=='deck' or b%2==0:
+                add(layers[0],tone(freq,beat*(3 if scene=='deck' else 5),'bow',-.22),b*4*beat,.75)
             if b%2==0:
                 add(layers[0],tone(freq*1.5,beat*8,'reed',.3),b*4*beat,.35)
             if b%4==1 or b%4==3:
@@ -206,6 +207,9 @@ def score():
         layers=[room(x,.38) for x in layers]
         peak=max(np.max(np.abs(sum(layers))),.001)
         layers=[x*(.42/peak) for x in layers]
+        # Listening revision: soften the persistent bass by 6 dB and leave breathing space.
+        layers[0]*=.5
+        layers[1]*=.85
         for i,x in enumerate(layers): write(f'music_{scene}_{i}',x,True)
         mixed=sum(layers);mixes[scene]=mixed
         p=SOURCE/'Masters'/f'{scene}.flac';p.parent.mkdir(parents=True,exist_ok=True)
