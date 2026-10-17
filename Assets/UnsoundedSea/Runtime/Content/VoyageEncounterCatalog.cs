@@ -13,8 +13,19 @@ namespace UnsoundedSea.Runtime
         {
             public string id;
             public BattleScenario scenario;
+            public string resourcePath;
+            public string displayName;
             public string group;
             public bool isBoss;
+
+            public BattleScenario LoadScenario()
+            {
+                if (scenario != null) return scenario;
+                var reference = Resources.Load<VoyageScenarioReference>(resourcePath);
+                if (reference == null || reference.scenario == null)
+                    throw new InvalidOperationException("Missing encounter resource: " + resourcePath);
+                return reference.scenario;
+            }
         }
 
         private const string ResourcePath = "VoyageEncounterCatalog";
@@ -29,19 +40,25 @@ namespace UnsoundedSea.Runtime
         };
         [SerializeField] private Entry[] entries = Array.Empty<Entry>();
         [SerializeField] private ToolDefinition[] tools = Array.Empty<ToolDefinition>();
-        private Dictionary<string, BattleScenario> lookup;
+        private Dictionary<string, Entry> lookup;
+        // Menu metadata must not pull every enemy, boss and stage into memory.
+        public static IReadOnlyList<Entry> MenuEntries => Array.AsReadOnly((Entry[])LoadCatalog().entries.Clone());
         public static IReadOnlyList<Entry> AllEntries
         {
             get
             {
-                var catalog = Resources.Load<VoyageEncounterCatalog>(ResourcePath);
-                if (catalog == null)
-                    throw new InvalidOperationException($"Missing Resources/{ResourcePath}.asset. Run Unsounded Sea/Content/Setup Voyage Campaign.");
-                return Array.AsReadOnly((Entry[])catalog.entries.Clone());
+                var result = (Entry[])LoadCatalog().entries.Clone();
+                for (var i = 0; i < result.Length; i++) result[i].scenario = result[i].LoadScenario();
+                return Array.AsReadOnly(result);
             }
         }
 
+        private static VoyageEncounterCatalog LoadCatalog() => Resources.Load<VoyageEncounterCatalog>(ResourcePath)
+            ?? throw new InvalidOperationException($"Missing Resources/{ResourcePath}.asset. Run Unsounded Sea/Content/Setup Voyage Campaign.");
+
         private Dictionary<string, ToolDefinition> toolLookup;
+        private void OnEnable() { lookup = null; toolLookup = null; }
+        private void OnValidate() { lookup = null; toolLookup = null; }
 
         public static BattleScenario Resolve(string encounterId)
         {
@@ -67,23 +84,24 @@ namespace UnsoundedSea.Runtime
         {
             if (lookup == null)
             {
-                var validated = new Dictionary<string, BattleScenario>(StringComparer.Ordinal);
+                var validated = new Dictionary<string, Entry>(StringComparer.Ordinal);
                 foreach (var entry in entries)
                 {
-                    if (string.IsNullOrWhiteSpace(entry.id) || entry.scenario == null)
+                    if (string.IsNullOrWhiteSpace(entry.id) || (entry.scenario == null && string.IsNullOrWhiteSpace(entry.resourcePath)))
                         throw new InvalidOperationException($"{name}: catalog contains a blank ID or missing scenario.");
-                    if (!validated.TryAdd(entry.id, entry.scenario))
+                    if (!validated.TryAdd(entry.id, entry))
                         throw new InvalidOperationException($"{name}: duplicate encounter ID '{entry.id}'.");
-                    if (entry.scenario.encounter == null || entry.scenario.encounter.id != entry.id)
-                        throw new InvalidOperationException($"{name}: scenario for '{entry.id}' has a mismatched encounter.");
                 }
                 foreach (var requiredId in RequiredIds)
                     if (!validated.ContainsKey(requiredId))
                         throw new InvalidOperationException($"{name}: required encounter '{requiredId}' is missing. Run Unsounded Sea/Content/Setup Voyage Campaign.");
                 lookup = validated;
             }
-            if (!lookup.TryGetValue(encounterId, out var scenario))
+            if (!lookup.TryGetValue(encounterId, out var selected))
                 throw new InvalidOperationException($"Voyage encounter '{encounterId}' is missing from {name}. Run Unsounded Sea/Content/Setup Voyage Campaign.");
+            var scenario = selected.LoadScenario();
+            if (scenario.encounter == null || scenario.encounter.id != encounterId)
+                throw new InvalidOperationException($"{name}: scenario for '{encounterId}' has a mismatched encounter.");
             return scenario;
         }
 

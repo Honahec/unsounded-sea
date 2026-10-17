@@ -73,7 +73,7 @@ namespace UnsoundedSea.Runtime
         }
         public CommandResult Submit(BattleCommand command)
         {
-            if (session == null || Paused || Busy) return new CommandResult(false, "请等待当前动作结束。");
+            if (session == null || Paused || Busy || GameSceneLoader.IsLoading) return new CommandResult(false, "请等待当前动作结束。");
             var before = View;
             var result = session.Execute(command);
             if (!result.Success)

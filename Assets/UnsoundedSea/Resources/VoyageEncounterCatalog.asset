@@ -14,135 +14,201 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.VoyageEncounterCatalog
   entries:
   - id: voyage-fog-0
-    scenario: {fileID: 11400000, guid: 2bc25851d1e884700a2878b159c8a185, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-fog-0
+    displayName: "\u7070\u96FE\u822A\u9053 / \u96FE\u4E2D\u7F06\u5DE5"
     group: "\u7070\u96FE\u822A\u9053"
     isBoss: 0
   - id: voyage-fog-1
-    scenario: {fileID: 11400000, guid: 768f8a99dbd864f559c7cadbb5b8c6b1, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-fog-1
+    displayName: "\u7070\u96FE\u822A\u9053 / \u5931\u5411\u6C34\u624B"
     group: "\u7070\u96FE\u822A\u9053"
     isBoss: 0
   - id: voyage-fog-2
-    scenario: {fileID: 11400000, guid: dd2d64d1a6967486ea7c268efa246f20, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-fog-2
+    displayName: "\u7070\u96FE\u822A\u9053 / \u767D\u706F\u53F8\u53F7"
     group: "\u7070\u96FE\u822A\u9053"
     isBoss: 0
   - id: voyage-fog-3
-    scenario: {fileID: 11400000, guid: cc5c6a9467e774295b47b87c27a31f19, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-fog-3
+    displayName: "\u7070\u96FE\u822A\u9053 / \u6E7F\u8863\u5F15\u822A\u5458"
     group: "\u7070\u96FE\u822A\u9053"
     isBoss: 0
   - id: voyage-fog-4
-    scenario: {fileID: 11400000, guid: 441f5b41e200544d197a7f4a8b0e5e9d, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-fog-4
+    displayName: "\u7070\u96FE\u822A\u9053 / \u6F02\u6876\u7A83\u8D3C"
     group: "\u7070\u96FE\u822A\u9053"
     isBoss: 0
   - id: voyage-bones-0
-    scenario: {fileID: 11400000, guid: e5bdc18b34add474a9a5ad8dcba28046, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-bones-0
+    displayName: "\u5C38\u9AB8\u4E4B\u6D77 / \u6F6E\u9AA8\u62FE\u8352\u8005"
     group: "\u5C38\u9AB8\u4E4B\u6D77"
     isBoss: 0
   - id: voyage-bones-1
-    scenario: {fileID: 11400000, guid: 15f8ec0c62efd485889c81c0504c8aa0, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-bones-1
+    displayName: "\u5C38\u9AB8\u4E4B\u6D77 / \u9AA8\u7B1B\u4F8D\u4ECE"
     group: "\u5C38\u9AB8\u4E4B\u6D77"
     isBoss: 0
   - id: voyage-bones-2
-    scenario: {fileID: 11400000, guid: 23c62baa762ab43ed928f137239a6d43, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-bones-2
+    displayName: "\u5C38\u9AB8\u4E4B\u6D77 / \u76D0\u9AD3\u53F8\u796D"
     group: "\u5C38\u9AB8\u4E4B\u6D77"
     isBoss: 0
   - id: voyage-bones-3
-    scenario: {fileID: 11400000, guid: c27d1e6c400f14f53b09cb1a38df103d, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-bones-3
+    displayName: "\u5C38\u9AB8\u4E4B\u6D77 / \u7A7A\u8231\u6572\u51FB\u8005"
     group: "\u5C38\u9AB8\u4E4B\u6D77"
     isBoss: 0
   - id: voyage-bones-4
-    scenario: {fileID: 11400000, guid: 3dc7bd06eaa08474983887d7eb77988b, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-bones-4
+    displayName: "\u5C38\u9AB8\u4E4B\u6D77 / \u7F1D\u9AA8\u62D6\u7F51\u5BA2"
     group: "\u5C38\u9AB8\u4E4B\u6D77"
     isBoss: 0
   - id: voyage-inverted-0
-    scenario: {fileID: 11400000, guid: 68933e715d6f74ee49c3057d563ad523, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-inverted-0
+    displayName: "\u5012\u60AC\u6F6E\u5EAD / \u5012\u60AC\u6D4B\u91CF\u5458"
     group: "\u5012\u60AC\u6F6E\u5EAD"
     isBoss: 0
   - id: voyage-inverted-1
-    scenario: {fileID: 11400000, guid: 768f399821f09464388955703995d2d0, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-inverted-1
+    displayName: "\u5012\u60AC\u6F6E\u5EAD / \u53CD\u5199\u9886\u822A\u5458"
     group: "\u5012\u60AC\u6F6E\u5EAD"
     isBoss: 0
   - id: voyage-inverted-2
-    scenario: {fileID: 11400000, guid: 5005a15ad09be4767b9cc34ee73fae07, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-inverted-2
+    displayName: "\u5012\u60AC\u6F6E\u5EAD / \u955C\u6F6E\u8BB0\u5F55\u5458"
     group: "\u5012\u60AC\u6F6E\u5EAD"
     isBoss: 0
   - id: voyage-inverted-3
-    scenario: {fileID: 11400000, guid: dbe28f7f996844f47bcf34696ff3d8b5, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-inverted-3
+    displayName: "\u5012\u60AC\u6F6E\u5EAD / \u94C5\u5782\u5B88\u671B\u8005"
     group: "\u5012\u60AC\u6F6E\u5EAD"
     isBoss: 0
   - id: voyage-inverted-4
-    scenario: {fileID: 11400000, guid: 1f31a82309f014de18aecb5e2accae8a, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-inverted-4
+    displayName: "\u5012\u60AC\u6F6E\u5EAD / \u9519\u4F4D\u503C\u66F4\u4EBA"
     group: "\u5012\u60AC\u6F6E\u5EAD"
     isBoss: 0
   - id: voyage-fleet-0
-    scenario: {fileID: 11400000, guid: 6d3700fc740814b49ae9887f3eed481b, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-fleet-0
+    displayName: "\u65E0\u706F\u88C2\u6D77 / \u65E0\u65D7\u767B\u8239\u5175"
     group: "\u65E0\u706F\u88C2\u6D77"
     isBoss: 0
   - id: voyage-fleet-1
-    scenario: {fileID: 11400000, guid: dc7f4fadd428845cba498c6be3333ef9, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-fleet-1
+    displayName: "\u65E0\u706F\u88C2\u6D77 / \u54D1\u706B\u70AE\u624B"
     group: "\u65E0\u706F\u88C2\u6D77"
     isBoss: 0
   - id: voyage-fleet-2
-    scenario: {fileID: 11400000, guid: 87f83b1e810bc4e3f8e6583fd663645a, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-fleet-2
+    displayName: "\u65E0\u706F\u88C2\u6D77 / \u9ED1\u5E06\u4F20\u4EE4"
     group: "\u65E0\u706F\u88C2\u6D77"
     isBoss: 0
   - id: voyage-fleet-3
-    scenario: {fileID: 11400000, guid: 340fd16430fb04d96b73d67ed73dbe14, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-fleet-3
+    displayName: "\u65E0\u706F\u88C2\u6D77 / \u5F03\u8230\u533B\u5B98"
     group: "\u65E0\u706F\u88C2\u6D77"
     isBoss: 0
   - id: voyage-fleet-4
-    scenario: {fileID: 11400000, guid: 063594bfbe43d42d788098ea1fca68e0, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-fleet-4
+    displayName: "\u65E0\u706F\u88C2\u6D77 / \u9508\u94FE\u62BC\u8FD0\u8005"
     group: "\u65E0\u706F\u88C2\u6D77"
     isBoss: 0
   - id: voyage-abyss-0
-    scenario: {fileID: 11400000, guid: 1346b24a01e1c47cdac69a2ac23bf86c, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-abyss-0
+    displayName: "\u65E0\u661F\u6DF1\u6E0A / \u65E0\u661F\u7AA5\u89C6\u8005"
     group: "\u65E0\u661F\u6DF1\u6E0A"
     isBoss: 0
   - id: voyage-abyss-1
-    scenario: {fileID: 11400000, guid: ca0f39bdd118b41a0bd7daeff92be0df, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-abyss-1
+    displayName: "\u65E0\u661F\u6DF1\u6E0A / \u6DF1\u6E0A\u542C\u5DEE"
     group: "\u65E0\u661F\u6DF1\u6E0A"
     isBoss: 0
   - id: voyage-abyss-2
-    scenario: {fileID: 11400000, guid: 1624d568f802d469ca4b25b4c1da1624, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-abyss-2
+    displayName: "\u65E0\u661F\u6DF1\u6E0A / \u7184\u706F\u53F8\u949F"
     group: "\u65E0\u661F\u6DF1\u6E0A"
     isBoss: 0
   - id: voyage-abyss-3
-    scenario: {fileID: 11400000, guid: 4603c5516dee44aecb92dcec24abe566, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-abyss-3
+    displayName: "\u65E0\u661F\u6DF1\u6E0A / \u672B\u6F6E\u89C1\u8BC1\u8005"
     group: "\u65E0\u661F\u6DF1\u6E0A"
     isBoss: 0
   - id: voyage-abyss-4
-    scenario: {fileID: 11400000, guid: cce0972e94ec147f4b9cc19b531a4660, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/voyage-abyss-4
+    displayName: "\u65E0\u661F\u6DF1\u6E0A / \u8237\u5916\u7D22\u540D\u8005"
     group: "\u65E0\u661F\u6DF1\u6E0A"
     isBoss: 0
   - id: storm-gauntlet
-    scenario: {fileID: 11400000, guid: 895f1859fc33449b9af9bc39fc3ddf33, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/storm-gauntlet
+    displayName: "\u9ED1\u6F6E\u538B\u8231\u6218"
     group: "\u533A\u57DF Boss"
     isBoss: 1
   - id: hollow-beacon
-    scenario: {fileID: 11400000, guid: 5edd55d7c1866467086137f2bb82be54, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/hollow-beacon
+    displayName: "\u7A7A\u5FC3\u822A\u6807"
     group: "\u533A\u57DF Boss"
     isBoss: 1
   - id: fog-visitors
-    scenario: {fileID: 11400000, guid: 580c88669e831483ebd024807d14fe7d, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/fog-visitors
+    displayName: "\u96FE\u6D77\u6765\u5BA2"
     group: "\u7070\u96FE\u822A\u9053"
     isBoss: 1
   - id: m02
-    scenario: {fileID: 11400000, guid: d0938344972594417be209b992572063, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/m02
+    displayName: "\u6F6E\u9AA8\u5531\u5E8F"
     group: "\u5C38\u9AB8\u4E4B\u6D77"
     isBoss: 1
   - id: m03
-    scenario: {fileID: 11400000, guid: 1cfc8d67ae20b4d94b17610c6ab64c9d, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/m03
+    displayName: "\u76D0\u683C\u53F8\u8861"
     group: "\u5012\u60AC\u6F6E\u5EAD"
     isBoss: 1
   - id: m04
-    scenario: {fileID: 11400000, guid: a0076eb581f044437835295f90636150, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/m04
+    displayName: "\u65E0\u706F\u65D7\u8230"
     group: "\u65E0\u706F\u88C2\u6D77"
     isBoss: 1
   - id: m05
-    scenario: {fileID: 11400000, guid: 15682be5e59794e138c591b1374bcf8f, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/m05
+    displayName: "\u65E0\u661F\u738B\u5EA7"
     group: "\u65E0\u661F\u6DF1\u6E0A"
     isBoss: 1
   - id: drowned-bell
-    scenario: {fileID: 11400000, guid: 87552db3958c64b77b330bfa72057f1e, type: 2}
+    scenario: {fileID: 0}
+    resourcePath: EncounterReferences/drowned-bell
+    displayName: "\u6C89\u949F\u6D77\u57DF"
     group: "\u72EC\u7ACB Boss"
     isBoss: 1
   tools:

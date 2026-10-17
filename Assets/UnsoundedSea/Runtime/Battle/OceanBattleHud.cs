@@ -814,7 +814,7 @@ namespace UnsoundedSea.Runtime
                     () => { VoyageRuntime.ReturnToVoyage(); Render(); }, "pause-option"));
             }
             sheet.Add(Button("battle-settings", "设置", () => { showSettings = true; Render(); }, "pause-option"));
-            sheet.Add(Button("battle-menu", "返回标题", () => SceneManager.LoadScene(menuScene), "pause-option"));
+            sheet.Add(Button("battle-menu", "返回标题", () => GameSceneLoader.Load(menuScene), "pause-option"));
             sheet.schedule.Execute(() => (sheet.Q<Button>(end ? "battle-voyage" : "battle-resume") ?? sheet.Q<Button>("battle-retry"))?.Focus());
         }
         private static string KnowledgeLabel(KnowledgeLevel level) => level == KnowledgeLevel.Verified ? "已验证" : level == KnowledgeLevel.Observed ? "已观察" : level == KnowledgeLevel.Rumored ? "传闻" : "未知";

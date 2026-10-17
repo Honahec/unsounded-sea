@@ -1,6 +1,8 @@
 using System;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEditor;
+using System.Linq;
 using UnsoundedSea.Runtime;
 
 namespace UnsoundedSea.Tests
@@ -76,6 +78,29 @@ namespace UnsoundedSea.Tests
             Assert.That(GameSettings.Resolution, Is.Zero);
             GameSettings.Resolution = int.MaxValue;
             Assert.That(GameSettings.Resolution, Is.EqualTo(GameSettings.ResolutionLabels.Length - 1));
+        }
+
+        [Test]
+        public void MenuCatalogDoesNotLoadBattleModelsOrStages()
+        {
+            const string path = "Assets/UnsoundedSea/Resources/VoyageEncounterCatalog.asset";
+            var dependencies = AssetDatabase.GetDependencies(path, true);
+            Assert.That(dependencies.Any(p => p.EndsWith(".glb") || p.EndsWith(".prefab")), Is.False,
+                "Reading menu metadata or tools must not depend on battle presentation.");
+            Assert.That(VoyageEncounterCatalog.MenuEntries.Count, Is.EqualTo(33));
+            foreach (var entry in VoyageEncounterCatalog.MenuEntries)
+            {
+                Assert.That(entry.scenario, Is.Null);
+                Assert.That(entry.displayName, Is.Not.Empty);
+                Assert.That(VoyageEncounterCatalog.Resolve(entry.id).encounter.id, Is.EqualTo(entry.id));
+            }
+        }
+
+        [Test]
+        public void InvalidSceneDoesNotLeaveLoadingLocked()
+        {
+            Assert.Throws<InvalidOperationException>(() => GameSceneLoader.Load("missing-performance-test-scene"));
+            Assert.That(GameSceneLoader.IsLoading, Is.False);
         }
     }
 }

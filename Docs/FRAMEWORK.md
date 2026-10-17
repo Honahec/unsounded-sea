@@ -12,6 +12,8 @@ Editor 点击 Play 默认从 `Assets/UnsoundedSea/Scenes/MainMenu.unity` 启动�
 
 ## 航海选路（局外）
 
+场景切换统一经 `GameSceneLoader.Load` 异步执行，独立持久加载面板提供反馈，加载期间阻止快捷键、重复启动及战斗命令，完成后恢复后台加载优先级。`VoyageEncounterCatalog.MenuEntries` 只读取名称、分组和资源路径；`Resolve` 按需加载独立 `VoyageScenarioReference`。`AllEntries` 会加载全部遭遇，仅用于内容检查／模拟，不用于菜单。`VoyageEncounterLoadingSetup.Configure` 经 Editor API 生成独立引用资产，保留原 Scenario 路径和 GUID；航程内容同步后自动调用。标题菜单在进入时检查存档，点击新航程时重新核实覆盖条件；打开／关闭弹窗不重复回放存档。图鉴翻页不主动执行全局资源回收。
+
 - **三幕标准航程（方案 A）**：海域仍为第一幕灰雾航道、第二幕尸骸之海／倒悬潮庭／无灯裂海三选一、第三幕无星深渊。各幕 Boss 独立按主种子抽取：第一幕为雾海来客／黑潮压舱者／空心航标，第二幕为 M02／M03／M04，第三幕为 M05／沉钟；第二幕海域选择不绑定 Boss。每幕 11 层，一条完整航线实际访问 11 个节点（含出发整备和幕末 Boss），全局 33 个节点；分支候选不是额外必经节点。主种子派生拓扑、布局、Boss、内容、可见性和战斗种子；调查与动画不推进规则随机数。
 - **分支与合并**：起点两个出口，终点前一层单出口；中间层宽 2–3，普通连接至少两个出口，第 2→3、7→8 层按同分支配对单出口，避免交换顺序后重复访问同类节点。只连接相邻层，保留近邻几何约束。
 - **节点节奏**：每幕仍有四场普通战、一场 Boss、一个事件、一个档案、一个独立奖励和三次整备。零基第 2/3 层的事件／战斗及第 7/8 层的档案／战斗按分支换序；第 6 层一条 `Perilous` 分支固定双敌，胜利后两次三选一。每条完整路径仍访问 11 节点，不登陆陆地。
@@ -127,7 +129,7 @@ M02–M05、雾海来客、沉钟、黑潮压舱者与空心航标均由开发�
 
 ### M02–M05 巨兽骨骼表现
 
-`GiantBossRig.py` 将 BANG 部件绑定到真实骨骼，`GiantBossSetup.Build` 配置表现 Prefab 与现有四个舞台；原始 PBR 图片不改。`BossAtmosphereSetup.Apply`（Editor 命名空间）为四场绑定独立 `StormSky` 材质和预烘焙环境反射，并由 `BattleEnvironmentLighting` 在退出时恢复入口的环境光与反射。覆写材质保留原 GLB 贴图，仅校正骨质／膜体／盔甲的金属度与法线强度，资产集中在 `Art/Bosses/Atmosphere`；不修改全局 glTF Shader。此工具只调整 M02 飞行构图，保留 M03–M05 已有机位与槽位；`GiantBossSetup.Build/BuildM05` 已调用相应收尾配置。制作和导入顺序见[模型流程](MODEL_IMPORT_WORKFLOW.md#m02m05bang-分件后的解剖绑定)，不同于沉钟之母的刚性 pivot 实现。
+`GiantBossRig.py` 将 BANG 部件绑定到真实骨骼，`GiantBossSetup.Build` 配置表现 Prefab 与现有四个舞台；原始 PBR 图片不改。`BossAtmosphereSetup.Apply`（Editor 命名空间）为四场绑定独立 `StormSky` 材质和预烘焙环境反射，并由 `BattleEnvironmentLighting` 在退出时恢复入口的环境光与反射。覆写材质沿用 GLB 当前导入材质的外部压缩贴图，仅校正骨质／膜体／盔甲的金属度与法线强度，资产集中在 `Art/Bosses/Atmosphere`；不修改全局 glTF Shader。此工具只调整 M02 飞行构图，保留 M03–M05 已有机位与槽位；`GiantBossSetup.Build/BuildM05` 已调用相应收尾配置。制作和导入顺序见[模型流程](MODEL_IMPORT_WORKFLOW.md#m02m05bang-分件后的解剖绑定)，不同于沉钟之母的刚性 pivot 实现。
 
 | Boss | 绑定与动作重点 | 战斗反馈 |
 | --- | --- | --- |

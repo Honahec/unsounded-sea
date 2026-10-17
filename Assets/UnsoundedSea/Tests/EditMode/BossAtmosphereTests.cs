@@ -57,6 +57,8 @@ namespace UnsoundedSea.Tests
                 var original = originals[material.name];
                 Assert.That(material, Is.Not.SameAs(original));
                 Assert.That(material.shader.isSupported, Is.True);
+                foreach (var property in new[] { "baseColorTexture", "metallicRoughnessTexture", "normalTexture" })
+                    Assert.That(material.GetTexture(property), Is.Not.Null, "Required texture missing: " + property);
                 foreach (var property in original.GetTexturePropertyNames())
                     Assert.That(material.GetTexture(property), Is.EqualTo(original.GetTexture(property)), property);
                 Assert.That(material.GetFloat("metallicFactor"), Is.LessThan(original.GetFloat("metallicFactor")));

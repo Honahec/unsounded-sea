@@ -20,6 +20,7 @@ namespace UnsoundedSea.Runtime
         private bool choosingCrew;
         private bool debugSelectionOpen;
         private bool collectionOpen;
+        private bool hasSavedVoyage;
         private string error;
 
         private void OnEnable()
@@ -33,7 +34,8 @@ namespace UnsoundedSea.Runtime
                 root.style.unityFontDefinition = FontDefinition.FromSDFFont(UiFont.Get(interfaceFont));
                 if (!root.styleSheets.Contains(menuStyle)) root.styleSheets.Add(menuStyle);
                 root.AddToClassList("game-menu");
-                Build(VoyageRuntime.HasSavedVoyage ? "menu-continue" : "menu-start");
+                hasSavedVoyage = VoyageRuntime.HasSavedVoyage;
+                Build(hasSavedVoyage ? "menu-continue" : "menu-start");
                 root.RegisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
             }
             catch (Exception exception) { root.Add(Text("菜单加载失败：" + exception.Message, "menu-error")); Debug.LogException(exception); }
@@ -116,9 +118,9 @@ namespace UnsoundedSea.Runtime
             }
             else
             {
-                if (VoyageRuntime.HasSavedVoyage)
+                if (hasSavedVoyage)
                     entries.Add(Entry("menu-continue", "继续航程", ContinueGame));
-                entries.Add(Entry("menu-start", VoyageRuntime.HasSavedVoyage ? "新航程" : "启航", StartGame, canStart));
+                entries.Add(Entry("menu-start", hasSavedVoyage ? "新航程" : "启航", StartGame, canStart));
                 if (Debug.isDebugBuild)
                     entries.Add(Entry("menu-debug", "调试选关", () => { debugSelectionOpen = true; error = null; Build(null); }));
                 entries.Add(Entry("menu-collection", "卡牌图鉴", () => { collectionOpen = true; Build(null); }));
@@ -178,7 +180,7 @@ namespace UnsoundedSea.Runtime
             var scroll = new ScrollView(ScrollViewMode.Vertical) { name = "debug-levels" };
             scroll.AddToClassList("debug-levels");
             var index = 0;
-            foreach (var group in VoyageEncounterCatalog.AllEntries.GroupBy(entry => entry.isBoss ? "Boss" : entry.group))
+            foreach (var group in VoyageEncounterCatalog.MenuEntries.GroupBy(entry => entry.isBoss ? "Boss" : entry.group))
             {
                 scroll.Add(Text(group.Key, "debug-group"));
                 foreach (var entry in group)
@@ -187,7 +189,7 @@ namespace UnsoundedSea.Runtime
                     var button = new Button(() => LaunchDebugEncounter(selected))
                     {
                         name = "debug-level-" + index++,
-                        text = selected.scenario.encounter.displayName
+                        text = string.IsNullOrEmpty(selected.displayName) ? selected.LoadScenario().encounter.displayName : selected.displayName
                     };
                     button.AddToClassList("debug-level");
                     scroll.Add(button);
@@ -298,7 +300,9 @@ namespace UnsoundedSea.Runtime
 
         private void StartGame()
         {
-            if (VoyageRuntime.HasSavedVoyage)
+            if (GameSceneLoader.IsLoading) return;
+            hasSavedVoyage = VoyageRuntime.HasSavedVoyage;
+            if (hasSavedVoyage)
             {
                 confirmingNewVoyage = true;
                 error = null;
@@ -309,10 +313,11 @@ namespace UnsoundedSea.Runtime
         }
         private void StartConfirmed()
         {
+            if (GameSceneLoader.IsLoading) return;
             try
             {
                 VoyageRuntime.StartNew();
-                SceneManager.LoadScene(voyageScene);
+                GameSceneLoader.Load(voyageScene);
             }
             catch (Exception exception)
             {
@@ -324,6 +329,7 @@ namespace UnsoundedSea.Runtime
         }
         private void ContinueGame()
         {
+            if (GameSceneLoader.IsLoading) return;
             if (!VoyageRuntime.TryResume(out var resumeError))
             {
                 error = "无法读取航程存档：" + resumeError;
@@ -336,7 +342,7 @@ namespace UnsoundedSea.Runtime
                 Build("menu-continue");
                 return;
             }
-            SceneManager.LoadScene(voyageScene);
+            GameSceneLoader.Load(voyageScene);
         }
         private static void Quit()
         {
