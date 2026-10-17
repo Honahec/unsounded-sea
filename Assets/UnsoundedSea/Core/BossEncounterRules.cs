@@ -56,7 +56,8 @@ namespace UnsoundedSea.Core
             public int Stage => stage;
             public bool IsVictory => victory;
             public int Progress => progress;
-            public int Target => kind == BossEncounterKind.Choirmaster ? (stage == 1 ? 3 : 36) : kind == BossEncounterKind.Surveyor ? 4 : kind == BossEncounterKind.FlagBearer ? (stage == 2 ? 3 : stage == 3 ? 48 : 2) : stage == 3 ? 2 : 5;
+            private int MainHealth => s.enemies[0].Definition.Health;
+            public int Target => kind == BossEncounterKind.Choirmaster ? (stage == 1 ? 3 : MainHealth) : kind == BossEncounterKind.Surveyor ? 4 : kind == BossEncounterKind.FlagBearer ? (stage == 2 ? 3 : stage == 3 ? MainHealth : 2) : stage == 3 ? 2 : 5;
             public string Objective => kind == BossEncounterKind.Choirmaster ? (stage == 1 ? "按序关闭唱诗匣" : "击破发声囊") : kind == BossEncounterKind.Surveyor ? "激活四枚安全封栓" : kind == BossEncounterKind.FlagBearer ? (stage == 1 ? "校正双继电器" : stage == 2 ? "依序释放三段闸锁" : "击退执旗者") : stage == 1 ? "建立撤离绳" : stage == 2 ? "牵引守卫并关闭五座锚点" : "收绞归航绳";
             public string Status => BuildStatus();
             public IReadOnlyList<EncounterTargetView> AllTargets { get { RefreshCards(); return targets.Select(x => new EncounterTargetView(x.Id, x.Name, TargetDetail(x.Id), true)).ToList().AsReadOnly(); } }
@@ -123,13 +124,13 @@ namespace UnsoundedSea.Core
                 if (kind == BossEncounterKind.Choirmaster)
                 {
                     known = Math.Max(known, Math.Min(2, s.turn)); if (known >= 2) RemoveCard("E02-01");
-                    if (stage == 2) SetPublicIntent(s.enemies[0], DamageChannel.Health, 8, "发声囊撞击");
+                    if (stage == 2) SetPublicIntent(s.enemies[0], DamageChannel.Health, 9, "发声囊撞击");
                     else if (s.turn % 3 == 2) SetPublicIntent(s.enemies[0], DamageChannel.Health, 0, s.turn > 6 && s.enemies[2].Health == 0 ? "召唤潮囊信使" : "召唤骨片侍从", true);
                     else SetPublicIntent(s.enemies[0], s.turn % 3 == 0 ? DamageChannel.Sanity : DamageChannel.Health, s.turn % 3 == 0 ? 4 : 6, s.turn % 3 == 0 ? "失谐合唱" : "骨潮冲击");
                     foreach (var e in s.enemies.Skip(1).Where(x => x.Health > 0)) SetPublicIntent(e, DamageChannel.Health, e.Definition.Id == s.enemies[2].Definition.Id ? 0 : 3, e.Definition.Id == s.enemies[2].Definition.Id ? "恢复发声囊 6" : "骨片切割", e.Definition.Id == s.enemies[2].Definition.Id);
                 }
-                else if (kind == BossEncounterKind.Surveyor) { SetPublicIntent(s.enemies[0], s.turn % 2 == 0 ? DamageChannel.Sanity : DamageChannel.Health, s.turn % 2 == 0 ? 3 : s.turn >= 7 ? 10 : 6, s.turn % 2 == 0 ? "召唤雾灯蛾群" : s.turn >= 7 ? "盐潮重压" : "盐浪拍击"); foreach (var e in s.enemies.Skip(1).Where(x => x.Health > 0)) SetPublicIntent(e, DamageChannel.Sanity, 2, "雾灯低鸣"); }
-                else if (kind == BossEncounterKind.FlagBearer) { if (stage == 3) flagFinalTurn++; SetPublicIntent(s.enemies[0], stage == 1 ? DamageChannel.Health : stage == 2 ? DamageChannel.Sanity : flagFinalTurn % 2 == 1 ? DamageChannel.Health : DamageChannel.Sanity, stage == 1 ? 7 : stage == 2 ? 4 : flagFinalTurn % 2 == 1 ? 12 : 6, stage == 1 ? "旗杆横扫" : stage == 2 ? "无灯号令" : flagFinalTurn % 2 == 1 ? "断桅重击" : "舰队回声"); if (s.enemies[1].Health > 0) SetPublicIntent(s.enemies[1], DamageChannel.Health, 4, "空甲突刺"); }
+                else if (kind == BossEncounterKind.Surveyor) { SetPublicIntent(s.enemies[0], s.turn % 2 == 0 ? DamageChannel.Sanity : DamageChannel.Health, s.turn % 2 == 0 ? 3 : s.turn >= 7 ? 10 : 8, s.turn % 2 == 0 ? "召唤雾灯蛾群" : s.turn >= 7 ? "盐潮重压" : "盐浪拍击"); foreach (var e in s.enemies.Skip(1).Where(x => x.Health > 0)) SetPublicIntent(e, DamageChannel.Sanity, 2, "雾灯低鸣"); }
+                else if (kind == BossEncounterKind.FlagBearer) { if (stage == 3) flagFinalTurn++; SetPublicIntent(s.enemies[0], stage == 1 ? DamageChannel.Health : stage == 2 ? DamageChannel.Sanity : flagFinalTurn % 2 == 1 ? DamageChannel.Health : DamageChannel.Sanity, stage == 1 ? 8 : stage == 2 ? 4 : flagFinalTurn % 2 == 1 ? 12 : 6, stage == 1 ? "旗杆横扫" : stage == 2 ? "无灯号令" : flagFinalTurn % 2 == 1 ? "断桅重击" : "舰队回声"); if (s.enemies[1].Health > 0) SetPublicIntent(s.enemies[1], DamageChannel.Health, 4, "空甲突刺"); }
                 else BeginWatcherTurn();
                 RefreshCards();
             }
@@ -175,11 +176,11 @@ namespace UnsoundedSea.Core
             private void Apply(string id, string target)
             {
                 if (id == "E02-01") { known++; s.Record(Constraint(known - 1)); if (known >= 2) RemoveCard(id); return; }
-                if (id == "E02-02") { primaryUsed = true; if (target == order[progress]) { completed.Add(target); progress++; s.Record("唱诗匣永久关闭。"); if (progress == 3) { stage = 2; cancelSummon = true; progress = 36 - s.enemies[0].Health; RemoveCard(id); s.Record("护持解除；尚未发生的新召唤取消。"); } } else { s.ApplyThreat(DamageChannel.Sanity, 4, "错误唱序"); } return; }
+                if (id == "E02-02") { primaryUsed = true; if (target == order[progress]) { completed.Add(target); progress++; s.Record("唱诗匣永久关闭。"); if (progress == 3) { stage = 2; cancelSummon = true; progress = MainHealth - s.enemies[0].Health; RemoveCard(id); s.Record("护持解除；尚未发生的新召唤取消。"); } } else { s.ApplyThreat(DamageChannel.Sanity, 4, "错误唱序"); } return; }
                 if (id == "E03-01") { opensThisTurn++; completed.Add(target); if (B03Mines.Contains(target)) s.ApplyThreat(DamageChannel.Health, s.SceneFailureDamage(6), "危险盐格"); if (B03Mines.Contains(target)) s.ApplyThreat(DamageChannel.Sanity, 2, "危险盐格"); if (B03Goals.Contains(target)) progress++; if (progress == 4) { victory = true; RemoveCard("E03-01"); RemoveCard("E03-02"); } return; }
                 if (id == "E03-02") { read.Add(target); s.Record($"{target} 相邻危险数：{AdjacentMines(target)}。"); return; }
                 if (id == "E04-01") { primaryUsed = true; var p = target.Split(':'); completed.Remove(p[0] + ":off"); completed.Remove(p[0] + ":positive"); completed.Remove(p[0] + ":reverse"); completed.Add(target); if (stage == 1 && Relay("R1") == "positive" && Relay("R2") == "reverse") { stagePending = true; s.Record("双继电器完成；下一玩家回合进入闸锁阶段。"); } return; }
-                if (id == "E04-02") { secondaryUsed = true; progress++; if (progress == 3) { stage = 3; flagFinalTurn = 0; cancelMainThisTurn = true; progress = 48 - s.enemies[0].Health; RemoveCard("E04-01"); RemoveCard("E04-02"); s.Record("第三锁完成；警报与本体理智攻击取消，护持解除。"); } return; }
+                if (id == "E04-02") { secondaryUsed = true; progress++; if (progress == 3) { stage = 3; flagFinalTurn = 0; cancelMainThisTurn = true; progress = MainHealth - s.enemies[0].Health; RemoveCard("E04-01"); RemoveCard("E04-02"); s.Record("第三锁完成；警报与本体理智攻击取消，护持解除。"); } return; }
                 if (id == "E05-01") { stage = 2; summonStep = 0; RemoveCard(id); return; }
                 if (id == "E05-02") { completed.Add(target.Split('|')[0] + ":bound"); return; }
                 primaryUsed = true; progress++; if (progress == 2) { victory = true; RemoveCard(id); }
@@ -194,8 +195,8 @@ namespace UnsoundedSea.Core
 
             public void EnemyDamaged(string id)
             {
-                var e = s.Find(id); if (kind == BossEncounterKind.Choirmaster && BaseId(id) == "b02-choirmaster") { if (stage == 2) progress = 36 - e.Health; if (e.Health == 0 && stage == 2) victory = true; }
-                else if (kind == BossEncounterKind.FlagBearer && BaseId(id) == "b04-flag-bearer") { if (stage == 3) progress = 48 - e.Health; if (e.Health == 0 && stage == 3) victory = true; }
+                var e = s.Find(id); if (kind == BossEncounterKind.Choirmaster && BaseId(id) == "b02-choirmaster") { if (stage == 2) progress = MainHealth - e.Health; if (e.Health == 0 && stage == 2) victory = true; }
+                else if (kind == BossEncounterKind.FlagBearer && BaseId(id) == "b04-flag-bearer") { if (stage == 3) progress = MainHealth - e.Health; if (e.Health == 0 && stage == 3) victory = true; }
                 else if (kind == BossEncounterKind.Watcher && BaseId(id).StartsWith("b05-guard-") && e.Health == 0)
                 {
                     if (completed.Contains(id + ":bound")) { completed.Add(id + ":closed"); progress++; dormantUntil.Remove(id); if (progress == 5) EnterEvacuation(); }
@@ -260,7 +261,7 @@ namespace UnsoundedSea.Core
                 {
                     ages[e.Definition.Id] = ages.TryGetValue(e.Definition.Id, out var age) ? age + 1 : 1;
                     var name = BaseId(e.Definition.Id).Substring("b05-guard-".Length);
-                    var amount = name == "anchor" ? 5 : name == "lamp" ? 3 : name == "bell" ? (ages[e.Definition.Id] % 2 == 1 ? 6 : 0) : name == "sail" ? (!sailBurst ? 6 : 4) : !eyeBurst ? 4 : 2;
+                    var amount = name == "anchor" ? 5 : name == "lamp" ? 3 : name == "bell" ? (ages[e.Definition.Id] % 2 == 1 ? 4 : 0) : name == "sail" ? (!sailBurst ? 6 : 4) : !eyeBurst ? 3 : 2;
                     SetPublicIntent(e, name == "lamp" || name == "bell" || name == "eye" ? DamageChannel.Sanity : DamageChannel.Health, amount, amount == 0 ? "本回合停手" : name == "anchor" ? "铁锚撞击" : name == "lamp" ? "裂灯低鸣" : name == "bell" ? "铜钟震响" : name == "sail" ? "折帆撕扯" : "闭眼凝视");
                 }
             }
@@ -275,7 +276,7 @@ namespace UnsoundedSea.Core
                     sailBurst |= name == "sail"; eyeBurst |= name == "eye";
                     if (e.ActualIntent.Amount > 0) s.ApplyThreat(e.ActualIntent.Channel, e.ActualIntent.Amount, e.Definition.Name);
                 }
-                summonStep++; if (summonStep % 2 == 0) s.ApplyThreat(DamageChannel.Sanity, activeAtStart == 3 ? 6 : 3, "无星余响");
+                summonStep++; if (summonStep % 2 == 0) s.ApplyThreat(DamageChannel.Sanity, activeAtStart == 3 ? 4 : 3, "无星余响");
                 SpawnWatcher(activeAtStart);
             }
             private void SpawnWatcher(int activeBefore)
@@ -356,13 +357,13 @@ namespace UnsoundedSea.Core
             private static string AnchorLabel(string name) => name == "anchor" ? "铁锚" : name == "lamp" ? "裂灯" : name == "bell" ? "铜钟" : name == "sail" ? "折帆" : "闭眼";
             private string BuildStatus()
             {
-                if (kind == BossEncounterKind.Choirmaster) return stage == 1 ? $"{(known == 0 ? "唱序未知" : string.Join("；", Enumerable.Range(0, known).Select(Constraint)))} · 封匣 {progress}/3" : $"护持解除 · 发声囊 {s.enemies[0].Health}/36";
+                if (kind == BossEncounterKind.Choirmaster) return stage == 1 ? $"{(known == 0 ? "唱序未知" : string.Join("；", Enumerable.Range(0, known).Select(Constraint)))} · 封匣 {progress}/3" : $"护持解除 · 发声囊 {s.enemies[0].Health}/{MainHealth}";
                 if (kind == BossEncounterKind.Surveyor) return $"封栓 {progress}/4 · 总危险 3" + (s.turn == 6 ? "\n下回合盐潮重压：10 生命" : "");
                 if (kind == BossEncounterKind.FlagBearer)
                 {
                     string Polarity(string relay) => Relay(relay) == "off" ? "断电" : Relay(relay) == "positive" ? "正接" : "反接";
                     var relays = $"R1 {Polarity("R1")} · R2 {Polarity("R2")}";
-                    return stage == 1 ? relays : stage == 2 ? $"{relays}\n闸锁 {progress}/3 · 警报 {alarm}\n{TargetDetail("lock-" + new[] { "I", "II", "III" }[Math.Min(progress, 2)])}" : $"主桅暴露 · {s.enemies[0].Health}/48";
+                    return stage == 1 ? relays : stage == 2 ? $"{relays}\n闸锁 {progress}/3 · 警报 {alarm}\n{TargetDetail("lock-" + new[] { "I", "II", "III" }[Math.Min(progress, 2)])}" : $"主桅暴露 · {s.enemies[0].Health}/{MainHealth}";
                 }
                 return stage == 3 ? $"撤离 {progress}/2" : (stage == 1 ? "撤离绳未建立" : $"锚点 {progress}/5 · 活动守卫 {s.enemies.Skip(1).Count(x => x.Health > 0)}/3") + "\n" + string.Join(" → ", guardOrder.Select(GuardLabel));
             }
@@ -518,7 +519,7 @@ namespace UnsoundedSea.Core
                 if (stage == 3) return evacuationJustEntered ? "无星余响：本回合停息" : "无星余响：4 点理智冲击";
                 var next = summonStep + 1;
                 var lines = new List<string>();
-                if (next % 2 == 0) lines.Add(s.enemies.Skip(1).Count(x => x.Health > 0) == 3 ? "无星余响：3–6 理智，清至两名则 3" : "无星余响：3 点理智冲击");
+                if (next % 2 == 0) lines.Add(s.enemies.Skip(1).Count(x => x.Health > 0) == 3 ? "无星余响：3–4 理智，清至两名则 3" : "无星余响：3 点理智冲击");
                 if (!initialSpawned) lines.Add("召唤：" + string.Join("、", guardOrder.Take(2).Select(GuardLabel)));
                 else if (next >= 3 && next % 2 == 1)
                 {

@@ -115,7 +115,8 @@ namespace UnsoundedSea.Tests
 
         [Test] public void CourseCorrectionIsPaidBeforeRevealMandatoryAtZeroActionsAndReplayable()
         {
-            var definition = Definition(CardCatalog.Get("c054"));
+            var definition = new BattleDefinition("reorder", Enumerable.Repeat(CardCatalog.Get("c054"), 8),
+                new[] { new EnemySpec("enemy", "敌人", 100, "攻击", new[] { Hit }) }, Array.Empty<ToolSpec>());
             var session = new BattleSession(definition, 7);
             for (var play = 0; play < 3; play++)
             {

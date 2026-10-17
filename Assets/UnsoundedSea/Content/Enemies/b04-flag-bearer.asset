@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: b04-flag-bearer
   displayName: "\u65E0\u706F\u6267\u65D7\u8005"
-  health: 48
+  health: 54
   candidateDescription: "\u7279\u6B8A\u906D\u9047\u89C4\u5219\u63A7\u5236\u516C\u5F00\u610F\u56FE"
   intents:
   - id: boss-script

@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
   id: c008
   displayName: "\u94DC\u58F3\u7A7F\u523A"
-  description: "\u5BF9\u4E00\u540D\u654C\u4EBA\u9020\u62108\u4F24\u5BB3\uFF1B\u82E5\u5176\u6765\u6E90\u6216\u5A92\u4ECB\u8054\u7CFB\u5DF2\u9A8C\u8BC1\uFF0C\u6539\u4E3A14\u4F24\u5BB3\u3002"
+  description: "\u5BF9\u4E00\u540D\u654C\u4EBA\u9020\u62108\u4F24\u5BB3\uFF1B\u82E5\u5176\u6765\u6E90\u6216\u5A92\u4ECB\u8054\u7CFB\u5DF2\u9A8C\u8BC1\uFF0C\u6539\u4E3A17\u4F24\u5BB3\u3002"
   actionCost: 2
   sanityCost: 0
   exhaust: 0
   effects:
   - effectId: c008
-    amount: 14
+    amount: 17

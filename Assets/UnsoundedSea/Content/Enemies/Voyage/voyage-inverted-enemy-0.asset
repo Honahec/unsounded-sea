@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-inverted-enemy-0
   displayName: "\u5012\u60AC\u6D4B\u91CF\u5458"
-  health: 20
-  candidateDescription: "\u6298\u5C3A\u91CF\u5207\uFF1A8 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  health: 34
+  candidateDescription: "\u6298\u5C3A\u91CF\u5207\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
   intents:
   - id: rule
     displayName: "\u6298\u5C3A\u91CF\u5207"
     clue: "\u6298\u5C3A\u5B8C\u5168\u5F20\u5F00\uFF0C\u957F\u81C2\u6CBF\u7532\u677F\u523B\u5EA6\u6446\u6B63\u3002"
     channel: 0
-    amount: 8
+    amount: 10
     isPublic: 1
     visibleAction: 1
     interruptible: 0

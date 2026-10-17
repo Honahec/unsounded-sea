@@ -34,6 +34,9 @@ namespace UnsoundedSea.Core
         private bool taskUsed, investigationUsed, sceneActionUsed, crewSupportUsed, directionalListeningBlocked, directionalListeningUsed;
         private int nextInstanceId, watched, nextHealthReduction, sceneFailureReduction, sceneDiscount;
         private readonly HashSet<int> retained = new HashSet<int>();
+        private readonly HashSet<int> carriedFromLastTurn = new HashSet<int>();
+        private readonly HashSet<string> newCardAnswers = new HashSet<string>(StringComparer.Ordinal);
+        private readonly Dictionary<string, HashSet<int>> weaponHits = new Dictionary<string, HashSet<int>>(StringComparer.Ordinal);
         private readonly HashSet<string> turnFlags = new HashSet<string>(StringComparer.Ordinal);
         private int watchedInvestigationBonus;
         private readonly BossEncounterKind bossKind;
@@ -107,10 +110,12 @@ namespace UnsoundedSea.Core
                     if (cardError != null) return Reject(cardError);
                     actions -= card.Definition.Cost; sanity -= card.Definition.SanityCost;
                     hand.Remove(card); // In-flight cards cannot retrieve themselves.
+                    var wasCarried = carriedFromLastTurn.Remove(card.InstanceId);
+                    retained.Remove(card.InstanceId);
                     Record($"使用 {card.Definition.Name}；支付 {card.Definition.Cost} 行动 / {card.Definition.SanityCost} 理智。");
                     if (IsCatalogCard(card.Definition))
                     {
-                        ApplyCatalogCard(card, command.targetId);
+                        ApplyCatalogCard(card, command.targetId, wasCarried);
                     }
                     else
                     {
@@ -175,6 +180,7 @@ namespace UnsoundedSea.Core
             turn++; SetPhase(BattlePhase.TurnStart); block = 0; ward = 0; taskUsed = false; actions = definition.Actions;
             investigationUsed = sceneActionUsed = crewSupportUsed = directionalListeningBlocked = directionalListeningUsed = false;
             watchedInvestigationBonus = sceneFailureReduction = sceneDiscount = 0; turnFlags.Clear();
+            newCardAnswers.Clear(); weaponHits.Clear();
             Draw(definition.DrawCount);
             boss?.BeginPlayerTurn();
             foreach (var enemy in enemies.Where(x => x.Health > 0))
@@ -190,9 +196,10 @@ namespace UnsoundedSea.Core
         private void ResolveTurn()
         {
             SetPhase(BattlePhase.Resolve);
+            carriedFromLastTurn.Clear();
             foreach (var card in hand.Where(x => !x.IsEncounter).ToList())
             {
-                if (retained.Remove(card.InstanceId)) continue;
+                if (retained.Remove(card.InstanceId)) { carriedFromLastTurn.Add(card.InstanceId); continue; }
                 hand.Remove(card); discard.Add(card);
             }
             if (boss != null)
@@ -275,7 +282,7 @@ namespace UnsoundedSea.Core
             return new CrewSupportView(support, used, phase == BattlePhase.PlayerTurn && reason == "", reason, targets.AsReadOnly());
         }
 
-        internal void Investigate(string id, InvestigationKind kind, string source)
+        internal void Investigate(string id, InvestigationKind kind, string source, bool fromInvestigationCard = false)
         {
             var enemy = Find(id);
             if (kind == InvestigationKind.SoundSource && directionalListeningBlocked) { Record("耳棉阻止了定向听取。"); return; }
@@ -290,6 +297,7 @@ namespace UnsoundedSea.Core
                 default: throw new ArgumentOutOfRangeException(nameof(kind));
             }
             knowledge.Record(new Evidence(EvidenceKey(id, kind), information, source, KnowledgeLevel.Observed));
+            if (fromInvestigationCard) newCardAnswers.Add(id);
             Record($"{source}观察到：{information}");
             if (kind == InvestigationKind.SoundSource) directionalListeningUsed = true;
             if (watchedInvestigationBonus > 0)
@@ -299,7 +307,7 @@ namespace UnsoundedSea.Core
                 if (available.Count > 0)
                 {
                     watchedInvestigationBonus = 0;
-                    Investigate(id, available[0], source + "·追问");
+                    Investigate(id, available[0], source + "·追问", fromInvestigationCard);
                 }
             }
         }

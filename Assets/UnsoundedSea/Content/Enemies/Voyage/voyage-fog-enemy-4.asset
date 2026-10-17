@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-fog-enemy-4
   displayName: "\u6F02\u6876\u7A83\u8D3C"
-  health: 16
-  candidateDescription: "\u6876\u7B8D\u51B2\u649E\uFF1A6 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u7F29\u6876\u89C2\u671B\uFF1A0 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  health: 22
+  candidateDescription: "\u6876\u7B8D\u51B2\u649E\uFF1A7 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u7F29\u6876\u89C2\u671B\uFF1A0 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
   intents:
   - id: barrel
     displayName: "\u6876\u7B8D\u51B2\u649E"
     clue: "\u7834\u6876\u538B\u4F4E\uFF0C\u94C1\u7B8D\u5BF9\u51C6\u819D\u90E8\u3002"
     channel: 0
-    amount: 6
+    amount: 7
     isPublic: 1
     visibleAction: 1
     interruptible: 0

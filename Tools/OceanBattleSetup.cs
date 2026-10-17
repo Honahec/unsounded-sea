@@ -107,7 +107,7 @@ public static class OceanBattleSetup
         var stageAsset=PrefabUtility.SaveAsPrefabAsset(stageRoot,Art+"/FogSeaStage.prefab").GetComponent<BattleStage>();UnityEngine.Object.DestroyImmediate(stageRoot);
         CardDefinition Card(string id)=>AssetDatabase.LoadAssetAtPath<CardDefinition>(Root+"/Content/Cards/"+id+".asset");
         EnemyDefinition Enemy(string id)=>AssetDatabase.LoadAssetAtPath<EnemyDefinition>(Root+"/Content/Enemies/"+id+".asset");
-        var prayer=Enemy("prayer");var echo=Enemy("echo");
+        var prayer=UnsoundedSea.Editor.CombatBalanceSetup.FogPrayer();var echo=Enemy("echo");
         // Scenario overrides leave the older rule examples independent from this art direction.
         var encounter=Asset<EncounterDefinition>(Root+"/Content/Encounters/fog-visitors.asset",e=>
         {e.id="fog-visitors";e.displayName="雾海来客";e.objective=ObjectiveKind.Seal;e.objectiveTarget=4;e.playerHealth=60;e.playerSanity=30;e.actionsPerTurn=3;e.drawPerTurn=5;

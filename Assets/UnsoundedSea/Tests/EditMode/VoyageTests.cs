@@ -7,6 +7,25 @@ namespace UnsoundedSea.Tests
 {
     public sealed class VoyageTests
     {
+        [Test] public void SynergyRewardsAreReachableAndForbiddenRecoveryStartsWithSecondAct()
+        {
+            var first = new System.Collections.Generic.HashSet<string>();
+            var next = new System.Collections.Generic.HashSet<string>();
+            for (uint seed = 0; seed < 100; seed++)
+            {
+                var s = VoyageSession.Create(seed);
+                MoveToLayer(s, 4);
+                foreach (var card in s.RewardCards) first.Add(card.Id);
+                var damaged = true; CompleteAct(s, ref damaged);
+                Assert.That(s.ChooseNextAct("bones"), Is.True);
+                foreach (var card in s.RewardCards) next.Add(card.Id);
+                Assert.That(VoyageSession.Restore(s.Export()).RewardCards.Select(c => c.Id), Is.EqualTo(s.RewardCards.Select(c => c.Id)));
+            }
+            Assert.That(first, Is.SupersetOf(new[] { "c016", "c026", "c032" }));
+            Assert.That(first, Does.Not.Contain("c076")); Assert.That(first, Does.Not.Contain("c083"));
+            Assert.That(next, Is.SupersetOf(new[] { "c016", "c026", "c032", "c076", "c083" }));
+        }
+
         [Test]
         public void NewVoyageSupportsInitialCrewDeckToolsAndSafePreparation()
         {

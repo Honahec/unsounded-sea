@@ -24,12 +24,12 @@ namespace UnsoundedSea.Core
 
     public sealed class VoyageSession
     {
-        public const int CheckpointVersion=5;
+        public const int CheckpointVersion=6;
         public const int ActLength=11;
         private const int InitialToolUses=2, MaxHistory=512;
         private static readonly string[] StarterDeck={"revolver","contradiction","c012","cover","steady","intuition","bandage","notes","light","c041","tear","c071"};
         private static readonly string[] InitialTools={"lantern","listener","shell"};
-        private static readonly int[] CommonRewards = { 3, 5, 7, 9, 14, 18, 23, 24, 27, 28, 29, 31, 33, 35, 38, 40, 45, 49, 50, 51, 53, 54 };
+        private static readonly int[] CommonRewards = { 3, 5, 7, 9, 14, 16, 18, 23, 24, 26, 27, 28, 29, 31, 32, 33, 35, 38, 40, 45, 49, 50, 51, 53, 54 };
         private static readonly Dictionary<string, int[]> RegionRewards = new Dictionary<string, int[]>
         {
             ["fog"] = new[] { 6, 11, 16, 25, 32, 36, 47, 48, 58, 64, 70 },
@@ -265,6 +265,7 @@ namespace UnsoundedSea.Core
         private bool UsefulInRegion(CardSpec card)
         {
             var number=CardCatalog.Number(card.Id);
+            if ((Act >= 2 || nextRegion != null) && (number == 76 || number == 83)) return true;
             return Array.IndexOf(CommonRewards, number) >= 0 || Array.IndexOf(RegionRewards[nextRegion??RegionId], number) >= 0;
         }
         private string RegionBriefing(bool boss)

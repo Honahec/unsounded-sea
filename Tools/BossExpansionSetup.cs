@@ -253,13 +253,12 @@ public static class BossExpansionSetup
         return prefab;
     }
     static int EnemyHealth(BossEncounterKind kind,int slot)
-    {if(slot==0)return kind==BossEncounterKind.Choirmaster?36:kind==BossEncounterKind.FlagBearer?48:1;if(kind==BossEncounterKind.Choirmaster)return slot==1?8:10;if(kind==BossEncounterKind.Surveyor)return 6;return 12;}
+    {return UnsoundedSea.Editor.CombatBalanceSetup.BossHealth(kind,slot);}
     static string EnemyIntent(BossEncounterKind kind,int slot)
-    {if(slot==0)return "特殊遭遇规则控制公开意图";if(kind==BossEncounterKind.Choirmaster)return slot==1?"每回合 3 生命":"恢复发声囊 6";if(kind==BossEncounterKind.Surveyor)return "每回合 2 理智";if(kind==BossEncounterKind.FlagBearer)return "每回合 4 生命";return slot==1?"每回合 5 生命":slot==2?"每回合 3 理智":slot==3?"奇数活动回合 6 理智":slot==4?"每回合 4 生命":"每回合 2 理智";}
+    {return UnsoundedSea.Editor.CombatBalanceSetup.BossIntent(kind,slot);}
     static IntentData[] Intents(BossEncounterKind kind,int slot)
     {
-        var sanity=EnemyIntent(kind,slot).Contains("理智");var amount=slot==0?0:kind==BossEncounterKind.Choirmaster?(slot==1?3:0):kind==BossEncounterKind.Surveyor?2:kind==BossEncounterKind.FlagBearer?4:slot==1?5:slot==2?3:slot==3?6:slot==4?4:2;
-        return new[]{new IntentData{id="boss-script",displayName=slot==0?"规则阶段":"公开行动",clue=EnemyIntent(kind,slot),channel=sanity?DamageChannel.Sanity:DamageChannel.Health,amount=amount,isPublic=true,visibleAction=true,interruptible=false,soundSource=slot==0?"舷外":"甲板"}};
+        return UnsoundedSea.Editor.CombatBalanceSetup.BossIntents(kind,slot);
     }
     static GameObject Obj(string name,Transform parent,Vector3 position)
     {var go=new GameObject(name);go.transform.SetParent(parent,false);go.transform.localPosition=position;return go;}

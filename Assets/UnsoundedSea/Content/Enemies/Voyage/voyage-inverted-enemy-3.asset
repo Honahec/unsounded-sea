@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-inverted-enemy-3
   displayName: "\u94C5\u5782\u5B88\u671B\u8005"
-  health: 23
-  candidateDescription: "\u94C5\u5760\u6446\u51FB\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u6821\u51C6\u5782\u7EBF\uFF1A0 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  health: 38
+  candidateDescription: "\u94C5\u5760\u6446\u51FB\uFF1A14 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u6821\u51C6\u5782\u7EBF\uFF1A0 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
   intents:
   - id: plumb
     displayName: "\u94C5\u5760\u6446\u51FB"
     clue: "\u80F8\u524D\u94C5\u5760\u79BB\u5F00\u5782\u7EBF\uFF0C\u76AE\u5E26\u5DF2\u7ECF\u7EF7\u7D27\u3002"
     channel: 0
-    amount: 10
+    amount: 14
     isPublic: 1
     visibleAction: 1
     interruptible: 0
