@@ -14,34 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-inverted-enemy-3
   displayName: "\u94C5\u5782\u5B88\u671B\u8005"
-  health: 11
-  candidateDescription: "\u77ED\u9E23\uFF1A2 \u7406\u667A\u51B2\u51FB\uFF08\u53EF\u6253\u65AD\uFF09/ \u89C2\u671B\uFF1A\u65E0\u4F24\u5BB3 / \u63A8\u51FB\uFF1A3 \u751F\u547D\u4F24\u5BB3\uFF08\u5747\u516C\u5F00\uFF09"
+  health: 23
+  candidateDescription: "\u94C5\u5760\u6446\u51FB\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u6821\u51C6\u5782\u7EBF\uFF1A0 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
   intents:
-  - id: short-call
-    displayName: "\u77ED\u4FC3\u547C\u53F7"
-    clue: "\u76EE\u6807\u4E3E\u8D77\u53F7\u5177\uFF0C\u547C\u6C14\u52A8\u4F5C\u6E05\u6670\u53EF\u89C1\u3002"
-    channel: 1
-    amount: 2
+  - id: plumb
+    displayName: "\u94C5\u5760\u6446\u51FB"
+    clue: "\u80F8\u524D\u94C5\u5760\u79BB\u5F00\u5782\u7EBF\uFF0C\u76AE\u5E26\u5DF2\u7ECF\u7EF7\u7D27\u3002"
+    channel: 0
+    amount: 10
     isPublic: 1
     visibleAction: 1
-    interruptible: 1
+    interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
-  - id: idle
-    displayName: "\u5B88\u4F4F\u8237\u8FB9"
-    clue: "\u76EE\u6807\u6CA1\u6709\u8FDB\u653B\uFF0C\u53EA\u5B88\u4F4F\u767B\u8239\u4F4D\u7F6E\u3002"
+  - id: still
+    displayName: "\u6821\u51C6\u5782\u7EBF"
+    clue: "\u94C5\u5760\u9759\u6B62\uFF0C\u53CC\u624B\u53EA\u5728\u8C03\u6574\u80A9\u5E26\u3002"
     channel: 0
     amount: 0
     isPublic: 1
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
-  - id: shove
-    displayName: "\u63A8\u51FB"
-    clue: "\u76EE\u6807\u80A9\u90E8\u524D\u538B\uFF0C\u51C6\u5907\u628A\u4EBA\u63A8\u79BB\u8237\u8FB9\u3002"
-    channel: 0
-    amount: 3
-    isPublic: 1
-    visibleAction: 1
-    interruptible: 0
-    soundSource: "\u76EE\u6807\u672C\u4F53"
-  presentationPrefab: {fileID: 6536484850760832164, guid: d6e078df63125453e87419a8e7f51e6d, type: 3}
+  presentationPrefab: {fileID: 593053487260516984, guid: b4c8bb3ef5dd3414cb4ae36b7bc422c7, type: 3}

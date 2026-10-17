@@ -27,7 +27,7 @@ namespace UnsoundedSea.Runtime
         {
             scenario.ValidatePresentation();
             session = scenario.CreateSession(seed, usePreparedDeck: true,
-                voyage: VoyageRuntime.OwnsEncounter(this) ? VoyageRuntime.Session : null,
+                voyage: VoyageRuntime.OwnsEncounter(this) && !VoyageRuntime.IsDebugSession ? VoyageRuntime.Session : null,
                 replay: VoyageRuntime.OwnsEncounter(this) ? VoyageRuntime.PendingReplay : null);
             SelectedEnemy = View.Enemies.FirstOrDefault(x => x.Health > 0 && x.Targetable)?.Id;
             feedbackUntil = 0; wasBusy = false; Paused = false; Notice = scenario.introduction;
@@ -53,7 +53,7 @@ namespace UnsoundedSea.Runtime
             var result = session.Execute(command);
             if (!result.Success) { Notice = result.Error; Changed?.Invoke(); return result; }
             var after = View;
-            if (before.Phase != BattlePhase.Victory && after.Phase == BattlePhase.Victory)
+            if (!VoyageRuntime.IsDebugSession && before.Phase != BattlePhase.Victory && after.Phase == BattlePhase.Victory)
                 CardDeckPreparation.StoreVerified(after.Evidence);
             if (!after.Enemies.Any(x => x.Id == SelectedEnemy && x.Health > 0 && x.Targetable))
                 SelectedEnemy = after.Enemies.FirstOrDefault(x => x.Health > 0 && x.Targetable)?.Id;

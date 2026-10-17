@@ -15,54 +15,128 @@ MonoBehaviour:
   entries:
   - id: voyage-fog-0
     scenario: {fileID: 11400000, guid: 2bc25851d1e884700a2878b159c8a185, type: 2}
+    group: "\u96FE\u6D77"
+    isBoss: 0
   - id: voyage-fog-1
     scenario: {fileID: 11400000, guid: 768f8a99dbd864f559c7cadbb5b8c6b1, type: 2}
+    group: "\u96FE\u6D77"
+    isBoss: 0
   - id: voyage-fog-2
     scenario: {fileID: 11400000, guid: dd2d64d1a6967486ea7c268efa246f20, type: 2}
+    group: "\u96FE\u6D77"
+    isBoss: 0
   - id: voyage-fog-3
     scenario: {fileID: 11400000, guid: cc5c6a9467e774295b47b87c27a31f19, type: 2}
+    group: "\u96FE\u6D77"
+    isBoss: 0
+  - id: voyage-fog-4
+    scenario: {fileID: 11400000, guid: 441f5b41e200544d197a7f4a8b0e5e9d, type: 2}
+    group: "\u96FE\u6D77"
+    isBoss: 0
   - id: voyage-bones-0
     scenario: {fileID: 11400000, guid: e5bdc18b34add474a9a5ad8dcba28046, type: 2}
+    group: "\u6F6E\u9AA8\u6D77"
+    isBoss: 0
   - id: voyage-bones-1
     scenario: {fileID: 11400000, guid: 15f8ec0c62efd485889c81c0504c8aa0, type: 2}
+    group: "\u6F6E\u9AA8\u6D77"
+    isBoss: 0
   - id: voyage-bones-2
     scenario: {fileID: 11400000, guid: 23c62baa762ab43ed928f137239a6d43, type: 2}
+    group: "\u6F6E\u9AA8\u6D77"
+    isBoss: 0
   - id: voyage-bones-3
     scenario: {fileID: 11400000, guid: c27d1e6c400f14f53b09cb1a38df103d, type: 2}
+    group: "\u6F6E\u9AA8\u6D77"
+    isBoss: 0
+  - id: voyage-bones-4
+    scenario: {fileID: 11400000, guid: 3dc7bd06eaa08474983887d7eb77988b, type: 2}
+    group: "\u6F6E\u9AA8\u6D77"
+    isBoss: 0
   - id: voyage-inverted-0
     scenario: {fileID: 11400000, guid: 68933e715d6f74ee49c3057d563ad523, type: 2}
+    group: "\u5012\u60AC\u6D77"
+    isBoss: 0
   - id: voyage-inverted-1
     scenario: {fileID: 11400000, guid: 768f399821f09464388955703995d2d0, type: 2}
+    group: "\u5012\u60AC\u6D77"
+    isBoss: 0
   - id: voyage-inverted-2
     scenario: {fileID: 11400000, guid: 5005a15ad09be4767b9cc34ee73fae07, type: 2}
+    group: "\u5012\u60AC\u6D77"
+    isBoss: 0
   - id: voyage-inverted-3
     scenario: {fileID: 11400000, guid: dbe28f7f996844f47bcf34696ff3d8b5, type: 2}
+    group: "\u5012\u60AC\u6D77"
+    isBoss: 0
+  - id: voyage-inverted-4
+    scenario: {fileID: 11400000, guid: 1f31a82309f014de18aecb5e2accae8a, type: 2}
+    group: "\u5012\u60AC\u6D77"
+    isBoss: 0
   - id: voyage-fleet-0
     scenario: {fileID: 11400000, guid: 6d3700fc740814b49ae9887f3eed481b, type: 2}
+    group: "\u65E0\u65D7\u8230\u7FA4"
+    isBoss: 0
   - id: voyage-fleet-1
     scenario: {fileID: 11400000, guid: dc7f4fadd428845cba498c6be3333ef9, type: 2}
+    group: "\u65E0\u65D7\u8230\u7FA4"
+    isBoss: 0
   - id: voyage-fleet-2
     scenario: {fileID: 11400000, guid: 87f83b1e810bc4e3f8e6583fd663645a, type: 2}
+    group: "\u65E0\u65D7\u8230\u7FA4"
+    isBoss: 0
   - id: voyage-fleet-3
     scenario: {fileID: 11400000, guid: 340fd16430fb04d96b73d67ed73dbe14, type: 2}
+    group: "\u65E0\u65D7\u8230\u7FA4"
+    isBoss: 0
+  - id: voyage-fleet-4
+    scenario: {fileID: 11400000, guid: 063594bfbe43d42d788098ea1fca68e0, type: 2}
+    group: "\u65E0\u65D7\u8230\u7FA4"
+    isBoss: 0
   - id: voyage-abyss-0
     scenario: {fileID: 11400000, guid: 1346b24a01e1c47cdac69a2ac23bf86c, type: 2}
+    group: "\u65E0\u661F\u6DF1\u6E0A"
+    isBoss: 0
   - id: voyage-abyss-1
     scenario: {fileID: 11400000, guid: ca0f39bdd118b41a0bd7daeff92be0df, type: 2}
+    group: "\u65E0\u661F\u6DF1\u6E0A"
+    isBoss: 0
   - id: voyage-abyss-2
     scenario: {fileID: 11400000, guid: 1624d568f802d469ca4b25b4c1da1624, type: 2}
+    group: "\u65E0\u661F\u6DF1\u6E0A"
+    isBoss: 0
   - id: voyage-abyss-3
     scenario: {fileID: 11400000, guid: 4603c5516dee44aecb92dcec24abe566, type: 2}
+    group: "\u65E0\u661F\u6DF1\u6E0A"
+    isBoss: 0
+  - id: voyage-abyss-4
+    scenario: {fileID: 11400000, guid: cce0972e94ec147f4b9cc19b531a4660, type: 2}
+    group: "\u65E0\u661F\u6DF1\u6E0A"
+    isBoss: 0
   - id: fog-visitors
     scenario: {fileID: 11400000, guid: 580c88669e831483ebd024807d14fe7d, type: 2}
+    group: "\u96FE\u6D77"
+    isBoss: 1
   - id: m02
     scenario: {fileID: 11400000, guid: d0938344972594417be209b992572063, type: 2}
+    group: "\u6F6E\u9AA8\u6D77"
+    isBoss: 1
   - id: m03
     scenario: {fileID: 11400000, guid: 1cfc8d67ae20b4d94b17610c6ab64c9d, type: 2}
+    group: "\u5012\u60AC\u6D77"
+    isBoss: 1
   - id: m04
     scenario: {fileID: 11400000, guid: a0076eb581f044437835295f90636150, type: 2}
+    group: "\u65E0\u65D7\u8230\u7FA4"
+    isBoss: 1
   - id: m05
     scenario: {fileID: 11400000, guid: 15682be5e59794e138c591b1374bcf8f, type: 2}
+    group: "\u65E0\u661F\u6DF1\u6E0A"
+    isBoss: 1
+  - id: drowned-bell
+    scenario: {fileID: 11400000, guid: 87552db3958c64b77b330bfa72057f1e, type: 2}
+    group: "\u72EC\u7ACB Boss"
+    isBoss: 1
   tools:
   - {fileID: 11400000, guid: d2943be9a66734ec2ae7bdaa9992577a, type: 2}
   - {fileID: 11400000, guid: 1d7a30e50a223431b9ba28e4fc023447, type: 2}

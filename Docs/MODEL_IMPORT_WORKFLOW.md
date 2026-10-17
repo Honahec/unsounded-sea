@@ -97,7 +97,9 @@ unity command run_script --project-path "$UNITY_PROJECT_PATH" --timeout 180 --fo
 
 **新增或替换模型：**先更新导入配置/脚本的名称、路径、SHA、预算和验收预期；当前 `ImportSources` 会拒绝覆盖不同哈希文件。应通过单独的 Unity CLI/AssetDatabase 更新步骤替换目标内容、保留 `.meta` GUID、重导入并检查子资产引用及 Prefab。不要删掉已编辑的场景来强迫初始化脚本重建；已有场景的重新绑定需要显式处理。同步更新 manifest 和验收结果。
 
-**普通敌人绑定检查点：**25 种静态源已归档；其中 22 种已有绑定 GLB/Blend，并导入独立 `Assets/UnsoundedSea/Scenes/EnemyRigReview.unity`，各含 Idle、Action、Hit、Death、RigValidation 五段动作；未替换战斗模型。02/03/05 已按用户要求在原 Chrome Agent 项目重新生成、下载并核验，尚未绑定。来源、实测规格及限制见 [普通敌人 manifest](../ArtSource/Characters/ordinary-enemies-manifest.json)。复现使用 `Tools/rig_enemy_trials.py`（拟合数据为 `ArtSource/Characters/rig-profiles.json`）、`Tools/validate_enemy_rigs.py`；Unity CLI 执行 `Tools/EnemyRigReviewSetup.cs` 的 `EnemyRigReviewSetup.Build`，Play 后执行 `Tools/EnemyAnimationQA.cs` 的 `EnemyAnimationQA.Run`。现有 Unity 审阅归一化使用扩大的蒙皮包围盒，已测到死亡姿势离地约 0.14 米，未修复；最新持物侧拟合修订尚未全部重新导出并导入。道具/衣摆未独立分件、无手指骨骼，不能视为全部动画或目标设备性能验收通过。日常游戏入口仍为 `MainMenu.unity`，审阅结束后恢复打开该场景。
+**普通敌人运行时静态接入：**25 种归档源已通过 `Assets/UnsoundedSea/Editor/Tools/OrdinaryEnemyStaticSetup.cs` 导入 `Art/Characters/OrdinaryStatic`，表现 Prefab 位于 `Art/Prefabs/OrdinaryStatic`，供 25 个普通遭遇使用。`VoyageCampaignSetup.Setup` 同时生成这些资产和遭遇目录；仅保存本次资产，不全局保存无关编辑。导入文件与归档源逐字节匹配，完整运行时路径／SHA／规格维护在 [运行时 manifest](../ArtSource/runtime-manifest.json)。普通战仍为静态网格反馈，不宣称具备骨骼动画。
+
+**绑定审阅暂缓：**22 种已有绑定 GLB/Blend，并导入独立 `EnemyRigReview.unity`，含 Idle、Action、Hit、Death、RigValidation；02/03/05 尚未绑定，运行时未引用这些未验收动画。来源及限制见 [普通敌人 manifest](../ArtSource/Characters/ordinary-enemies-manifest.json)。复现使用 `Tools/rig_enemy_trials.py`、`rig-profiles.json`、`Tools/validate_enemy_rigs.py`；Unity CLI 执行 `Tools/EnemyRigReviewSetup.cs` 的 `Build`，Play 后执行 `Tools/EnemyAnimationQA.cs` 的 `Run`。审阅归一化仍使用扩大的蒙皮包围盒，曾测到死亡姿势离地约 0.14 米；最新拟合修订尚未全部导出／导入，道具、衣摆、手指与目标设备性能未验收。日常入口仍为 `MainMenu.unity`。
 
 ## 5. 引擎验收
 

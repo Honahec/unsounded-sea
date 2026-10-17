@@ -679,7 +679,6 @@ MonoBehaviour:
   interfaceFont: {fileID: 11400000, guid: d42cdd7f06ee0455aab49a65c2126337, type: 2}
   menuStyle: {fileID: 7433441132597879392, guid: 5944e187946754d54b2135ec664ad890, type: 3}
   voyageScene: Voyage
-  seaBossScene: SeaBossBattle
 --- !u!114 &1184011517
 MonoBehaviour:
   m_ObjectHideFlags: 0

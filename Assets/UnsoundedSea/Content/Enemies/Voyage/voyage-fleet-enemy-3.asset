@@ -14,34 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-fleet-enemy-3
   displayName: "\u5F03\u8230\u533B\u5B98"
-  health: 11
-  candidateDescription: "\u77ED\u9E23\uFF1A2 \u7406\u667A\u51B2\u51FB\uFF08\u53EF\u6253\u65AD\uFF09/ \u89C2\u671B\uFF1A\u65E0\u4F24\u5BB3 / \u63A8\u51FB\uFF1A3 \u751F\u547D\u4F24\u5BB3\uFF08\u5747\u516C\u5F00\uFF09"
+  health: 19
+  candidateDescription: "\u836F\u7BB1\u91CD\u51FB\uFF1A7 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u6577\u6599\u4F4E\u8BED\uFF1A3 \u7406\u667A\u51B2\u51FB"
   intents:
-  - id: short-call
-    displayName: "\u77ED\u4FC3\u547C\u53F7"
-    clue: "\u76EE\u6807\u4E3E\u8D77\u53F7\u5177\uFF0C\u547C\u6C14\u52A8\u4F5C\u6E05\u6670\u53EF\u89C1\u3002"
+  - id: case
+    displayName: "\u836F\u7BB1\u91CD\u51FB"
+    clue: "\u9508\u836F\u7BB1\u88AB\u5355\u624B\u63D0\u81F3\u80A9\u9AD8\u3002"
+    channel: 0
+    amount: 7
+    isPublic: 1
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
+  - id: bandage
+    displayName: "\u6577\u6599\u4F4E\u8BED"
+    clue: "\u6577\u6599\u4E00\u5708\u5708\u677E\u5F00\uFF0C\u58F0\u97F3\u5374\u6765\u81EA\u7BB1\u5185\u3002"
     channel: 1
-    amount: 2
-    isPublic: 1
-    visibleAction: 1
-    interruptible: 1
-    soundSource: "\u76EE\u6807\u672C\u4F53"
-  - id: idle
-    displayName: "\u5B88\u4F4F\u8237\u8FB9"
-    clue: "\u76EE\u6807\u6CA1\u6709\u8FDB\u653B\uFF0C\u53EA\u5B88\u4F4F\u767B\u8239\u4F4D\u7F6E\u3002"
-    channel: 0
-    amount: 0
-    isPublic: 1
-    visibleAction: 1
-    interruptible: 0
-    soundSource: "\u76EE\u6807\u672C\u4F53"
-  - id: shove
-    displayName: "\u63A8\u51FB"
-    clue: "\u76EE\u6807\u80A9\u90E8\u524D\u538B\uFF0C\u51C6\u5907\u628A\u4EBA\u63A8\u79BB\u8237\u8FB9\u3002"
-    channel: 0
     amount: 3
-    isPublic: 1
-    visibleAction: 1
-    interruptible: 0
-    soundSource: "\u76EE\u6807\u672C\u4F53"
-  presentationPrefab: {fileID: 6536484850760832164, guid: d6e078df63125453e87419a8e7f51e6d, type: 3}
+    isPublic: 0
+    visibleAction: 0
+    interruptible: 1
+    soundSource: "\u836F\u7BB1"
+  presentationPrefab: {fileID: 1959885599509719947, guid: 16044fb42b1b54f31819b07a2a9308e6, type: 3}

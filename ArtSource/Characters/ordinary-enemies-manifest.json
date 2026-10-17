@@ -2,7 +2,7 @@
   "project": "未测之海普通敌人25种",
   "source": "https://hyper3d.ai/workspace/agent?project=815bddca-e04a-476f-845a-b07f233ec326&thread=674d72a2-889b-4fe5-ab4d-95827faf242f&lang=zh",
   "method": "User Chrome Hyper3D Agent via computer use",
-  "status": "All 25 enemy static sources archived. LostSailor, WhiteLampSignaller and BarrelThief were regenerated through the original Chrome Agent project and locally checked. The existing 22 rigs remain an incomplete animation checkpoint.",
+  "status": "All 25 enemy static sources archived and copied byte-identically into Unity ordinary encounter models. Runtime paths and measurements are in ../runtime-manifest.json. Skeleton animation work is deferred; the existing 22 rigs remain an incomplete animation checkpoint and are not used by these levels.",
   "requestedAssetCount": 25,
   "checkpoint": {
     "archivedEnemyCount": 25,
@@ -12,7 +12,7 @@
     "knownIssues": [
       "Unity review normalization uses padded SkinnedMeshRenderer bounds; measured Death bottom is 0.144m above ground for AbandonShipMedic.",
       "Latest held-tool fitting/action corrections have not all been re-exported and imported; archive and Unity copies are a work checkpoint, not a synchronized final release.",
-      "The assets list covers the original two-sample trial and three regenerated sources; other archived source files and per-enemy binding JSON exist but consolidated inventory is not yet complete.",
+      "The assets list below covers the original two-sample trial and three regenerated sources; the complete 25-source-to-runtime mapping is maintained in ../runtime-manifest.json under ordinaryEnemies.",
       "Existing validation JSON describes earlier trial runs, not acceptance of all 22 current rigs."
     ]
   },

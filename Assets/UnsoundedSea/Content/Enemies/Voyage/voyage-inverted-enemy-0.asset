@@ -15,15 +15,15 @@ MonoBehaviour:
   id: voyage-inverted-enemy-0
   displayName: "\u5012\u60AC\u6D4B\u91CF\u5458"
   health: 20
-  candidateDescription: "\u8D8A\u8237\u5F3A\u88AD\uFF1A8 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  candidateDescription: "\u6298\u5C3A\u91CF\u5207\uFF1A8 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
   intents:
-  - id: assault
-    displayName: "\u8D8A\u8237\u5F3A\u88AD"
-    clue: "\u76EE\u6807\u538B\u4F4E\u91CD\u5FC3\uFF0C\u6B66\u5668\u671D\u5411\u7532\u677F\u3002"
+  - id: rule
+    displayName: "\u6298\u5C3A\u91CF\u5207"
+    clue: "\u6298\u5C3A\u5B8C\u5168\u5F20\u5F00\uFF0C\u957F\u81C2\u6CBF\u7532\u677F\u523B\u5EA6\u6446\u6B63\u3002"
     channel: 0
     amount: 8
     isPublic: 1
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
-  presentationPrefab: {fileID: 8503010910801479966, guid: 3174b36a4959843a7b46702d709df05d, type: 3}
+  presentationPrefab: {fileID: 671962571068755995, guid: 59e5f45a02a974fdda3512974fcb7087, type: 3}

@@ -14,16 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-fleet-enemy-0
   displayName: "\u65E0\u65D7\u767B\u8239\u5175"
-  health: 21
-  candidateDescription: "\u8D8A\u8237\u5F3A\u88AD\uFF1A8 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  health: 22
+  candidateDescription: "\u7F3A\u76FE\u538B\u8FDB\uFF1A8 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
   intents:
-  - id: assault
-    displayName: "\u8D8A\u8237\u5F3A\u88AD"
-    clue: "\u76EE\u6807\u538B\u4F4E\u91CD\u5FC3\uFF0C\u6B66\u5668\u671D\u5411\u7532\u677F\u3002"
+  - id: shield
+    displayName: "\u7F3A\u76FE\u538B\u8FDB"
+    clue: "\u7F3A\u89D2\u8237\u76FE\u5C01\u4F4F\u8EAB\u524D\uFF0C\u77ED\u5200\u538B\u5728\u76FE\u540E\u3002"
     channel: 0
     amount: 8
     isPublic: 1
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
-  presentationPrefab: {fileID: 8503010910801479966, guid: 3174b36a4959843a7b46702d709df05d, type: 3}
+  presentationPrefab: {fileID: 3799410124382133561, guid: e70252791c40e43ac91a12fd26ac41b3, type: 3}

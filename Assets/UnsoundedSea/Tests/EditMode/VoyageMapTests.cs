@@ -20,6 +20,8 @@ namespace UnsoundedSea.Tests
                 Assert.That(count,Is.GreaterThan(1));
                 Assert.That(byId[plan.GoalId].EncounterId,Is.EqualTo(act==1?"fog-visitors":act==3?"m05":region=="bones"?"m02":region=="inverted"?"m03":"m04"));
                 Assert.That(plan.Stops.Where(x=>x.Kind==RunNodeKind.Battle).All(x=>x.EncounterId.StartsWith("voyage-"+region+"-",StringComparison.Ordinal)),Is.True);
+                var battles=plan.Stops.Where(x=>x.Kind==RunNodeKind.Battle).GroupBy(x=>x.Layer).Select(x=>x.First().EncounterId).ToArray();
+                Assert.That(battles,Has.Length.EqualTo(4)); Assert.That(battles,Is.Unique);
             }
         }
 
@@ -28,6 +30,14 @@ namespace UnsoundedSea.Tests
         {
             Assert.That(Snapshot(VoyageMapGenerator.Generate(17,1,"fog")),Is.EqualTo(Snapshot(VoyageMapGenerator.Generate(17,1,"fog"))));
             Assert.That(Snapshot(VoyageMapGenerator.Generate(17,1,"fog")),Is.Not.EqualTo(Snapshot(VoyageMapGenerator.Generate(17,2,"bones"))));
+        }
+
+        [Test]
+        public void FifthOrdinaryVariantIsReachableWithoutRepeatingAFightWithinAnAct()
+        {
+            var variants=Enumerable.Range(0,32).SelectMany(seed=>VoyageMapGenerator.Generate((uint)seed).Stops)
+                .Where(x=>x.Kind==RunNodeKind.Battle).Select(x=>x.EncounterId).ToArray();
+            Assert.That(variants,Does.Contain("voyage-fog-4"));
         }
 
         [Test]

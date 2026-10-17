@@ -58,5 +58,257 @@
       "sourceTask": "0feac426-21e7-5cfa-8f05-d3416ab6c040",
       "artifact": "f32b35cf-8102-4806-9946-5efce7c06278"
     }
+  ],
+  "ordinaryEnemies": [
+    {
+      "name": "AbandonShipMedic",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/AbandonShipMedic.glb",
+      "source": "ArtSource/Characters/AbandonShipMedic_Source.glb",
+      "sha256": "288d09ebc74cb80d1159dee4f7be66cd3f63a0dc89731ab9fe74cb58624487ee",
+      "bytes": 36121888,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "AbyssRunner",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/AbyssRunner.glb",
+      "source": "ArtSource/Characters/AbyssRunner_Source.glb",
+      "sha256": "7942dcdedba6059493edcaa458fc9ea469636e0d1b721f18a15412854c49e4f7",
+      "bytes": 37443384,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "BarrelThief",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/BarrelThief.glb",
+      "source": "ArtSource/Characters/BarrelThief_Source.glb",
+      "sha256": "a097ca2ccc094964614a1c14880d64042e5695d4b6676209da8ab7317e394357",
+      "bytes": 37147488,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "BlackSailMessenger",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/BlackSailMessenger.glb",
+      "source": "ArtSource/Characters/BlackSailMessenger_Source.glb",
+      "sha256": "07c9dba9e989f7cb1faf03699a715a8a9fcb3abcdeeb113508b52e9f3491d70b",
+      "bytes": 32886120,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "BoneFluteAttendant",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/BoneFluteAttendant.glb",
+      "source": "ArtSource/Characters/BoneFluteAttendant_Source.glb",
+      "sha256": "6824adcf221a5670ce298ffb5451f5f721b796d466590f99f17d6c54653d0d64",
+      "bytes": 41755836,
+      "triangles": 50000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "BoneNetStitcher",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/BoneNetStitcher.glb",
+      "source": "ArtSource/Characters/BoneNetStitcher_Source.glb",
+      "sha256": "841cbd7e3d156cf1049cc04d382c90a3fe984ce12b12e116e6fb1fdb8eece2bc",
+      "bytes": 49315140,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "DisplacedWatchman",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/DisplacedWatchman.glb",
+      "source": "ArtSource/Characters/DisplacedWatchman_Source.glb",
+      "sha256": "52e1a3f0f0eb440c04d0ac1f9e30113b0372b48595dc2b95e048b5d49523bcd7",
+      "bytes": 29269660,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "EmptyHoldKnocker",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/EmptyHoldKnocker.glb",
+      "source": "ArtSource/Characters/EmptyHoldKnocker_Source.glb",
+      "sha256": "09d55181e14aec3676d5f6ac75159c49f5f50e753a51ce8f3e67c7195544de9d",
+      "bytes": 44403316,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "FogRigger",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/FogRigger.glb",
+      "source": "ArtSource/Characters/FogRigger_LOD0.glb",
+      "sha256": "ece5fa87f551e927843250683248418431ffcfd2c61f6b0c66a9e4bf4a847ee1",
+      "bytes": 55534196,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "InvertedSurveyHand",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/InvertedSurveyHand.glb",
+      "source": "ArtSource/Characters/InvertedSurveyHand_Source.glb",
+      "sha256": "95acf12f076df2bdc1b2a670c5326b118a5c7935d0d14397d4ab96469b342f08",
+      "bytes": 40015492,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "LampOutBellkeeper",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/LampOutBellkeeper.glb",
+      "source": "ArtSource/Characters/LampOutBellkeeper_Source.glb",
+      "sha256": "45412a583367042dc9314b997b76fe6eb16700da9122ce9a628248d114737158",
+      "bytes": 36048400,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "LastTideWitness",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/LastTideWitness.glb",
+      "source": "ArtSource/Characters/LastTideWitness_Source.glb",
+      "sha256": "787d9d5cfa24756bb92ed7c98460e17d7fc4d72e27533ce674d82ab19db2824d",
+      "bytes": 34599292,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "LostSailor",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/LostSailor.glb",
+      "source": "ArtSource/Characters/LostSailor_Source.glb",
+      "sha256": "5f6e011c2994bdc48deb1a84a9768fc21291ab87452b01fe02fc010c6895289f",
+      "bytes": 39233952,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "MirrorTideScribe",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/MirrorTideScribe.glb",
+      "source": "ArtSource/Characters/MirrorTideScribe_Source.glb",
+      "sha256": "49850a316d17550190b1f13c2417141f9258ac6a463faeda401361d9869ec212",
+      "bytes": 40628896,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "MisfireGunner",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/MisfireGunner.glb",
+      "source": "ArtSource/Characters/MisfireGunner_Source.glb",
+      "sha256": "b5f712a149641a57683bb56451e99fe2b5f8280c5304a0dfeec2adb2401552b7",
+      "bytes": 42528880,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "PlumbWatcher",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/PlumbWatcher.glb",
+      "source": "ArtSource/Characters/PlumbWatcher_Source.glb",
+      "sha256": "3f40f54fa9a580df695d855f41c2854546914c57f232598393015fabce6fda7f",
+      "bytes": 28933144,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "RailNameTaker",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/RailNameTaker.glb",
+      "source": "ArtSource/Characters/RailNameTaker_Source.glb",
+      "sha256": "3d21de7acb2acbf159692f9b0f89911dcb5a780b86cb498720f0fe7076ae36b3",
+      "bytes": 32720208,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "ReverseNavigator",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/ReverseNavigator.glb",
+      "source": "ArtSource/Characters/ReverseNavigator_Source.glb",
+      "sha256": "59b2de06e31cbc5e8238966a552956e60a2964175dcaa663f097ca139a367bf7",
+      "bytes": 30550404,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "RustChainEscort",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/RustChainEscort.glb",
+      "source": "ArtSource/Characters/RustChainEscort_Source.glb",
+      "sha256": "dfd70c953ff947184d8189e4241bd98b696969da6522458bd3f5e8e583698366",
+      "bytes": 40835376,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "SaltMarrowPriest",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/SaltMarrowPriest.glb",
+      "source": "ArtSource/Characters/SaltMarrowPriest_Source.glb",
+      "sha256": "72c56cb8e348d82830c2a005aa7314cd8e36735291a1ec0dc216410e2f46f777",
+      "bytes": 33047196,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "StarlessPeeker",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/StarlessPeeker.glb",
+      "source": "ArtSource/Characters/StarlessPeeker_Source.glb",
+      "sha256": "610063a36e9eeb134c3498b1b9241f4b1f7d3ea227d8ce792dcaf9aaa8787301",
+      "bytes": 39972888,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "TideBoneScavenger",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/TideBoneScavenger.glb",
+      "source": "ArtSource/Characters/TideBoneScavenger_Source.glb",
+      "sha256": "363eb6146bbdd7fd996f0899f6601be920cbb72a36de0bfbe4ec53f616061f9c",
+      "bytes": 34304344,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "UnflaggedBoarder",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/UnflaggedBoarder.glb",
+      "source": "ArtSource/Characters/UnflaggedBoarder_Source.glb",
+      "sha256": "b416a41ae6075f5eec2d62df0c11c62dd18710f2e55d9c9b7f81e265853e1bb7",
+      "bytes": 26495448,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "WetCoatPilot",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/WetCoatPilot.glb",
+      "source": "ArtSource/Characters/WetCoatPilot_Source.glb",
+      "sha256": "dd62ac9bb248601e3519723f07022cace0ccd4df9ace2779454a8e2e59f7d35d",
+      "bytes": 31509360,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "name": "WhiteLampSignaller",
+      "file": "Assets/UnsoundedSea/Art/Characters/OrdinaryStatic/WhiteLampSignaller.glb",
+      "source": "ArtSource/Characters/WhiteLampSignaller_Source.glb",
+      "sha256": "3eafe585ac7a97a514d9d29cb08c4ef4fa47c47533aaccd36c82df1cbf0e1056",
+      "bytes": 24097056,
+      "triangles": 45000,
+      "skins": 0,
+      "animations": 0
+    }
   ]
 }

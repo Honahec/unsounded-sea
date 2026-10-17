@@ -94,6 +94,39 @@ namespace UnsoundedSea.Tests
             Assert.That(restored.Current.Id, Is.EqualTo(first));
         }
 
+        [Test]
+        public void ArchiveKnowledgeHasTruthfulEffectAndSurvivesRestore()
+        {
+            var routes=VoyageSession.Create(121);MoveToLayer(routes,7);
+            var expected=routes.Export().Map.Stops.Single(x=>x.Id==routes.Current.Id).Next;
+            Assert.That(routes.ChooseNode("routes"),Is.True);
+            Assert.That(routes.Current.Next,Is.EquivalentTo(expected));
+            Assert.That(routes.ChooseNode("routes"),Is.False);
+            var restored=VoyageSession.Restore(routes.Export());
+            Assert.That(restored.Knowledge,Is.EqualTo(routes.Knowledge));
+            Assert.That(restored.KnownRoutes.Select(Key),Is.EqualTo(routes.KnownRoutes.Select(Key)));
+
+            var briefing=VoyageSession.Create(122);MoveToLayer(briefing,7);
+            Assert.That(briefing.ChooseNode("briefing"),Is.True);
+            Assert.That(briefing.ChooseNode("routes"),Is.False);
+            Assert.That(VoyageSession.Restore(briefing.Export()).Knowledge,Is.EqualTo(briefing.Knowledge));
+        }
+
+        [Test]
+        public void DebugNodesAreIndependentPlayableAndCannotBeSaved()
+        {
+            var archive=VoyageSession.CreateDebug(3,"fleet",RunNodeKind.Archive);
+            Assert.That(archive.IsDebug,Is.True);Assert.That(archive.Phase,Is.EqualTo(VoyagePhase.Arrived));
+            Assert.That(archive.ChooseNode("briefing"),Is.True);Assert.That(archive.Continue(),Is.True);Assert.That(archive.Phase,Is.EqualTo(VoyagePhase.Completed));
+            Assert.Throws<InvalidOperationException>(()=>archive.Export());
+
+            var battle=VoyageSession.CreateDebug(4,"fog",RunNodeKind.Battle,"voyage-fog-4");
+            Assert.That(battle.BeginEncounter(),Is.True);Assert.That(battle.ResolveEncounter(true,60,30),Is.True);
+            Assert.That(battle.RewardCards.Count,Is.EqualTo(3));Assert.That(battle.ClaimReward(null),Is.True);Assert.That(battle.Phase,Is.EqualTo(VoyagePhase.Completed));
+            var boss=VoyageSession.CreateDebug(5,"bones",RunNodeKind.Boss,"m02");
+            Assert.That(boss.BeginEncounter(),Is.True);Assert.That(boss.ResolveEncounter(true,60,30),Is.True);Assert.That(boss.Phase,Is.EqualTo(VoyagePhase.Completed));
+        }
+
         private static void CompleteAct(VoyageSession s,ref bool firstDamage)
         {
             while(s.Phase!=VoyagePhase.ActComplete&&s.Phase!=VoyagePhase.Completed)

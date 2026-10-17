@@ -15,15 +15,15 @@ MonoBehaviour:
   id: voyage-abyss-enemy-0
   displayName: "\u65E0\u661F\u7AA5\u89C6\u8005"
   health: 22
-  candidateDescription: "\u8D8A\u8237\u5F3A\u88AD\uFF1A9 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  candidateDescription: "\u7A7A\u9762\u6CE8\u89C6\uFF1A4 \u7406\u667A\u51B2\u51FB\uFF08\u516C\u5F00\uFF09"
   intents:
-  - id: assault
-    displayName: "\u8D8A\u8237\u5F3A\u88AD"
-    clue: "\u76EE\u6807\u538B\u4F4E\u91CD\u5FC3\uFF0C\u6B66\u5668\u671D\u5411\u7532\u677F\u3002"
-    channel: 0
-    amount: 9
+  - id: hollow
+    displayName: "\u7A7A\u9762\u6CE8\u89C6"
+    clue: "\u51F9\u9677\u9762\u90E8\u8F6C\u5411\u4F60\uFF0C\u53CC\u624B\u4ECD\u5782\u5728\u8EAB\u4FA7\u3002"
+    channel: 1
+    amount: 4
     isPublic: 1
-    visibleAction: 1
+    visibleAction: 0
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
-  presentationPrefab: {fileID: 8503010910801479966, guid: 3174b36a4959843a7b46702d709df05d, type: 3}
+  presentationPrefab: {fileID: 1945147638880492984, guid: 6e95ba77cada54be091f25b70953d024, type: 3}

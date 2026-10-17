@@ -1,8 +1,10 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TextCore.Text;
 using UnityEngine.UIElements;
+using UnsoundedSea.Core;
 
 namespace UnsoundedSea.Runtime
 {
@@ -12,11 +14,10 @@ namespace UnsoundedSea.Runtime
         [SerializeField] private FontAsset interfaceFont;
         [SerializeField] private StyleSheet menuStyle;
         [SerializeField] private string voyageScene = VoyageRuntime.VoyageScene;
-        [SerializeField] private string seaBossScene = "";
         private VisualElement root;
         private bool settingsOpen;
         private bool confirmingNewVoyage;
-        private bool bossSelectionOpen;
+        private bool debugSelectionOpen;
         private bool collectionOpen;
         private string error;
 
@@ -32,10 +33,23 @@ namespace UnsoundedSea.Runtime
                 if (!root.styleSheets.Contains(menuStyle)) root.styleSheets.Add(menuStyle);
                 root.AddToClassList("game-menu");
                 Build("menu-start");
+                root.RegisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
             }
             catch (Exception exception) { root.Add(Text("菜单加载失败：" + exception.Message, "menu-error")); Debug.LogException(exception); }
         }
-        private void OnDisable() { root?.Clear(); }
+        private void OnDisable()
+        {
+            root?.UnregisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
+            root?.Clear();
+        }
+
+        private void OnKey(KeyDownEvent evt)
+        {
+            if (!debugSelectionOpen || evt.keyCode != KeyCode.Escape) return;
+            debugSelectionOpen = false;
+            Build("menu-debug");
+            evt.StopPropagation();
+        }
 
         private static Label Text(string text, string className)
         {
@@ -86,20 +100,9 @@ namespace UnsoundedSea.Runtime
                 entries.Add(Entry("menu-confirm-new", "开始新航程", StartConfirmed, canStart));
                 entries.Add(Entry("menu-cancel-new", "返回", () => { confirmingNewVoyage = false; error = null; Build("menu-start"); }));
             }
-            else if (bossSelectionOpen)
+            else if (debugSelectionOpen)
             {
-                var encounters = new[]
-                {
-                    ("BossM02", "骸潮领唱者"), ("BossM03", "倒悬司衡者"),
-                    ("BossM04", "无灯执旗者"), ("BossM05", "无星守望者")
-                };
-                foreach (var encounter in encounters)
-                {
-                    var scene = encounter.Item1;
-                    entries.Add(Entry("menu-" + scene, encounter.Item2, () => SceneManager.LoadScene(scene),
-                        Application.CanStreamedLevelBeLoaded(scene)));
-                }
-                entries.Add(Entry("menu-boss-back", "返回", () => { bossSelectionOpen = false; Build("menu-boss-encounters"); }));
+                // The selector owns focus while open.
             }
             else if (collectionOpen)
             {
@@ -110,10 +113,7 @@ namespace UnsoundedSea.Runtime
                 entries.Add(Entry("menu-start", "启航", StartGame, canStart));
                 if (VoyageRuntime.HasSavedVoyage)
                     entries.Add(Entry("menu-continue", "继续航程", ContinueGame));
-                bool hasBoss = !string.IsNullOrWhiteSpace(seaBossScene);
-                if (hasBoss)
-                    entries.Add(Entry("menu-sea-boss", "沉钟海域", () => SceneManager.LoadScene(seaBossScene), Application.CanStreamedLevelBeLoaded(seaBossScene)));
-                entries.Add(Entry("menu-boss-encounters", "禁航海域", () => { bossSelectionOpen = true; Build("menu-BossM02"); }));
+                entries.Add(Entry("menu-debug", "调试选关", () => { debugSelectionOpen = true; error = null; Build(null); }));
                 entries.Add(Entry("menu-collection", "行动图鉴 / 初始船员", () => { collectionOpen = true; Build(null); }));
                 var settings = Entry("menu-settings", "设置", () => { settingsOpen = true; error = null; Build(null); });
                 settings.EnableInClassList("open", settingsOpen);
@@ -124,10 +124,16 @@ namespace UnsoundedSea.Runtime
             else if (!string.IsNullOrEmpty(VoyageRuntime.EncounterSaveError))
                 entries.Add(Text("遭遇结果尚未保存，请选择继续航程重试：" + VoyageRuntime.EncounterSaveError, "menu-error"));
             column.Add(entries);
-            column.SetEnabled(!settingsOpen);
+            column.SetEnabled(!settingsOpen && !debugSelectionOpen);
             root.Add(column);
 
 
+            if (debugSelectionOpen)
+            {
+                root.Add(BuildDebugSelector());
+                root.schedule.Execute(() => root.Q<Button>("debug-level-0")?.Focus());
+            }
+            else
             if (collectionOpen)
             {
                 column.SetEnabled(false);
@@ -145,6 +151,100 @@ namespace UnsoundedSea.Runtime
             }
             else if (focus != null)
                 root.schedule.Execute(() => root.Q<Button>(focus)?.Focus());
+        }
+
+        private VisualElement BuildDebugSelector()
+        {
+            var panel = new VisualElement { name = "debug-selector" };
+            panel.AddToClassList("debug-selector");
+            var head = new VisualElement { pickingMode = PickingMode.Ignore };
+            head.AddToClassList("debug-head");
+            head.Add(Text("调试选关", "debug-title"));
+            head.Add(Text("独立试玩 · 不读写正式航程存档", "debug-note"));
+            panel.Add(head);
+            var scroll = new ScrollView(ScrollViewMode.Vertical) { name = "debug-levels" };
+            scroll.AddToClassList("debug-levels");
+            var index = 0;
+            foreach (var group in VoyageEncounterCatalog.AllEntries.GroupBy(entry => entry.isBoss ? "Boss" : entry.group))
+            {
+                scroll.Add(Text(group.Key, "debug-group"));
+                foreach (var entry in group)
+                {
+                    var selected = entry;
+                    var button = new Button(() => LaunchDebugEncounter(selected))
+                    {
+                        name = "debug-level-" + index++,
+                        text = selected.scenario.encounter.displayName
+                    };
+                    button.AddToClassList("debug-level");
+                    scroll.Add(button);
+                }
+            }
+            foreach (var region in new[]
+            {
+                ("fog", "雾海"), ("bones", "尸骸之海"), ("inverted", "倒悬潮庭"),
+                ("fleet", "无灯裂海"), ("abyss", "无星深渊")
+            })
+            {
+                scroll.Add(Text(region.Item2 + " · 非战斗", "debug-group"));
+                AddDebugNode(scroll, ref index, region.Item1, RunNodeKind.Reward, "行动奖励");
+                AddDebugNode(scroll, ref index, region.Item1, RunNodeKind.Event, "海上事件");
+                AddDebugNode(scroll, ref index, region.Item1, RunNodeKind.Archive, "档案节点");
+                AddDebugNode(scroll, ref index, region.Item1, RunNodeKind.Supply, "补给整备");
+            }
+            panel.Add(scroll);
+            var close = new Button(() => { debugSelectionOpen = false; Build("menu-debug"); })
+            {
+                name = "debug-close",
+                text = "返回标题 / Esc"
+            };
+            close.AddToClassList("debug-close");
+            panel.Add(close);
+            return panel;
+        }
+
+        private void AddDebugNode(VisualElement parent, ref int index, string region, RunNodeKind kind, string title)
+        {
+            var button = new Button(() => LaunchDebugNode(region, kind))
+            {
+                name = "debug-level-" + index++,
+                text = title
+            };
+            button.AddToClassList("debug-level");
+            parent.Add(button);
+        }
+
+        private void LaunchDebugEncounter(VoyageEncounterCatalog.Entry entry)
+        {
+            try { VoyageRuntime.StartDebugEncounter(entry.id, RegionId(entry), entry.isBoss); }
+            catch (Exception exception)
+            {
+                error = "无法打开调试关卡：" + exception.Message;
+                debugSelectionOpen = false;
+                Build("menu-debug");
+                Debug.LogException(exception);
+            }
+        }
+
+        private void LaunchDebugNode(string region, RunNodeKind kind)
+        {
+            try { VoyageRuntime.StartDebugNode(region, kind); }
+            catch (Exception exception)
+            {
+                error = "无法打开调试关卡：" + exception.Message;
+                debugSelectionOpen = false;
+                Build("menu-debug");
+                Debug.LogException(exception);
+            }
+        }
+
+        private static string RegionId(VoyageEncounterCatalog.Entry entry)
+        {
+            if (entry.id == "fog-visitors" || entry.id == "drowned-bell") return "fog";
+            if (entry.id.StartsWith("m02", StringComparison.Ordinal) || entry.id.StartsWith("voyage-bones-", StringComparison.Ordinal)) return "bones";
+            if (entry.id.StartsWith("m03", StringComparison.Ordinal) || entry.id.StartsWith("voyage-inverted-", StringComparison.Ordinal)) return "inverted";
+            if (entry.id.StartsWith("m04", StringComparison.Ordinal) || entry.id.StartsWith("voyage-fleet-", StringComparison.Ordinal)) return "fleet";
+            return "abyss";
         }
 
         private void StartGame()

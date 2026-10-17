@@ -26,6 +26,7 @@ namespace UnsoundedSea.Runtime
         public static string SavePath => Path.Combine(Application.persistentDataPath, "voyage.json");
         public static bool IsVoyageEncounter => Session != null && Session.Phase == VoyagePhase.Encounter;
         public static string EncounterSaveError { get; private set; }
+        public static bool IsDebugSession => Session != null && Session.IsDebug;
         internal static BattleReplay PendingReplay { get; private set; }
         private static BattleScenario pendingScenario;
         private static BattleDirector encounterDirector;
@@ -41,6 +42,32 @@ namespace UnsoundedSea.Runtime
             PendingReplay = null;
             unsavedOutcome = false;
             EncounterSaveError = null;
+        }
+
+        public static void StartDebugEncounter(string encounterId, string regionId, bool isBoss)
+        {
+            var scenario = VoyageEncounterCatalog.Resolve(encounterId);
+            scenario.ValidatePresentation();
+            if (!Application.CanStreamedLevelBeLoaded(BattleScene))
+                throw new InvalidOperationException("战斗场景未加入构建列表。");
+            ResetEncounterState();
+            Session = VoyageSession.CreateDebug(NewSeed(), regionId, isBoss ? RunNodeKind.Boss : RunNodeKind.Battle, encounterId);
+            if (!Session.BeginEncounter())
+                throw new InvalidOperationException("调试遭遇无法开始。");
+            pendingScenario = scenario;
+            SceneManager.sceneLoaded += ConfigureEncounter;
+            SceneManager.LoadScene(BattleScene);
+        }
+
+        public static void StartDebugNode(string regionId, RunNodeKind kind)
+        {
+            if (kind == RunNodeKind.Battle || kind == RunNodeKind.Boss)
+                throw new ArgumentException("战斗调试必须指定遭遇。", nameof(kind));
+            if (!Application.CanStreamedLevelBeLoaded(VoyageScene))
+                throw new InvalidOperationException("航程场景未加入构建列表。");
+            ResetEncounterState();
+            Session = VoyageSession.CreateDebug(NewSeed(), regionId, kind);
+            SceneManager.LoadScene(VoyageScene);
         }
 
         private static uint NewSeed()
@@ -80,9 +107,27 @@ namespace UnsoundedSea.Runtime
             }
         }
 
+        private static void ResetEncounterState()
+        {
+            SceneManager.sceneLoaded -= ConfigureEncounter;
+            SceneManager.sceneUnloaded -= ReleaseEncounter;
+            if (encounterDirector != null) encounterDirector.Resolved -= RecordEncounterCommand;
+            encounterDirector = null;
+            pendingScenario = null;
+            PendingReplay = null;
+            unsavedOutcome = false;
+            EncounterSaveError = null;
+        }
+
         public static void Checkpoint()
         {
             if (Session == null) throw new InvalidOperationException("没有可保存的航程。");
+            if (IsDebugSession)
+            {
+                unsavedOutcome = false;
+                EncounterSaveError = null;
+                return;
+            }
             Save(new SaveData { Voyage = Session.Export(), Battle = PendingReplay });
             unsavedOutcome = false;
             EncounterSaveError = null;
@@ -98,13 +143,13 @@ namespace UnsoundedSea.Runtime
                 throw new InvalidOperationException("战斗场景未加入构建列表。");
             if (PendingReplay != null)
                 scenario.CreateSession(Session.Current.BattleSeed, voyage: Session, replay: PendingReplay);
-            var previous = Session.Export();
+            var previous = IsDebugSession ? null : Session.Export();
             if (!IsVoyageEncounter && !Session.BeginEncounter())
                 throw new InvalidOperationException("当前位置不能开始遭遇。");
             try { Checkpoint(); }
             catch
             {
-                Session = VoyageSession.Restore(previous);
+                if (previous != null) Session = VoyageSession.Restore(previous);
                 throw;
             }
             pendingScenario = scenario;
@@ -115,6 +160,12 @@ namespace UnsoundedSea.Runtime
 
         public static void ReturnToVoyage()
         {
+            if (IsDebugSession)
+            {
+                SceneManager.LoadScene(Session.Phase == VoyagePhase.Completed || Session.Phase == VoyagePhase.Failed
+                    ? MainMenuScene : VoyageScene);
+                return;
+            }
             try
             {
                 Checkpoint();
