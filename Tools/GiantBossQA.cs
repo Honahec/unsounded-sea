@@ -106,6 +106,30 @@ public static class GiantBossQA
         if(early||!delayed)throw new Exception("Sanity feedback appeared before the vessel impact.");
         return "earlySanityPulse="+early+", delayedAt300ms="+delayed+", sanity="+sanity+"->"+d.View.Sanity;
     }
+    public static async Task<string> M05AllGuards()
+    {
+        var saved=File.Exists(VoyageRuntime.SavePath)?File.ReadAllText(VoyageRuntime.SavePath):null;
+        VoyageRuntime.StartDebugEncounter("m05","abyss",true);
+        await Task.Delay(500);await WaitReady();var d=Director();
+        for(var i=0;i<5;i++)
+        {
+            if(d.View.Actions==0){var end=d.Submit(BattleCommand.EndTurn());if(!end.Success)throw new Exception(end.Error);await WaitReady();}
+            var card=d.View.Hand.Single(c=>c.Definition.Id=="E05-01");
+            var target=card.Targets.First(t=>t.Enabled);
+            var actor=d.Stage.Actors.Single(a=>a.EnemyId==target.Id);
+            var crossed=false;actor.BrokeSurface+=_=>crossed=true;
+            var result=d.Submit(BattleCommand.Play(card.InstanceId,target.Id));if(!result.Success)throw new Exception(result.Error);
+            if(!actor.IsEmerging||actor.HighestPointY>=d.Stage.water.SurfaceHeight(actor.transform.position))throw new Exception("Guard did not start underwater: "+target.Id);
+            await WaitReady();
+            if(!crossed||actor.IsEmerging)throw new Exception("Guard did not finish breaking the surface: "+target.Id);
+        }
+        if(d.View.Enemies.Skip(1).Count(e=>e.Health>0)!=5||d.View.ObjectiveProgress!=0)throw new Exception("Five summoned guards must remain alive without victory progress.");
+        var positions=d.Stage.Actors.Skip(1).Select(a=>d.Stage.battleCamera.WorldToViewportPoint(a.transform.position).x).OrderBy(x=>x).ToArray();
+        if(positions[1]>=.45f||positions[3]<=.55f||Mathf.Abs(positions[2]-.5f)>.05f)throw new Exception("Guard slots are not left two, center one, right two.");
+        Capture(d.Stage.battleCamera,"Logs/GiantBosses/M05-all-guards.png");
+        if(saved!=(File.Exists(VoyageRuntime.SavePath)?File.ReadAllText(VoyageRuntime.SavePath):null))throw new Exception("Formal save changed.");
+        return "Five real summons emerged; slots="+string.Join(",",positions.Select(x=>x.ToString("F3")))+"; formal save unchanged.";
+    }
     public static void Capture(Camera camera,string path)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path));var rt=RenderTexture.GetTemporary(960,540,24);var old=camera.targetTexture;var active=RenderTexture.active;

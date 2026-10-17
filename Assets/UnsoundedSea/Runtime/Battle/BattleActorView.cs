@@ -144,7 +144,12 @@ namespace UnsoundedSea.Runtime
         {
             var newlyAlive = alive && !Alive;
             Alive = alive;
-            if (newlyAlive && placement != null && placement.emergeDepth > 0) { emergence = 0; surfaceBroken = false; }
+            if (newlyAlive && placement != null && placement.emergeDepth > 0)
+            {
+                emergence = 0; surfaceBroken = false;
+                if (surfaceHeight != null) ConfigureSeaEmergence(surfaceHeight);
+                else { emergenceOffset = -placement.emergeDepth; body.localPosition = bodyPosition + Vector3.up * emergenceOffset; }
+            }
             if (GiantMotion != null)
             {
                 if (!alive) GiantMotion.Retire();
