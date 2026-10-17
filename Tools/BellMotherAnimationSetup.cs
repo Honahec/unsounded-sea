@@ -99,13 +99,19 @@ public static class BellMotherAnimationSetup
             var scale = 32f / bounds.size.y;
             model.transform.localScale *= scale;
             model.transform.localPosition = new Vector3(-bounds.center.x, -bounds.min.y, -bounds.center.z) * scale;
-            var animator = root.AddComponent<Animator>();
+            // The imported clips are authored relative to the FBX root. Put the
+            // Animator on that same root; placing it on the outer presentation
+            // wrapper would make every binding path miss silently.
+            var animator = model.GetComponent<Animator>();
+            if (animator == null) animator = model.AddComponent<Animator>();
             animator.runtimeAnimatorController = controller;
             animator.updateMode = AnimatorUpdateMode.UnscaledTime;
             animator.applyRootMotion = false;
             EditorUtility.SetDirty(animator);
+            var authoredMaterial = AssetDatabase.LoadAssetAtPath<Material>(Root + "/Art/SeaBoss/BellMother.mat");
             foreach (var renderer in root.GetComponentsInChildren<Renderer>(true))
             {
+                if (authoredMaterial != null) renderer.sharedMaterial = authoredMaterial;
                 renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
                 renderer.receiveShadows = true;
             }
@@ -134,7 +140,17 @@ public static class BellMotherAnimationSetup
         var root = PrefabUtility.LoadPrefabContents(PrefabPath);
         try
         {
-            var animator = root.GetComponent<Animator>() ?? root.AddComponent<Animator>();
+            var animator = root.GetComponentsInChildren<Animator>(true).FirstOrDefault();
+            if (animator == null)
+            {
+                var model = root.transform.childCount > 0 ? root.transform.GetChild(0).gameObject : root;
+                animator = model.AddComponent<Animator>();
+            }
+            if (animator.gameObject == root)
+            {
+                UnityEngine.Object.DestroyImmediate(animator);
+                animator = root.transform.GetChild(0).gameObject.AddComponent<Animator>();
+            }
             animator.runtimeAnimatorController = controller;
             animator.applyRootMotion = false;
             var serialized = new SerializedObject(animator);

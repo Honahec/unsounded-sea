@@ -47,7 +47,7 @@ Deemos 当前可见的 Agent 快捷动作是部位拆分与材质调整；没有
 1. 在 `arch` 的 `/home/honahec/Projects/unsounded-sea` 检查源 `BellMother_LOD0.glb`，确认单网格、151,658 顶点、无 Armature/Action；保留源文件不改。
 2. 运行 [BellMotherRig.py](../Tools/BellMotherRig.py)：按身体、冠部、下部六条触手建立 30 根骨骼，按空间区域生成权重，制作 `Idle / Telegraph / Attack_A / Recover / Hit / Death` 六组动作，并在起止/中间帧检查有限变形。
 3. 导出 `ArtSource/Bosses/BellMother_Rigged.blend`、LFS 下的 `Assets/UnsoundedSea/Art/Models/BellMother_Rigged.fbx/.glb` 与 manifest。重新导入 Blender 后，FBX/GLB 都能读到 30 根骨骼和 6 个 Action；`git lfs fsck` 通过。
-4. 在 Unity 通过 [BellMotherAnimationSetup.cs](../Tools/BellMotherAnimationSetup.cs) 设置 Generic ModelImporter、创建 `BellMother.controller`，生成 32 m 的 `BellMother.prefab`，并将 `bell-mother.asset` 指向它。`BattleActorView` 只接收规则结算结果，按 `Telegraph → Attack_A → Recover`、`Hit`、`Death` 播放；规则层不读取 Animator。无骨骼模型仍走旧的简化反馈。
+4. 在 Unity 通过 [BellMotherAnimationSetup.cs](../Tools/BellMotherAnimationSetup.cs) 设置 Generic ModelImporter、创建 `BellMother.controller`，把 Animator 放在导入模型根节点以匹配 FBX 曲线路径，复用原 `BellMother.mat`，生成 32 m 的 `BellMother.prefab`，并将 `bell-mother.asset` 指向它。`BattleActorView` 只接收规则结算结果，按 `Telegraph → Attack_A → Recover`、`Hit`、`Death` 播放；规则层不读取 Animator。无骨骼模型仍走旧的简化反馈。
 5. 验收顺序：Blender 动作截图 → Unity Prefab 骨骼/动作检查 → Play Mode 触发一次攻击并截图 → EditMode 规则回归。当前样例已完成前四项，正式发布前仍需目标设备性能和最终美术权重验收。
 
 ### 下载后的最低检查

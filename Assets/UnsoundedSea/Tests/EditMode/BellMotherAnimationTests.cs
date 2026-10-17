@@ -25,7 +25,10 @@ namespace UnsoundedSea.Tests
             var clips = animator.runtimeAnimatorController.animationClips.Select(x => x.name).ToArray();
             foreach (var action in RequiredActions)
                 Assert.That(clips.Any(x => x == action || x.EndsWith(action)), Is.True, action);
-            Assert.That(prefab.GetComponentsInChildren<SkinnedMeshRenderer>(true).Length, Is.GreaterThan(0));
+            var skin = prefab.GetComponentsInChildren<SkinnedMeshRenderer>(true).FirstOrDefault();
+            Assert.That(skin, Is.Not.Null);
+            Assert.That(skin.sharedMaterial, Is.Not.Null);
+            Assert.That(skin.sharedMaterial.name, Is.EqualTo("BellMother"));
         }
 
         [Test]
@@ -36,6 +39,24 @@ namespace UnsoundedSea.Tests
             Assert.That(skin, Is.Not.Null);
             Assert.That(skin.rootBone, Is.Not.Null);
             Assert.That(skin.bones.Length, Is.GreaterThanOrEqualTo(19));
+        }
+
+        [Test]
+        public void AttackClipChangesImportedBonePose()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+            var instance = Object.Instantiate(prefab);
+            try
+            {
+                var animator = instance.GetComponentInChildren<Animator>();
+                var bone = instance.GetComponentsInChildren<Transform>(true)
+                    .First(x => x.name == "tentacle_front_left_01");
+                animator.Play("BellMother_Attack_A", 0, 0.5f);
+                var before = bone.localRotation;
+                animator.Update(0.4f);
+                Assert.That(Quaternion.Angle(before, bone.localRotation), Is.GreaterThan(0.01f));
+            }
+            finally { Object.DestroyImmediate(instance); }
         }
     }
 }
