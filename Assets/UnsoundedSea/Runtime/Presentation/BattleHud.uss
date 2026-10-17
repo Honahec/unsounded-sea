@@ -42,3 +42,6 @@
 .battle-hud .card-play-feedback { position: absolute; left: 50%; bottom: 282px; translate: -50% 0; padding: 6px 14px; color: #fff0c9; background-color: rgba(8,19,22,.9); border-bottom-width: 1px; border-bottom-color: #d7bd82; opacity: 1; transition-property: translate, opacity; transition-duration: .16s; }
 .battle-hud .card-play-feedback.departing { translate: -50% -18px; opacity: 0; }
 .battle-hud.reduced-motion .card-play-feedback { transition-duration: 0s; }
+.enemy-target-group { align-items: center; }
+.battle-hud .enemy-choice { width: 48px; height: 48px; margin-top: 10px; border-width: 2px; border-color: #d7bd82; border-radius: 24px; background-color: rgba(0,0,0,0); }
+.battle-hud .enemy-choice:hover, .battle-hud .enemy-choice:focus, .battle-hud .enemy-choice.selected { border-color: #fff0c9; background-color: #254b48; }

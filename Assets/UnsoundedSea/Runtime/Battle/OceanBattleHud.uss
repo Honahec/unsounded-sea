@@ -102,3 +102,5 @@
 .ocean-ui.reduced-motion .card-play-feedback { transition-duration: 0s; }
 
 .pile-summary { color: #c6b58e; font-size: 14px; margin-bottom: 14px; }
+.enemy-choice { position: absolute; width: 48px; height: 48px; margin: 0; border-width: 2px; border-color: #d7bd82; border-radius: 24px; background-color: rgba(0,0,0,0); }
+.enemy-choice:hover, .enemy-choice:focus, .enemy-choice.selected { border-color: #fff0c9; background-color: #254b48; }

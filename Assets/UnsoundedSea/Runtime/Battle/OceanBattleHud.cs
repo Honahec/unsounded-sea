@@ -22,6 +22,8 @@ namespace UnsoundedSea.Runtime
         private bool showSettings;
         private bool chartOpen, chartWasPaused;
         private int selectedEncounterCard;
+        private readonly EnemyCardSelection enemySelection = new EnemyCardSelection();
+        private readonly List<(Button button, BattleActorView actor)> enemyChoices = new List<(Button, BattleActorView)>();
         private int inspectedCard;
         private string selectedSupport;
         private int[] previousHand = Array.Empty<int>();
@@ -101,6 +103,8 @@ namespace UnsoundedSea.Runtime
             root.focusable = v.PendingChoice == null && inspectedCard == 0 && !chartOpen && !director.Paused && v.Phase == BattlePhase.PlayerTurn;
             if (root.focusable) root.Focus();
             encounterLabels.Clear();
+            enemyChoices.Clear();
+            if (selectedEncounterCard == 0) enemySelection.Reset();
             presentedBoss = v.BossKind;
             if (!v.Hand.Any(c => c.InstanceId == selectedEncounterCard && c.Targets.Count > 0)) selectedEncounterCard = 0;
             var scenario = director.scenario; bool active = v.Phase == BattlePhase.PlayerTurn && !director.Paused && !director.Busy;
@@ -112,10 +116,14 @@ namespace UnsoundedSea.Runtime
                 // Use the battle viewport: an offscreen reflection render can change Screen dimensions.
                 var local = root.WorldToLocal(new Vector2(evt.position.x, evt.position.y));
                 var point = new Vector3(local.x / root.resolvedStyle.width, 1 - local.y / root.resolvedStyle.height, 0);
+                var ray = director.Stage.battleCamera.ViewportPointToRay(point);
+                if (selectedEncounterCard != 0)
+                    foreach (var candidate in director.Stage.Actors)
+                        if (candidate.HitSelectionRing(ray) && TryPlaySelectedTarget(candidate.EnemyId)) return;
                 if (Physics.Raycast(director.Stage.battleCamera.ViewportPointToRay(point), out var hit))
                 {
                     var actor = hit.collider.GetComponent<BattleActorView>();
-                    if (actor != null && !TryPlaySelectedTarget(actor.EnemyId)) director.Select(actor.EnemyId);
+                    if (actor != null) director.Select(actor.EnemyId);
                 }
             }); root.Add(surface);
             var top = Box("sea-top"); root.Add(top);
@@ -198,7 +206,8 @@ namespace UnsoundedSea.Runtime
                 {
                     if (!c.Enabled || def.Cost > v.Actions || def.SanityCost >= v.Sanity) { inspectedCard = c.InstanceId; Render(); return; }
                     selectedSupport = null;
-                    if (c.Targets.Count == 0) { selectedEncounterCard = 0; director.Submit(BattleCommand.Play(c.InstanceId)); }
+                    var automaticTarget = EnemyCardSelection.AutomaticTarget(c, v);
+                    if (c.Targets.Count == 0 || automaticTarget != null) { selectedEncounterCard = 0; director.Submit(BattleCommand.Play(c.InstanceId, automaticTarget)); }
                     else
                     {
                         selectedEncounterCard = selectedEncounterCard == c.InstanceId ? 0 : c.InstanceId;
@@ -251,7 +260,7 @@ namespace UnsoundedSea.Runtime
                     var a = actor; var enemy = v.Enemies.First(x => x.Id == a.EnemyId);
                     var hideHealth = v.BossKind != BossEncounterKind.None ? !enemy.Targetable : !string.IsNullOrWhiteSpace(scenario.enemyStatus);
                     var status = hideHealth ? (v.BossKind != BossEncounterKind.None ? "不可直接伤害" : scenario.enemyStatus) : enemy.Health + " / " + enemy.MaxHealth;
-                    var plate = Button("actor-" + a.EnemyId, "", () => { if (!TryPlaySelectedTarget(a.EnemyId)) director.Select(a.EnemyId); }, "actor-label");
+                    var plate = Button("actor-" + a.EnemyId, "", () => director.Select(a.EnemyId), "actor-label");
                     plate.Add(Text(enemy.Name, "actor-name"));
                     if (!hideHealth)
                     {
@@ -263,6 +272,20 @@ namespace UnsoundedSea.Runtime
                     plate.EnableInClassList("actor-intent", showIntent);
                     if (showIntent) plate.Add(new EnemyIntentDetails(enemy));
                     plate.EnableInClassList("selected", a.EnemyId == director.SelectedEnemy); plate.SetEnabled(a.Alive && !director.Paused); root.Add(plate); nameplates.Add(plate);
+                    var selectedCard = v.Hand.FirstOrDefault(c => c.InstanceId == selectedEncounterCard);
+                    if (selectedCard == null) a.Select(a.EnemyId == director.SelectedEnemy);
+                    else a.Select(false);
+                    if (selectedCard != null && a.Alive && enemySelection.CanChoose(selectedCard, a.EnemyId))
+                    {
+                        a.ShowCardTarget(enemySelection.IsSelected(selectedCard, a.EnemyId));
+                        var choice = Button("enemy-choice-" + a.EnemyId, "",
+                            () => TryPlaySelectedTarget(a.EnemyId), "enemy-choice");
+                        choice.AddToClassList("target-ready");
+                        choice.EnableInClassList("selected", enemySelection.IsSelected(selectedCard, a.EnemyId));
+                        if (a.HasSelectionRing) { choice.style.opacity = 0; choice.pickingMode = PickingMode.Ignore; }
+                        choice.SetEnabled(active && selectedCard.Enabled);
+                        root.Add(choice); enemyChoices.Add((choice, a));
+                    }
                 }
             if (chartOpen)
             {
@@ -291,11 +314,10 @@ namespace UnsoundedSea.Runtime
         {
             var card = director.View?.Hand.FirstOrDefault(item => item.InstanceId == selectedEncounterCard);
             if (card == null) return false;
-            var target = card.Targets.FirstOrDefault(item => item.Enabled &&
-                (item.Id == enemyId || item.Id == "enemy:" + enemyId));
-            if (target == null) return false;
+            if (!enemySelection.Choose(card, enemyId, out var target)) return false;
+            if (target == null) { Render(); return true; }
             selectedEncounterCard = 0;
-            var result = director.Submit(BattleCommand.Play(card.InstanceId, target.Id));
+            var result = director.Submit(BattleCommand.Play(card.InstanceId, target));
             if (!result.Success) { selectedEncounterCard = card.InstanceId; Render(); }
             return true;
         }
@@ -350,11 +372,13 @@ namespace UnsoundedSea.Runtime
         {
             var selected = view.Hand.FirstOrDefault(card => card.InstanceId == selectedEncounterCard);
             if (selected == null || selected.Targets.Count == 0 || (selected.IsEncounter && view.BossKind != BossEncounterKind.None)) return;
+            var otherTargets = selected.Targets.Where(t => !EnemyCardSelection.IsEnemyTarget(t.Id, view)).ToArray();
+            if (otherTargets.Length == 0) return;
             var panel = Box("card-target-panel");
             panel.Add(Text("选择：" + selected.Definition.Name, "card-target-title"));
             var options = new ScrollView(ScrollViewMode.Vertical); options.AddToClassList("card-target-options"); panel.Add(options);
             var index = 0;
-            foreach (var option in selected.Targets)
+            foreach (var option in otherTargets)
             {
                 var target = option;
                 var cardId = selected.InstanceId;
@@ -518,7 +542,7 @@ namespace UnsoundedSea.Runtime
                 {
                     plate.style.left = 32;
                     plate.style.top = summonTop;
-                    if (actor.Alive) summonTop += height + 12;
+                    if (actor.Alive) summonTop += height + (enemyChoices.Any(c => c.actor == actor) ? 62 : 12);
                 }
                 else
                 {
@@ -526,6 +550,20 @@ namespace UnsoundedSea.Runtime
                     plate.style.top = Mathf.Max(64, p.y - height - 12);
                 }
                 plate.style.display = screen.z > 0 && actor.Alive ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+            foreach (var choice in enemyChoices)
+            {
+                var screen = director.Stage.battleCamera.WorldToViewportPoint(choice.actor.transform.position);
+                var width = choice.button.resolvedStyle.width;
+                choice.button.style.left = Mathf.Clamp(screen.x * root.resolvedStyle.width - width * .5f, 18, Mathf.Max(18, root.resolvedStyle.width - width - 18));
+                choice.button.style.top = Mathf.Clamp((1 - screen.y) * root.resolvedStyle.height + 12, 100, Mathf.Max(100, root.resolvedStyle.height - 300));
+                if (presentedBoss != BossEncounterKind.None)
+                {
+                    var plate = root.Q<Button>("actor-" + choice.actor.EnemyId);
+                    choice.button.style.left = plate.resolvedStyle.left;
+                    choice.button.style.top = plate.resolvedStyle.top + plate.resolvedStyle.height + 6;
+                }
+                choice.button.style.display = screen.z > 0 && choice.actor.Alive ? DisplayStyle.Flex : DisplayStyle.None;
             }
         }
     }
