@@ -24,6 +24,9 @@ namespace UnsoundedSea.Runtime
         public bool placeholderCombatMotion = true;
         public IReadOnlyList<BattleActorView> Actors => actors;
         private readonly List<BattleActorView> actors = new List<BattleActorView>();
+        private readonly List<BellMotherRigidMotion> seaMotions = new List<BellMotherRigidMotion>();
+        private readonly VesselWaveResponse vesselResponse = new VesselWaveResponse();
+        public bool HasPendingSeaAttack => seaMotions.Exists(m => m != null && m.ActiveAction == "Attack");
         private BattleDirector director;
         private Vector3 shipPosition, cameraPosition;
         private Quaternion shipRotation;
@@ -59,6 +62,13 @@ namespace UnsoundedSea.Runtime
                     actor.gameObject.SetActive(view.Enemies[i].Health > 0);
                 }
                 actors.Add(actor);
+                var motion = actor.GetComponentInChildren<BellMotherRigidMotion>();
+                if (actor.IsSeaActor && motion != null && water != null)
+                {
+                    motion.SurfaceHeight = water.SurfaceHeight;
+                    motion.SurfaceStruck += OnSurfaceStruck;
+                    seaMotions.Add(motion);
+                }
             }
             if (water != null) water.Bind(battleCamera);
             owner.Resolved += Present; RefreshSelection();
@@ -82,7 +92,10 @@ namespace UnsoundedSea.Runtime
             if (after.ObjectiveProgress > before.ObjectiveProgress && feedback != null && sealCue != null) feedback.PlayOneShot(sealCue);
             RefreshSelection();
         }
-        private void Update()
+        private void OnSurfaceStruck(Vector3 point) => water.EmitImpact(point);
+
+        // Runs after actor motion: contacts, water geometry and vessel samples share one frame.
+        private void LateUpdate()
         {
             if (director == null) return;
             if (ambience != null)
@@ -119,7 +132,7 @@ namespace UnsoundedSea.Runtime
             }
             if (vesselFollowsWater && water != null)
             {
-                if (!reduced) FollowWaves();
+                if (!reduced) FollowWaves(Time.unscaledDeltaTime);
             }
             else
             {
@@ -127,7 +140,7 @@ namespace UnsoundedSea.Runtime
                 vessel.localRotation = shipRotation * Quaternion.Euler(reduced ? 0 : Mathf.Sin(age * 0.31f) * vesselPitch, 0, reduced ? 0 : Mathf.Sin(age * 0.47f) * vesselRoll);
             }
         }
-        private void FollowWaves()
+        private void FollowWaves(float delta)
         {
             var parent = vessel.parent;
             var rest = parent != null ? parent.TransformPoint(shipPosition) : shipPosition;
@@ -136,15 +149,27 @@ namespace UnsoundedSea.Runtime
             var right = rotation * Vector3.right * Mathf.Max(0.1f, vesselSampleExtents.x);
             float pitch = -Mathf.Atan2(water.SampleDisplacement(rest + forward).y - water.SampleDisplacement(rest - forward).y, forward.magnitude * 2) * Mathf.Rad2Deg;
             float roll = Mathf.Atan2(water.SampleDisplacement(rest + right).y - water.SampleDisplacement(rest - right).y, right.magnitude * 2) * Mathf.Rad2Deg;
-            var targetRotation = rotation * Quaternion.Euler(Mathf.Clamp(pitch, -maxWavePitch, maxWavePitch), Mathf.Sin(water.SeaTime * 0.24f) * vesselYaw, Mathf.Clamp(roll, -maxWaveRoll, maxWaveRoll));
-            // Continuous response, independent of commands; smooth re-entry after reduced-motion changes.
-            float blend = 1 - Mathf.Exp(-Time.unscaledDeltaTime * 3);
-            vessel.position = Vector3.Lerp(vessel.position, rest + water.SampleDisplacement(rest), blend);
-            vessel.rotation = Quaternion.Slerp(vessel.rotation, targetRotation, blend);
+            var impact = Mathf.Abs(water.SampleImpactHeight(rest));
+            float response = Mathf.Clamp01(impact / 3f);
+            var targetAngles = new Vector3(Mathf.Clamp(pitch, -maxWavePitch - response * 6, maxWavePitch + response * 6),
+                Mathf.Sin(water.SeaTime * 0.24f) * vesselYaw,
+                Mathf.Clamp(roll, -maxWaveRoll - response * 7, maxWaveRoll + response * 7));
+            // Finite hull footprint filters small ripples; the same travelling crest lifts the hull.
+            var displacement = water.SampleDisplacement(rest);
+            displacement.y = (displacement.y * 2 + water.SampleDisplacement(rest + forward).y
+                + water.SampleDisplacement(rest - forward).y + water.SampleDisplacement(rest + right).y
+                + water.SampleDisplacement(rest - right).y) / 6;
+            displacement += water.SampleImpactSurge(rest);
+            vesselResponse.Tick(displacement, targetAngles, delta);
+            vessel.position = rest + vesselResponse.Offset;
+            vessel.rotation = rotation * Quaternion.Euler(vesselResponse.Angles);
         }
         private void OnDisable()
         {
             if (director != null) director.Resolved -= Present;
+            foreach (var motion in seaMotions)
+                if (motion != null) { motion.SurfaceStruck -= OnSurfaceStruck; motion.SurfaceHeight = null; }
+            seaMotions.Clear();
             RenderSettings.fog = previousFog; RenderSettings.fogColor = previousColor;
             RenderSettings.fogDensity = previousDensity; RenderSettings.fogMode = previousMode;
         }

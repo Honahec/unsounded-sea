@@ -46,6 +46,7 @@ void Sample(uint3 id:SV_DispatchThreadID)
             shader.SetFloat("_SeaTime",water.SeaTime);shader.SetFloat("_StormStrength",mat.GetFloat("_StormStrength"));
             foreach(var suffix in new[]{"A","B","C","D"})shader.SetVector("_StormWave"+suffix,mat.GetVector("_StormWave"+suffix));
             var block=new MaterialPropertyBlock();water.surface.GetPropertyBlock(block);shader.SetVector("_Threat",block.GetVector("_Threat"));
+            shader.SetVectorArray("_SeaImpacts",block.GetVectorArray("_SeaImpacts"));
             void Base(string prefix,string suffix)
             {
                 shader.SetVector("_Base"+suffix,new Vector4(mat.GetFloat(prefix+"Length"),mat.GetFloat(prefix+"Height"),mat.GetFloat(prefix+"Speed"),mat.GetFloat(prefix+"Sharpness")));
@@ -65,7 +66,7 @@ void Sample(uint3 id:SV_DispatchThreadID)
                 maxError=Mathf.Max(maxError,error);
             }
             if(float.IsNaN(maxError)||maxError>0.005f)throw new Exception("CPU/GPU water sample mismatch: "+maxError);
-            return new{points=64,maxErrorMetres=maxError,opaqueWater=true,clock=water.SeaTime};
+            return new{points=64,maxErrorMetres=maxError,opaqueWater=true,clock=water.SeaTime,impacts=water.ImpactCount};
         }
         finally {positions?.Release();results?.Release();AssetDatabase.DeleteAsset(folder);}
     }

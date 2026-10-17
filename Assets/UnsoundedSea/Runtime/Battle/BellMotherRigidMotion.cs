@@ -31,6 +31,10 @@ namespace UnsoundedSea.Runtime
         private Quaternion[] attackRotations;
         private Vector3 attackBodyPosition, attackCrownPosition;
         private Quaternion attackBodyRotation, attackCrownRotation;
+        public event System.Action<Vector3> SurfaceStruck;
+        public System.Func<Vector3, float> SurfaceHeight { get; set; }
+        private Vector3[] previousStrikeTips;
+        private bool[] struckSurface;
         private bool paused;
         private float idleTime;
 
@@ -102,6 +106,13 @@ namespace UnsoundedSea.Runtime
                 // Cross(outward, up) raises the outer end for every radial
                 // direction, including mirrored left/right and rear tentacles.
                 attackAxes[i] = Vector3.Cross(outward, Vector3.up).normalized;
+            }
+            previousStrikeTips = new Vector3[attackTentacles == null ? 0 : attackTentacles.Length];
+            struckSurface = new bool[previousStrikeTips.Length];
+            for (var i = 0; i < previousStrikeTips.Length; i++)
+            {
+                var index = System.Array.IndexOf(tentacles, attackTentacles[i]);
+                previousStrikeTips[i] = attackTentacles[i].TransformPoint(tentacleTips[index]);
             }
             sequence = Sequence.Attack;
             ActiveAction = "Attack";
@@ -191,10 +202,35 @@ namespace UnsoundedSea.Runtime
             else
             {
                 ApplyAttackPose(0);
+                EmitSurfaceContacts();
                 sequence = Sequence.Idle;
                 ActiveAction = "Idle";
                 ActionElapsed = 0;
                 ActionImpact = 0;
+                return;
+            }
+            EmitSurfaceContacts();
+        }
+
+        private void EmitSurfaceContacts()
+        {
+            if (SurfaceHeight == null || previousStrikeTips == null) return;
+            for (var i = 0; i < previousStrikeTips.Length; i++)
+            {
+                var index = System.Array.IndexOf(tentacles, attackTentacles[i]);
+                var tip = attackTentacles[i].TransformPoint(tentacleTips[index]);
+                var height = SurfaceHeight(tip);
+                if (!struckSurface[i] && ActionElapsed >= StrikeStart && tip.y <= height)
+                {
+                    var previous = previousStrikeTips[i];
+                    float above = previous.y - SurfaceHeight(previous);
+                    float below = height - tip.y;
+                    var point = Vector3.Lerp(previous, tip, above > 0 ? above / (above + below) : 1);
+                    point.y = SurfaceHeight(point);
+                    struckSurface[i] = true;
+                    SurfaceStruck?.Invoke(point);
+                }
+                previousStrikeTips[i] = tip;
             }
         }
 

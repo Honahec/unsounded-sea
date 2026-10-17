@@ -125,6 +125,39 @@ namespace UnsoundedSea.Tests
         }
 
         [Test]
+        public void EachOuterTentacleEmitsOnceOnActualWaterCrossingAndPauseCannotEmit()
+        {
+            var instance = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath));
+            try
+            {
+                instance.transform.localScale = Vector3.one * 6.5f;
+                var motion = instance.GetComponent<BellMotherRigidMotion>();
+                var plane = motion.attackTentacles.Max(p => p.TransformPoint(motion.tentacleTips[System.Array.IndexOf(motion.tentacles, p)]).y) + 20;
+                motion.SurfaceHeight = p => plane;
+                int contacts = 0;
+                motion.SurfaceStruck += p =>
+                {
+                    contacts++;
+                    Assert.That(p.y, Is.EqualTo(plane).Within(0.001f));
+                    Assert.That(motion.ActionElapsed, Is.InRange(0.84f, 1.12f), "Contact should occur before the submerged recovery pose");
+                };
+                for (int attack = 0; attack < 2; attack++)
+                {
+                    motion.PlayAttack();
+                    motion.Tick(0.75f);
+                    Assert.That(contacts, Is.EqualTo(attack * 2), "Rising out of water is not a slap");
+                    motion.SetPaused(true);
+                    motion.Tick(10);
+                    Assert.That(contacts, Is.EqualTo(attack * 2));
+                    motion.SetPaused(false);
+                    for (int frame = 0; frame < 150; frame++) motion.Tick(0.01f);
+                    Assert.That(contacts, Is.EqualTo((attack + 1) * 2));
+                }
+            }
+            finally { Object.DestroyImmediate(instance); }
+        }
+
+        [Test]
         public void HitUsesHeavyRecoilWithoutBouncyOvershoot()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);

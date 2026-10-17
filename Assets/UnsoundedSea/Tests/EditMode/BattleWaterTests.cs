@@ -86,6 +86,55 @@ namespace UnsoundedSea.Tests
         }
 
         [Test]
+        public void ImpactTravelsToVesselThenExpiresAndRebindClearsIt()
+        {
+            source.EnableKeyword("_ENABLEWAVE");
+            source.SetFloat("_ENABLEWAVE", 1);
+            water.Bind(camera);
+            var ship = Vector3.right * 135;
+            water.EmitImpact(Vector3.zero);
+            Assert.That(water.SampleImpactHeight(ship), Is.Zero);
+            water.Tick(2, false, false, Vector4.zero);
+            Assert.That(water.SampleImpactHeight(ship), Is.Zero, "Ship must not react before the front arrives");
+            water.Tick(1, false, false, Vector4.zero);
+            var crest = water.SampleImpactHeight(ship);
+            Assert.That(crest, Is.GreaterThan(3));
+            Assert.That(water.SampleImpactSurge(ship).x, Is.GreaterThan(0));
+            water.Tick(10, true, false, Vector4.zero);
+            Assert.That(water.SampleImpactHeight(ship), Is.EqualTo(crest));
+            var block = new MaterialPropertyBlock();
+            water.surface.GetPropertyBlock(block);
+            Assert.That(block.GetVectorArray("_SeaImpacts"), Has.Length.EqualTo(SeaImpactWave.Capacity));
+            water.Tick(10, false, false, Vector4.zero);
+            Assert.That(water.SampleImpactHeight(ship), Is.Zero);
+            water.EmitImpact(ship);
+            water.Bind(camera);
+            Assert.That(water.ImpactCount, Is.Zero);
+            Assert.That(water.SampleImpactHeight(ship), Is.Zero);
+        }
+
+        [Test]
+        public void BuoyancyHasInertiaAndSettlesWithoutFrameRateDependence()
+        {
+            var a = new VesselWaveResponse();
+            var b = new VesselWaveResponse();
+            var target = new Vector3(2, 5, -1);
+            var tilt = new Vector3(10, 0, 15);
+            a.Tick(target, tilt, 0.5f);
+            for (int i = 0; i < 60; i++) b.Tick(target, tilt, 1f / 120);
+            Assert.That(Vector3.Distance(a.Offset, b.Offset), Is.LessThan(0.0001f));
+            Assert.That(Vector3.Distance(a.Angles, b.Angles), Is.LessThan(0.0001f));
+            var before = a.Offset;
+            a.Tick(Vector3.zero, Vector3.zero, 0);
+            Assert.That(a.Offset, Is.EqualTo(before), "Pause retains position and momentum");
+            a.Tick(Vector3.zero, Vector3.zero, 0.01f);
+            Assert.That(a.Offset.magnitude, Is.GreaterThan(1), "Hull cannot teleport to calm water");
+            for (int i = 0; i < 600; i++) a.Tick(Vector3.zero, Vector3.zero, 1f / 60);
+            Assert.That(a.Offset.magnitude, Is.LessThan(0.001f));
+            Assert.That(a.Angles.magnitude, Is.LessThan(0.001f));
+        }
+
+        [Test]
         public void RebindAndUnbindReleaseOwnedObjectsAndPreserveSourceAndMask()
         {
             var firstMaterial = water.surface.sharedMaterial;

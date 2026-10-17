@@ -1,6 +1,30 @@
 #ifndef UNSOUNDED_SEA_WATER_WAKE_INCLUDED
 #define UNSOUNDED_SEA_WATER_WAKE_INCLUDED
 
+// Per-renderer pulse slots: XZ origin, birth time, amplitude. Unused amplitude = 0.
+float4 _SeaImpacts[8];
+float UnsoundedImpactHeight(float2 p, float time)
+{
+    float height = 0;
+    [unroll] for (int i = 0; i < 8; i++)
+    {
+        float4 origin = _SeaImpacts[i];
+        float age = time - origin.z;
+        if (origin.w <= 0 || age <= 0 || age >= 12) continue;
+        float2 delta = p - origin.xy;
+        float d = length(delta), angle = atan2(delta.y, delta.x);
+        float warp = (sin(angle * 3 + 0.7) * 3 + sin(angle * 7) * 1.5) * saturate(d / 30);
+        float q = (d + warp - 45 * age) / 22;
+        if (q >= 1 || q <= -2) continue;
+        float crest = pow(max(0, 1 - q*q), 3);
+        float tq = (q + 1) / 0.9;
+        float trough = pow(max(0, 1 - tq*tq), 3) * 0.38;
+        float fade = smoothstep(0, 0.18, age) * (1 - smoothstep(9, 12, age));
+        height += origin.w * (crest - trough) * fade / sqrt(1 + d * 0.025);
+    }
+    return height;
+}
+
 // Four crossing, phase-warped swells. Wave = heading, wavelength, amplitude, speed.
 // CPU counterpart lives in BattleWater so the ship follows the rendered sea.
 float UnsoundedStormWave(float2 p, float time, float4 wave, float offset, out float2 gradient)
@@ -45,7 +69,10 @@ float UnsoundedSeaSurface(float2 p, float4 threat, float time, out float2 gradie
     float wake=UnsoundedSeaWake(p,threat,time);
     gradient+=float2(UnsoundedSeaWake(p+float2(0.5,0),threat,time)-UnsoundedSeaWake(p-float2(0.5,0),threat,time),
         UnsoundedSeaWake(p+float2(0,0.5),threat,time)-UnsoundedSeaWake(p-float2(0,0.5),threat,time));
-    return h+wake;
+    float impact = UnsoundedImpactHeight(p,time);
+    gradient += float2(UnsoundedImpactHeight(p+float2(0.5,0),time)-UnsoundedImpactHeight(p-float2(0.5,0),time),
+        UnsoundedImpactHeight(p+float2(0,0.5),time)-UnsoundedImpactHeight(p-float2(0,0.5),time));
+    return h+wake+impact;
 #endif
 }
 
@@ -69,7 +96,9 @@ float UnsoundedSeaFoamMask(float2 p, float4 threat, float time)
     float d=distance(p,threat.xy);
     float disturbance=exp(-abs(d-threat.z)*0.021)*step(0.01,threat.z);
     float churn=smoothstep(0.35,1.3,UnsoundedSeaWake(p,threat,time))*smoothstep(0.38,0.72,n+fine*0.25);
-    return saturate(whitecap*_StormStrength+churn*disturbance*0.85);
+    float impact = UnsoundedImpactHeight(p,time);
+    float impactFoam = smoothstep(0.5, 2.4, impact) * smoothstep(0.25, 0.6, n*0.65+fine*0.35);
+    return saturate(whitecap*_StormStrength+churn*disturbance*0.85+impactFoam);
 #endif
 }
 #endif
