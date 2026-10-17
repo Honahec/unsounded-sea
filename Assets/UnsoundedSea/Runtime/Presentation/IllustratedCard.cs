@@ -8,7 +8,7 @@ namespace UnsoundedSea.Runtime
     {
         public static void Apply(VisualElement face, CardSpec card)
         {
-            var art = Resources.Load<Texture2D>("CardArt/" + (card.Id == "E01-01" ? "c064" : card.Id));
+            var art = Resources.Load<Texture2D>("CardArt/" + card.Id);
             face.Clear();
             face.style.paddingLeft = face.style.paddingRight = 0;
             face.style.paddingTop = face.style.paddingBottom = 0;

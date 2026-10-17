@@ -51,8 +51,9 @@
 .card-name { font-size: 17px; color: #202b2c; }
 .card-description { font-size: 15px; color: #303c3b; flex-grow: 1; }
 .fine-print { font-size: 10px; color: #7d3e35; }
-.end-turn { min-height: 48px; margin: 0; padding: 10px 8px; border-radius: 2px; border-width: 1px; border-color: #998b69; background-color: rgba(41,54,50,.96); color: #eee4c9; font-size: 17px; -unity-text-align: middle-center; }
-.end-turn:hover { background-color: #3c4e46; border-color: #d0bb88; }
+.end-turn { align-self: center; width: 88px; height: 88px; min-height: 88px; flex-shrink: 0; margin: 0; padding: 0; border-radius: 44px; border-width: 2px; border-color: #cbb27b; background-color: rgba(112,79,38,.94); }
+.end-turn:hover { background-color: #816035; border-color: #eee4c9; }
+.end-title { margin-top: 10px; font-size: 17px; color: #eee4c9; -unity-text-align: middle-center; }
 .battle-notice { position: absolute; bottom: 300px; left: 30%; right: 30%; padding: 5px 10px; -unity-text-align: middle-center; background-color: rgba(8,19,22,.72); }
 .actor-label { position: absolute; width: 285px; min-height: 48px; padding: 3px 8px; border-width: 0; background-color: transparent; color: #eee4c9; align-items: flex-start; }
 .actor-name, .actor-status { -unity-text-align: middle-left; text-shadow: 0 1px 3px #000; }.actor-name { font-size: 18px; }.actor-status { font-size: 13px; color: #80b5a5; }
@@ -73,6 +74,10 @@
 .ocean-sheet { width: 620px; max-height: 92%; padding: 26px 38px; background-color: rgb(15,31,35); border-width: 1px; border-color: #9e8755; }
 .modal-title { font-size: 28px; margin-bottom: 12px; letter-spacing: 3px; }.modal-copy { color: #b9cbc2; margin-bottom: 12px; }.journal { height: 180px; margin-bottom: 14px; }.log-line { font-size: 13px; color: #80b5a5; margin-bottom: 5px; }
 .ocean-sheet .settings { position: relative; left: 0; top: 0; width: 100%; translate: 0 0; }
+.ocean-sheet.pause { position: relative; left: auto; top: auto; translate: 0 0; width: 360px; }
+.ocean-sheet .pause-option { min-height: 44px; padding: 10px 14px; margin-top: 10px; border-width: 0; border-bottom-width: 1px; border-color: rgba(158,135,85,.35); background-color: transparent; color: #eee4c9; font-size: 19px; }
+.ocean-sheet .pause-option:hover, .ocean-sheet .pause-option:focus { color: #d7bd82; background-color: rgba(38,62,54,.6); }
+.ocean-sheet .pause-option, .sea-top .sea-button { white-space: nowrap; }
 .battle-chart-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 24px; background-color: rgba(1,8,13,.96); }
 .battle-chart-overlay VoyageMapPanel { flex-grow: 1; }
 .battle-chart-close { position: absolute; right: 38px; bottom: 30px; min-width: 128px; min-height: 40px; padding: 8px 14px; border-width: 1px; border-color: #d7bd82; background-color: #19383c; color: #eee4c9; }

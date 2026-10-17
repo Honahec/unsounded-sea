@@ -297,6 +297,7 @@ namespace UnsoundedSea.Runtime
 
             // Target nameplates float over the stage; selection is shown by brackets and a text label.
             var targetBar = Element("targets");
+            targetBar.EnableInClassList("split-targets", view.Enemies.Count == 2);
             foreach (var enemy in view.Enemies)
             {
                 var id = enemy.Id;
@@ -374,14 +375,14 @@ namespace UnsoundedSea.Runtime
                 var top = Element("journal-head");
                 var titles = Element("journal-titles");
                 titles.Add(Text("调查档案", "journal-title"));
-                titles.Add(Text($"截至第 {view.Turn:00} 回合 · 只记录你确实知道的事", "journal-subtitle"));
+                titles.Add(Text($"第 {view.Turn:00} 回合", "journal-subtitle"));
                 top.Add(titles);
                 top.Add(Button("journal-close", "收起", "journal-close", ToggleJournal));
                 journal.Add(top);
                 var entries = new ScrollView { name = "journal-entries" };
                 entries.AddToClassList("journal-entries");
                 entries.Add(Text("证据", "journal-section"));
-                if (view.Evidence.Count == 0) entries.Add(Text("尚无证据。使用调查工具或调查类卡牌后会记录在此。", "journal-empty"));
+                if (view.Evidence.Count == 0) entries.Add(Text("暂无证据", "journal-empty"));
                 foreach (var evidence in view.Evidence.OrderByDescending(e => e.Level))
                 {
                     var item = Element("evidence");
@@ -533,8 +534,9 @@ namespace UnsoundedSea.Runtime
             // Lower right: the fixed encounter action stays separate from the random hand.
             var controls = Element("turn-controls");
             var end = Button("end-turn", "", "end-turn", () => Send(BattleCommand.EndTurn()), playing);
-            end.Add(new SeaUiArt("seal")); end.Add(Text("结束\n回合", "end-title"));
+            end.tooltip = "结束回合";
             controls.Add(end);
+            controls.Add(Text("结束回合", "end-title"));
             root.Add(controls);
 
             var latest = PlayerLog(view).Select(entry => entry.text).LastOrDefault() ?? "";
@@ -564,7 +566,7 @@ namespace UnsoundedSea.Runtime
             if (bookOpen)
             {
                 foreach (var child in root.Children().ToArray()) child.SetEnabled(false);
-                root.Add(new BattleActionBookPanel(ToggleActionBook, false));
+                root.Add(new BattleActionBookPanel(ToggleActionBook, false, view.Tools));
             }
 
             else if (chartOpen)
@@ -588,12 +590,11 @@ namespace UnsoundedSea.Runtime
                 else
                 {
                     var pause = Element("pause");
-                    pause.Add(Text("航行暂停", "pause-overline"));
-                    pause.Add(Text($"第 {view.Turn:00} 回合 · 回合制遭遇不会在此期间推进", "pause-note"));
-                    pause.Add(Button("pause-resume", "继续调查", "pause-option", ToggleMenu));
+                    pause.Add(Text("暂停", "pause-overline"));
+                    pause.Add(Button("pause-resume", "继续 / Esc", "pause-option", ToggleMenu));
                     pause.Add(Button("pause-settings", "设置", "pause-option", () => { settingsOpen = true; Refresh(); }));
                     var canLeave = Application.CanStreamedLevelBeLoaded(menuScene);
-                    var leave = Button("pause-title", canLeave ? "返回标题 · 放弃本场遭遇" : "返回标题（未加入构建列表）", "pause-option", () => SceneManager.LoadScene(menuScene), canLeave);
+                    var leave = Button("pause-title", "放弃并返回标题", "pause-option", () => SceneManager.LoadScene(menuScene), canLeave);
                     leave.AddToClassList("danger");
                     pause.Add(leave);
                     scrim.Add(pause);

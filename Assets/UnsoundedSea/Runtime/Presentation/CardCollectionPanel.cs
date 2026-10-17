@@ -26,7 +26,7 @@ namespace UnsoundedSea.Runtime
 
             var head = new VisualElement(); head.AddToClassList("collection-head");
             head.Add(Label("行动簿", "collection-title"));
-            head.Add(Label("全部 90 种方案用于独立遭遇配牌。三幕远征从固定 12 张起步，途中学习与整备；此处船员选择用于新航程。", "collection-copy"));
+            head.Add(Label("独立遭遇配牌", "collection-copy"));
             count = Label("", "collection-count"); head.Add(count); Add(head);
 
             var body = new VisualElement(); body.AddToClassList("collection-body");
@@ -40,6 +40,11 @@ namespace UnsoundedSea.Runtime
             inspected = CardCatalog.All.First();
             body.Add(Detail()); Add(body);
             RenderPage(); UpdateCount();
+            RegisterCallback<KeyDownEvent>(evt =>
+            {
+                if (evt.keyCode != KeyCode.S) return;
+                SaveAndClose(); evt.StopPropagation();
+            }, TrickleDown.TrickleDown);
         }
 
         private void ChangePage(int direction)
@@ -75,7 +80,7 @@ namespace UnsoundedSea.Runtime
             var listener = new Button(() => SelectCrew("listener")) { name = "crew-listener", text = "听测员 · 记录声源" };
             crew.Add(medic); crew.Add(listener); detail.Add(crew); UpdateCrew(medic, listener);
             var toggle = new Button(Toggle) { name = "collection-toggle" }; toggle.AddToClassList("collection-toggle"); detail.Add(toggle);
-            var save = new Button(SaveAndClose) { name = "collection-save", text = "保存行动簿" };
+            var save = new Button(SaveAndClose) { name = "collection-save", text = "保存 / S" };
             save.SetEnabled(selected.Count == CardDeckPreparation.DeckSize); detail.Add(save);
             detail.Add(new Button(close) { name = "collection-close", text = "取消" });
             UpdateToggle(toggle); return detail;
@@ -120,7 +125,7 @@ namespace UnsoundedSea.Runtime
 
         private void UpdateCount()
         {
-            count.text = $"已编入 {selected.Count} / {CardDeckPreparation.DeckSize}";
+            count.text = $"{selected.Count}/{CardDeckPreparation.DeckSize}";
             this.Q<Button>("collection-save")?.SetEnabled(selected.Count == CardDeckPreparation.DeckSize);
         }
         private void UpdateToggle(Button button)

@@ -85,18 +85,21 @@
 .reward-card-face { width: 188px; height: 284px; -unity-background-scale-mode: scale-and-crop; }
 .voyage-hud .reward-skip { margin-top: 26px; min-width: 230px; align-self: center; border-width: 0; border-bottom-width: 1px; border-bottom-color: #756b55; background-color: rgba(8, 19, 22, 0.7); -unity-text-align: middle-center; }
 .act-complete .voyage-navigation { width: 420px; }
-.action-book { width: 940px; max-width: 92%; height: 760px; max-height: 90%; min-height: 0; padding: 24px 28px; background-color: rgb(13, 29, 31); border-width: 1px; border-top-width: 3px; border-color: rgb(158, 135, 85); }
-.action-book-head { flex-direction: row; flex-shrink: 0; justify-content: space-between; align-items: center; }
-.action-book .journal-title { color: #e5d4aa; }
-.collection-count { flex-shrink: 0; color: #e5d4aa; font-size: 17px; }
+.action-book { width: 1120px; max-width: 94%; height: 760px; max-height: 90%; min-height: 0; padding: 24px 28px; background-color: rgb(13, 29, 31); border-width: 1px; border-top-width: 3px; border-color: rgb(158, 135, 85); }
+.action-book > .journal-title { flex-shrink: 0; margin-bottom: 18px; color: #e5d4aa; }
+.action-book-body { flex-grow: 1; flex-shrink: 1; flex-direction: row; min-width: 0; min-height: 0; }
+.action-book-side { width: 230px; min-width: 230px; flex-shrink: 0; padding-right: 24px; border-right-width: 1px; border-right-color: rgba(158, 135, 85, 0.4); }
+.action-book-main { flex-grow: 1; flex-shrink: 1; min-width: 0; min-height: 0; padding-left: 24px; }
+.collection-count { flex-shrink: 0; align-self: flex-end; color: #e5d4aa; font-size: 17px; }
 .action-book-scroll { flex-grow: 1; flex-shrink: 1; min-height: 0; margin-top: 10px; }
 .action-book-cards { flex-direction: row; flex-wrap: wrap; justify-content: center; }
-.voyage-hud .action-book-card { width: 142px; height: 214px; margin: 7px; padding: 0; border-width: 2px; border-color: transparent; background-color: #0f1d21; }
+.voyage-hud .action-book-card { width: 142px; height: 214px; margin: 12px; padding: 0; border-width: 2px; border-color: transparent; background-color: #0f1d21; }
 .voyage-hud .action-book-card.selected { border-color: #e5c67f; translate: 0 -4px; }
 .action-book-card-face { width: 138px; height: 210px; -unity-background-scale-mode: scale-and-crop; }
-.tool-count { flex-shrink: 0; margin-top: 10px; color: #d4c49a; font-size: 14px; letter-spacing: 1px; }
-.action-book-tools { flex-direction: row; flex-wrap: wrap; flex-shrink: 0; }
-.voyage-hud .action-book-tool { flex-grow: 1; margin: 6px 8px 0 0; min-width: 190px; border-left-width: 3px; -unity-text-align: middle-left; }
+.tool-count { flex-shrink: 0; color: #d4c49a; font-size: 14px; letter-spacing: 1px; }
+.action-book-tools { flex-shrink: 0; }
+.voyage-hud .action-book-tool { margin-top: 10px; min-height: 46px; border-left-width: 3px; -unity-text-align: middle-left; }
 .voyage-hud .action-book-tool.selected { border-left-color: #e5c67f; background-color: #31473e; color: #fff0c6; }
-.modal-actions { flex-direction: row; flex-shrink: 0; justify-content: flex-end; align-items: center; }
-.modal-actions .primary, .modal-actions .secondary { margin: 10px 0 0 12px; min-width: 150px; -unity-text-align: middle-center; }
+.action-book-side .modal-actions { flex-grow: 1; flex-direction: column; justify-content: flex-end; }
+.action-book-side .modal-actions .primary, .action-book-side .modal-actions .secondary { width: 100%; margin: 10px 0 0 0; min-height: 42px; -unity-text-align: middle-center; }
+.voyage-hud .action-book-tool, .voyage-hud .modal-actions Button, .voyage-hud .pause-option, .voyage-utilities Button { white-space: nowrap; }

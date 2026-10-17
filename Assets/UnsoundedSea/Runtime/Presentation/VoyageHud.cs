@@ -21,6 +21,7 @@ namespace UnsoundedSea.Runtime
         private bool paused, settingsOpen, journalOpen, chartOpen, deckOpen;
         private string saveError, loadError, notice;
         private float lastTick;
+        private Action actionBookSave;
         private VoyageSession Session => VoyageRuntime.Session;
 
         private void OnEnable()
@@ -75,6 +76,14 @@ namespace UnsoundedSea.Runtime
                 else if (journalOpen) journalOpen = false;
                 else if (chartOpen && !paused) chartOpen = false;
                 else paused = !paused;
+            }
+            else if (deckOpen && evt.keyCode == KeyCode.S)
+            {
+                var save = root.Q<Button>("action-book-save");
+                if (save?.enabledSelf != true) return;
+                actionBookSave?.Invoke();
+                evt.StopPropagation();
+                return;
             }
             else if (evt.keyCode == KeyCode.B)
             {
@@ -380,16 +389,17 @@ namespace UnsoundedSea.Runtime
             var selected = new HashSet<string>(Session.DeckIds, StringComparer.Ordinal);
             var scrim = Element("voyage-overlay"); scrim.pickingMode = PickingMode.Position;
             var sheet = Element("action-book");
-            var head = Element("action-book-head");
-            head.Add(Text("远征行动簿", "journal-title"));
-            var count = Text("", "collection-count"); head.Add(count); sheet.Add(head);
-            sheet.Add(Text(editable ? "仅显示本次远征已习得的行动。选满 12 张后保存；不会写入标题页的预设牌组。" : "高亮为已编入的 12 张牌；其余为已学方案。仅能在整备节点更换。", "muted"));
+            sheet.Add(Text("远征行动簿", "journal-title"));
+            var body = Element("action-book-body"); sheet.Add(body);
+            var side = Element("action-book-side"); body.Add(side);
+            var main = Element("action-book-main"); body.Add(main);
+            var count = Text("", "collection-count"); main.Add(count);
             var scroll = new ScrollView(ScrollViewMode.Vertical); scroll.AddToClassList("action-book-scroll");
-            var cards = Element("action-book-cards"); scroll.Add(cards); sheet.Add(scroll);
+            var cards = Element("action-book-cards"); scroll.Add(cards); main.Add(scroll);
             Button save = null;
             void UpdateState()
             {
-                count.text = $"已编入 {selected.Count} / 12";
+                count.text = $"{selected.Count}/12";
                 save?.SetEnabled(editable && selected.Count == 12);
             }
             foreach (var id in Session.LearnedCardIds)
@@ -411,8 +421,8 @@ namespace UnsoundedSea.Runtime
                 button.tooltip = card.Name + "：" + card.Description; cards.Add(button);
             }
             var selectedTools = new HashSet<string>(Session.ToolIds, StringComparer.Ordinal);
-            var toolTitle = Text($"调查工具 {selectedTools.Count} / 2", "tool-count"); sheet.Add(toolTitle);
-            var tools = Element("action-book-tools"); sheet.Add(tools);
+            var toolTitle = Text($"调查工具 {selectedTools.Count}/2", "tool-count"); side.Add(toolTitle);
+            var tools = Element("action-book-tools"); side.Add(tools);
             foreach (var id in Session.LearnedToolIds)
             {
                 var toolId = id;
@@ -426,19 +436,20 @@ namespace UnsoundedSea.Runtime
                         selectedTools.Add(toolId);
                     }
                     tool.EnableInClassList("selected", selectedTools.Contains(toolId));
-                    toolTitle.text = $"调查工具 {selectedTools.Count} / 2";
+                    toolTitle.text = $"调查工具 {selectedTools.Count}/2";
                 };
                 tool.EnableInClassList("selected", selectedTools.Contains(id)); tools.Add(tool);
             }
-            var actions = Element("modal-actions");
-            save = Action("action-book-save", "保存 12 张", "primary", () =>
+            var actions = Element("modal-actions"); side.Add(actions);
+            actionBookSave = () =>
             {
-                if (!Session.SetDeck(selected) || !Session.SetTools(selectedTools)) return;
+                if (!editable || selected.Count != 12 || !Session.SetDeck(selected) || !Session.SetTools(selectedTools)) return;
                 deckOpen = false; notice = "行动簿与调查工具已整备（可不携带工具）。"; Save(); Refresh();
-            }, editable && selected.Count == 12);
+            };
+            save = Action("action-book-save", "保存 / S", "primary", actionBookSave, editable && selected.Count == 12);
             if (editable) actions.Add(save);
             actions.Add(Action("action-book-close", "取消 / Esc", "secondary", () => { deckOpen = false; Refresh(); }));
-            sheet.Add(actions); scrim.Add(sheet); root.Add(scrim);
+            scrim.Add(sheet); root.Add(scrim);
             UpdateState();
             scrim.RegisterCallback<NavigationMoveEvent>(evt =>
             {
@@ -463,8 +474,8 @@ namespace UnsoundedSea.Runtime
             }
         }
 
-        private static string ToolName(string id) => id == "lantern" ? "防风提灯 · 可见行动" :
-            id == "listener" ? "定向听筒 · 声源" : id == "shell" ? "听潮贝壳 · 伤害途径（支付 3 理智）" : id;
+        private static string ToolName(string id) => id == "lantern" ? "防风提灯" :
+            id == "listener" ? "定向听筒" : id == "shell" ? "听潮贝壳 · 3 理智" : id;
 
         private static string KindName(RunNodeKind kind)
         {
@@ -531,11 +542,10 @@ namespace UnsoundedSea.Runtime
             else
             {
                 var pause = Element("pause");
-                pause.Add(Text("航行暂停", "pause-overline"));
-                pause.Add(Text("暂停期间不会抵达目的地，也不会改变方向。", "pause-note"));
-                pause.Add(Action("pause-resume", "继续航行", "pause-option", () => { paused = false; Refresh(); }));
+                pause.Add(Text("暂停", "pause-overline"));
+                pause.Add(Action("pause-resume", "继续 / Esc", "pause-option", () => { paused = false; Refresh(); }));
                 pause.Add(Action("pause-settings", "设置", "pause-option", () => { settingsOpen = true; Refresh(); }));
-                pause.Add(Action("pause-title", "保存航程 / 返回标题", "pause-option", () => { Save(); if (string.IsNullOrEmpty(saveError)) SceneManager.LoadScene(VoyageRuntime.MainMenuScene); else Refresh(); }));
+                pause.Add(Action("pause-title", "保存并返回标题", "pause-option", () => { Save(); if (string.IsNullOrEmpty(saveError)) SceneManager.LoadScene(VoyageRuntime.MainMenuScene); else Refresh(); }));
                 scrim.Add(pause);
             }
             root.Add(scrim); if (!settingsOpen) root.schedule.Execute(() => root.Q<Button>("pause-resume")?.Focus());

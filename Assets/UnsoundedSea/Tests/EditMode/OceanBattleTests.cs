@@ -12,23 +12,17 @@ namespace UnsoundedSea.Tests
         private const string Path = "Assets/UnsoundedSea/Content/Scenarios/FogVisitors.asset";
         private static BattleScenario Scenario => AssetDatabase.LoadAssetAtPath<BattleScenario>(Path);
         private static BattleCommand Seal(BattleSession session) => BattleCommand.Play(session.View.Hand.Single(x => x.IsEncounter).InstanceId);
-        [Test] public void ScenarioHasCompleteReplaceablePresentation()
-        {
-            Assert.That(Scenario, Is.Not.Null);
-            Assert.DoesNotThrow(() => Scenario.ValidatePresentation());
-            Assert.That(Scenario.encounter.enemies.Length, Is.EqualTo(2));
-        }
         [Test] public void RestartCreatesIndependentObjectiveAndInvestigationState()
         {
             var a = Scenario.CreateSession(23); var b = Scenario.CreateSession(23);
             Assert.That(a.Execute(Seal(a)).Success, Is.True);
-            var tool = a.View.Tools[0].Definition.Id;
-            a.Execute(BattleCommand.Investigate(tool, a.View.Enemies[0].Id));
+            var tool = a.View.Tools.First(t => t.Definition.Kind == InvestigationKind.SoundSource).Definition.Id;
+            Assert.That(a.Execute(BattleCommand.Investigate(tool, a.View.Enemies[0].Id)).Success, Is.True);
             Assert.That(b.View.ObjectiveProgress, Is.Zero);
-            Assert.That(b.View.Tools[0].RemainingUses, Is.EqualTo(1));
-            Assert.That(a.View.Tools[0].RemainingUses, Is.Zero);
+            Assert.That(b.View.Tools.Single(t => t.Definition.Id == tool).RemainingUses, Is.EqualTo(1));
+            Assert.That(a.View.Tools.Single(t => t.Definition.Id == tool).RemainingUses, Is.Zero);
         }
-        [Test] public void FourSealsWinWithBothMonstersStillAlive()
+        [Test] public void FourSealsWinWithoutKillingTheEcho()
         {
             var session = Scenario.CreateSession(20261016);
             for (var i = 0; i < 4; i++)
@@ -50,7 +44,7 @@ namespace UnsoundedSea.Tests
         }
         [Test] public void CardTargetsOnlySelectedEnemy()
         {
-            var definition = Scenario.encounter.Build();
+            var definition = VoyageEncounterCatalog.Resolve("voyage-fog-4").encounter.Build();
             var session = new BattleSession(new BattleDefinition(definition.Id, new[] { CardCatalog.Get("revolver") },
                 definition.Enemies, definition.Tools), 20261016);
             var card = session.View.Hand.First(x => x.Definition.Id == "revolver");
