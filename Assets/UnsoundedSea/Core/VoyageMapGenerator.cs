@@ -19,7 +19,6 @@ namespace UnsoundedSea.Core
         public IReadOnlyList<string> Next { get; }
         public int Layer { get; }
         public uint BattleSeed { get; }
-        public bool Perilous { get; internal set; }
         public VoyageStop(string id, string name, string clue, string description, float x, float y, int travelHours,
             RunNodeKind kind, string encounterId, IEnumerable<string> next, int layer, uint battleSeed)
         {

@@ -32,8 +32,6 @@ namespace UnsoundedSea.Core
         public EncounterTargetView(string id, string name, string detail, bool enabled)
         { Id = id; Name = name; Detail = detail; Enabled = enabled; }
     }
-    public enum EnemyStyle { Rhythm, Hidden, Boss }
-
     public sealed class EnemyView
     {
         public string Id { get; }
@@ -44,8 +42,6 @@ namespace UnsoundedSea.Core
         public string Intent { get; }
         public bool IntentConfirmed { get; }
         public bool Targetable { get; }
-        public int Surge { get; internal set; }
-        public EnemyStyle Style { get; internal set; } = EnemyStyle.Hidden;
         internal EnemyView(string id, string name, int health, int maxHealth, string clue, string intent, bool confirmed, bool targetable = true)
         { Id = id; Name = name; Health = health; MaxHealth = maxHealth; Clue = clue; Intent = intent; IntentConfirmed = confirmed; Targetable = targetable; }
     }
