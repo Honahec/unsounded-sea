@@ -1,0 +1,47 @@
+{
+  "motionProfile": "hull_mallet_knock",
+  "source": "EmptyHoldKnocker_Source.glb",
+  "method": "Fitted anatomical landmarks + Blender bone heat; normalized strongest four influences",
+  "height": 2.0,
+  "bones": 20,
+  "animations": [
+    "Idle",
+    "Action",
+    "Hit",
+    "Death",
+    "RigValidation"
+  ],
+  "meshes": [
+    {
+      "mesh": "model",
+      "vertices": 22498,
+      "weightedVertices": 22498,
+      "boneInfluenceVertexCounts": {
+        "hips": 4243,
+        "spine": 6807,
+        "chest": 5159,
+        "neck": 2825,
+        "head": 2961,
+        "shoulder.L": 3408,
+        "upper_arm.L": 3341,
+        "forearm.L": 1718,
+        "hand.L": 1037,
+        "shoulder.R": 5948,
+        "upper_arm.R": 5880,
+        "forearm.R": 2832,
+        "hand.R": 1690,
+        "thigh.L": 3807,
+        "shin.L": 2847,
+        "foot.L": 1421,
+        "thigh.R": 3758,
+        "shin.R": 2817,
+        "foot.R": 1407
+      }
+    }
+  ],
+  "limitations": [
+    "No finger articulation or facial rig",
+    "Original props are fused geometry; attachment deformation requires visual review",
+    "Not certified for arbitrary retargeted animation"
+  ]
+}

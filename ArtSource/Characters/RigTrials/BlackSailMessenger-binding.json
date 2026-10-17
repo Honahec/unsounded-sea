@@ -1,0 +1,47 @@
+{
+  "motionProfile": "black_flag_signal",
+  "source": "BlackSailMessenger_Source.glb",
+  "method": "Fitted anatomical landmarks + Blender bone heat; normalized strongest four influences",
+  "height": 2.0,
+  "bones": 20,
+  "animations": [
+    "Idle",
+    "Action",
+    "Hit",
+    "Death",
+    "RigValidation"
+  ],
+  "meshes": [
+    {
+      "mesh": "model",
+      "vertices": 22492,
+      "weightedVertices": 22492,
+      "boneInfluenceVertexCounts": {
+        "hips": 3066,
+        "spine": 3319,
+        "chest": 1186,
+        "neck": 2607,
+        "head": 4511,
+        "shoulder.L": 6772,
+        "upper_arm.L": 8163,
+        "forearm.L": 5491,
+        "hand.L": 6627,
+        "shoulder.R": 3342,
+        "upper_arm.R": 4694,
+        "forearm.R": 4434,
+        "hand.R": 925,
+        "thigh.L": 8121,
+        "shin.L": 6757,
+        "foot.L": 4514,
+        "thigh.R": 989,
+        "shin.R": 2981,
+        "foot.R": 1774
+      }
+    }
+  ],
+  "limitations": [
+    "No finger articulation or facial rig",
+    "Original props are fused geometry; attachment deformation requires visual review",
+    "Not certified for arbitrary retargeted animation"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "files": [
+    {
+      "file": "RigTrials/FogRigger_Rigged.glb",
+      "bytes": 54727448,
+      "sha256": "d817af6fae43767a4813519ccd3525d1d7d15a4e53942592cbeb16777ee39b5f"
+    },
+    {
+      "file": "RigTrials/FogRigger_Rigged.blend",
+      "bytes": 54883882,
+      "sha256": "8ae4801ebd6801f22fd5dc96965ff810ee606342218088e750664eecce7c2837"
+    },
+    {
+      "file": "RigTrials/BoneFluteAttendant_Rigged.glb",
+      "bytes": 41561832,
+      "sha256": "93d8cd07a94dabdd6e4071a17dfa2387358b109081c83a98ff2d08dbe41a9ae1"
+    },
+    {
+      "file": "RigTrials/BoneFluteAttendant_Rigged.blend",
+      "bytes": 41634479,
+      "sha256": "cd7f03d6a219443f1a3f6a08c29853fa60680e7a7d15fc7c4c7e74812523732d"
+    }
+  ]
+}
