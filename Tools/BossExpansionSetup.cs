@@ -50,18 +50,16 @@ public static class BossExpansionSetup
     public static string ImportModels()
     {
         if (EditorApplication.isPlaying) throw new InvalidOperationException("Stop Play before importing boss models.");
-        Folder(Models); Folder(BossArt); Folder(Root+"/Art/Prefabs");
+        foreach (var spec in Specs)
+            if (!File.Exists(Models + "/" + spec.Model + "_BANG_LOD0.glb"))
+                throw new FileNotFoundException("Build the archived BANG model with Tools/BossBangBuild.py first.", spec.Model);
+        Folder(BossArt); Folder(Root+"/Art/Prefabs");
         foreach (var spec in Specs)
         {
-            var source=Path.GetFullPath("ArtSource/Bosses/"+spec.Model+"_LOD0.glb");
-            var destination=Path.GetFullPath(Models+"/"+spec.Model+"_LOD0.glb");
-            if(!File.Exists(source))throw new FileNotFoundException("Missing archived low model",source);
-            if(!File.Exists(destination)||File.GetLastWriteTimeUtc(source)!=File.GetLastWriteTimeUtc(destination))
-            {File.Copy(source,destination,true);File.SetLastWriteTimeUtc(destination,File.GetLastWriteTimeUtc(source));}
-            AssetDatabase.ImportAsset(Models+"/"+spec.Model+"_LOD0.glb",ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.ImportAsset(Models+"/"+spec.Model+"_BANG_LOD0.glb",ImportAssetOptions.ForceSynchronousImport);
             NormalizeModel(spec);
         }
-        return "Imported and normalized four archived LOD0 boss models.";
+        return "Imported and normalized four BANG rigid-part boss models; preserved encounter rules and stage placement.";
     }
 
     public static string Build()
@@ -86,8 +84,10 @@ public static class BossExpansionSetup
 
     static void NormalizeModel(Spec spec)
     {
-        var source=AssetDatabase.LoadAssetAtPath<GameObject>(Models+"/"+spec.Model+"_LOD0.glb");
+        var source=AssetDatabase.LoadAssetAtPath<GameObject>(Models+"/"+spec.Model+"_BANG_LOD0.glb");
         if(source==null)throw new InvalidOperationException(spec.Model+" is still importing.");
+        if(source.GetComponentsInChildren<MeshFilter>(true).Length < 2)
+            throw new InvalidOperationException(spec.Model+" is not a split BANG model.");
         var root=new GameObject(spec.Name);
         try
         {

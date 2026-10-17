@@ -1,0 +1,159 @@
+{
+  "date": "2026-10-17",
+  "assets": [
+    {
+      "asset": "TideBonesChoirmaster",
+      "parts": 10,
+      "triangles": 89995,
+      "size": [
+        12.722805,
+        10.5777092,
+        18.0
+      ],
+      "grounded": 4.76837158E-07,
+      "enemyReference": true,
+      "materialsSupported": true,
+      "textures": [
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048
+        },
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048
+        }
+      ]
+    },
+    {
+      "asset": "InvertedSurveyor",
+      "parts": 9,
+      "triangles": 89995,
+      "size": [
+        6.24951,
+        12.000001,
+        5.2286396
+      ],
+      "grounded": 0.0,
+      "enemyReference": true,
+      "materialsSupported": true,
+      "textures": [
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048
+        },
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048
+        }
+      ]
+    },
+    {
+      "asset": "UnlitFlagBearer",
+      "parts": 4,
+      "triangles": 89998,
+      "size": [
+        2.74976015,
+        3.79999971,
+        1.2994597
+      ],
+      "grounded": 0.0,
+      "enemyReference": true,
+      "materialsSupported": true,
+      "textures": [
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048
+        },
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048
+        }
+      ]
+    },
+    {
+      "asset": "StarlessWatcher",
+      "parts": 5,
+      "triangles": 89997,
+      "size": [
+        21.0415668,
+        29.9999981,
+        15.3311453
+      ],
+      "grounded": 0.0,
+      "enemyReference": true,
+      "materialsSupported": true,
+      "textures": [
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048
+        },
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048
+        }
+      ]
+    }
+  ],
+  "runtime": [
+    {
+      "asset": "TideBonesChoirmaster",
+      "scene": "BossM02",
+      "parts": 10,
+      "turn": 2,
+      "frame": 2778,
+      "seaActor": true
+    },
+    {
+      "asset": "InvertedSurveyor",
+      "scene": "BossM03",
+      "parts": 9,
+      "turn": 2,
+      "frame": 3664,
+      "seaActor": true
+    },
+    {
+      "asset": "UnlitFlagBearer",
+      "scene": "BossM04",
+      "parts": 4,
+      "turn": 2,
+      "frame": 4290,
+      "seaActor": true
+    },
+    {
+      "asset": "StarlessWatcher",
+      "scene": "BossM05",
+      "parts": 5,
+      "turn": 2,
+      "frame": 4391,
+      "seaActor": true
+    }
+  ]
+}

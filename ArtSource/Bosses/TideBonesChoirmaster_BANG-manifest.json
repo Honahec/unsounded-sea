@@ -1,0 +1,245 @@
+{
+  "asset": "TideBonesChoirmaster",
+  "provider": "Hyper3D BANG",
+  "source_generation": "3056a97e-803f-469f-8ddc-82d1891d91bf",
+  "source_asset": "5c7e56bb-bae6-5db3-939a-ff054831b6a7",
+  "request": {
+    "asset_id": "5c7e56bb-bae6-5db3-939a-ff054831b6a7",
+    "geometry_file_format": "glb"
+  },
+  "privacy": {
+    "basis": "API output is not published to public ASSETS or shared with other users.",
+    "policy": "https://docs.hyper3d.ai/en/legal/data-retention-policy"
+  },
+  "method": "BANG semantic split; independent rigid part pivots; Blender decimation",
+  "parts": 10,
+  "part_mapping": [
+    {
+      "pivot": "Part_01",
+      "source_mesh": "root.0",
+      "center": [
+        -0.001743406057357788,
+        -0.08844470977783203,
+        0.7580326795578003
+      ],
+      "minimum": [
+        -0.27245140075683594,
+        -0.686753511428833,
+        0.40156441926956177
+      ],
+      "maximum": [
+        0.26896458864212036,
+        0.509864091873169,
+        1.1145009994506836
+      ]
+    },
+    {
+      "pivot": "Part_02",
+      "source_mesh": "root.1",
+      "center": [
+        -0.0008676052093505859,
+        -0.21628522872924805,
+        0.5676077604293823
+      ],
+      "minimum": [
+        -0.17537738382816315,
+        -0.7396528720855713,
+        0.1979863941669464
+      ],
+      "maximum": [
+        0.17364217340946198,
+        0.3070824146270752,
+        0.9372291564941406
+      ]
+    },
+    {
+      "pivot": "Part_03",
+      "source_mesh": "root.2",
+      "center": [
+        0.3891627788543701,
+        -0.16298890113830566,
+        0.2661421298980713
+      ],
+      "minimum": [
+        0.10724282264709473,
+        -0.3138413429260254,
+        0.0
+      ],
+      "maximum": [
+        0.6710827350616455,
+        -0.012136459350585938,
+        0.5322842597961426
+      ]
+    },
+    {
+      "pivot": "Part_04",
+      "source_mesh": "root.3",
+      "center": [
+        -0.3891627788543701,
+        -0.1629319041967392,
+        0.2661421298980713
+      ],
+      "minimum": [
+        -0.6710827350616455,
+        -0.31372734904289246,
+        0.0
+      ],
+      "maximum": [
+        -0.10724282264709473,
+        -0.012136459350585938,
+        0.5322842597961426
+      ]
+    },
+    {
+      "pivot": "Part_05",
+      "source_mesh": "root.4",
+      "center": [
+        -0.0014685988426208496,
+        0.8026484251022339,
+        0.3574730157852173
+      ],
+      "minimum": [
+        -0.13942605257034302,
+        0.6529285907745361,
+        0.18006086349487305
+      ],
+      "maximum": [
+        0.13648885488510132,
+        0.9523682594299316,
+        0.5348851680755615
+      ]
+    },
+    {
+      "pivot": "Part_06",
+      "source_mesh": "root.5",
+      "center": [
+        -0.0006253495812416077,
+        -0.7744669914245605,
+        0.4818843603134155
+      ],
+      "minimum": [
+        -0.1128014475107193,
+        -0.9466161727905273,
+        0.3251597583293915
+      ],
+      "maximum": [
+        0.11155074834823608,
+        -0.6023178100585938,
+        0.638608992099762
+      ]
+    },
+    {
+      "pivot": "Part_07",
+      "source_mesh": "root.6",
+      "center": [
+        -0.004677198827266693,
+        0.5239176750183105,
+        0.6457797884941101
+      ],
+      "minimum": [
+        -0.05121105909347534,
+        0.3697633743286133,
+        0.46526145935058594
+      ],
+      "maximum": [
+        0.041856661438941956,
+        0.6780719757080078,
+        0.8262981176376343
+      ]
+    },
+    {
+      "pivot": "Part_08",
+      "source_mesh": "root.7",
+      "center": [
+        -0.001755155622959137,
+        -0.7106356620788574,
+        0.6408399343490601
+      ],
+      "minimum": [
+        -0.10611293464899063,
+        -0.8052711486816406,
+        0.5386919975280762
+      ],
+      "maximum": [
+        0.10260262340307236,
+        -0.6160001754760742,
+        0.742987871170044
+      ]
+    },
+    {
+      "pivot": "Part_09",
+      "source_mesh": "root.8",
+      "center": [
+        -0.00043173134326934814,
+        0.6603626608848572,
+        0.5015972852706909
+      ],
+      "minimum": [
+        -0.02731754444539547,
+        0.6316746473312378,
+        0.44417285919189453
+      ],
+      "maximum": [
+        0.026454081758856773,
+        0.6890506744384766,
+        0.5590217113494873
+      ]
+    },
+    {
+      "pivot": "Part_10",
+      "source_mesh": "root.9",
+      "center": [
+        -0.011611968278884888,
+        0.4773578643798828,
+        0.6756300330162048
+      ],
+      "minimum": [
+        -0.07967019826173782,
+        0.42357444763183594,
+        0.6028304696083069
+      ],
+      "maximum": [
+        0.05644626170396805,
+        0.5311412811279297,
+        0.7484295964241028
+      ]
+    }
+  ],
+  "decimate_ratio": 0.1125,
+  "triangles_before": 800000,
+  "triangles_after": 89995,
+  "source_spec": {
+    "bytes": 46928572,
+    "triangles": 800000,
+    "vertices": 705682,
+    "meshes": 10,
+    "materials": 10,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "runtime_spec": {
+    "bytes": 20358892,
+    "triangles": 89995,
+    "vertices": 107686,
+    "meshes": 10,
+    "materials": 10,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "outputs": {
+    "source": "ArtSource/Bosses/TideBonesChoirmaster_BANG_High.glb",
+    "glb": "Assets/UnsoundedSea/Art/Models/TideBonesChoirmaster_BANG_LOD0.glb",
+    "preview": "ArtSource/Bosses/TideBonesChoirmaster_BANG-preview.png"
+  },
+  "sha256": {
+    "source": "3ad7a5949d21bcbc7ef755a4e9b4c73769396b9252abda391a4fd4a8bf1c99a3",
+    "glb": "e52c5facb59d9ed6b4c723b89ee1cbdec956e14e136b3471ec07487906716e0f",
+    "preview": "b42a3e60b925df7a442905317d7e377bb1662d0cfaaeecd2ce68960497ed5046"
+  },
+  "animation_ready": false,
+  "notes": [
+    "Part pivots preserve the assembled silhouette. Anatomical joint calibration and combat animation are not included."
+  ]
+}

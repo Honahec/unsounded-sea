@@ -29,10 +29,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5793252420606983802}
+  - {fileID: 1632421998032115160}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &5909709488112005857
+--- !u!1001 &707579596644415916
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -40,69 +40,69 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8325659759326853866}
     m_Modifications:
-    - target: {fileID: -746079447478585731, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
-      propertyPath: m_Name
-      value: TideBonesChoirmaster_LOD0
-      objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalScale.x
-      value: 9.477911
+      value: 9.479138
       objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalScale.y
-      value: 9.477911
+      value: 9.479138
       objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalScale.z
-      value: 9.477911
+      value: 9.479138
       objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.00031296985
+      value: -0.0013774716
       objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0
+      value: 0.0028069234
       objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.02576239
+      value: 0.026583282
       objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalRotation.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
+    - target: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2704617126083673900, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+      propertyPath: m_Name
+      value: TideBonesChoirmaster_BANG_LOD0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
-  m_SourcePrefab: {fileID: -4161369568681901532, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
---- !u!4 &5793252420606983802 stripped
+  m_SourcePrefab: {fileID: -4161369568681901532, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+--- !u!4 &1632421998032115160 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 172901596975893659, guid: 1b64dcc456d764a4bbc3aa6966601360, type: 3}
-  m_PrefabInstance: {fileID: 5909709488112005857}
+  m_CorrespondingSourceObject: {fileID: -6956279337524843404, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+  m_PrefabInstance: {fileID: 707579596644415916}
   m_PrefabAsset: {fileID: 0}
