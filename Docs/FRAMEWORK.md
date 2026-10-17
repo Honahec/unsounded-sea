@@ -4,7 +4,7 @@
 
 ## 快速运行
 
-打开 `Assets/UnsoundedSea/Scenes/MainMenu.unity`，Play 后选择「启航」或「继续航程」进入 `Voyage.unity`；有效未完航程需确认覆盖，终局记录不显示继续。开局可选择医师或听音员，记住设备偏好。统一「调试选关」仅在 Editor／Development Build 显示，覆盖 25 个普通遭遇、八个 Boss／目标战与非战斗节点。Editor 运行当前场景；pull 不会自动切换入口。`Battle.unity` 保留为旧规则样例，`ModelImportReview.unity` 仅供美术审阅；绑定资产保留集见[模型流程](MODEL_IMPORT_WORKFLOW.md)。
+Editor 点击 Play 默认从 `Assets/UnsoundedSea/Scenes/MainMenu.unity` 启动，再选择「启航」或「继续航程」进入 `Voyage.unity`；有效未完航程需确认覆盖，终局记录不显示继续。`PlayModeEntry` 配置 `playModeStartScene`，不覆盖当前编辑场景；调试单场景时取消菜单 `Unsounded Sea > Play From Main Menu`，该偏好按本机项目保存。开局可选择医师或听音员，记住设备偏好。统一「调试选关」仅在 Editor／Development Build 显示，覆盖 25 个普通遭遇、八个 Boss／目标战与非战斗节点。`Battle.unity` 保留为旧规则样例，`ModelImportReview.unity` 仅供美术审阅；绑定资产保留集见[模型流程](MODEL_IMPORT_WORKFLOW.md)。
 
 独立样例「雾海来客」：调查船上仅保留空潜水服「灯塔下的回声」，已移除蒙面祷告者。每回合 3 行动、抽 5 张牌；点击敌人切换查看对象，将卡牌拖到敌人、信息区或脚下圆圈后松手出牌，无目标牌拖到战场或玩家资源区。调查工具每场次数有限。额外遭遇牌「绘制封线」基础消耗 3 行动，每回合一次，累计 4 段获胜；它保留在手，不进入普通牌堆，敌人可以仍然存活。生命或理智归零失败。它是前两幕七个随机 Boss 候选之一，不固定在第一幕。独立样例允许重开，航程战斗只允许保存后返回航海、继续当前战斗，不提供重试刷新资源。
 
@@ -103,6 +103,8 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 
 
 `MainMenu` 与 `SettingsPanel` 共用深墨绿、旧黄铜与象牙文字样式；Esc 打开简短暂停菜单，J 单独打开航海日志。覆盖存档警告、放弃后果和错误不省略。设置提供总音量、音乐／环境声、音效、1280×720／1600×900／1920×1080、显示模式、垂直同步与减少动效；音量百分比固定留宽且不换行，设置内容可滚动。`GameSettings` 属于设备偏好，不进入规则或回放。旧 `BattleHud` 同步手牌、工具、日志与意图规则，仅服务 `Battle.unity`。
+
+四个 UI 入口通过 `UiFont` 从现有中文源字体创建共用的运行时动态 SDF 字体，保留采样尺寸、图集尺寸和渲染模式。新增字形只填入运行时图集，不修改导入的 `default_zh.asset`；切场景复用，新的 Play 会话重置缓存。不要通过恢复正在使用的字体资产来清理字形缓存，这可能让 TextCore 已缓存的字形失去图集引用。
 
 场景已入库，无需生成脚本才能运行。需要有意重建本场样例时，用 Unity CLI 执行 `Tools/OceanBattleSetup.cs` 的 `OceanBattleSetup.Build`；它会覆盖本场场景与配置，但保留航海标题入口，运行前先保存改动。`Tools/SeaBossSetup.cs` 的 `ImportModel` / `Build` 分别归一化 Boss 并重建海面样例；仅重设海面战构图可调用 `SeaBossSetup.ApplyComposition`，不会重建遭遇或场景。重建后再执行 `Tools/UberWaterSetup.cs` 的 `UberWaterSetup.Build` 恢复新版海面（只更新水体、雾和相应 Prefab 配置）。`Tools/ImportSurveyVessel.cs` 负责选定船体版本的归一化；模型制作和 LFS 规范见 [模型全流程](MODEL_IMPORT_WORKFLOW.md)。
 

@@ -42,7 +42,7 @@ namespace UnsoundedSea.Runtime
             root.Clear(); root.AddToClassList("ocean-ui"); root.pickingMode = PickingMode.Ignore; root.focusable = true;
             if (menuStyle != null) root.styleSheets.Add(menuStyle);
             if (styleSheet != null) root.styleSheets.Add(styleSheet);
-            if (font != null) root.style.unityFontDefinition = FontDefinition.FromSDFFont(font);
+            if (font != null) root.style.unityFontDefinition = FontDefinition.FromSDFFont(UiFont.Get(font));
             director.Changed += Refresh;
             director.Resolved += OnResolved;
             root.RegisterCallback<KeyDownEvent>(Key, TrickleDown.TrickleDown);

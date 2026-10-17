@@ -29,7 +29,7 @@ namespace UnsoundedSea.Runtime
             {
                 if (interfaceFont == null || menuStyle == null)
                     throw new InvalidOperationException("Assign the project menu font and stylesheet.");
-                root.style.unityFontDefinition = FontDefinition.FromSDFFont(interfaceFont);
+                root.style.unityFontDefinition = FontDefinition.FromSDFFont(UiFont.Get(interfaceFont));
                 if (!root.styleSheets.Contains(menuStyle)) root.styleSheets.Add(menuStyle);
                 root.AddToClassList("game-menu");
                 Build("menu-start");

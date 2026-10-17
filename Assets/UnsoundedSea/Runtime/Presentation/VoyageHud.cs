@@ -34,7 +34,7 @@ namespace UnsoundedSea.Runtime
             {
                 if (interfaceFont == null || interfaceStyle == null || menuStyle == null || sailingPresentation == null)
                     throw new InvalidOperationException("Assign the voyage font, stylesheets and sailing presentation.");
-                root.style.unityFontDefinition = FontDefinition.FromSDFFont(interfaceFont);
+                root.style.unityFontDefinition = FontDefinition.FromSDFFont(UiFont.Get(interfaceFont));
                 if (!root.styleSheets.Contains(menuStyle)) root.styleSheets.Add(menuStyle);
                 if (!root.styleSheets.Contains(interfaceStyle)) root.styleSheets.Add(interfaceStyle);
                 root.AddToClassList("voyage-hud");
