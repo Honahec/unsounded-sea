@@ -27,6 +27,8 @@ namespace UnsoundedSea.Runtime
         private Quaternion[] tentacleRotations;
         private Vector3[] attackAnchors, attackAxes;
         private Quaternion[] attackRotations;
+        private Vector3 attackBodyPosition, attackCrownPosition;
+        private Quaternion attackBodyRotation, attackCrownRotation;
         private bool paused;
         private float idleTime;
 
@@ -73,12 +75,19 @@ namespace UnsoundedSea.Runtime
 
         public void PlayAttack()
         {
-            // Freeze the current attachment positions. The imported transform
+            // Capture the attachments relative to the body's starting pose. The imported transform
             // origins are not anatomical joints, so rotate about the baked root
             // and compensate translation instead of lifting the whole part.
-            if (tentacleRoots == null || tentacleTips == null || tentacles == null ||
+            if (body == null || tentacleRoots == null || tentacleTips == null || tentacles == null ||
                 tentacleRoots.Length != tentacles.Length || tentacleTips.Length != tentacles.Length)
                 return;
+            attackBodyPosition = body.localPosition;
+            attackBodyRotation = body.localRotation;
+            if (crown != null)
+            {
+                attackCrownPosition = crown.localPosition;
+                attackCrownRotation = crown.localRotation;
+            }
             attackAnchors = new Vector3[tentacles.Length];
             attackAxes = new Vector3[tentacles.Length];
             attackRotations = new Quaternion[tentacles.Length];
@@ -226,13 +235,37 @@ namespace UnsoundedSea.Runtime
 
         private void ApplyAttackPose(float angle)
         {
+            // A small shared body motion carries the attached roots and crown.
+            // At stage scale this is about 3 m of travel on a 208 m creature;
+            // the lowest point trails contact by 80 ms, with no spring bounce.
+            var load = AttackBodyLoad(ActionElapsed);
+            var lift = load < 0 ? -load * 0.008f : -load * 0.018f;
+            var sway = Quaternion.Euler(load * 0.85f, 0, load * 0.30f);
+            var pivot = attackBodyPosition + Vector3.up * lift;
+            body.localPosition = pivot;
+            body.localRotation = sway * attackBodyRotation;
+            if (crown != null)
+            {
+                crown.localPosition = pivot + sway * (attackCrownPosition - attackBodyPosition);
+                crown.localRotation = sway * attackCrownRotation;
+            }
             for (var i = 0; i < tentacles.Length; i++)
             {
                 var part = tentacles[i];
-                var rotation = Quaternion.AngleAxis(angle, attackAxes[i]) * attackRotations[i];
+                var rotation = sway * Quaternion.AngleAxis(angle, attackAxes[i]) * attackRotations[i];
+                var anchor = pivot + sway * (attackAnchors[i] - attackBodyPosition);
                 part.localRotation = rotation;
-                part.localPosition = attackAnchors[i] - rotation * Vector3.Scale(tentacleRoots[i], part.localScale);
+                part.localPosition = anchor - rotation * Vector3.Scale(tentacleRoots[i], part.localScale);
             }
+        }
+
+        private static float AttackBodyLoad(float time)
+        {
+            if (time < 0.32f) return -Smooth(time / 0.32f);
+            if (time < 0.38f) return -1f;
+            if (time < 0.56f) return Mathf.Lerp(-1f, 0.65f, Smooth((time - 0.38f) / 0.18f));
+            if (time < 0.64f) return Mathf.Lerp(0.65f, 1f, Smooth((time - 0.56f) / 0.08f));
+            return Mathf.Lerp(1f, 0, Smooth((time - 0.64f) / 0.30f));
         }
 
         private static float Smooth(float value)

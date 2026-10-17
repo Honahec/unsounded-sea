@@ -38,7 +38,7 @@ namespace UnsoundedSea.Tests
 
         [TestCase(false)]
         [TestCase(true)]
-        public void AttackPinsEveryRootAndRaisesOuterEnds(bool transformed)
+        public void AttackCarriesRootsWithSubtleBodyMotionAndRaisesOuterEnds(bool transformed)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
             var instance = Object.Instantiate(prefab);
@@ -54,10 +54,15 @@ namespace UnsoundedSea.Tests
                 Assert.That(motion.tentacleRoots, Has.Length.EqualTo(6));
                 Assert.That(motion.tentacleTips, Has.Length.EqualTo(6));
                 var roots = motion.tentacles.Select((p, i) => p.TransformPoint(motion.tentacleRoots[i])).ToArray();
+                var attachments = roots.Select(p => motion.body.InverseTransformPoint(p)).ToArray();
                 var tips = motion.tentacles.Select((p, i) => p.TransformPoint(motion.tentacleTips[i])).ToArray();
                 var lengths = roots.Select((p, i) => Vector3.Distance(p, tips[i])).ToArray();
                 var bodyPosition = motion.body.position;
                 var bodyRotation = motion.body.rotation;
+                var crownAttachment = motion.body.InverseTransformPoint(motion.crown.position);
+                var bodyHeight = instance.GetComponentsInChildren<Renderer>().Max(r => r.bounds.max.y) -
+                    instance.GetComponentsInChildren<Renderer>().Min(r => r.bounds.min.y);
+                var contactBodyY = bodyPosition.y;
                 motion.PlayAttack();
                 // Verify the entire arc, including lift, contact and recovery;
                 // moving transform origins upward cannot satisfy this test.
@@ -68,7 +73,7 @@ namespace UnsoundedSea.Tests
                     {
                         var root = motion.tentacles[i].TransformPoint(motion.tentacleRoots[i]);
                         var tip = motion.tentacles[i].TransformPoint(motion.tentacleTips[i]);
-                        Assert.That(Vector3.Distance(root, roots[i]), Is.LessThan(lengths[i] * 0.0001f),
+                        Assert.That(Vector3.Distance(root, motion.body.TransformPoint(attachments[i])), Is.LessThan(lengths[i] * 0.0001f),
                             $"Tentacle {i + 1} attachment drift at frame {frame}");
                         Assert.That(Vector3.Distance(root, tip), Is.EqualTo(lengths[i]).Within(lengths[i] * 0.0001f));
                         if (frame == 35)
@@ -76,13 +81,23 @@ namespace UnsoundedSea.Tests
                         if (frame == 57)
                             Assert.That(tip.y, Is.LessThan(tips[i].y), $"Outer end {i + 1} must slap downward");
                     }
-                    Assert.That(Vector3.Distance(motion.body.position, bodyPosition), Is.LessThan(0.0001f));
-                    Assert.That(Quaternion.Angle(motion.body.rotation, bodyRotation), Is.LessThan(0.001f));
-                    if (frame == 35) Assert.That(motion.ActionImpact, Is.Zero);
+                    Assert.That(Vector3.Distance(motion.body.position, bodyPosition), Is.LessThan(bodyHeight * 0.02f));
+                    Assert.That(Quaternion.Angle(motion.body.rotation, bodyRotation), Is.LessThan(1.1f));
+                    Assert.That(Vector3.Distance(motion.crown.position, motion.body.TransformPoint(crownAttachment)),
+                        Is.LessThan(bodyHeight * 0.0001f));
+                    if (frame == 35)
+                    {
+                        Assert.That(motion.ActionImpact, Is.Zero);
+                        Assert.That(motion.body.position.y, Is.GreaterThan(bodyPosition.y + bodyHeight * 0.001f));
+                    }
+                    if (frame == 56) contactBodyY = motion.body.position.y;
+                    if (frame == 64) Assert.That(motion.body.position.y, Is.LessThan(contactBodyY));
                     if (frame == 57) Assert.That(motion.ActionImpact, Is.GreaterThan(0.8f));
                     if (motion.ActiveAction == "Idle") break;
                 }
                 Assert.That(motion.ActiveAction, Is.EqualTo("Idle"));
+                Assert.That(Vector3.Distance(motion.body.position, bodyPosition), Is.LessThan(0.0001f));
+                Assert.That(Quaternion.Angle(motion.body.rotation, bodyRotation), Is.LessThan(0.001f));
                 for (var i = 0; i < motion.tentacles.Length; i++)
                     Assert.That(Vector3.Distance(motion.tentacles[i].TransformPoint(motion.tentacleTips[i]), tips[i]),
                         Is.LessThan(lengths[i] * 0.0001f));
