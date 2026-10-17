@@ -14,6 +14,35 @@ namespace UnsoundedSea.Editor
         private const string Root = "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/";
         public static GameObject LoadOrdinary(string name) => AssetDatabase.LoadAssetAtPath<GameObject>(Root + name + ".prefab");
 
+        private static void CalibrateFacing(GameObject root)
+        {
+            float yaw;
+            switch (root.name)
+            {
+                case "MisfireGunner": yaw = 60; break;
+                case "BlackSailMessenger": case "InvertedSurveyHand": yaw = 15; break;
+                default: return;
+            }
+            if (root.transform.childCount != 1) throw new InvalidOperationException("Unexpected deck model hierarchy: " + root.name);
+            // Normalize the visible authored pose, rather than treating every wrapper's +Z as its gaze.
+            root.transform.GetChild(0).localRotation = Quaternion.Euler(0, yaw, 0);
+        }
+
+        public static string CalibrateDeckFacing()
+        {
+            var paths = new[] { "MisfireGunner", "BlackSailMessenger", "InvertedSurveyHand" }.Select(name => Root + name + ".prefab").ToArray();
+            var editing = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+            if (editing != null && paths.Contains(editing.assetPath) && editing.scene.isDirty)
+                throw new InvalidOperationException("Save the open deck prefab edits first.");
+            foreach (var path in paths)
+            {
+                var root = PrefabUtility.LoadPrefabContents(path);
+                try { CalibrateFacing(root); PrefabUtility.SaveAsPrefabAsset(root, path); }
+                finally { PrefabUtility.UnloadPrefabContents(root); }
+            }
+            return "Calibrated the authored firearm and two oblique character poses toward +Z; preserved rigs and model GUIDs.";
+        }
+
         [MenuItem("Unsounded Sea/Animation/Apply Deck Combat Animation")]
         public static string Apply()
         {
@@ -72,6 +101,7 @@ namespace UnsoundedSea.Editor
             var root = PrefabUtility.LoadPrefabContents(path);
             try
             {
+                CalibrateFacing(root);
                 var motion = root.GetComponent<DeckActorMotion>() ?? root.AddComponent<DeckActorMotion>();
                 motion.style = StyleFor(root.name);
                 motion.attackDuration = motion.style == DeckMotionStyle.Heavy ? 1.8f : motion.style == DeckMotionStyle.Skirmisher ? 1.18f : motion.style == DeckMotionStyle.Veiled ? 1.65f : 1.45f;

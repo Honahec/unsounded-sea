@@ -6,7 +6,7 @@ namespace UnsoundedSea.Runtime
     /// <summary>Single source for sanity thresholds: unlabeled ticks on a bar plus a state word when not stable.</summary>
     internal static class SanityGauge
     {
-        public const string RuleTooltip = "理智 13–30 稳定，6–12 动摇，1–5 临界，0 时无法继续。阈值只提示风险，不改变费用、效果或伤害；主动支付后至少剩 1。";
+        public const string RuleTooltip = "理智 13–30 稳定，6–12 动摇，1–5 临界，归零时航程结束。状态不影响费用、效果或伤害；主动支付后至少剩 1。";
 
         public static void AddMarks(VisualElement track, int max)
         {

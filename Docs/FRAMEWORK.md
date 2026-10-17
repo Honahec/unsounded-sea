@@ -67,8 +67,8 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 
 - **换场景**：复制或创建带 `BattleStage` 的 Prefab，配置 `battleCamera`、`vessel`（所有随船运动的物体父节点）、`actorAnchors` 和选中材质，再替换 Scenario 的 `stagePrefab`。海面与音响可选；当前舞台不支持角色移动/导航。
 - **镜头构图**：海面 Boss 的相机独立于船体 rig，船体横摇不带动镜头；巨浪来临时按前方水位预判升高并调整俯角，浪后回到基础构图。基础位置 `(85,22,-26)`、看向 `(0,8,70)`、垂直 FOV 60°。换船或海怪后需一起检查尺度、距离、海面覆盖、名牌和 HUD 遮挡，不能只移动相机。
-- **甲板 / 海面锚点**：普通锚点保持甲板表现；`FogSeaStage.singleActorAnchor` 指向原右侧第二站位，单敌使用此引用，双敌仍依次使用原两个 `actorAnchors`；其他舞台不配置该可选引用时保持原布局。`Tools/OceanBattleSetup.ConfigureSingleEnemyPlacement` 只更新此引用，不重建舞台。海面锚点挂 `BattleAnchor` 并设为 `Sea`，必须放在船体 rig 之外，校验会拒绝错误挂载。设置独立位置、浸没深度、名牌高度/偏移、轻微升沉与扰流半径；海面角色通常关闭脚底选中环。碰撞范围按模型局部包围盒计算，锚点旋转/缩放不重复放大范围。
-- **换角色**：修改 Enemy 的 `presentationPrefab`，或在 Scenario 的 `actorOverrides` 按敌人槽位覆写。模型约定脚底 y=0、正面 +Z、真实米制；锚点决定位置和朝向。同种敌人可以重复引用，规则实例 ID 为 `id:槽位`。出生前校验相机、船体、锚点和模型引用。
+- **甲板 / 海面锚点**：普通锚点保持甲板表现，角色出生时按实际位置在甲板平面内朝向战斗相机；`FogSeaStage.singleActorAnchor` 指向原右侧第二站位，单敌使用此引用，双敌仍依次使用原两个 `actorAnchors`；其他舞台不配置该可选引用时保持原布局。`Tools/OceanBattleSetup.ConfigureSingleEnemyPlacement` 只更新此引用，不重建舞台。海面锚点挂 `BattleAnchor` 并设为 `Sea`，必须放在船体 rig 之外，校验会拒绝错误挂载。设置独立位置、浸没深度、名牌高度/偏移、轻微升沉与扰流半径；海面角色通常关闭脚底选中环。碰撞范围按模型局部包围盒计算，锚点旋转/缩放不重复放大范围。
+- **换角色**：修改 Enemy 的 `presentationPrefab`，或在 Scenario 的 `actorOverrides` 按敌人槽位覆写。模型约定脚底 y=0、正面 +Z、真实米制；锚点决定位置与海面角色朝向，甲板角色按战斗相机定向。包装节点的 +Z 不一定是实际脸部／武器前向；`DeckAnimationSetup.CalibrateDeckFacing` 校准炮手、黑帆传令和倒悬测量员的内部模型姿态，完整动画配置入口会重复应用同一校准。同种敌人可以重复引用，规则实例 ID 为 `id:槽位`。出生前校验相机、船体、锚点和模型引用。
 - **换遭遇**：Scenario 指向另一个 Encounter；牌组、资源、敌人意图和工具仍属于规则数据。UI 按快照更新，不依赖两只敌人的名字。新增敌人需增加相应舞台锚点并检查名牌排布。
 - **特殊战入口**：派生 `BattleRuleModule`，为每次会话创建新的 `EffectRegistry` / `IEncounterObjective`。`SealingRuleModule` 用于雾海封线；`SurvivalRuleModule` 用于海面撤离，按已结算轮数计数。两者均不靠敌人全部死亡判胜。模块资产只存配置，不能共享可变进度。需要新命令、敌人阶段策略或即时玩法时仍需扩展 Core 与测试；当前入口不等于这些玩法已实现。
 - **甲板骨骼动作**：`DeckActorMotion` 兼容保留集的两种骨名，缓存绑定姿态并按角色空间轴叠加脊柱／胸／颈／肩臂旋转；不使用海怪 Animator 状态名，不移动脚部和骨盆。七种动作家族、可调曲线与幅度见[机制文档](ASSET_MECHANICS_DESIGN.md#甲板敌人的战斗动作设计与当前实现)。`BattleView.ResolvedEnemyActions` 只包含上个成功 EndTurn 已执行的敌人行动（ID、通道、原始量），普通敌人和 Boss 召唤物按此播放；不解析日志、不读取新回合隐藏意图。`BattleDirector.Busy` 等待攻击／受击时钟结束，暂停时保持锁。海面巨兽同样消费该记录；表现不推进规则随机数。
@@ -252,7 +252,7 @@ UnsoundedSea.Tests.EditMode       NUnit 行为测试，引用 Core / Runtime
 
 `SupportCatalog` 定义 25 道具和 10 船员；`BattleLoadout` 校验最多两份战斗物资、三件不同装备且最多一个引擎、航标和被注视。`BattleSupportRules` 处理 `UseConsumable`、船员、装备触发与显式证据组合；`BattleView.SupplyActions` 提供合法目标。所有扣费先验证，消耗记录在 `SpentConsumables`；每次成功战斗命令写回待续回放，战后由 `ResolveEncounter` 验证携带份数并一次扣库存。装备、受伤与类型化证据均进入回放指纹。
 
-节点主面板将 `GetNodeChoices` 的互斥「本节点选项」与 `GetNodeServices` 的「接驳服务」分组；事件标题读取 `EventTitle`，被注视 3 层时回视处置优先。`VoyageSupport.GetSupportChoices` 保留兼容的配装与事件接口；`IsLoadoutChoice` 限制船上清单仅查看／配装，购买、招聘、治疗、修械、营救邀请、筹备和回望均在主面板，经 `ManageSupport` 验证执行。服务不结算节点，也不能重开一次性节点收益；已结算节点隐藏服务，待邀请候选除外。`BattleSupplyPanel` 继续消费实际物资次数和目标，I14 封泥每场最多推进一次普通／雾海封线。
+节点主面板将 `GetNodeChoices` 的互斥「可选行动」与 `GetNodeServices` 的「接驳服务」分组；事件标题读取 `EventTitle`，被注视 3 层时回视处置优先。`VoyageSupport.GetSupportChoices` 保留兼容的配装与事件接口；`IsLoadoutChoice` 限制船上清单仅查看／配装，购买、招聘、治疗、修械、营救邀请、筹备和回望均在主面板，经 `ManageSupport` 验证执行。服务不结算节点，也不能重开一次性节点收益；已结算节点隐藏服务，待邀请候选除外。`BattleSupplyPanel` 继续消费实际物资次数和目标，I14 封泥每场最多推进一次普通／雾海封线。
 
 奖励页先选牌，再选择「直接编入（替换一张）」或「仅收入行动簿」。独立替换弹窗调用单次 `ClaimReward(id, oldId)`，Esc／右键／取消不修改状态；每次领取清空 UI 选择。`NewRewardCardIds` 只标记尚未整备的新收获，整备保存后清除。适用 Boss 标签读取目录 `BossIds`，在奖励选择、行动簿焦点／悬停摘要与提示中显示，不修改卡面、不把一般推荐等同于专用。险航徽记同时用于已公开航路和海图，普通预览读取 `PreviewStyle` 与公开候选通道，不反推锁定行动。
 

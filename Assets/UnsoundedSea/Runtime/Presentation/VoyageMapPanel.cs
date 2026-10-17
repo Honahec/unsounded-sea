@@ -25,7 +25,7 @@ namespace UnsoundedSea.Runtime
 
             if (session == null)
             {
-                var empty = new Label("独立遭遇 / 无航程海图") { pickingMode = PickingMode.Ignore };
+                var empty = new Label("本场遭遇没有海图") { pickingMode = PickingMode.Ignore };
                 empty.AddToClassList("map-empty"); Add(empty); return;
             }
 

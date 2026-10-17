@@ -47,6 +47,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.DeckActorMotion
   style: 6
   amplitude: 1
+  idleAmplitude: 1.8
+  attackAmplitude: 1.5
+  hitAmplitude: 1.6
   attackDuration: 1.45
   hitDuration: 0.75
   strike:
@@ -933,7 +936,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8477790688681899896}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.5, z: 0, w: 0.8660254}
   m_LocalPosition: {x: -0.00000023841858, y: 0.00000011920929, z: 0.00000017881393}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
