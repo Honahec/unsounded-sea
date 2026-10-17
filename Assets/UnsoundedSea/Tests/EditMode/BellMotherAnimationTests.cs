@@ -53,9 +53,11 @@ namespace UnsoundedSea.Tests
                 var motion = instance.GetComponent<BellMotherRigidMotion>();
                 Assert.That(motion.tentacleRoots, Has.Length.EqualTo(6));
                 Assert.That(motion.tentacleTips, Has.Length.EqualTo(6));
+                Assert.That(motion.attackTentacles.Select(p => p.name), Is.EquivalentTo(new[] { "Tentacle_04", "Tentacle_05" }));
                 var roots = motion.tentacles.Select((p, i) => p.TransformPoint(motion.tentacleRoots[i])).ToArray();
                 var attachments = roots.Select(p => motion.body.InverseTransformPoint(p)).ToArray();
                 var tips = motion.tentacles.Select((p, i) => p.TransformPoint(motion.tentacleTips[i])).ToArray();
+                var tipAttachments = tips.Select(p => motion.body.InverseTransformPoint(p)).ToArray();
                 var lengths = roots.Select((p, i) => Vector3.Distance(p, tips[i])).ToArray();
                 var bodyPosition = motion.body.position;
                 var bodyRotation = motion.body.rotation;
@@ -76,9 +78,13 @@ namespace UnsoundedSea.Tests
                         Assert.That(Vector3.Distance(root, motion.body.TransformPoint(attachments[i])), Is.LessThan(lengths[i] * 0.0001f),
                             $"Tentacle {i + 1} attachment drift at frame {frame}");
                         Assert.That(Vector3.Distance(root, tip), Is.EqualTo(lengths[i]).Within(lengths[i] * 0.0001f));
-                        if (frame == 35)
+                        var strikes = motion.attackTentacles.Contains(motion.tentacles[i]);
+                        if (!strikes)
+                            Assert.That(Vector3.Distance(tip, motion.body.TransformPoint(tipAttachments[i])),
+                                Is.LessThan(lengths[i] * 0.02f), $"Support limb {i + 1} must not join the slap");
+                        if (strikes && frame == 35)
                             Assert.That(tip.y - tips[i].y, Is.GreaterThan(lengths[i] * 0.2f), $"Outer end {i + 1} must rise");
-                        if (frame == 57)
+                        if (strikes && frame == 57)
                             Assert.That(tip.y, Is.LessThan(tips[i].y), $"Outer end {i + 1} must slap downward");
                     }
                     Assert.That(Vector3.Distance(motion.body.position, bodyPosition), Is.LessThan(bodyHeight * 0.02f));

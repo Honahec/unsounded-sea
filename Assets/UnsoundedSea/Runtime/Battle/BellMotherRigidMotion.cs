@@ -12,6 +12,8 @@ namespace UnsoundedSea.Runtime
         public Transform body;
         public Transform crown;
         public Transform[] tentacles;
+        [Tooltip("Only these front tentacles perform the water slap; the others keep a restrained sway.")]
+        public Transform[] attackTentacles;
         [Tooltip("Attachment points in each tentacle transform's local space, baked by BellMotherBangSetup.")]
         public Vector3[] tentacleRoots;
         [Tooltip("Outer end samples in each tentacle transform's local space.")]
@@ -252,7 +254,12 @@ namespace UnsoundedSea.Runtime
             for (var i = 0; i < tentacles.Length; i++)
             {
                 var part = tentacles[i];
-                var rotation = sway * Quaternion.AngleAxis(angle, attackAxes[i]) * attackRotations[i];
+                var strikes = attackTentacles != null && System.Array.IndexOf(attackTentacles, part) >= 0;
+                // Support limbs stay low. Fade their sub-degree movement back
+                // to the starting pose so recovery has no discontinuity.
+                var supportSway = Mathf.Sin(Mathf.PI * Mathf.Clamp01(ActionElapsed / 0.94f)) *
+                    Mathf.Sin(idleTime * 1.8f + i * 0.82f + ActionElapsed * 1.8f) * 0.8f;
+                var rotation = sway * Quaternion.AngleAxis(strikes ? angle : supportSway, attackAxes[i]) * attackRotations[i];
                 var anchor = pivot + sway * (attackAnchors[i] - attackBodyPosition);
                 part.localRotation = rotation;
                 part.localPosition = anchor - rotation * Vector3.Scale(tentacleRoots[i], part.localScale);

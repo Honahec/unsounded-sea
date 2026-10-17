@@ -86,6 +86,10 @@ public static class BellMotherBangSetup
     // The inner/outer 5% averages avoid selecting a single noisy surface vertex.
     static void ConfigureAttackJoints(BellMotherRigidMotion motion)
     {
+        // The inner front pair straddles the body centreline and points along
+        // model +Z. The BANG numeric order is not front-to-back order.
+        motion.attackTentacles = new[] { "Tentacle_04", "Tentacle_05" }
+            .Select(name => motion.tentacles.Single(part => part.name == name)).ToArray();
         motion.tentacleRoots = new Vector3[motion.tentacles.Length];
         motion.tentacleTips = new Vector3[motion.tentacles.Length];
         for (var i = 0; i < motion.tentacles.Length; i++)
@@ -123,7 +127,7 @@ public static class BellMotherBangSetup
             var motion = root.GetComponent<BellMotherRigidMotion>();
             ConfigureAttackJoints(motion);
             PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
-            return "Baked six root/outer-tip pairs; preserved meshes, materials and imported hierarchy.";
+            return "Baked six root/outer-tip pairs; selected Tentacle_04/05 for attacks; preserved meshes, materials and hierarchy.";
         }
         finally { PrefabUtility.UnloadPrefabContents(root); }
     }
