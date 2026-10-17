@@ -8,8 +8,9 @@ namespace UnsoundedSea.Runtime
 {
     internal sealed class CardCollectionPanel : VisualElement
     {
-        // Cards keep a 2:3 ratio; rows are rounded to fill the height, then the page holds whole rows and columns.
+        // Leave room for UI Toolkit's panel-to-pixel rounding at fractional scales.
         private const float CardMaxHeight = 225, CardMinHeight = 170, Gap = 10;
+        private const float FitSlack = 1;
         private float cardWidth = 150, cardHeight = 225;
         private readonly Action close;
         private readonly VisualElement grid;
@@ -53,16 +54,16 @@ namespace UnsoundedSea.Runtime
 
         private void Fit()
         {
-            // Measure the browser, not the grid: the grid is sized to whole columns after each fit.
-            var width = grid.parent.resolvedStyle.width; var height = grid.resolvedStyle.height;
+            // Only the browser defines available space; card content must not determine page capacity.
+            var width = grid.parent.contentRect.width; var height = grid.parent.contentRect.height;
             if (float.IsNaN(width) || float.IsNaN(height) || width <= 0 || height <= 0) return;
             var fitRows = Mathf.Max(1, Mathf.RoundToInt(height / (CardMaxHeight + Gap)));
-            var fitHeight = Mathf.Clamp(height / fitRows - Gap, CardMinHeight, CardMaxHeight);
-            if (fitHeight * fitRows + Gap * fitRows > height + 1) { fitRows = Mathf.Max(1, fitRows - 1); fitHeight = Mathf.Min(CardMaxHeight, height / fitRows - Gap); }
-            var fitWidth = Mathf.Round(fitHeight * 2f / 3f);
-            var fitColumns = Mathf.Max(1, Mathf.FloorToInt(width / (fitWidth + Gap)));
-            var sized = !Mathf.Approximately(fitHeight, cardHeight);
-            cardHeight = Mathf.Round(fitHeight); cardWidth = fitWidth;
+            fitRows = Mathf.Min(fitRows, Mathf.Max(1, Mathf.FloorToInt(height / (CardMinHeight + Gap + FitSlack))));
+            var fitHeight = Mathf.Floor(Mathf.Min(CardMaxHeight, height / fitRows - Gap - FitSlack));
+            var fitWidth = Mathf.Floor(fitHeight * 2f / 3f);
+            var fitColumns = Mathf.Max(1, Mathf.FloorToInt(width / (fitWidth + Gap + FitSlack)));
+            var sized = !Mathf.Approximately(fitHeight, cardHeight) || !Mathf.Approximately(fitWidth, cardWidth);
+            cardHeight = fitHeight; cardWidth = fitWidth;
             if (!sized && fitColumns == columns && fitRows == rows) return;
             var first = page * PageSize;
             columns = fitColumns; rows = fitRows;
@@ -81,9 +82,16 @@ namespace UnsoundedSea.Runtime
         private void RenderPage()
         {
             grid.Clear();
-            grid.style.width = columns * (cardWidth + Gap);
+            // Explicit rows avoid flex-wrap dropping a column when rounded margins exceed the grid width.
+            VisualElement row = null;
+            var index = 0;
             foreach (var current in CardCatalog.All.Skip(page * PageSize).Take(PageSize))
             {
+                if (index++ % columns == 0)
+                {
+                    row = new VisualElement(); row.AddToClassList("collection-grid-row");
+                    row.style.width = columns * (cardWidth + Gap + FitSlack); grid.Add(row);
+                }
                 var card = current;
                 var applicability = BossApplicability.CardLabel(card);
                 var button = new Button(() => Inspect(card)) { name = "collection-" + card.Id, tooltip = card.Name + "：" + card.Description + (string.IsNullOrEmpty(applicability) ? "" : "\n" + applicability) };
@@ -91,7 +99,7 @@ namespace UnsoundedSea.Runtime
                 button.AddToClassList("collection-card");
                 button.style.width = cardWidth; button.style.height = cardHeight;
                 button.EnableInClassList("selected", card == inspected);
-                var face = new VisualElement(); face.AddToClassList("collection-card-face"); IllustratedCard.Apply(face, card); button.Add(face); grid.Add(button);
+                var face = new VisualElement(); face.AddToClassList("collection-card-face"); IllustratedCard.Apply(face, card); button.Add(face); row.Add(button);
             }
             pageLabel.text = $"{page + 1} / {PageCount}";
             previous.SetEnabled(page > 0);
