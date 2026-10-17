@@ -37,12 +37,15 @@ namespace UnsoundedSea.Runtime
         private bool[] struckSurface;
         private bool paused;
         private float idleTime;
+        private float hitElapsed = 2f, hitLoad, hitStartLoad;
+        private bool hitOffsetApplied;
+        private Vector3 hitPivot, hitTranslation;
+        private Quaternion hitRotation;
 
         private enum Sequence
         {
             Idle,
             Attack,
-            Hit,
             Death,
         }
 
@@ -71,6 +74,8 @@ namespace UnsoundedSea.Runtime
 
         public void ResetIdle()
         {
+            RemoveHitOffset();
+            hitElapsed = 2f; hitLoad = hitStartLoad = 0;
             sequence = Sequence.Idle;
             ActiveAction = "Idle";
             ActionElapsed = 0;
@@ -87,6 +92,7 @@ namespace UnsoundedSea.Runtime
             if (body == null || tentacleRoots == null || tentacleTips == null || tentacles == null ||
                 tentacleRoots.Length != tentacles.Length || tentacleTips.Length != tentacles.Length)
                 return;
+            RemoveHitOffset();
             attackBodyPosition = body.localPosition;
             attackBodyRotation = body.localRotation;
             if (crown != null)
@@ -118,18 +124,22 @@ namespace UnsoundedSea.Runtime
             ActiveAction = "Attack";
             ActionElapsed = 0;
             ActionImpact = 0;
+            UpdateHitOffset(0);
         }
 
         public void PlayHit()
         {
-            sequence = Sequence.Hit;
-            ActiveAction = "Hit";
-            ActionElapsed = 0;
-            ActionImpact = 0;
+            if (sequence == Sequence.Death) return;
+            // Continue from the current pressure on repeat hits; never snap to a recoil pose.
+            hitStartLoad = hitLoad;
+            hitElapsed = 0;
+            if (sequence == Sequence.Idle) ActiveAction = "Hit";
         }
 
         public void PlayDeath()
         {
+            RemoveHitOffset();
+            hitElapsed = 2f; hitLoad = 0;
             sequence = Sequence.Death;
             ActiveAction = "Death";
             ActionElapsed = 0;
@@ -145,6 +155,7 @@ namespace UnsoundedSea.Runtime
         public void Tick(float delta)
         {
             if (paused) return;
+            RemoveHitOffset();
             delta = Mathf.Max(0, delta);
             ActionElapsed += delta;
             ActionImpact = Mathf.MoveTowards(ActionImpact, 0, delta * 3.5f);
@@ -152,9 +163,10 @@ namespace UnsoundedSea.Runtime
             {
                 case Sequence.Idle: UpdateIdle(delta); break;
                 case Sequence.Attack: UpdateAttack(); break;
-                case Sequence.Hit: UpdateHit(); break;
                 case Sequence.Death: UpdateDeath(); break;
             }
+            UpdateHitOffset(delta);
+            if (sequence == Sequence.Idle) ActiveAction = hitElapsed < 1.8f ? "Hit" : "Idle";
         }
 
         private void UpdateIdle(float delta)
@@ -234,17 +246,41 @@ namespace UnsoundedSea.Runtime
             }
         }
 
-        private void UpdateHit()
+        private void UpdateHitOffset(float delta)
         {
-            const float duration = 0.30f;
-            if (ActionElapsed >= duration) { ResetIdle(); return; }
-            // A hit is a single heavy recoil with a controlled settle.  Avoid
-            // sinusoidal shake: the rigid silhouette should absorb the blow,
-            // rather than bounce like soft rubber.
-            var u = Smooth(ActionElapsed / duration);
-            var settle = 1f - u;
-            ApplyPose(-2.8f * settle, 1.1f * settle, -1.4f * settle,
-                -4.5f * settle, 1.5f * settle, -2.2f * settle, -0.055f * settle);
+            hitElapsed += delta;
+            if (body == null || hitElapsed >= 1.8f) { hitLoad = 0; return; }
+            // A massive body absorbs pressure, settles briefly, then slowly releases it.
+            // This overlays the ongoing pose so idle phase and attack timing never restart.
+            if (hitElapsed < 0.32f) hitLoad = Mathf.Lerp(hitStartLoad, 1, Smooth(hitElapsed / 0.32f));
+            else if (hitElapsed < 0.54f) hitLoad = Mathf.Lerp(1, 0.96f, Smooth((hitElapsed - 0.32f) / 0.22f));
+            else hitLoad = 0.96f * (1 - Smooth((hitElapsed - 0.54f) / 1.26f));
+            hitPivot = body.localPosition;
+            hitTranslation = Vector3.down * (0.006f * hitLoad);
+            hitRotation = Quaternion.Euler(-0.55f * hitLoad, 0, -0.12f * hitLoad);
+            TransformHitPart(body, false);
+            TransformHitPart(crown, false);
+            if (tentacles != null) foreach (var part in tentacles) TransformHitPart(part, false);
+            hitOffsetApplied = true;
+        }
+
+        private void RemoveHitOffset()
+        {
+            if (!hitOffsetApplied) return;
+            TransformHitPart(body, true);
+            TransformHitPart(crown, true);
+            if (tentacles != null) foreach (var part in tentacles) TransformHitPart(part, true);
+            hitOffsetApplied = false;
+        }
+
+        private void TransformHitPart(Transform part, bool restore)
+        {
+            if (part == null) return;
+            var rotation = restore ? Quaternion.Inverse(hitRotation) : hitRotation;
+            part.localPosition = restore
+                ? hitPivot + rotation * (part.localPosition - hitPivot - hitTranslation)
+                : hitPivot + rotation * (part.localPosition - hitPivot) + hitTranslation;
+            part.localRotation = rotation * part.localRotation;
         }
 
         private void UpdateDeath()

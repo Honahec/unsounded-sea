@@ -158,20 +158,64 @@ namespace UnsoundedSea.Tests
         }
 
         [Test]
-        public void HitUsesHeavyRecoilWithoutBouncyOvershoot()
+        public void HitAbsorbsSlowlyPreservesAttachmentsAndNeverRestartsIdle()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
             var instance = Object.Instantiate(prefab);
+            var reference = Object.Instantiate(prefab);
             try
             {
                 var motion = instance.GetComponent<BellMotherRigidMotion>();
-                var bodyRotationBefore = motion.body.localRotation;
-                var bodyHeightBefore = motion.body.localPosition.y;
+                var idle = reference.GetComponent<BellMotherRigidMotion>();
+                motion.Tick(0.7f); idle.Tick(0.7f);
+                var before = motion.body.localRotation;
                 motion.PlayHit();
-                motion.Tick(0.12f);
-                Assert.That(motion.body.localPosition.y, Is.LessThan(bodyHeightBefore));
-                Assert.That(Quaternion.Angle(bodyRotationBefore, motion.body.localRotation), Is.LessThan(8f));
-                motion.Tick(0.24f);
+                Assert.That(Quaternion.Angle(before, motion.body.localRotation), Is.LessThan(0.001f));
+                float maximum = 0;
+                for (int frame = 1; frame <= 200; frame++)
+                {
+                    motion.Tick(0.01f); idle.Tick(0.01f);
+                    float angle = Quaternion.Angle(idle.body.localRotation, motion.body.localRotation);
+                    maximum = Mathf.Max(maximum, angle);
+                    if (frame <= 2) Assert.That(angle, Is.LessThan(0.05f), "No first-frame pose jump");
+                    Assert.That(angle, Is.LessThan(0.7f), "A giant must not whip back several degrees");
+                    Assert.That(motion.body.localPosition.y, Is.LessThanOrEqualTo(idle.body.localPosition.y + 0.00001f));
+                    for (int i = 0; i < motion.tentacles.Length; i++)
+                        Assert.That(Vector3.Distance(
+                            motion.body.InverseTransformPoint(motion.tentacles[i].TransformPoint(motion.tentacleRoots[i])),
+                            idle.body.InverseTransformPoint(idle.tentacles[i].TransformPoint(idle.tentacleRoots[i]))), Is.LessThan(0.001f));
+                    Assert.That(Vector3.Distance(motion.body.InverseTransformPoint(motion.crown.position),
+                        idle.body.InverseTransformPoint(idle.crown.position)), Is.LessThan(0.001f));
+                    if (frame == 80) Assert.That(angle, Is.GreaterThan(0.3f), "Recovery must retain weight beyond the old 0.3 second recoil");
+                }
+                Assert.That(maximum, Is.GreaterThan(0.45f));
+                Assert.That(motion.ActiveAction, Is.EqualTo("Idle"));
+                Assert.That(Quaternion.Angle(idle.body.localRotation, motion.body.localRotation), Is.LessThan(0.01f));
+            }
+            finally { Object.DestroyImmediate(instance); Object.DestroyImmediate(reference); }
+        }
+
+        [Test]
+        public void RepeatedHitsRemainContinuousAndDoNotInterruptAnAttackOrPause()
+        {
+            var instance = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath));
+            try
+            {
+                var motion = instance.GetComponent<BellMotherRigidMotion>();
+                motion.PlayHit(); motion.Tick(0.45f);
+                var before = motion.body.localRotation;
+                motion.PlayHit(); motion.Tick(0.001f);
+                Assert.That(Quaternion.Angle(before, motion.body.localRotation), Is.LessThan(0.03f));
+                motion.SetPaused(true); before = motion.body.localRotation; motion.Tick(5);
+                Assert.That(motion.body.localRotation, Is.EqualTo(before));
+                motion.SetPaused(false); motion.PlayAttack();
+                Assert.That(Quaternion.Angle(before, motion.body.localRotation), Is.LessThan(0.03f), "Starting an attack must not pop the hit overlay off");
+                motion.Tick(0.5f);
+                var attackElapsed = motion.ActionElapsed;
+                motion.PlayHit(); motion.Tick(0.01f);
+                Assert.That(motion.ActiveAction, Is.EqualTo("Attack"));
+                Assert.That(motion.ActionElapsed, Is.EqualTo(attackElapsed + 0.01f).Within(0.0001f));
+                motion.Tick(2.1f);
                 Assert.That(motion.ActiveAction, Is.EqualTo("Idle"));
             }
             finally { Object.DestroyImmediate(instance); }

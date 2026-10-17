@@ -9,6 +9,7 @@
 .sea-button:focus, .tool:focus, .end-turn:focus, .task-button:focus { border-color: #eee4c9; }
 .sea-card:focus, .actor-label:focus { border-color: #eee4c9; border-width: 2px; }
 .tool:disabled, .end-turn:disabled, .task-button:disabled { opacity: .4; }
+.ocean-ui .feedback-locked:disabled { opacity: 1; }
 .intel-name { color: #d7bd82; font-size: 12px; letter-spacing: 2px; }
 .clue { margin-top: 3px; font-size: 15px; -unity-text-align: middle-center; text-shadow: 0 1px 2px #020708; }
 .intel-text { margin-top: 3px; color: #80b5a5; font-size: 14px; -unity-text-align: middle-center; }
