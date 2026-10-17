@@ -17,6 +17,51 @@ namespace UnsoundedSea.Runtime
         private bool wavesEnabled;
         private Vector4 stormA, stormB, stormC, stormD, currentThreat;
         private float stormStrength;
+        public Material impactSprayMaterial;
+        private readonly Vector4[] impacts = new Vector4[SeaImpactWave.Capacity];
+        private int nextImpact;
+        private SeaImpactSpray spray;
+        public int ImpactCount { get; private set; }
+
+        public float SurfaceHeight(Vector3 worldPosition) =>
+            (surface != null ? surface.transform.position.y : 0) + SampleDisplacement(worldPosition).y;
+
+        public float SampleImpactHeight(Vector3 worldPosition, float secondsAhead = 0)
+        {
+            float height = 0;
+            var p = new Vector2(worldPosition.x, worldPosition.z);
+            foreach (var impact in impacts) height += SeaImpactWave.Height(p, SeaTime + secondsAhead, impact);
+            return SeaImpactWave.Combine(height);
+        }
+
+        public Vector3 SampleImpactSurge(Vector3 worldPosition)
+        {
+            var p = new Vector2(worldPosition.x, worldPosition.z);
+            var surge = Vector2.zero;
+            foreach (var impact in impacts)
+                surge += (p - new Vector2(impact.x, impact.y)).normalized * SeaImpactWave.Height(p, SeaTime, impact) * 0.3f;
+            surge = Vector2.ClampMagnitude(surge, 8f);
+            return new Vector3(surge.x, 0, surge.y);
+        }
+
+        public void EmitImpact(Vector3 worldPosition, float amplitude = SeaImpactWave.DefaultAmplitude)
+        {
+            if (instance == null || !wavesEnabled) return;
+            impacts[nextImpact] = new Vector4(worldPosition.x, worldPosition.z, SeaTime, amplitude);
+            nextImpact = (nextImpact + 1) % impacts.Length;
+            ImpactCount++;
+            spray?.Emit(worldPosition, ImpactCount, amplitude);
+            Publish();
+        }
+
+        private void Publish()
+        {
+            surface.GetPropertyBlock(properties);
+            properties.SetFloat("_SeaTime", SeaTime);
+            properties.SetVector("_Threat", currentThreat);
+            properties.SetVectorArray("_SeaImpacts", impacts);
+            surface.SetPropertyBlock(properties);
+        }
 
         // Matches the pinned Uber shader's GersterWaveGenerator: cos height, negative sin horizontal offset.
         private struct Wave
@@ -50,7 +95,7 @@ namespace UnsoundedSea.Runtime
             float r = d - currentThreat.z + 12 * Mathf.Sin(angle * 3 + SeaTime * 0.17f) + 7 * Mathf.Sin(angle * 7 - SeaTime * 0.11f);
             float envelope = currentThreat.z < 0.01f ? 0 : Mathf.Exp(-Mathf.Abs(r) * 0.018f) * Mathf.SmoothStep(0, 1, Mathf.InverseLerp(20, 65, d));
             float wake = envelope * (Mathf.Sin(r * 0.16f - SeaTime * 0.75f + Mathf.Sin(angle * 4) * 0.8f) * 1.4f + Mathf.Sin(r * 0.29f + SeaTime * 0.61f + angle * 3) * 0.65f);
-            return firstWave.Sample(restWorldPosition, SeaTime) + secondWave.Sample(restWorldPosition, SeaTime) + Vector3.up * (storm + wake);
+            return firstWave.Sample(restWorldPosition, SeaTime) + secondWave.Sample(restWorldPosition, SeaTime) + Vector3.up * (storm + wake + SampleImpactHeight(restWorldPosition));
         }
 
         private float StormWave(Vector2 p, Vector4 wave, float offset)
@@ -72,6 +117,11 @@ namespace UnsoundedSea.Runtime
             instance = new Material(original) { name = original.name + " (battle)", hideFlags = HideFlags.DontSave };
             surface.sharedMaterial = instance;
             properties = new MaterialPropertyBlock();
+            // Shader displacement exceeds the authored mesh's static Y bounds.
+            var bounds = surface.localBounds;
+            bounds.Expand(new Vector3(0, SeaImpactWave.CombinedHeightLimit * 2 + 20, 0));
+            surface.localBounds = bounds;
+            if (impactSprayMaterial != null) spray = new SeaImpactSpray(transform, impactSprayMaterial);
             wavesEnabled = instance.IsKeywordEnabled("_ENABLEWAVE");
             firstWave = Wave.Read(instance, "_1st_Wave_");
             secondWave = Wave.Read(instance, "_2nd_Wave_");
@@ -79,6 +129,11 @@ namespace UnsoundedSea.Runtime
             stormA = instance.GetVector("_StormWaveA"); stormB = instance.GetVector("_StormWaveB");
             stormC = instance.GetVector("_StormWaveC"); stormD = instance.GetVector("_StormWaveD");
             instance.SetFloat("_UseSeaTime", 1);
+            // Opaque storm water must depth-test against itself. Transparent draw order
+            // otherwise lets distant triangles overwrite a tall foreground crest.
+            var opaque = instance.GetFloat("_ShoreFade") == 0 && instance.GetColor("_Color_Shallow").a >= 1
+                && instance.GetColor("_Color_Deep").a >= 1 && !instance.IsKeywordEnabled("_ENABLEREFRACTION");
+            instance.SetFloat("_SeaZWrite", opaque ? 1 : 0);
 
             var host = new GameObject("Battle water reflections");
             host.transform.SetParent(transform, false);
@@ -104,10 +159,8 @@ namespace UnsoundedSea.Runtime
             currentThreat = threat;
             // Integrating speed preserves phase when the accessibility setting changes.
             SeaTime += deltaTime * (reducedMotion ? 0.25f : 1f);
-            surface.GetPropertyBlock(properties);
-            properties.SetFloat("_SeaTime", SeaTime);
-            properties.SetVector("_Threat", threat);
-            surface.SetPropertyBlock(properties);
+            spray?.Tick(deltaTime * (reducedMotion ? 0.25f : 1f));
+            Publish();
         }
 
         private void OnDisable() => Unbind();
@@ -136,6 +189,12 @@ namespace UnsoundedSea.Runtime
             instance = null;
             original = null;
             wavesEnabled = false;
+            System.Array.Clear(impacts, 0, impacts.Length);
+            nextImpact = 0;
+            ImpactCount = 0;
+            spray?.Dispose();
+            spray = null;
+            if (surface != null) surface.ResetLocalBounds();
         }
 
         private static void DestroyOwned(Object value)

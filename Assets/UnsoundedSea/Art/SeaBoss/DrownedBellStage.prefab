@@ -2114,6 +2114,7 @@ MonoBehaviour:
   reflectionLayers:
     serializedVersion: 2
     m_Bits: 4294967279
+  impactSprayMaterial: {fileID: 2100000, guid: 7d804d139b5c84e2f94ca51c20288656, type: 2}
 --- !u!1 &7457013176256575744
 GameObject:
   m_ObjectHideFlags: 0

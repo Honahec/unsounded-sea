@@ -10,10 +10,11 @@ namespace UnsoundedSea.Runtime
         public BattleScenario scenario;
         public uint seed = 20261016;
         public BattleView View => session?.View;
+        public int ViewRevision { get; private set; }
         public BattleStage Stage { get; private set; }
         public string SelectedEnemy { get; private set; }
         public bool Paused { get; private set; }
-        public bool Busy => Time.unscaledTime < feedbackUntil;
+        public bool Busy => Time.unscaledTime < feedbackUntil || (Stage != null && Stage.HasPendingSeaAttack);
         public string Notice { get; private set; }
         public event Action Changed;
         public event Action<BattleView, BattleView, BattleCommand> Resolved;
@@ -34,6 +35,7 @@ namespace UnsoundedSea.Runtime
             if (Stage != null) { Stage.gameObject.SetActive(false); Destroy(Stage.gameObject); }
             Stage = Instantiate(scenario.stagePrefab);
             Stage.Bind(this);
+            ViewRevision++;
             Changed?.Invoke();
         }
         private void Update()
@@ -52,6 +54,7 @@ namespace UnsoundedSea.Runtime
             var before = View;
             var result = session.Execute(command);
             if (!result.Success) { Notice = result.Error; Changed?.Invoke(); return result; }
+            ViewRevision++;
             var after = View;
             if (!VoyageRuntime.IsDebugSession && before.Phase != BattlePhase.Victory && after.Phase == BattlePhase.Victory)
                 CardDeckPreparation.StoreVerified(after.Evidence);

@@ -2,6 +2,7 @@ Shader "UberStylizedWater"
 {
     Properties
     {
+        [HideInInspector] _SeaZWrite("Opaque Sea Depth Write", Float) = 0
         [HideInInspector] _UseSeaTime("Use Battle Clock", Float) = 0
         [HideInInspector] _SeaTime("Battle Clock", Float) = 0
         _StormStrength("Storm Swell Strength", Range(0,2)) = 0
@@ -141,7 +142,7 @@ Shader "UberStylizedWater"
         Cull Back
         Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
         ZTest LEqual
-        ZWrite Off
+        ZWrite [_SeaZWrite]
         
         // Debug
         // <None>
@@ -2730,7 +2731,7 @@ Shader "UberStylizedWater"
             _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41.WorldSpacePosition = IN.WorldSpacePosition;
             float3 _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41_Out_1_Vector3;
             SG_SampleReflectionProbe_acfe000db94296b438eea35960185cb0_float(float(1), _Property_1bb940c837aa43499770baf42afa7871_Out_0_Float, (float4(_GetVariable_0a50c7cf00a34add8e190aa1ff3f876e_Vector3_4_Vector3, 1.0)), _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41, _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41_Out_1_Vector3);
-            float _Property_ca37d809e4b24ff4ae21629b88b9e91a_Out_0_Float = _PlannerReflectionBlend;
+            float _Property_ca37d809e4b24ff4ae21629b88b9e91a_Out_0_Float = lerp(_PlannerReflectionBlend, 1, smoothstep(5, 30, abs(UnsoundedImpactHeight(IN.WorldSpacePosition.xz, _SeaTime)))); // Tall crests use the environment probe; a sea-level planar reflection projects a false horizon onto the wall.
             float3 _Lerp_5888e194dcd8468a9d5c65b2b9fbed6b_Out_3_Vector3;
             Unity_Lerp_float3((_SamplePlannerReflection_edf67320bbcf4a7dbc198fe4f0f7d381_OutVector4_1_Vector4.xyz), _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41_Out_1_Vector3, (_Property_ca37d809e4b24ff4ae21629b88b9e91a_Out_0_Float.xxx), _Lerp_5888e194dcd8468a9d5c65b2b9fbed6b_Out_3_Vector3);
             float _Property_6b078dd9230d4f86bda35d86be8f8735_Out_0_Float = _Reflection_Distortion;
@@ -6732,7 +6733,7 @@ Shader "UberStylizedWater"
         Cull Back
         Blend SrcAlpha OneMinusSrcAlpha, One OneMinusSrcAlpha
         ZTest LEqual
-        ZWrite Off
+        ZWrite [_SeaZWrite]
         
         // Debug
         // <None>
@@ -9340,7 +9341,7 @@ Shader "UberStylizedWater"
             _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41.WorldSpacePosition = IN.WorldSpacePosition;
             float3 _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41_Out_1_Vector3;
             SG_SampleReflectionProbe_acfe000db94296b438eea35960185cb0_float(float(1), _Property_1bb940c837aa43499770baf42afa7871_Out_0_Float, (float4(_GetVariable_0a50c7cf00a34add8e190aa1ff3f876e_Vector3_4_Vector3, 1.0)), _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41, _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41_Out_1_Vector3);
-            float _Property_ca37d809e4b24ff4ae21629b88b9e91a_Out_0_Float = _PlannerReflectionBlend;
+            float _Property_ca37d809e4b24ff4ae21629b88b9e91a_Out_0_Float = lerp(_PlannerReflectionBlend, 1, smoothstep(5, 30, abs(UnsoundedImpactHeight(IN.WorldSpacePosition.xz, _SeaTime)))); // Tall crests use the environment probe; a sea-level planar reflection projects a false horizon onto the wall.
             float3 _Lerp_5888e194dcd8468a9d5c65b2b9fbed6b_Out_3_Vector3;
             Unity_Lerp_float3((_SamplePlannerReflection_edf67320bbcf4a7dbc198fe4f0f7d381_OutVector4_1_Vector4.xyz), _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41_Out_1_Vector3, (_Property_ca37d809e4b24ff4ae21629b88b9e91a_Out_0_Float.xxx), _Lerp_5888e194dcd8468a9d5c65b2b9fbed6b_Out_3_Vector3);
             float _Property_6b078dd9230d4f86bda35d86be8f8735_Out_0_Float = _Reflection_Distortion;
@@ -14017,7 +14018,7 @@ Shader "UberStylizedWater"
             _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41.WorldSpacePosition = IN.WorldSpacePosition;
             float3 _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41_Out_1_Vector3;
             SG_SampleReflectionProbe_acfe000db94296b438eea35960185cb0_float(float(1), _Property_1bb940c837aa43499770baf42afa7871_Out_0_Float, (float4(_GetVariable_0a50c7cf00a34add8e190aa1ff3f876e_Vector3_4_Vector3, 1.0)), _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41, _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41_Out_1_Vector3);
-            float _Property_ca37d809e4b24ff4ae21629b88b9e91a_Out_0_Float = _PlannerReflectionBlend;
+            float _Property_ca37d809e4b24ff4ae21629b88b9e91a_Out_0_Float = lerp(_PlannerReflectionBlend, 1, smoothstep(5, 30, abs(UnsoundedImpactHeight(IN.WorldSpacePosition.xz, _SeaTime)))); // Tall crests use the environment probe; a sea-level planar reflection projects a false horizon onto the wall.
             float3 _Lerp_5888e194dcd8468a9d5c65b2b9fbed6b_Out_3_Vector3;
             Unity_Lerp_float3((_SamplePlannerReflection_edf67320bbcf4a7dbc198fe4f0f7d381_OutVector4_1_Vector4.xyz), _SampleReflectionProbe_aa26071399924ac5b77c3b494bc1ea41_Out_1_Vector3, (_Property_ca37d809e4b24ff4ae21629b88b9e91a_Out_0_Float.xxx), _Lerp_5888e194dcd8468a9d5c65b2b9fbed6b_Out_3_Vector3);
             float _Property_6b078dd9230d4f86bda35d86be8f8735_Out_0_Float = _Reflection_Distortion;

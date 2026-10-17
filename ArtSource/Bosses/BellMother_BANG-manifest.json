@@ -1,0 +1,19 @@
+{
+  "asset": "BellMother",
+  "provider": "Hyper3D BANG",
+  "source_generation": "a69dfe2b-089e-4ca1-9987-0d36ec94312c",
+  "source_asset": "020d73c8-7721-581f-ae65-3f8fd8c93d1d",
+  "method": "BANG semantic part split; rigid pivot hierarchy; Blender decimate ratio 0.08",
+  "parts": 12,
+  "tentacle_parts": 6,
+  "triangles_before": 1500000,
+  "triangles_after": 119992,
+  "outputs": {
+    "glb": "Assets/UnsoundedSea/Art/Models/BellMother_BANG_LOD0.glb",
+    "preview": "ArtSource/Bosses/BellMother_BANG-preview.png"
+  },
+  "sha256": {
+    "glb": "00a7feaf9c217702cf0c95a9ddfa11c5a9a387f84029f9efa512ae807db55f57",
+    "preview": "6c9acf57c22dbbf03933a1464606717fbd09c7242cc9d342e902b78f2b057a66"
+  }
+}

@@ -12,6 +12,7 @@
 | 3D 战斗场景、角色替换、特殊战扩展 | [框架指南](Docs/FRAMEWORK.md) 的「3D 战斗组合与扩展」→ `Runtime/Battle/`；场景重建会覆盖配置，先检查现有编辑 |
 | 规则、UI、存档、内容配置和代码修复 | [框架指南](Docs/FRAMEWORK.md) → 相关代码；涉及验收时再读 [验证记录](Docs/FRAMEWORK_VALIDATION.md) |
 | 模型生成、减面、Unity 导入、模型归档或 LFS | [模型全流程](Docs/MODEL_IMPORT_WORKFLOW.md) → 机制文档中对应资产要求 → 相关 manifest/脚本 |
+| 沉钟之母分件、支点/骨骼取舍、攻击与受击动画 | [动画设计](Docs/BELL_MOTHER_ANIMATION_DESIGN.md) → `BellMotherRigidMotion` / `BellMotherBangSetup`；复用模型不必重跑生成流程 |
 | 确定使用 Deemos Agent | 在模型流程基础上，再读 [网页操作说明](DEEMOS_AGENT.md) |
 | 文档整理 | 阅读本次涉及的文档和链接目标，检查职责重叠、过时状态与断链 |
 
@@ -22,6 +23,7 @@
 - `FRAMEWORK.md`：已实现架构、接口、扩展方法和回放契约；事实以当前代码/配置为准，冲突时修正文档。
 - `FRAMEWORK_VALIDATION.md`：带日期和范围的验证结果；历史通过不代表当前修改通过。
 - `MODEL_IMPORT_WORKFLOW.md`：模型制作全流程与简短当前状态；`DEEMOS_AGENT.md` 只维护网页操作。
+- `BELL_MOTHER_ANIMATION_DESIGN.md`：沉钟之母分件与动画的设计取舍、复现入口及未实施的骨骼升级方案；不复制规格或验证流水账。
 - `ArtSource` 下 manifest 和检查 JSON：模型来源、哈希与实测规格的唯一数据记录；不在多篇 Markdown 复制完整表。
 
 概念目标、细化提案与实现现状分别描述不同层次，不能仅因文档较新就声称功能已实现。出现冲突先核对对应事实来源，再更新负责该内容的文档。
