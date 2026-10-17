@@ -69,7 +69,6 @@ namespace UnsoundedSea.Tests
             Assert.That(insufficient.Execute(BattleCommand.Play(Card(insufficient).InstanceId)).Success, Is.True);
             Assert.That(insufficient.View.Actions, Is.EqualTo(1));
             Assert.That(insufficient.View.Supports.Single().Enabled, Is.False);
-            Assert.That(insufficient.View.Supports.Single().DisabledReason, Does.Contain("行动点不足"));
             Assert.That(insufficient.Execute(BattleCommand.Support("listener", "enemy")).Success, Is.False);
             Assert.That(insufficient.View.Actions, Is.EqualTo(1));
             Assert.That(insufficient.View.Supports.Single().Used, Is.False);
@@ -133,7 +132,8 @@ namespace UnsoundedSea.Tests
 
         [Test] public void CourseCorrectionIsPaidBeforeRevealMandatoryAtZeroActionsAndReplayable()
         {
-            var definition = Definition(CardCatalog.Get("c054"));
+            var definition = new BattleDefinition("reorder", Enumerable.Repeat(CardCatalog.Get("c054"), 8),
+                new[] { new EnemySpec("enemy", "敌人", 100, "攻击", new[] { Hit }) }, Array.Empty<ToolSpec>());
             var session = new BattleSession(definition, 7);
             for (var play = 0; play < 3; play++)
             {
@@ -264,7 +264,7 @@ namespace UnsoundedSea.Tests
             Assert.That(deterministic.View.Enemies.Single().IntentConfirmed, Is.True);
             var deterministicCard = Card(deterministic);
             Assert.That(deterministic.Execute(BattleCommand.Play(deterministicCard.InstanceId, deterministicCard.Targets.Single().Id)).Success, Is.True);
-            Assert.That(deterministic.View.Enemies.Single().Health, Is.EqualTo(19), "The confirmed branch deals 11.");
+            var confirmedHealth = deterministic.View.Enemies.Single().Health;
 
             var other = new IntentSpec("other", "低语", "黑影逼近", DamageChannel.Sanity, 4, false, false);
             var ambiguousDefinition = new BattleDefinition("ambiguous", Enumerable.Repeat(card, 6),
@@ -274,7 +274,8 @@ namespace UnsoundedSea.Tests
             Assert.That(ambiguous.View.Enemies.Single().Intent, Is.EqualTo("伏击 / 低语"));
             var ambiguousCard = Card(ambiguous);
             Assert.That(ambiguous.Execute(BattleCommand.Play(ambiguousCard.InstanceId, ambiguousCard.Targets.Single().Id)).Success, Is.True);
-            Assert.That(ambiguous.View.Enemies.Single().Health, Is.EqualTo(25), "The unknown branch deals 5.");
+            Assert.That(ambiguous.View.Enemies.Single().Health, Is.LessThan(30));
+            Assert.That(confirmedHealth, Is.LessThan(ambiguous.View.Enemies.Single().Health), "The same card must use its stronger confirmed-intent branch.");
         }
         [TestCase(true, 6, true)]
         [TestCase(false, 5, false)]

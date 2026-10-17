@@ -60,7 +60,7 @@ namespace UnsoundedSea.Core
             result.Register("interrupt", new Handler(true, (c, n) => c.Interrupt()));
             result.Register("objective", new Handler(false, (c, n) => c.AdvanceObjective(n)));
             // Catalog cards are executed transactionally by BattleSession; registration keeps definition validation strict.
-            for (var i = 1; i <= 90; i++) result.Register("c" + i.ToString("000"), new Handler(false, (c, n) => { }));
+            for (var i = 1; i <= 96; i++) result.Register("c" + i.ToString("000"), new Handler(false, (c, n) => { }));
             return result;
         }
     }

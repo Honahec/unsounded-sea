@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-inverted-enemy-4
   displayName: "\u9519\u4F4D\u503C\u66F4\u4EBA"
-  health: 21
-  candidateDescription: "\u65E7\u8896\u64D2\u62FF\uFF1A7 \u751F\u547D\u4F24\u5BB3 / \u65B0\u8896\u51FB\u6253\uFF1A9 \u751F\u547D\u4F24\u5BB3"
+  health: 28
+  candidateDescription: "\u65E7\u8896\u64D2\u62FF\uFF1A8 \u751F\u547D\u4F24\u5BB3 / \u65B0\u8896\u51FB\u6253\uFF1A10 \u751F\u547D\u4F24\u5BB3"
   intents:
   - id: old-watch
     displayName: "\u65E7\u8896\u64D2\u62FF"
     clue: "\u892A\u8272\u65E7\u8896\u62AC\u8D77\uFF0C\u53E6\u4E00\u4FA7\u4ECD\u5782\u843D\u3002"
     channel: 0
-    amount: 7
+    amount: 8
     isPublic: 0
     visibleAction: 1
     interruptible: 0
@@ -30,7 +30,7 @@ MonoBehaviour:
     displayName: "\u65B0\u8896\u51FB\u6253"
     clue: "\u8F83\u65B0\u7684\u8896\u53E3\u540E\u64A4\u84C4\u529B\uFF0C\u65E7\u8896\u8D34\u4F4F\u80F8\u524D\u3002"
     channel: 0
-    amount: 9
+    amount: 10
     isPublic: 0
     visibleAction: 1
     interruptible: 0

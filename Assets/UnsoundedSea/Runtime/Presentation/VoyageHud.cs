@@ -10,7 +10,7 @@ using UnsoundedSea.Core;
 namespace UnsoundedSea.Runtime
 {
     [RequireComponent(typeof(UIDocument))]
-    public sealed class VoyageHud : MonoBehaviour
+    public sealed partial class VoyageHud : MonoBehaviour
     {
         [SerializeField] private FontAsset interfaceFont;
         [SerializeField] private StyleSheet interfaceStyle;
@@ -57,7 +57,7 @@ namespace UnsoundedSea.Runtime
         private void Update()
         {
             sailingPresentation?.Tick(Time.unscaledDeltaTime,
-                paused || settingsOpen || journalOpen || chartOpen || deckOpen || !string.IsNullOrEmpty(saveError) || !string.IsNullOrEmpty(loadError),
+                paused || settingsOpen || journalOpen || chartOpen || deckOpen || supportOpen || !string.IsNullOrEmpty(saveError) || !string.IsNullOrEmpty(loadError),
                 GameSettings.ReducedMotion);
         }
         private void OnDisable()
@@ -72,7 +72,8 @@ namespace UnsoundedSea.Runtime
             if (settingsOpen || root.panel?.focusController.focusedElement is TextField) return;
             if (evt.keyCode == KeyCode.Escape)
             {
-                if (deckOpen) deckOpen = false;
+                if (supportOpen) supportOpen = false;
+                else if (deckOpen) deckOpen = false;
                 else if (journalOpen) journalOpen = false;
                 else if (chartOpen && !paused) chartOpen = false;
                 else paused = !paused;
@@ -88,10 +89,10 @@ namespace UnsoundedSea.Runtime
             else if (evt.keyCode == KeyCode.B)
             {
                 if (deckOpen) deckOpen = false;
-                else if (paused || journalOpen || chartOpen || Session?.Phase == VoyagePhase.Reward) return;
+                else if (supportOpen || paused || journalOpen || chartOpen || Session?.Phase == VoyagePhase.Reward) return;
                 else deckOpen = true;
             }
-            else if (deckOpen) return;
+            else if (deckOpen || supportOpen) return;
             else if (evt.keyCode == KeyCode.M && !paused && !journalOpen && Session?.Phase != VoyagePhase.Sailing) chartOpen = !chartOpen;
             else if (evt.keyCode == KeyCode.J && !paused) journalOpen = !journalOpen;
             else return;
@@ -243,6 +244,7 @@ namespace UnsoundedSea.Runtime
                 error.Add(Action("save-retry", "重试保存", "primary", () => { Save(); Refresh(); })); root.Add(error);
                 root.schedule.Execute(() => root.Q<Button>("save-retry")?.Focus());
             }
+            else if (supportOpen) BuildSupportManifest();
             else if (deckOpen) BuildActionBook();
             else if (journalOpen) BuildJournal();
             else if (paused) BuildPause();
@@ -272,6 +274,7 @@ namespace UnsoundedSea.Runtime
         private void BuildDestination(VisualElement panel, VoyageSession session, VoyageChart chart)
         {
             bool saved = string.IsNullOrEmpty(saveError);
+            panel.Add(Action("voyage-support-manifest","物资 · 船员 · 档案","secondary",()=>{supportOpen=true;Refresh();},saved));
             var stop = session.Selected ?? session.Current;
             if (session.Phase == VoyagePhase.ChoosingRoute && session.Selected == null)
             {
@@ -326,7 +329,7 @@ namespace UnsoundedSea.Runtime
                         if (session.CanEditDeck)
                             panel.Add(Action("arrival-action-book", "整备行动簿", "secondary", () => { deckOpen = true; Refresh(); }));
                         if (nodeChoices.Count == 0)
-                            panel.Add(Action("arrival-continue", "记录并继续", "primary", () => Change(Session.Continue), saved));
+                            panel.Add(Action("arrival-continue", "记录并继续", "primary", () => Change(Session.Continue), saved&&session.CanContinue));
                     }
                     break;
                 case VoyagePhase.Encounter:
@@ -354,6 +357,11 @@ namespace UnsoundedSea.Runtime
                 button.tooltip = card.Name + "：" + card.Description; cards.Add(button);
             }
             panel.Add(cards);
+            foreach (var item in session.RewardItems)
+            {
+                var id = item.Id;
+                panel.Add(Action("reward-item-" + id, "改选装备 · " + item.Name, "secondary", () => Change(() => Session.ClaimReward("item:" + id)), saved));
+            }
             var suppliesFull = session.Supplies >= 8;
             var skip = Action("reward-supplies", suppliesFull ? "放弃：补给已满" : "放弃：获得 1 补给", "secondary",
                 () => Change(() => Session.ClaimReward(null), suppliesFull ? "已跳过奖励；补给已满，没有额外收益。" : "已将所得换为 1 补给。"), saved);
@@ -474,8 +482,8 @@ namespace UnsoundedSea.Runtime
             }
         }
 
-        private static string ToolName(string id) => id == "lantern" ? "防风提灯" :
-            id == "listener" ? "定向听筒" : id == "shell" ? "听潮贝壳 · 3 理智" : id;
+        private static string ToolName(string id) => id == "lantern" ? "防风提灯 · 可见行动" :
+            id == "listener" ? "定向听筒 · 声源" : id == "shell" ? "听潮贝壳 · 伤害途径（支付 3 理智）" : SupportCatalog.Item(id).Name;
 
         private static string KindName(RunNodeKind kind)
         {

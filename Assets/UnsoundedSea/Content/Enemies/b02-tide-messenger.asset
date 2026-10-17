@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: b02-tide-messenger
   displayName: "\u6F6E\u56CA\u4FE1\u4F7F"
-  health: 10
+  health: 12
   candidateDescription: "\u6062\u590D\u53D1\u58F0\u56CA 6"
   intents:
   - id: boss-script

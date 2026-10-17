@@ -36,6 +36,9 @@ namespace UnsoundedSea.Core
         private bool taskUsed, investigationUsed, sceneActionUsed, crewSupportUsed, directionalListeningBlocked, directionalListeningUsed;
         private int nextInstanceId, watched, nextHealthReduction, sceneFailureReduction, sceneDiscount;
         private readonly HashSet<int> retained = new HashSet<int>();
+        private readonly HashSet<int> carriedFromLastTurn = new HashSet<int>();
+        private readonly HashSet<string> newCardAnswers = new HashSet<string>(StringComparer.Ordinal);
+        private readonly Dictionary<string, HashSet<int>> weaponHits = new Dictionary<string, HashSet<int>>(StringComparer.Ordinal);
         private readonly HashSet<string> turnFlags = new HashSet<string>(StringComparer.Ordinal);
         private int watchedInvestigationBonus;
         private readonly BossEncounterKind bossKind;
@@ -54,6 +57,7 @@ namespace UnsoundedSea.Core
             Seed = seed; deckRandom = new DeterministicRandom(seed); intentRandom = new DeterministicRandom(seed ^ 0x9E3779B9u);
             bossKind = Require.Defined(boss);
             health = definition.InitialHealth; sanity = definition.InitialSanity;
+            watched=definition.Loadout.Watched;beaconAvailable=definition.Loadout.SurveyedBeacon;
             enemies = definition.Enemies.Select(x => new EnemyState { Definition = x, Health = x.Health }).ToList();
             toolUses = definition.Tools.ToDictionary(x => x.Id, x => x.Uses, StringComparer.Ordinal);
             for (var i = 0; i < definition.Deck.Count; i++) draw.Add(new CardView(i + 1, definition.Deck[i]));
@@ -82,7 +86,8 @@ namespace UnsoundedSea.Core
                     Hand = hand.Select(x => x.Snapshot()).ToList().AsReadOnly(),
                     Enemies = enemies.Select(BossEnemyView).ToList().AsReadOnly(),
                     Tools = definition.Tools.Select(t => new ToolView(t, toolUses[t.Id])).ToList().AsReadOnly(),
-                    Supports = definition.Supports.Select(SupportView).ToList().AsReadOnly(),
+                    Supports = definition.Supports.Select(BuildSupportView).ToList().AsReadOnly(),
+                    SupplyActions=SupplyViews().ToList().AsReadOnly(),SpentConsumables=spentConsumables.ToList().AsReadOnly(),Equipment=definition.Loadout.Equipment,SurveyedBeacon=beaconAvailable,
                     
                     Evidence = knowledge.Entries, Log = log.ToList().AsReadOnly()
                 };
@@ -93,8 +98,10 @@ namespace UnsoundedSea.Core
         {
             if (input == null) return Reject("缺少操作。");
             if (phase != BattlePhase.PlayerTurn) return Reject("战斗已结束或尚未进入玩家回合。");
-            if (pendingReorder != null && input.kind != CommandKind.ReorderDeck) return Reject("必须先完成抽牌顺序选择。");
+            if ((pendingReorder != null || pendingRetain) && input.kind != CommandKind.ReorderDeck) return Reject("必须先完成卡牌选择。");
             var command = input.Copy();
+            currentPaidActions=0;
+            var beforeBound=boss?.BoundCount??0;var beforeEvac=boss?.EvacuationProgress??0;var beforeSafe=boss?.SafeOpenedCount??0;
             switch (command.kind)
             {
                 case CommandKind.PlayCard:
@@ -113,11 +120,16 @@ namespace UnsoundedSea.Core
                     var cardError = ValidateCardPlay(card, command.targetId);
                     if (cardError != null) return Reject(cardError);
                     actions -= card.Definition.Cost; sanity -= card.Definition.SanityCost;
+                    currentPaidActions=card.Definition.Cost;ActiveSanityEquipment(card.Definition.SanityCost);
+                    var beforeDraw=cardsDrawn;
                     hand.Remove(card); // In-flight cards cannot retrieve themselves.
+                    var wasCarried = carriedFromLastTurn.Remove(card.InstanceId);
+                    retained.Remove(card.InstanceId);
                     Record($"使用 {card.Definition.Name}；支付 {card.Definition.Cost} 行动 / {card.Definition.SanityCost} 理智。");
                     if (IsCatalogCard(card.Definition))
                     {
-                        ApplyCatalogCard(card, command.targetId);
+                        ApplyCatalogCard(card, command.targetId, wasCarried);
+                        EquipmentAfterCard(card,beforeDraw);
                     }
                     else
                     {
@@ -130,24 +142,22 @@ namespace UnsoundedSea.Core
                 case CommandKind.UseTool:
                     var tool = definition.Tools.FirstOrDefault(x => x.Id == command.toolId);
                     if (tool == null || toolUses[tool.Id] <= 0) return Reject("道具不可用。");
+                    if ((int)tool.Kind>=3) { var error=UseSupply(tool.Id,command.targetId,false);if(error!=null)return Reject(error);break; }
                     if (!IsLiving(command.targetId)) return Reject("请选择存活目标。");
                     if (sanity <= tool.SanityCost) return Reject("理智不足以支付代价。");
                     if (tool.Kind == InvestigationKind.SoundSource && directionalListeningBlocked) return Reject("耳棉阻止了定向听取；未消耗次数。");
                     if (!CanInvestigate(command.targetId, tool.Kind)) return Reject("该问题已回答，或道具无法观察这一动作；未消耗次数。");
                     toolUses[tool.Id]--; sanity -= tool.SanityCost;
+                    ActiveSanityEquipment(tool.SanityCost);turnFlags.Add("tool-new-answer");
                     Record($"使用 {tool.Name}；支付 {tool.SanityCost} 理智。");
                     Investigate(command.targetId, tool.Kind, tool.Name);
                     break;
                 case CommandKind.UseCrewSupport:
                     var support = definition.Supports.FirstOrDefault(x => x.Id == command.supportId);
-                    if (support == null || usedSupports.Contains(support.Id)) return Reject("该船员本场不可再支援。");
-                    if (crewSupportUsed || actions < support.Cost) return Reject($"每回合至多一次船员支援，需要 {support.Cost} 行动。");
-                    if (support.Kind == CrewSupportKind.Listener && (!IsLiving(command.targetId) || !CanInvestigate(command.targetId, InvestigationKind.SoundSource)))
-                        return Reject("请选择有新声源信息的存活目标。");
-                    actions -= support.Cost; crewSupportUsed = true; usedSupports.Add(support.Id);
-                    Record($"{support.Name}提供支援；支付 {support.Cost} 行动。");
-                    if (support.Kind == CrewSupportKind.Medic) Heal(2);
-                    else Investigate(command.targetId, InvestigationKind.SoundSource, support.Name);
+                    var crewError=UseCrew(support,command.targetId);if(crewError!=null)return Reject(crewError);
+                    break;
+                case CommandKind.UseConsumable:
+                    var supplyError=UseSupply(command.toolId,command.targetId,true);if(supplyError!=null)return Reject(supplyError);
                     break;
                 case CommandKind.ReorderDeck:
                     var reorderError = ResolvePendingReorder(command.targetId);
@@ -165,6 +175,7 @@ namespace UnsoundedSea.Core
                     break;
                 default: return Reject("未知操作。");
             }
+            if(command.kind!=CommandKind.EndTurn)EquipmentTransitions(beforeBound,beforeEvac,beforeSafe);
             history.Add(command);
             return new CommandResult(true);
         }
@@ -193,6 +204,7 @@ namespace UnsoundedSea.Core
             turn++; SetPhase(BattlePhase.TurnStart); block = 0; ward = 0; taskUsed = false; actions = definition.Actions;
             investigationUsed = sceneActionUsed = crewSupportUsed = directionalListeningBlocked = directionalListeningUsed = false;
             watchedInvestigationBonus = sceneFailureReduction = sceneDiscount = 0; turnFlags.Clear();
+            newCardAnswers.Clear(); weaponHits.Clear();cardQuestions.Clear();
             Draw(definition.DrawCount);
             boss?.BeginPlayerTurn();
             foreach (var enemy in enemies.Where(x => x.Health > 0))
@@ -208,9 +220,10 @@ namespace UnsoundedSea.Core
         private void ResolveTurn()
         {
             SetPhase(BattlePhase.Resolve);
+            carriedFromLastTurn.Clear();
             foreach (var card in hand.Where(x => !x.IsEncounter).ToList())
             {
-                if (retained.Remove(card.InstanceId)) continue;
+                if (retained.Remove(card.InstanceId)) { carriedFromLastTurn.Add(card.InstanceId); continue; }
                 hand.Remove(card); discard.Add(card);
             }
             if (boss != null)
@@ -244,7 +257,7 @@ namespace UnsoundedSea.Core
             {
                 if (draw.Count == 0) { draw.AddRange(discard); discard.Clear(); deckRandom.Shuffle(draw); }
                 if (draw.Count == 0) break;
-                var index = draw.Count - 1; hand.Add(draw[index]); draw.RemoveAt(index);
+                var index = draw.Count - 1; hand.Add(draw[index]); draw.RemoveAt(index);cardsDrawn++;
             }
         }
         internal void DamageEnemy(string id, int amount)
@@ -281,19 +294,8 @@ namespace UnsoundedSea.Core
             if (kind == InvestigationKind.VisibleAction) return enemy.ActualIntent.VisibleAction && !enemy.Confirmed;
             return !knowledge.Entries.Any(x => x.Key == EvidenceKey(id, kind));
         }
-        private CrewSupportView SupportView(CrewSupportSpec support)
-        {
-            var targets = support.Kind == CrewSupportKind.Listener
-                ? enemies.Where(x => x.Health > 0 && CanInvestigate(x.Definition.Id, InvestigationKind.SoundSource))
-                    .Select(x => new EncounterTargetView(x.Definition.Id, x.Definition.Name, "获取当前声源证据", true)).ToList()
-                : new List<EncounterTargetView>();
-            var used = usedSupports.Contains(support.Id);
-            var reason = used ? "本场已使用。" : crewSupportUsed ? "本回合已使用船员支援。" : actions < support.Cost ? "行动点不足。" :
-                support.Kind == CrewSupportKind.Listener && targets.Count == 0 ? "没有新的声源目标。" : "";
-            return new CrewSupportView(support, used, phase == BattlePhase.PlayerTurn && reason == "", reason, targets.AsReadOnly());
-        }
 
-        internal void Investigate(string id, InvestigationKind kind, string source)
+        internal void Investigate(string id, InvestigationKind kind, string source, bool fromInvestigationCard = false)
         {
             var enemy = Find(id);
             if (kind == InvestigationKind.SoundSource && directionalListeningBlocked) { Record("耳棉阻止了定向听取。"); return; }
@@ -307,7 +309,9 @@ namespace UnsoundedSea.Core
                 case InvestigationKind.DamageChannel: information = $"主要威胁：{(enemy.ActualIntent.Channel == DamageChannel.Health ? "肉体" : "理智")}"; break;
                 default: throw new ArgumentOutOfRangeException(nameof(kind));
             }
-            knowledge.Record(new Evidence(EvidenceKey(id, kind), information, source, KnowledgeLevel.Observed));
+            knowledge.Record(new Evidence(EvidenceKey(id, kind), information, source, KnowledgeLevel.Observed,EvidenceScope.Turn,id,SubjectType(id),kind.ToString(),definition.Id,turn,fact:kind==InvestigationKind.SoundSource?enemy.ActualIntent.SoundSource:information));
+            if (fromInvestigationCard) { newCardAnswers.Add(id);if(!cardQuestions.TryGetValue(id,out var questions))cardQuestions[id]=questions=new HashSet<InvestigationKind>();questions.Add(kind); }
+            if(kind==InvestigationKind.VisibleAction)ConfirmationEquipment();
             Record($"{source}观察到：{information}");
             if (kind == InvestigationKind.SoundSource) directionalListeningUsed = true;
             if (watchedInvestigationBonus > 0)
@@ -317,7 +321,7 @@ namespace UnsoundedSea.Core
                 if (available.Count > 0)
                 {
                     watchedInvestigationBonus = 0;
-                    Investigate(id, available[0], source + "·追问");
+                    Investigate(id, available[0], source + "·追问", fromInvestigationCard);
                 }
             }
         }

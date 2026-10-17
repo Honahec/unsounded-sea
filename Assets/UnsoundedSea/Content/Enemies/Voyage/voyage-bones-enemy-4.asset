@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-bones-enemy-4
   displayName: "\u7F1D\u9AA8\u62D6\u7F51\u5BA2"
-  health: 20
-  candidateDescription: "\u9AA8\u7F51\u6295\u63B7\uFF1A7 \u751F\u547D\u4F24\u5BB3 / \u6536\u9488\u6574\u7F51\uFF1A0 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  health: 28
+  candidateDescription: "\u9AA8\u7F51\u6295\u63B7\uFF1A8 \u751F\u547D\u4F24\u5BB3 / \u6536\u9488\u6574\u7F51\uFF1A0 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
   intents:
   - id: cast
     displayName: "\u9AA8\u7F51\u6295\u63B7"
     clue: "\u80A9\u7F51\u5C55\u5F00\uFF0C\u9AA8\u7247\u78B0\u649E\u58F0\u6765\u81EA\u5DE6\u4FA7\u3002"
     channel: 0
-    amount: 7
+    amount: 8
     isPublic: 0
     visibleAction: 1
     interruptible: 0

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: b05-guard-anchor
   displayName: "\u951A\u5B88\u536B"
-  health: 12
+  health: 16
   candidateDescription: "\u6BCF\u56DE\u5408 5 \u751F\u547D"
   intents:
   - id: boss-script

@@ -186,8 +186,8 @@ namespace UnsoundedSea.Runtime
 
             var selected = v.Enemies.FirstOrDefault(x => x.Id == director.SelectedEnemy);
 
-            var tools = Box("tools"); root.Add(tools);
-            foreach (var tool in v.Tools)
+            var tools = new ScrollView(ScrollViewMode.Vertical); tools.AddToClassList("tools"); tools.style.maxHeight = new StyleLength(new Length(48, LengthUnit.Percent)); root.Add(tools);
+            foreach (var tool in v.Tools.Where(x=>(int)x.Definition.Kind<3))
             {
                 var t = tool; var cost = t.Definition.SanityCost > 0 ? $"{t.Definition.SanityCost}理智" : "无代价";
                 var b = Button("tool-" + t.Definition.Id, "", () => director.Submit(BattleCommand.Investigate(t.Definition.Id, director.SelectedEnemy)), "tool");
@@ -206,10 +206,11 @@ namespace UnsoundedSea.Runtime
                 button.Add(new SeaUiArt(crew.Definition.Kind == CrewSupportKind.Medic ? "heart" : "ear"));
                 button.Add(Text(crew.Definition.Name, "tool-name"));
                 button.Add(Text(crew.Used ? "本场已用" : $"{crew.Definition.Cost}行动", "tool-meta"));
-                button.tooltip = crew.Enabled ? "船员支援 · 每回合最多一次，每人每场一次" : crew.DisabledReason;
+                button.tooltip = crew.Enabled ? SupportCatalog.CrewDescription(crew.Definition.Kind) + " 每回合最多一次，每人每场一次" : crew.DisabledReason;
                 ActionButton(button, active && crew.Enabled); tools.Add(button);
             }
 
+            tools.Add(BattleSupplyPanel.Build(v,command=>director.Submit(command),active,ActionButton));
             var objective = Box("battle-objective"); root.Add(objective);
             objective.pickingMode = PickingMode.Position;
             objective.Add(Text(v.BossKind != BossEncounterKind.None ? "进度" : scenario.encounter.objective == ObjectiveKind.Seal ? "封线" : scenario.encounter.objective == ObjectiveKind.Survive ? "撤离" : "压制", "objective-label"));
@@ -320,7 +321,8 @@ namespace UnsoundedSea.Runtime
                     {
                         plate.style.left = previousPosition.x; plate.style.top = previousPosition.y;
                     }
-                    plate.RegisterCallback<GeometryChangedEvent>(_ => PositionLabels());
+                    // LateUpdate positions labels after layout; changing position inside a
+                    // GeometryChangedEvent can recursively invalidate the same layout pass.
                     plate.Add(Text(enemy.Name, "actor-name"));
                     if (!hideHealth)
                     {
@@ -579,7 +581,7 @@ namespace UnsoundedSea.Runtime
                 if (journalOpen)
                 {
                     var log = new ScrollView(); log.AddToClassList("journal");
-                    foreach (var evidence in view.Evidence) log.Add(Text($"[{KnowledgeLabel(evidence.Level)}] {evidence.Text} / {evidence.Source}", "log-line"));
+                    foreach (var evidence in view.Evidence) log.Add(Text($"[{KnowledgeLabel(evidence.Level)}] {evidence.Text} / {BattleSupplyPanel.EvidenceLabel(evidence, view.Turn)}", "log-line"));
                     var entries = view.Log.Where(x => !x.Contains("阶段：")).ToArray();
                     foreach (var entry in entries.Skip(Math.Max(0, entries.Length - 12))) log.Add(Text(entry, "log-line"));
                     sheet.Add(log);
