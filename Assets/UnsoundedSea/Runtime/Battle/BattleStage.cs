@@ -28,7 +28,7 @@ namespace UnsoundedSea.Runtime
         private readonly List<BattleActorView> actors = new List<BattleActorView>();
         private readonly List<BellMotherRigidMotion> seaMotions = new List<BellMotherRigidMotion>();
         private readonly VesselWaveResponse vesselResponse = new VesselWaveResponse();
-        public bool HasPendingSeaAttack => seaMotions.Exists(m => m != null && m.ActiveAction == "Attack");
+        public bool HasPendingSeaAttack => seaMotions.Exists(m => m != null && m.ActiveAction == "Attack") || actors.Exists(a => a.GiantMotion != null && a.GiantMotion.Busy);
         private BattleDirector director;
         private Vector3 shipPosition, cameraPosition;
         private Quaternion shipRotation, cameraRotation;
@@ -71,6 +71,11 @@ namespace UnsoundedSea.Runtime
                     actor.gameObject.SetActive(view.Enemies[i].Health > 0);
                 }
                 actors.Add(actor);
+                if (actor.GiantMotion != null)
+                {
+                    actor.GiantMotion.BindEffects(water,vessel);
+                    actor.GiantMotion.SurfaceReleased += OnGiantRelease;
+                }
                 var motion = actor.GetComponentInChildren<BellMotherRigidMotion>();
                 if (actor.IsSeaActor && motion != null && water != null)
                 {
@@ -87,13 +92,19 @@ namespace UnsoundedSea.Runtime
         {
             for (var i = 0; i < actors.Count; i++)
             {
-                if (after.BossKind != BossEncounterKind.None)
+                if (after.BossKind != BossEncounterKind.None && actors[i].GiantMotion == null)
                     actors[i].gameObject.SetActive(after.Enemies[i].Health > 0);
                 var action = command.kind == CommandKind.EndTurn
                     ? after.ResolvedEnemyActions.FirstOrDefault(x => x.EnemyId == actors[i].EnemyId) : null;
                 var damaged = after.Enemies[i].Health < before.Enemies[i].Health;
-                actors[i].Feedback(damaged, actors[i].IsSeaActor ? command.kind == CommandKind.EndTurn && before.Enemies[i].Health > 0 : action != null, after.Enemies[i].Health > 0,
+                actors[i].Feedback(damaged, action != null, after.Enemies[i].Health > 0,
                     action != null && action.Channel == DamageChannel.Sanity, action != null && action.Amount == 0, i * .12f);
+                if (actors[i].GiantMotion != null)
+                {
+                    if (after.Phase == BattlePhase.Victory && before.Phase != BattlePhase.Victory) actors[i].GiantMotion.Retire();
+                    else if (!after.Enemies[i].Targetable && after.ObjectiveProgress > before.ObjectiveProgress)
+                        actors[i].GiantMotion.PlayHit(.65f);
+                }
                 if (!actors[i].IsSeaActor && damaged) combatTarget = Mathf.Max(combatTarget, .65f);
             }
             if (after.Health < before.Health || after.Sanity < before.Sanity)
@@ -105,6 +116,7 @@ namespace UnsoundedSea.Runtime
             if (after.ObjectiveProgress > before.ObjectiveProgress && feedback != null && sealCue != null) feedback.PlayOneShot(sealCue);
             RefreshSelection();
         }
+        private void OnGiantRelease(Vector3 point,float amplitude) { if(water!=null)water.EmitImpact(point,amplitude); }
         private void OnSurfaceStruck(Vector3 point) => water.EmitImpact(point);
 
         // Runs after actor motion: contacts, water geometry and vessel samples share one frame.
@@ -220,6 +232,7 @@ namespace UnsoundedSea.Runtime
             foreach (var motion in seaMotions)
                 if (motion != null) { motion.SurfaceStruck -= OnSurfaceStruck; motion.SurfaceHeight = null; }
             seaMotions.Clear();
+            foreach(var actor in actors) if(actor != null && actor.GiantMotion != null) actor.GiantMotion.SurfaceReleased -= OnGiantRelease;
             if (skybox != null) RenderSettings.skybox = previousSkybox;
             RenderSettings.fog = previousFog; RenderSettings.fogColor = previousColor;
             RenderSettings.fogDensity = previousDensity; RenderSettings.fogMode = previousMode;

@@ -1,6 +1,10 @@
 Shader "UnsoundedSea/Impact Spray"
 {
-    Properties { _Color("Spray albedo", Color) = (0.65,0.78,0.75,1) }
+    Properties
+    {
+        _Color("Spray albedo", Color) = (0.65,0.78,0.75,1)
+        _Emission("Resonance emission", Range(0,2)) = 0
+    }
     SubShader
     {
         Tags { "RenderPipeline"="UniversalPipeline" "Queue"="Transparent+15" "RenderType"="Transparent" }
@@ -18,6 +22,7 @@ Shader "UnsoundedSea/Impact Spray"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
             CBUFFER_START(UnityPerMaterial)
             float4 _Color;
+            float _Emission;
             CBUFFER_END
             struct Attributes { float4 positionOS:POSITION; float2 uv:TEXCOORD0; float4 color:COLOR; };
             struct Varyings { float4 positionCS:SV_POSITION; float2 uv:TEXCOORD0; float4 color:COLOR; float3 world:TEXCOORD1; float fog:TEXCOORD2; };
@@ -47,7 +52,7 @@ Shader "UnsoundedSea/Impact Spray"
                 alpha *= saturate((sceneDepth-eyeDepth)/1.5);
                 Light light = GetMainLight();
                 float3 lighting = max(0,SampleSH(float3(0,1,0)))+light.color*saturate(light.direction.y)*0.7;
-                return half4(MixFog(i.color.rgb*_Color.rgb*lighting,i.fog),alpha);
+                return half4(MixFog(i.color.rgb*_Color.rgb*(lighting+_Emission),i.fog),alpha);
             }
             ENDHLSL
         }

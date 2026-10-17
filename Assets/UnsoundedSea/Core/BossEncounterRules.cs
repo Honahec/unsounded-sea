@@ -281,7 +281,7 @@ namespace UnsoundedSea.Core
             private void ResolveWatcher()
             {
                 if (stage == 1) return;
-                if (stage == 3) { if (!evacuationJustEntered) s.ApplyThreat(DamageChannel.Sanity, 4, "无星余响"); return; }
+                if (stage == 3) { if (!evacuationJustEntered) s.ApplyEnemyThreat(s.enemies[0], DamageChannel.Sanity, 4, "无星余响"); return; }
                 var activeAtStart = s.enemies.Skip(1).Count(x => x.Health > 0);
                 foreach (var e in s.enemies.Skip(1).Where(x => x.Health > 0 && !x.Interrupted).ToList())
                 {
@@ -289,7 +289,7 @@ namespace UnsoundedSea.Core
                     sailBurst |= name == "sail"; eyeBurst |= name == "eye";
                     if (e.ActualIntent.Amount > 0) s.ApplyEnemyThreat(e, e.ActualIntent.Channel, e.ActualIntent.Amount);
                 }
-                summonStep++; if (summonStep % 2 == 0) s.ApplyThreat(DamageChannel.Sanity, activeAtStart == 3 ? 4 : 3, "无星余响");
+                summonStep++; if (summonStep % 2 == 0) s.ApplyEnemyThreat(s.enemies[0], DamageChannel.Sanity, activeAtStart == 3 ? 4 : 3, "无星余响");
                 SpawnWatcher(activeAtStart);
             }
             private void SpawnWatcher(int activeBefore)
@@ -325,6 +325,9 @@ namespace UnsoundedSea.Core
             private static string ChoirLabel(string id) => id == "choir-a" ? "潮匣" : id == "choir-b" ? "骨匣" : "息匣";
             private void RevealSummonSource(EnemyState enemy)
             {
+                // Visual cue for an actual summon, not the next turn's intent.
+                if (!s.resolvedEnemyActions.Any(a => a.EnemyId == s.enemies[0].Definition.Id))
+                    s.resolvedEnemyActions.Add(new ResolvedEnemyAction(s.enemies[0].Definition.Id, DamageChannel.Sanity, 0));
                 completed.Add(enemy.Definition.Id + ":source");
                 s.knowledge.Record(new Evidence(enemy.Definition.Id + "/source", "召唤来源已公开", "场景召唤", KnowledgeLevel.Observed));
             }

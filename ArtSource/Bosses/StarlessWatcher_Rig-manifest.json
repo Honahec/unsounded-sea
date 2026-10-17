@@ -1,0 +1,187 @@
+{
+  "asset": "StarlessWatcher",
+  "method": "Anatomical armature on assembled BANG parts; rigid shell weights and localized soft chains",
+  "input_sha256": "635e245013070b36f27f395c26686ed044cf345342c423973679083e8c0c4737",
+  "output_sha256": "8d460a4da9a66d4953b9b87943744e2783992954d027d5b66820eb755f1afa08",
+  "bones": [
+    {
+      "name": "GB_Body",
+      "head_blender": [
+        0,
+        0,
+        0.92
+      ],
+      "parent": null
+    },
+    {
+      "name": "GB_Head",
+      "head_blender": [
+        0,
+        -0.02,
+        1.38
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_Arch_L",
+      "head_blender": [
+        -0.5,
+        0.16,
+        0.18
+      ],
+      "parent": null
+    },
+    {
+      "name": "GB_Arch_R",
+      "head_blender": [
+        0.5,
+        0.16,
+        0.18
+      ],
+      "parent": null
+    },
+    {
+      "name": "GB_Curtain_L",
+      "head_blender": [
+        -0.33,
+        -0.12,
+        1.04
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_CurtainMid_L",
+      "head_blender": [
+        -0.38,
+        -0.1,
+        0.63
+      ],
+      "parent": "GB_Curtain_L"
+    },
+    {
+      "name": "GB_CurtainLow_L",
+      "head_blender": [
+        -0.43,
+        -0.1,
+        0.23
+      ],
+      "parent": "GB_CurtainMid_L"
+    },
+    {
+      "name": "GB_Curtain_R",
+      "head_blender": [
+        0.33,
+        -0.12,
+        1.04
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_CurtainMid_R",
+      "head_blender": [
+        0.38,
+        -0.1,
+        0.63
+      ],
+      "parent": "GB_Curtain_R"
+    },
+    {
+      "name": "GB_CurtainLow_R",
+      "head_blender": [
+        0.43,
+        -0.1,
+        0.23
+      ],
+      "parent": "GB_CurtainMid_R"
+    }
+  ],
+  "meshes": [
+    {
+      "mesh": "Part_01_Mesh",
+      "bang_part": 1,
+      "bones": [
+        "Body",
+        "CurtainLow_L",
+        "CurtainLow_R",
+        "CurtainMid_L",
+        "CurtainMid_R",
+        "Curtain_L",
+        "Curtain_R",
+        "Head"
+      ],
+      "triangles": 44332
+    },
+    {
+      "mesh": "Part_02_Mesh",
+      "bang_part": 2,
+      "bones": [
+        "Arch_R"
+      ],
+      "triangles": 18511
+    },
+    {
+      "mesh": "Part_03_Mesh",
+      "bang_part": 3,
+      "bones": [
+        "Arch_L"
+      ],
+      "triangles": 18532
+    },
+    {
+      "mesh": "Part_04_Mesh",
+      "bang_part": 4,
+      "bones": [
+        "Curtain_R"
+      ],
+      "triangles": 4318
+    },
+    {
+      "mesh": "Part_05_Mesh",
+      "bang_part": 5,
+      "bones": [
+        "Curtain_L"
+      ],
+      "triangles": 4304
+    }
+  ],
+  "triangle_uv_signature_before": "c9ff6b711e731541ef75a6952fd02d0a1490d159f233274899eec09920af2ec2",
+  "triangle_uv_signature_after": "c9ff6b711e731541ef75a6952fd02d0a1490d159f233274899eec09920af2ec2",
+  "max_influences": 3,
+  "weight_sum_error": 1.6595342267056168e-07,
+  "pose_test_displacement": 0.18478344918020864,
+  "bind_restore_error": 0.0,
+  "embedded_clips": 0,
+  "animation_driver": "GiantBossMotion; authored curves in GiantBossSetup",
+  "target_device_performance_tested": false,
+  "input_revision": "3430ecc",
+  "input_path": "Assets/UnsoundedSea/Art/Models/StarlessWatcher_BANG_LOD0.glb",
+  "blender_version": "5.2.2",
+  "embedded_images": [
+    {
+      "bytes": 3512401,
+      "sha256": "223378c3fd8b066cc8020af4321e5263a4216395f597bddd221626d905319f77"
+    },
+    {
+      "bytes": 5256657,
+      "sha256": "3ed6f2fd4f63d6efb761264bf4d5859e2f6ba7238a4f3f0da59e8b600d0a63e0"
+    },
+    {
+      "bytes": 4141806,
+      "sha256": "23d50c779fc998170e8f05229b8829e71d116ffe219f0216ac58883c54b4d45a"
+    }
+  ],
+  "embedded_images_identical_to_bang_lod0": true,
+  "unity_validation": {
+    "editor": "6000.6.5f1",
+    "platform": "macOS Metal",
+    "date": "2026-10-17",
+    "editmode_suite": {
+      "passed": 215,
+      "failed": 0
+    },
+    "live_enemy_turns": 2,
+    "hit_overlay_reviewed": true,
+    "pause_verified": true,
+    "review": "Docs/ArtReferences/giant-boss-M05-motion.jpg"
+  }
+}

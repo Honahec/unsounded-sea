@@ -11,7 +11,7 @@
     "basis": "API output is not published to public ASSETS or shared with other users.",
     "policy": "https://docs.hyper3d.ai/en/legal/data-retention-policy"
   },
-  "method": "BANG semantic split; independent rigid part pivots; Blender decimation",
+  "method": "BANG semantic split; Blender decimation; anatomical skin and localized cloth chains",
   "parts": 5,
   "part_mapping": [
     {
@@ -124,27 +124,31 @@
     "animations": 0
   },
   "runtime_spec": {
-    "bytes": 16526228,
+    "bytes": 18447212,
     "triangles": 89997,
-    "vertices": 95885,
+    "vertices": 95902,
     "meshes": 5,
     "materials": 5,
     "images": 3,
-    "skins": 0,
+    "skins": 1,
     "animations": 0
   },
   "outputs": {
     "source": "ArtSource/Bosses/StarlessWatcher_BANG_High.glb",
     "glb": "Assets/UnsoundedSea/Art/Models/StarlessWatcher_BANG_LOD0.glb",
-    "preview": "ArtSource/Bosses/StarlessWatcher_BANG-preview.png"
+    "preview": "ArtSource/Bosses/StarlessWatcher_BANG-preview.png",
+    "rig_report": "ArtSource/Bosses/StarlessWatcher_Rig-manifest.json"
   },
   "sha256": {
     "source": "3c433e43a47fc5f222273accae98da7a4c8865dc172685b657cce7db6cffbd3c",
-    "glb": "635e245013070b36f27f395c26686ed044cf345342c423973679083e8c0c4737",
+    "glb": "8d460a4da9a66d4953b9b87943744e2783992954d027d5b66820eb755f1afa08",
     "preview": "6553cd8df12372fdf5e3cc298243d535c82d5a4f46d5c10919ec1129361a2034"
   },
-  "animation_ready": false,
+  "animation_ready": true,
   "notes": [
-    "Part pivots preserve the assembled silhouette. Anatomical joint calibration and combat animation are not included."
-  ]
+    "Part mapping above describes the archived unskinned BANG input, not anatomical joints.",
+    "Runtime uses GiantBossMotion procedural skeletal curves; no embedded clips. Joint/weight/UV checks and limitations are in the rig report.",
+    "Original embedded PBR images retained byte-for-byte. Target-device performance and final art approval remain unverified."
+  ],
+  "partition_output_sha256": "635e245013070b36f27f395c26686ed044cf345342c423973679083e8c0c4737"
 }

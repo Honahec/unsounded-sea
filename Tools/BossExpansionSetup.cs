@@ -59,7 +59,7 @@ public static class BossExpansionSetup
             AssetDatabase.ImportAsset(Models+"/"+spec.Model+"_BANG_LOD0.glb",ImportAssetOptions.ForceSynchronousImport);
             NormalizeModel(spec);
         }
-        return "Imported and normalized four BANG rigid-part boss models; preserved encounter rules and stage placement.";
+        return "Imported BANG models; retained existing anatomical rigs and authored encounter stages.";
     }
 
     public static string Build()
@@ -84,6 +84,9 @@ public static class BossExpansionSetup
 
     static void NormalizeModel(Spec spec)
     {
+        // Preserve the anatomical rig and authored motion profile on subsequent imports.
+        var existing = AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/Art/Prefabs/"+spec.Model+".prefab");
+        if (existing != null && existing.GetComponentInChildren<GiantBossMotion>(true) != null) return;
         var source=AssetDatabase.LoadAssetAtPath<GameObject>(Models+"/"+spec.Model+"_BANG_LOD0.glb");
         if(source==null)throw new InvalidOperationException(spec.Model+" is still importing.");
         if(source.GetComponentsInChildren<MeshFilter>(true).Length < 2)

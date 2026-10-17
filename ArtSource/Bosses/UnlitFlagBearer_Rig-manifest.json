@@ -1,0 +1,161 @@
+{
+  "asset": "UnlitFlagBearer",
+  "method": "Anatomical armature on assembled BANG parts; rigid shell weights and localized soft chains",
+  "input_sha256": "b81e1345a7eb414855e8c82aab6f633ce304502491cb0f5cc405ea03c4d62536",
+  "output_sha256": "37b1f87c931ef86404dfafb93a0c8b3219f42dc2c53ecd8a4c0b47502c0e15be",
+  "bones": [
+    {
+      "name": "GB_Body",
+      "head_blender": [
+        0.23,
+        0,
+        0.85
+      ],
+      "parent": null
+    },
+    {
+      "name": "GB_Head",
+      "head_blender": [
+        0.23,
+        0,
+        1.39
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_Pole",
+      "head_blender": [
+        -0.1,
+        -0.2,
+        1.09
+      ],
+      "parent": "GB_Body"
+    },
+    {
+      "name": "GB_FlagTop",
+      "head_blender": [
+        -0.25,
+        -0.17,
+        1.68
+      ],
+      "parent": "GB_Pole"
+    },
+    {
+      "name": "GB_FlagMid",
+      "head_blender": [
+        -0.35,
+        -0.17,
+        1.2
+      ],
+      "parent": "GB_FlagTop"
+    },
+    {
+      "name": "GB_FlagLow",
+      "head_blender": [
+        -0.44,
+        -0.17,
+        0.7
+      ],
+      "parent": "GB_FlagMid"
+    },
+    {
+      "name": "GB_FreeArm",
+      "head_blender": [
+        0.44,
+        -0.02,
+        1.23
+      ],
+      "parent": "GB_Body"
+    }
+  ],
+  "meshes": [
+    {
+      "mesh": "Part_01_Mesh",
+      "bang_part": 1,
+      "bones": [
+        "Body",
+        "FreeArm",
+        "Head",
+        "Pole"
+      ],
+      "triangles": 55187
+    },
+    {
+      "mesh": "Part_03_Mesh",
+      "bang_part": 3,
+      "bones": [
+        "Body"
+      ],
+      "triangles": 4400
+    },
+    {
+      "mesh": "Part_04_Mesh",
+      "bang_part": 4,
+      "bones": [
+        "FreeArm"
+      ],
+      "triangles": 4690
+    },
+    {
+      "mesh": "FlagPole",
+      "bang_part": 2,
+      "bones": [
+        "FlagMid",
+        "FlagTop",
+        "Pole"
+      ],
+      "triangles": 7739
+    },
+    {
+      "mesh": "FlagCloth",
+      "bang_part": 2,
+      "bones": [
+        "FlagLow",
+        "FlagMid",
+        "FlagTop",
+        "Pole"
+      ],
+      "triangles": 17982
+    }
+  ],
+  "triangle_uv_signature_before": "4fddf269439a770f320fafbc9e4d8e4012254eb9788f12aebb810e1e56ff3091",
+  "triangle_uv_signature_after": "4fddf269439a770f320fafbc9e4d8e4012254eb9788f12aebb810e1e56ff3091",
+  "max_influences": 3,
+  "weight_sum_error": 9.386682509049393e-08,
+  "pose_test_displacement": 0.21943290239869467,
+  "bind_restore_error": 0.0,
+  "embedded_clips": 0,
+  "animation_driver": "GiantBossMotion; authored curves in GiantBossSetup",
+  "target_device_performance_tested": false,
+  "input_revision": "3430ecc",
+  "input_path": "Assets/UnsoundedSea/Art/Models/UnlitFlagBearer_BANG_LOD0.glb",
+  "blender_version": "5.2.2",
+  "embedded_images": [
+    {
+      "bytes": 2651326,
+      "sha256": "5c65baad60177a9b78147d7ffac7cd0fe50f736b4430bcac53f76f69f39d1af4"
+    },
+    {
+      "bytes": 4339172,
+      "sha256": "2ebeeba2e11c886f9f510407555f9e008e38835dffe0462891f9736a8b7d1eff"
+    },
+    {
+      "bytes": 3571629,
+      "sha256": "076115e5bba0ad1374610c2c0750f1b25b5d827e798923d7ebb9736b13d8eee0"
+    }
+  ],
+  "embedded_images_identical_to_bang_lod0": true,
+  "unity_validation": {
+    "editor": "6000.6.5f1",
+    "platform": "macOS Metal",
+    "date": "2026-10-17",
+    "editmode_suite": {
+      "passed": 215,
+      "failed": 0
+    },
+    "live_enemy_turns": 2,
+    "hit_overlay_reviewed": true,
+    "pause_verified": true,
+    "review": "Docs/ArtReferences/giant-boss-M04-motion.jpg"
+  }
+}

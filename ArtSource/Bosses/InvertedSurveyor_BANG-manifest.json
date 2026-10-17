@@ -11,7 +11,7 @@
     "basis": "API output is not published to public ASSETS or shared with other users.",
     "policy": "https://docs.hyper3d.ai/en/legal/data-retention-policy"
   },
-  "method": "BANG semantic split; independent rigid part pivots; Blender decimation",
+  "method": "BANG semantic split; Blender decimation; anatomical skin and localized cloth chains",
   "parts": 9,
   "part_mapping": [
     {
@@ -200,27 +200,31 @@
     "animations": 0
   },
   "runtime_spec": {
-    "bytes": 18393912,
+    "bytes": 20413864,
     "triangles": 89995,
     "vertices": 100880,
     "meshes": 9,
     "materials": 9,
     "images": 3,
-    "skins": 0,
+    "skins": 1,
     "animations": 0
   },
   "outputs": {
     "source": "ArtSource/Bosses/InvertedSurveyor_BANG_High.glb",
     "glb": "Assets/UnsoundedSea/Art/Models/InvertedSurveyor_BANG_LOD0.glb",
-    "preview": "ArtSource/Bosses/InvertedSurveyor_BANG-preview.png"
+    "preview": "ArtSource/Bosses/InvertedSurveyor_BANG-preview.png",
+    "rig_report": "ArtSource/Bosses/InvertedSurveyor_Rig-manifest.json"
   },
   "sha256": {
     "source": "f95e9055f3209d4efbf3c965488d21e7e3eb0c61a6ec6f2e1767e0eef90b56eb",
-    "glb": "6ae17694ba9702a32be54238a756ee66eedfe2717c409b6b2cc5932196d42414",
+    "glb": "56984d233fe65871478020732cc0fcf251c4c1a53610a8ec4b3530d3da6f0925",
     "preview": "77d61f312fe9392831670acf3920dbec0f808725ed32c86daca2721a9436c746"
   },
-  "animation_ready": false,
+  "animation_ready": true,
   "notes": [
-    "Part pivots preserve the assembled silhouette. Anatomical joint calibration and combat animation are not included."
-  ]
+    "Part mapping above describes the archived unskinned BANG input, not anatomical joints.",
+    "Runtime uses GiantBossMotion procedural skeletal curves; no embedded clips. Joint/weight/UV checks and limitations are in the rig report.",
+    "Original embedded PBR images retained byte-for-byte. Target-device performance and final art approval remain unverified."
+  ],
+  "partition_output_sha256": "6ae17694ba9702a32be54238a756ee66eedfe2717c409b6b2cc5932196d42414"
 }

@@ -11,7 +11,7 @@
     "basis": "API output is not published to public ASSETS or shared with other users.",
     "policy": "https://docs.hyper3d.ai/en/legal/data-retention-policy"
   },
-  "method": "BANG semantic split; independent rigid part pivots; Blender decimation",
+  "method": "BANG semantic split; Blender decimation; anatomical skin and localized cloth chains",
   "parts": 4,
   "part_mapping": [
     {
@@ -105,27 +105,31 @@
     "animations": 0
   },
   "runtime_spec": {
-    "bytes": 14373456,
+    "bytes": 16427084,
     "triangles": 89998,
-    "vertices": 102048,
-    "meshes": 4,
+    "vertices": 102236,
+    "meshes": 5,
     "materials": 4,
     "images": 3,
-    "skins": 0,
+    "skins": 1,
     "animations": 0
   },
   "outputs": {
     "source": "ArtSource/Bosses/UnlitFlagBearer_BANG_High.glb",
     "glb": "Assets/UnsoundedSea/Art/Models/UnlitFlagBearer_BANG_LOD0.glb",
-    "preview": "ArtSource/Bosses/UnlitFlagBearer_BANG-preview.png"
+    "preview": "ArtSource/Bosses/UnlitFlagBearer_BANG-preview.png",
+    "rig_report": "ArtSource/Bosses/UnlitFlagBearer_Rig-manifest.json"
   },
   "sha256": {
     "source": "7ce687d8ea8f59b2300af1e38eba76381a106285ccefdb78e51fd1fb2e1fa4d3",
-    "glb": "b81e1345a7eb414855e8c82aab6f633ce304502491cb0f5cc405ea03c4d62536",
+    "glb": "37b1f87c931ef86404dfafb93a0c8b3219f42dc2c53ecd8a4c0b47502c0e15be",
     "preview": "30bc86447d3d568868944a3b230be22ff2f74842510aa1e52dd82d0e4fe223c7"
   },
-  "animation_ready": false,
+  "animation_ready": true,
   "notes": [
-    "Part pivots preserve the assembled silhouette. Anatomical joint calibration and combat animation are not included."
-  ]
+    "Part mapping above describes the archived unskinned BANG input, not anatomical joints.",
+    "Runtime uses GiantBossMotion procedural skeletal curves; no embedded clips. Joint/weight/UV checks and limitations are in the rig report.",
+    "Original embedded PBR images retained byte-for-byte. Target-device performance and final art approval remain unverified."
+  ],
+  "partition_output_sha256": "b81e1345a7eb414855e8c82aab6f633ce304502491cb0f5cc405ea03c4d62536"
 }
