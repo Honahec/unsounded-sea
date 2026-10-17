@@ -123,6 +123,8 @@
 
 持久证据：[四场完整 HUD](ArtReferences/giant-boss-ui.jpg)、[领唱者动作](ArtReferences/giant-boss-M02-motion.jpg)、[司衡者动作](ArtReferences/giant-boss-M03-motion.jpg)、[执旗者动作](ArtReferences/giant-boss-M04-motion.jpg)、[守望者动作](ArtReferences/giant-boss-M05-motion.jpg)、[受击采样](ArtReferences/giant-boss-hit.jpg)。图为按时间顺序抽样，完整帧在忽略的 `Logs/GiantBosses`，可由 QA 脚本重建。
 
+资产与截图已推送到 `940243b`，独立 sparse clone 从远端 LFS 下载四个 GLB 与六张图片，10 份 SHA-256 全部匹配；本地完整 `git lfs fsck` 通过。具体远端回读范围见[检查报告](../ArtSource/Bosses/GiantBoss-readback.json)。
+
 当前完整规则胜负验证见本文件「卡牌联动与敌人数值」的最终 Boss 检查；本节动画检查未重新手动打完四场胜利。未验收独立 Player、非 16:9、目标设备显存／帧率、全角度大幅变形或最终美术质量。M05 仍沿用偏人形的候选模型；旗布是骨链近似，海浪是既有程序波，不是布料／流体物理模拟。
 
 ## UI 精简重设计验收
