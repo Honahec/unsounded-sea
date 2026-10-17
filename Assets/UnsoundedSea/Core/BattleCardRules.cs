@@ -236,9 +236,14 @@ namespace UnsoundedSea.Core
             {
                 case 37: RecordClue(enemyId); Draw(1); break;
                 case 38: if (!MoveDiscardToHand(selection, IsArmed)) Draw(1); break;
-                case 39: if (IsConfirmed(enemyId)) Draw(1); else Investigate(enemyId, InvestigationKind.VisibleAction, "临时照明", true); break;
+                case 39:
+                    if (IsConfirmed(enemyId)) Draw(1);
+                    else { var followup = newCardAnswers.Contains(enemyId); Investigate(enemyId, InvestigationKind.VisibleAction, "临时照明", true); if (followup) Draw(1); }
+                    break;
                 case 40: if (selection == null) Draw(1); else VerifyEvidence(selection.Substring(9)); break;
-                case 41: Investigate(enemyId, InvestigationKind.SoundSource, "听声辨位", true); Draw(1); break;
+                case 41:
+                    var crossChecked = newCardAnswers.Contains(enemyId) && !directionalListeningBlocked && CanInvestigate(enemyId, InvestigationKind.SoundSource);
+                    Investigate(enemyId, InvestigationKind.SoundSource, "听声辨位", true); Draw(crossChecked ? 2 : 1); break;
                 case 42: if (boss?.InspectConnection(selection) != true) Draw(1); break;
                 case 43: if (boss?.MeasureCell(selection) != true) Draw(1); break;
                 case 44: if (boss?.OpenProvenSafe(selection, countsQuota: true) != true && boss?.HasCardMechanic(n) != true) AddWard(3); break;
@@ -247,7 +252,18 @@ namespace UnsoundedSea.Core
                 case 47: if (!MoveDiscardToDraw(selection, x => IsInvestigation(x) && !x.Exhaust)) Draw(1); break;
                 case 48: if (selection == null) Draw(1); else VerifyEvidencePair(selection); break;
                 case 49: if (selection == null) AddWard(3); else ApplyFocus(selection); break;
-                case 50: if (IsConfirmed(enemyId)) { Draw(2); if (newCardAnswers.Contains(enemyId)) AddWard(3); } else Draw(1); break;
+                case 50:
+                    if (IsConfirmed(enemyId))
+                    {
+                        Draw(2);
+                        if (newCardAnswers.Contains(enemyId))
+                        {
+                            AddWard(3);
+                            if (turnFlags.Add("investigation-refund")) { actions++; Record("调查接力：延长观察返还 1 行动（每回合一次）。"); }
+                        }
+                    }
+                    else Draw(1);
+                    break;
                 case 51: Retain(selection); break;
                 case 52: if (bossKind == BossEncounterKind.Watcher) { boss.VerifyGuardAnchor(selection); AddWard(4); } else Draw(1); break;
                 case 53: if (selection == null) Draw(2); else foreach (var id in selection.Substring("enemies:".Length).Split(',')) Investigate(id, InvestigationKind.VisibleAction, "现场重建", true); break;

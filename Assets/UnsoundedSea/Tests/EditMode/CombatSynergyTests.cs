@@ -25,6 +25,42 @@ namespace UnsoundedSea.Tests
         }
         private static int Hp(BattleSession s, string id = "a") => s.View.Enemies.Single(e => e.Id == id).Health;
 
+        [Test] public void LightThenSoundDrawsTwoOnlyForNewComplementaryAnswer()
+        {
+            var s = Session(new[] { "cover", "light", "c041" }, false, 6);
+            Play(s, "cover"); Play(s, "light", "enemy:a"); Play(s, "c041", "enemy:a");
+            Assert.That(s.View.Hand.Select(c => c.Definition.Id), Is.EquivalentTo(new[] { "cover", "light" }));
+            // Recovered illumination is only a cantrip; a repeated sound cannot earn a second answer.
+            Play(s, "light", "enemy:a"); Play(s, "c041", "enemy:a");
+            Assert.That(s.View.Hand.Count, Is.EqualTo(2));
+        }
+
+        [Test] public void SoundThenLightAlsoRewardsCrossChecking()
+        {
+            var s = Session(new[] { "cover", "light", "c041" }, false);
+            Play(s, "cover"); Play(s, "c041", "enemy:a"); Play(s, "light", "enemy:a");
+            Assert.That(s.View.Hand.Select(c => c.Definition.Id), Is.EquivalentTo(new[] { "cover", "c041" }));
+        }
+
+        [Test] public void ObservationRefundIsSharedAcrossCopiesAndResetsNextTurn()
+        {
+            var s = Session(new[] { "c041", "c050", "c050" });
+            Play(s, "c041", "enemy:a"); Play(s, "c050", "enemy:a"); Play(s, "c050", "enemy:a");
+            Assert.That(s.View.Actions, Is.EqualTo(1));
+            Execute(s, BattleCommand.EndTurn());
+            Play(s, "c041", "enemy:a"); Play(s, "c050", "enemy:a");
+            Assert.That(s.View.Actions, Is.EqualTo(2));
+        }
+
+        [Test] public void ObservationCannotBorrowItsFutureRefundToPayCost()
+        {
+            var s = Session(new[] { "c041", "c050" }, actions: 1);
+            Play(s, "c041", "enemy:a");
+            var result = s.Execute(BattleCommand.Play(Card(s, "c050").InstanceId, "enemy:a"));
+            Assert.That(result.Success, Is.False); Assert.That(s.View.Actions, Is.Zero);
+            Assert.That(s.Commands.Count, Is.EqualTo(1));
+        }
+
         [TestCase(false, 5)] [TestCase(true, 9)]
         public void ContradictionHasUnknownAndPublicBaselines(bool known, int damage)
         {
@@ -41,7 +77,7 @@ namespace UnsoundedSea.Tests
             Play(s, "c050", "enemy:a");
             Assert.That(Hp(s), Is.EqualTo(88));
             Assert.That(s.View.Ward, Is.EqualTo(3));
-            Assert.That(s.View.Actions, Is.Zero);
+            Assert.That(s.View.Actions, Is.EqualTo(1));
             var restored = BattleReplay.Capture(s).Restore(Definition(new[] { "light", "contradiction", "c050", "cover" }, false));
             Assert.That(restored.View.Log, Is.EqualTo(s.View.Log));
         }

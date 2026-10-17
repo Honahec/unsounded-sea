@@ -8,7 +8,7 @@ namespace UnsoundedSea.Core
     [Serializable]
     public sealed class BattleReplay
     {
-        public const int CurrentVersion = 5;
+        public const int CurrentVersion = 6;
         public int version;
         public string contentHash;
         public uint seed;

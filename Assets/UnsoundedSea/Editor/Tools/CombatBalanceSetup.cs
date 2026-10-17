@@ -67,7 +67,7 @@ namespace UnsoundedSea.Editor
 
         public static int BossHealth(BossEncounterKind kind, int slot)
         {
-            if (slot == 0) return kind == BossEncounterKind.Choirmaster ? 42 : kind == BossEncounterKind.FlagBearer ? 54 : 1;
+            if (slot == 0) return kind == BossEncounterKind.Choirmaster ? 42 : kind == BossEncounterKind.FlagBearer ? 48 : 1;
             if (kind == BossEncounterKind.Choirmaster) return slot == 1 ? 10 : 12;
             if (kind == BossEncounterKind.Surveyor) return 6;
             return kind == BossEncounterKind.FlagBearer ? 14 : 16;

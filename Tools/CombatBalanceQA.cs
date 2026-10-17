@@ -35,11 +35,11 @@ public static class CombatBalanceQA
         public readonly HashSet<int> Carried = new HashSet<int>();
         public readonly HashSet<int> Retain = new HashSet<int>();
         public int Combos;
-        public bool BoundThisTurn;
+        public bool BoundThisTurn, ObservationUsed;
         public readonly HashSet<string> Bound = new HashSet<string>();
         public bool OtherHit(string target, int instance) => target != null && Hit.TryGetValue(target, out var instances) && instances.Any(id => id != instance);
         public void RecordHit(string target, int instance) { if (!Hit.TryGetValue(target, out var instances)) Hit.Add(target, instances = new HashSet<int>()); instances.Add(instance); }
-        public void End() { Hit.Clear(); Answer.Clear(); Carried.Clear(); foreach (var id in Retain) Carried.Add(id); Retain.Clear(); BoundThisTurn = false; }
+        public void End() { Hit.Clear(); Answer.Clear(); Carried.Clear(); foreach (var id in Retain) Carried.Add(id); Retain.Clear(); BoundThisTurn = ObservationUsed = false; }
     }
 
     public static string Main()
@@ -188,6 +188,7 @@ public static class CombatBalanceQA
             var pick = options[0]; var number = Number(pick.Card);
             Must(s.Execute(BattleCommand.Play(pick.Card.InstanceId, pick.Target)));
             var after = s.View; var target = pick.Target?.Replace("enemy:", "");
+            if (number == 50 && policy.Answer.Contains(target)) policy.ObservationUsed = true;
             var enemy = v.Enemies.FirstOrDefault(e => e.Id == target);
             if (number == 2 && enemy?.IntentConfirmed == true && policy.Answer.Contains(target) || number == 12 && v.Block >= 6 || number == 14 && enemy?.IntentConfirmed == true && policy.Carried.Contains(pick.Card.InstanceId) || number == 16 && policy.OtherHit(target, pick.Card.InstanceId)) policy.Combos++;
             if (number <= 18) foreach (var e in v.Enemies) if (after.Enemies.First(x => x.Id == e.Id).Health < e.Health) policy.RecordHit(e.Id, pick.Card.InstanceId);
@@ -231,10 +232,10 @@ public static class CombatBalanceQA
             case 24: value = block(6); break; case 26: value = block(5)+ward(2); break; case 28: value = block(6)+1; break;
             case 31: value = block(8); break; case 32: value = ward(6); break; case 34: value = block(v.BossKind != BossEncounterKind.None && v.Enemies.Skip(1).Any(x=>x.Health>0) ? 12 : 6); break; case 35: value = ward(3); break;
             case 37: value = 4; break; case 38: value = target == null ? 2 : v.Actions >= 2 ? 6 : 1; break;
-            case 39: value = e != null && !e.IntentConfirmed ? 3 + (Has(v, 2) ? 4 : 0) : 2; break;
-            case 41: value = 3 + (e != null && !p.Answer.Contains(e.Id) && e.IntentConfirmed && Has(v, 2) ? 3 : 0); break;
+            case 39: value = e != null && !e.IntentConfirmed ? 3 + (Has(v, 2) ? 4 : 0) + (Has(v,50) && !p.ObservationUsed && v.Actions >= 2 ? 12 : 0) : 2; break;
+            case 41: value = 3 + (e != null && !p.Answer.Contains(e.Id) && e.IntentConfirmed ? (Has(v, 2) ? 3 : 0) + (Has(v,50) && !p.ObservationUsed && v.Actions >= 2 ? 12 : 0) : 0); break;
             case 45: case 51: case 71: value = target != null && target.Substring(5).Split(',').Select(int.Parse).Any(id => v.Hand.Any(c => c.InstanceId == id && Number(c) == 14) && !p.Carried.Contains(id)) ? 7 : 1; break;
-            case 46: value = 2; break; case 50: value = e?.IntentConfirmed == true ? 5 + (p.Answer.Contains(e.Id) ? ward(3) : 0) : 2; break;
+            case 46: value = 2; break; case 50: value = e?.IntentConfirmed == true ? 5 + (p.Answer.Contains(e.Id) ? ward(3) + (!p.ObservationUsed ? 20 : 0) : 0) : 2; break;
             case 54: value = v.Actions > 1 ? 4 : 1; break;
             case 55: value = e == null ? 0 : hit(e,4) + (e.IntentConfirmed && e.Intent.Contains("可打断") ? Threat(e,false)+Threat(e,true)*1.6 : 0); break;
             case 66: value = block(5); break;
