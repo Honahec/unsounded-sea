@@ -6,6 +6,7 @@ namespace UnsoundedSea.Core
     public sealed partial class VoyageSession
     {
         private bool echoRitualLearned, echoRitualPrepared, echoRitualExpired;
+        public bool KnowsEchoRitual => echoRitualLearned;
 
         public string RitualStatus => !echoRitualLearned ? "尚未取得仪式" : echoRitualPrepared ? "遮断回声 · 已备妥（下场战斗可用一次）" : echoRitualExpired ? "遮断回声 · 上次筹备已失效，可再次筹备" : "遮断回声 · 已掌握，需在安全补给点筹备";
 

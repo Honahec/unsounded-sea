@@ -90,10 +90,53 @@ namespace UnsoundedSea.Core
             id.StartsWith("treat:",StringComparison.Ordinal)||id.StartsWith("gunsmith:",StringComparison.Ordinal)||id=="accept"||
             id.StartsWith("accept@",StringComparison.Ordinal)||id=="escort-decline"||id=="gaze:hide"||id=="gaze:keep";
         private static bool IsPreparationService(string id)=>id.StartsWith("starter:",StringComparison.Ordinal)||id.StartsWith("trust:",StringComparison.Ordinal)||id=="tea"||id=="navigate"||id=="ritual:prepare";
+        private string DisabledSupportReason(string action)
+        {
+            var split=action.Split('@');var parts=split[0].Split(':');
+            var verb=parts[0];var id=parts.Length>1?parts[1]:null;
+            string SupplyCost(int cost)=>$"需要 {cost} 补给（现有 {Supplies}）";
+            string InventorySpace(string itemId,string replacement=null)
+            {
+                var item=SupportCatalog.Item(itemId);
+                if(item.Kind==ItemKind.Tool)return "已取得这件工具";
+                if(item.Kind==ItemKind.Equipment)return "已拥有这件装备";
+                if(inventory.Count(x=>x==itemId)-(replacement==itemId?1:0)>=2)return item.Name+"已存放两份";
+                return "物资箱已满（6/6）";
+            }
+            switch(verb)
+            {
+                case "equip":
+                    var conflict=equippedItems.FirstOrDefault(x=>SupportCatalog.Item(x).Engine);
+                    if(SupportCatalog.Item(id).Engine&&conflict!=null)return "先卸下"+SupportCatalog.Item(conflict).Name;
+                    return "装备位已满（3/3）";
+                case "pack":
+                    if(carriedItems.Count(x=>x==id)>=inventory.Count(x=>x==id))return "已全部随身携带";
+                    if(carriedItems.Count>=2)return "战斗物资已满（2/2）";
+                    return "调查工具位已满，先卸下一件工具";
+                case "buy":
+                    var price=SupportCatalog.Item(id).Kind==ItemKind.Consumable?1:2;
+                    return Supplies<price?SupplyCost(price):InventorySpace(id,split.Length>1?split[1]:null);
+                case "hire":return SupplyCost(HirePrice);
+                case "treat":return SupplyCost(2);
+                case "tea":case "crew":return "理智已满";
+                case "gunsmith":return id=="chart"?"海图次数已满（2/2）":id=="lookout"?"望远镜次数已满（2/2）":InventorySpace("i13");
+                case "trust":return "暂无可学习的相关行动";
+                case "repair-boat":return learnedTools.Contains("i08")?"已取得绝缘钳":SupplyCost(1);
+                case "gaze":case "rescue":return SupplyCost(1);
+                case "archive":return id=="card"?"已学会复核证据":"补给已满";
+                case "specimen":
+                    if(id=="archive")return "尚无已核实的来源记录";
+                    if(id=="supply")return "补给已满";
+                    return markers.ContainsKey("sealed-specimen")?"已携带封存标本":SupplyCost(1);
+                case "risk":return id=="watch"?"补给已满":"需空出两份补给的位置";
+                default:return "";
+            }
+        }
+
         private IReadOnlyList<VoyageNodeChoice> GetCombinedChoices()
         {
             var result=new List<VoyageNodeChoice>();
-            void Add(string id,string title,string detail,bool enabled=true)=>result.Add(new VoyageNodeChoice(id,title,detail,enabled));
+            void Add(string id,string title,string detail,bool enabled=true)=>result.Add(new VoyageNodeChoice(id,title,detail,enabled,enabled?"":DisabledSupportReason(id)));
             result.AddRange(GetRitualChoices());
             if(CanEditDeck)
             {

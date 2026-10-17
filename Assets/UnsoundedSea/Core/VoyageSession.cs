@@ -21,7 +21,9 @@ namespace UnsoundedSea.Core
         public string Title { get; }
         public string Description { get; }
         public bool Enabled { get; }
-        public VoyageNodeChoice(string id,string title,string description,bool enabled=true) { Id=id; Title=title; Description=description; Enabled=enabled; }
+        public string DisabledReason { get; }
+        public VoyageNodeChoice(string id,string title,string description,bool enabled=true,string disabledReason="")
+        { Id=id; Title=title; Description=description; Enabled=enabled; DisabledReason=enabled?"":disabledReason; }
     }
     public sealed class VoyageSummary
     {

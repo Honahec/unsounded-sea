@@ -84,6 +84,12 @@ public static class UiExperienceQA
     }
     static async Task DebugNode(RunNodeKind kind)
     {VoyageRuntime.StartDebugNode("fog",kind);await Task.Delay(650);await Wait(()=>Root.Q<Button>("voyage-support-manifest")!=null,"node "+kind);}
+    public static async Task<object> PreviewManifest()
+    {
+        Check(EditorApplication.isPlaying,"Enter Play first.");
+        await DebugNode(RunNodeKind.Supply);Click("voyage-support-manifest");await Resize(1920,1080);
+        return new{scene=SceneManager.GetActiveScene().name,debug=VoyageRuntime.IsDebugSession,manifestOpen=Root.Q("support-manifest")!=null};
+    }
     public static async Task<object> SupportReadability()
     {
         Check(EditorApplication.isPlaying,"Enter Play first.");
@@ -124,9 +130,48 @@ public static class UiExperienceQA
             await DebugNode(RunNodeKind.Supply);CheckEntry();
             Click("voyage-action-book");await Task.Delay(150);Click("action-book-close");await Task.Delay(200);
             await Capture("voyage-services-readable");
+            // Rich display fixture lives only in the isolated debug voyage; actions still use real UI/rules.
+            var fixture=VoyageRuntime.Session;
+            void Items(string field,params string[] ids)
+            {
+                var list=(List<string>)typeof(VoyageSession).GetField(field,All).GetValue(fixture);
+                list.Clear();list.AddRange(ids);
+            }
+            Items("inventory","i10","i09","i11","i13");Items("carriedItems","i10","i11");
+            Items("ownedEquipment","i17","i18","i20","i21","i23");Items("equippedItems","i17","i20","i21");
+            Click("voyage-support-manifest");Click("support-tab-1");await Task.Delay(200);
+            Check(Root.Q<Button>("support-pack:i13").tooltip=="战斗物资已满（2/2）","Full consumables reason is incorrect.");
+            Check(Root.Q<Button>("support-equip:i18").tooltip=="先卸下盐蚀怀表","Engine conflict reason is incorrect.");
+            Check(Root.Q<Button>("support-equip:i23").tooltip=="装备位已满（3/3）","Equipment capacity reason is incorrect.");
+            Click("support-unpack:i11");await Task.Delay(100);
+            Check(Root.Q<Button>("support-pack:i09").tooltip=="调查工具位已满，先卸下一件工具","Tool conflict reason is incorrect.");
+            Click("support-pack:i11");Check(fixture.CarriedItems.Contains("i11"),"Packing failed.");
+            Click("support-equip:i20");Click("support-equip:i23");Check(fixture.Equipment.Contains("i23")&&!fixture.Equipment.Contains("i20"),"Equipment swap failed.");
+            await Capture("support-inventory-populated");
+            var inventoryScroll=Root.Q<ScrollView>("support-scroll");
+            inventoryScroll.ScrollTo(Root.Q("manifest-item-i18"));await Task.Delay(100);
+            Root.Q("manifest-item-i18").Focus();await Capture("support-equipment-blocked");
+            inventoryScroll.ScrollTo(Root.Q<Button>("support-tools"));await Task.Delay(100);
+            Root.Q("manifest-item-shell").Focus();await Capture("support-tools-populated");
+            var manifest=Root.Q("support-manifest");
+            for(int i=0;i<30;i++)
+            {
+                var focused=Root.panel.focusController.focusedElement as VisualElement;
+                Check(focused!=null&&manifest.Contains(focused),"Focus escaped the manifest.");
+                using(var key=KeyDownEvent.GetPooled(new Event{type=EventType.KeyDown,keyCode=KeyCode.Tab,character='\t'})){key.target=focused;focused.SendEvent(key);}
+                await Task.Delay(10);
+            }
+            var archive=(List<Evidence>)typeof(VoyageSession).GetField("runArchive",All).GetValue(fixture);
+            archive.Add(new Evidence("enemy/source","钟声来自沉船舷侧。","定向听筒",KnowledgeLevel.Verified,EvidenceScope.Run,"","enemy","Source","enc",1,"source-v1","舷边",new[]{"a","b"}));
+            Click("support-tab-3");await Capture("support-archive-populated");
+            var labels=string.Join("\n",Root.Q<ScrollView>("support-scroll").Query<Label>().ToList().Select(x=>x.text));
+            Check(!labels.Contains("source-v1")&&!labels.Contains("enemy/")&&!labels.Contains("阅读不收费"),"Archive exposes implementation text.");
+            typeof(VoyageSession).GetField("echoRitualLearned",All).SetValue(fixture,true);
+            Click("support-tab-4");await Capture("support-ritual-known");
+            Click("support-manifest-close");
             var after=File.Exists(save)?File.ReadAllBytes(save):null;
             Check(before==null?after==null:after!=null&&before.SequenceEqual(after),"Formal save changed.");Check(errors.Count==0,string.Join("; ",errors));
-            var report=new{success=true,pages=6,aspectRatios=3,captures=Captures.Count,runtimeErrors=errors.Count,formalSaveUnchanged=true};
+            var report=new{success=true,views=11,aspectRatios=3,captures=Captures.Count,runtimeErrors=errors.Count,formalSaveUnchanged=true,specificDisabledReasons=true,packAndEquipmentActions=true,keyboardFocusContained=true};
             File.WriteAllText(Path.Combine(Dir,"support-readability-result.json"),JsonConvert.SerializeObject(report,Formatting.Indented));
             await Load(VoyageRuntime.MainMenuScene);return report;
         }

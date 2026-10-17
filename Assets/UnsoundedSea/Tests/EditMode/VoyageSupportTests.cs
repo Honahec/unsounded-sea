@@ -27,6 +27,44 @@ namespace UnsoundedSea.Tests
             Assert.That(s.Current.Layer,Is.EqualTo(layer));
         }
         private static VoyageSession RoundTrip(VoyageSession s)=>VoyageSession.Restore(JsonConvert.DeserializeObject<VoyageCheckpoint>(JsonConvert.SerializeObject(s.Export())));
+        // Isolate each capacity/conflict condition without depending on a random shop assortment.
+        private static void SetItems(VoyageSession session,string field,params string[] ids)
+        {
+            var items=(System.Collections.Generic.List<string>)typeof(VoyageSession).GetField(field,System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).GetValue(session);
+            items.Clear();items.AddRange(ids);
+        }
+        [Test] public void LoadoutDisabledReasonsIdentifyTheActualBlockingCondition()
+        {
+            var s=VoyageSession.Create(1);
+            VoyageNodeChoice Choice(string id)=>s.GetSupportChoices().Single(x=>x.Id==id);
+            Assert.That(Choice("pack:i10").DisabledReason,Is.EqualTo("已全部随身携带"));
+            SetItems(s,"inventory","i10","i11","i13");SetItems(s,"carriedItems","i10","i11");
+            Assert.That(Choice("pack:i13").DisabledReason,Is.EqualTo("战斗物资已满（2/2）"));
+            SetItems(s,"inventory","i10","i09");SetItems(s,"carriedItems","i10");
+            Assert.That(Choice("pack:i09").DisabledReason,Is.EqualTo("调查工具位已满，先卸下一件工具"));
+            SetItems(s,"ownedEquipment","i17","i18","i20","i21","i23");
+            Assert.That(Choice("equip:i18").DisabledReason,Is.EqualTo("先卸下盐蚀怀表"));
+            SetItems(s,"equippedItems","i17","i20","i21");
+            Assert.That(Choice("equip:i23").DisabledReason,Is.EqualTo("装备位已满（3/3）"));
+            Assert.That(s.GetSupportChoices().Where(x=>x.Enabled).All(x=>x.DisabledReason==""),Is.True);
+            var checkpoint=JsonConvert.SerializeObject(s.Export());
+            Assert.That(s.ManageSupport("equip:i23"),Is.False);
+            Assert.That(JsonConvert.SerializeObject(s.Export()),Is.EqualTo(checkpoint));
+            Assert.That(s.ManageSupport("equip:i20"),Is.True);
+            Assert.That(Choice("equip:i23").Enabled,Is.True);Assert.That(Choice("equip:i23").DisabledReason,Is.Empty);
+        }
+        [Test] public void PurchaseDisabledReasonsDistinguishCostFromInventoryCapacity()
+        {
+            var s=VoyageSession.Create(1);
+            SetItems(s,"inventory","i10","i10","i11","i11","i13","i13");
+            var blocked=s.GetNodeServices().First(x=>x.Id.StartsWith("buy:")&&!x.Id.Contains("@")&&SupportCatalog.Item(x.Id.Split(':')[1]).Kind==ItemKind.Consumable);
+            Assert.That(blocked.Enabled,Is.False);
+            var id=blocked.Id.Split(':')[1];
+            Assert.That(blocked.DisabledReason,Is.EqualTo(s.Inventory.Count(x=>x==id)==2?SupportCatalog.Item(id).Name+"已存放两份":"物资箱已满（6/6）"));
+            typeof(VoyageSession).GetProperty("Supplies").SetValue(s,0);
+            blocked=s.GetNodeServices().Single(x=>x.Id==blocked.Id);
+            Assert.That(blocked.DisabledReason,Is.EqualTo("需要 1 补给（现有 0）"));
+        }
         [Test] public void InitialEquipmentChoiceIsExclusiveAndConfigurationSurvivesJsonReplay()
         {
             var s=VoyageSession.Create(1);Assert.That(s.ManageSupport("starter:i18"),Is.True);Assert.That(s.ManageSupport("starter:i19"),Is.False);

@@ -121,9 +121,47 @@
 .support-illustration { position: absolute; left: 0; right: 0; top: 0; bottom: 0; opacity: 0.06; -unity-background-scale-mode: scale-and-crop; }
 .support-illustration-veil { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(8, 19, 22, 0.88); }
 .support-scroll .body, .support-scroll .node-choice-description { color: #eee4c9; }
-.support-entry { padding: 10px 2px; border-bottom-width: 1px; border-bottom-color: rgba(158, 135, 85, 0.3); }
-.support-entry .node-choice-description { margin-top: 6px; font-size: 14px; }
-.voyage-hud .support-entry Button { align-self: flex-start; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 38px; border-width: 0; border-left-width: 2px; border-left-color: #a48b58; background-color: transparent; -unity-text-align: middle-left; }
+.manifest-head { flex-direction: row; justify-content: space-between; align-items: center; flex-shrink: 0; margin-bottom: 14px; }
+.manifest-supplies { flex-direction: row; align-items: center; }
+.manifest-icon { width: 30px; height: 30px; min-width: 30px; flex-shrink: 0; margin-right: 10px; }
+.manifest-supplies .manifest-icon { width: 22px; height: 22px; min-width: 22px; }
+.manifest-count { font-size: 13px; color: #80b5a5; white-space: nowrap; }
+.manifest-section { margin-bottom: 20px; flex-shrink: 0; }
+.manifest-section-head { flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.manifest-section-title { font-size: 19px; color: #d7bd82; white-space: normal; }
+.manifest-caption { font-size: 14px; color: #a9b6ad; white-space: normal; margin-top: 4px; }
+.manifest-eyebrow { font-size: 12px; color: #80b5a5; margin-bottom: 4px; }
+.manifest-destination, .manifest-clue { flex-direction: row; align-items: center; padding: 12px 0 18px; margin-bottom: 16px; border-bottom-width: 1px; border-bottom-color: rgba(158,135,85,.3); }
+.manifest-destination-copy { flex-grow: 1; flex-shrink: 1; min-width: 0; }
+.manifest-slots { flex-direction: row; }
+.manifest-slot { flex-grow: 1; flex-basis: 0; min-width: 0; margin-right: 8px; min-height: 78px; padding: 12px 8px; flex-direction: row; align-items: center; background-color: rgba(28,48,47,.7); border-width: 1px; border-color: rgba(158,135,85,.45); }
+.manifest-slot-name { flex-shrink: 1; font-size: 16px; color: #eee4c9; white-space: normal; }
+.manifest-slot.empty { background-color: transparent; border-color: rgba(158,135,85,.2); }
+.manifest-slot.empty .manifest-icon { opacity: .35; }
+.manifest-slot.empty .manifest-slot-name { color: #71847e; }
+.manifest-item-detail { min-height: 90px; padding: 12px 14px; margin-bottom: 20px; border-left-width: 2px; border-left-color: #80b5a5; background-color: rgba(35,61,56,.55); }
+.support-manifest > .manifest-item-detail { flex-shrink: 0; margin: 0 20px 14px; }
+.manifest-record-body { font-size: 15px; color: #eee4c9; white-space: normal; margin-top: 8px; }
+.manifest-item-grid { flex-direction: row; flex-wrap: wrap; justify-content: space-between; }
+.manifest-item, .manifest-crew { width: 48.5%; min-width: 0; padding: 12px; margin-bottom: 10px; background-color: rgba(23,42,43,.8); border-width: 1px; border-color: rgba(158,135,85,.3); }
+.manifest-item.selected { border-color: #80b5a5; background-color: rgba(35,61,56,.7); }
+.manifest-item:hover { border-color: #d7bd82; }
+.manifest-item:focus { border-color: #eee4c9; }
+.manifest-item-head { flex-direction: row; align-items: center; }
+.manifest-item-name { flex-grow: 1; flex-shrink: 1; min-width: 0; font-size: 17px; color: #eee4c9; white-space: normal; }
+.manifest-item-status { font-size: 13px; color: #80b5a5; margin-top: 6px; white-space: normal; }
+.manifest-item-actions { flex-direction: row; margin-top: 8px; }
+.voyage-hud .manifest-item-actions Button { min-height: 40px; flex-grow: 1; margin: 0 8px 0 0; padding: 6px; white-space: nowrap; -unity-text-align: middle-center; }
+.manifest-blocked-reason { margin-top: 8px; color: #f2bc9d; font-size: 13px; white-space: normal; }
+.manifest-navigation-tools { flex-direction: row; justify-content: space-between; padding: 10px 0; border-top-width: 1px; border-top-color: rgba(158,135,85,.3); }
+.manifest-record-group { margin: 4px 0 14px; padding: 10px 8px; border-bottom-width: 1px; border-bottom-color: rgba(158,135,85,.3); color: #d7bd82; font-size: 17px; }
+.manifest-record-group > .unity-foldout__content { padding-left: 10px; }
+.manifest-record { padding: 10px 0 14px; }
+.manifest-empty { min-height: 300px; justify-content: center; align-items: center; }
+.manifest-empty .manifest-icon { width: 64px; height: 64px; margin: 0 0 20px; }
+.manifest-empty .manifest-caption { margin-top: 12px; }
+.manifest-ritual { padding: 28px 16px; }
+.manifest-ritual .manifest-icon { width: 56px; height: 56px; margin-bottom: 18px; }
 .support-manifest > .primary { flex-shrink: 0; align-self: flex-end; margin-top: 12px; }
 
 /* Arrival choices and their follow-up actions keep a consistent rhythm. */
