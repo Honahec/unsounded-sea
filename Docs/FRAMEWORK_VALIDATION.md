@@ -2,6 +2,18 @@
 
 2026-10-17 更新。各节分别记录环境和验证范围；历史通过不代表后续改动通过。旧 HUD 的逐轮记录保留在 Git 历史，不重复维护。
 
+## 卡牌拖放与界面动效
+
+2026-10-17，Windows / Unity 6000.6.5f1 / Unity CLI 1.0.0-beta.13 / Pipeline 0.8.0-exp.1。基于远端 `502c66d` 合并验证，保留其焦点、滚动恢复与规则更新；表现契约见[框架指南](FRAMEWORK.md#3d-战斗组合与扩展)。
+
+- Unity CLI 编译通过；完整 `UnsoundedSea.Tests` EditMode **237 通过／0 失败／0 跳过**。动效不修改规则、随机数或回放格式。
+- [CardMotionQA.cs](../Tools/CardMotionQA.cs) 在 Play Mode 向真实 HUD 发送 UI Toolkit 指针／键盘事件。`Main` 在 **1600×900、1280×720** 各通过 **33** 项断言：点击不出牌、无效落点／Esc／右键取消、重复松手不重复扣费、攻击、防御、调查、双目标分步支付、手牌目标、暂停冻结、减少动效与临时元素清理。
+- `Bosses` 通过 **17** 项断言，覆盖 M03 盐格、M04 继电器、M05 绞盘与守卫→航标两步拖放；第一步不支付，完成后只结算一次。
+- `UiFlow` 在上述两种分辨率各通过 **15** 项断言，覆盖单敌人仍需拖放、键盘提交、行动簿／暂停退出、回合推进、抽牌动画收束和血条布局。等待控件实际解锁再发送键盘事件，避免规则反馈时钟结束与下一帧 UI 刷新之间的竞态。
+- `Menus` 通过 **16** 项断言，覆盖船上清单五页、图鉴、设置与退场清理。以上共 **129** 项 Play Mode 断言，正式航程存档内容均未改变。复现：进入 Play Mode 后，使用 Unity CLI `run_script --file Tools/CardMotionQA.cs --entry CardMotionQA.Main`（或 `Bosses`／`UiFlow`／`Menus`）；分辨率用 `Tools/OceanBattleQA.cs` 的 `Resolution` 入口设置。
+- `wait_for` 确认 `Time.frameCount` 持续推进后，运行 `Preview` 检查实际拖牌、枪击与格挡帧；截图只存忽略的 `Logs/CardMotion`。修复 USS 不支持的缩放数字格式及标题对齐值；未新增模型／贴图。测试后退出 Play，恢复原有干净 `SeaBossBattle` 场景和 1600×900 Game View，后台运行设置保持原值。
+- 尚未验收独立 Player、触屏、非 16:9 布局或目标硬件帧率，不能据此宣称稳定 60 FPS。远端代码的既有 `Evidence` 序列化分析提示与 `GameSettings` 旧对象查找 API 警告不在此次动效修改范围。
+
 ## 卡面、清单与规则修复
 
 2026-10-17，macOS / Unity 6000.6.5f1。实现契约见[框架指南](FRAMEWORK.md)；本节不替代人工平衡或独立 Player 验收。
