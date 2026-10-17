@@ -92,6 +92,7 @@ Packages/packages-lock.json linguist-generated
 # Audio
 *.aif                   lfs
 *.aiff                  lfs
+*.flac                  lfs
 *.it                    lfs
 *.mod                   lfs
 *.mp3                   lfs
