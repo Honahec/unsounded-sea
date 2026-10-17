@@ -185,7 +185,7 @@ namespace UnsoundedSea.Runtime
             {
                 var error = Element("voyage-load-error");
                 error.Add(Text("无法读取航海记录", "panel-title")); error.Add(Text(loadError ?? "航程尚未创建。", "body"));
-                error.Add(Text("原记录未被覆盖。返回标题后可重试，或明确开始新航程。", "muted"));
+                error.Add(Text("存档仍保留。返回标题后可重试，或开始新航程。", "muted"));
                 error.Add(Action("load-title", "返回标题", "primary", () => GameSceneLoader.Load(VoyageRuntime.MainMenuScene)));
                 root.Add(error); return;
             }
@@ -316,12 +316,12 @@ namespace UnsoundedSea.Runtime
             var chartTool = Action("reveal-routes", $"旧海图  ×{session.ChartUses}", "navigation-tool",
                 () => Change(Session.RevealRoutes, "旧海图已补记此处岔路。"),
                 session.CanRevealRoutes && string.IsNullOrEmpty(saveError));
-            chartTool.tooltip = "旧海图：揭开当前位置未测出口；数字为剩余次数，没有新发现时不消耗。";
+            chartTool.tooltip = "揭示此处未测航路。无新发现时不消耗次数。";
             tools.Add(chartTool);
             var lookoutTool = Action("scout-ahead", $"远望  ×{session.LookoutUses}", "navigation-tool",
                 () => Change(Session.ScoutAhead, "远望记录已加入海图。"),
                 session.CanScoutAhead && string.IsNullOrEmpty(saveError));
-            lookoutTool.tooltip = "测绘望远镜：需先选择航向；侦察目的地再往前一段，数字为剩余次数，没有新发现时不消耗。";
+            lookoutTool.tooltip = "先选择航向，再侦察目的地的下一段航路。无新发现时不消耗次数。";
             tools.Add(lookoutTool);
             workspace.Add(tools);
         }
@@ -384,7 +384,7 @@ namespace UnsoundedSea.Runtime
                         if (!string.IsNullOrEmpty(session.EventTitle))
                             panel.Add(Text(session.EventTitle, "event-title"));
                         var nodeChoices = session.GetNodeChoices();
-                        AddNodeChoiceGroup(panel, "本节点选项", nodeChoices, saved, false);
+                        AddNodeChoiceGroup(panel, "可选行动", nodeChoices, saved, false);
                         if (nodeChoices.Count == 0 && session.GetNodeServices().Count == 0)
                             panel.Add(Action("arrival-continue", "记录并继续", "primary", () => Change(Session.Continue), saved && session.CanContinue));
                         BuildNodeServices(panel, session, saved);
@@ -392,7 +392,7 @@ namespace UnsoundedSea.Runtime
                     break;
                 case VoyagePhase.Encounter:
                     var resume = Action("resume-encounter", "继续调查", "primary", EnterEncounter, saved);
-                    resume.tooltip = "调查尚未结算；继续时将返回本场调查。";
+                    resume.tooltip = "返回未完成的战斗。";
                     panel.Add(resume); break;
                 case VoyagePhase.Reward:
                     BuildRewards(panel, session, saved); break;
@@ -414,9 +414,9 @@ namespace UnsoundedSea.Runtime
             scroll.Add(Text($"生命 {summary.Health} · 理智 {summary.Sanity} · 补给 {summary.Supplies}\n航行 {summary.ElapsedHours} 小时 · 使用 {summary.SpentSupplies} 补给", "body"));
             scroll.Add(Text("航迹", "section-label"));
             foreach (var stop in summary.Route) scroll.Add(Text(stop, "body"));
-            scroll.Add(Text("学到的行动", "section-label"));
+            scroll.Add(Text("已学行动", "section-label"));
             scroll.Add(Text(string.Join("、", summary.LearnedCards), "body"));
-            scroll.Add(Text("使用的物资", "section-label"));
+            scroll.Add(Text("消耗物资", "section-label"));
             scroll.Add(Text(summary.SpentItems.Count == 0 ? "无" : string.Join("、", summary.SpentItems), "body"));
             panel.Add(scroll);
         }
@@ -502,7 +502,7 @@ namespace UnsoundedSea.Runtime
             }
             var suppliesFull = session.Supplies >= 8;
             var skip = Action("reward-supplies", suppliesFull ? "放弃：补给已满" : "放弃：+1 补给", "secondary",
-                () => {selectedReward=null;Change(() => Session.ClaimReward(null), suppliesFull ? "已跳过奖励；补给已满，没有额外收益。" : "已将所得换为 1 补给。");}, saved);
+                () => {selectedReward=null;Change(() => Session.ClaimReward(null), suppliesFull ? "已放弃奖励，补给已满。" : "已换取 1 补给。");}, saved);
             skip.AddToClassList("reward-skip");
             panel.Add(skip);
         }
@@ -758,7 +758,7 @@ namespace UnsoundedSea.Runtime
             actionBookSave = () =>
             {
                 if (!editable || selected.Count != 12 || !Session.SetDeck(selected) || !Session.SetTools(selectedTools)) return;
-                deckOpen = false; notice = "行动簿与调查工具已整备（可不携带工具）。"; Save(); Refresh();
+                deckOpen = false; notice = "整备完成。"; Save(); Refresh();
             };
             save = KeyBadge.Attach(Action("action-book-save", "保存", "primary", actionBookSave, editable && selected.Count == 12), "S");
             if (editable) actions.Add(save);

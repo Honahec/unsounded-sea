@@ -25,7 +25,7 @@ namespace UnsoundedSea.Runtime
             {
                 var fold=new Foldout{text="装备与航标",value=false};fold.AddToClassList("tool-name");
                 foreach(var id in view.Equipment){var label=new Label(SupportCatalog.Item(id).Name+"："+SupportCatalog.Item(id).Description);label.style.whiteSpace=WhiteSpace.Normal;fold.Add(label);}
-                if(view.SurveyedBeacon)fold.Add(new Label("已测航标：下一场战斗结束或使用后过期。"));
+                if(view.SurveyedBeacon)fold.Add(new Label("已测航标：使用后或本场战斗结束时失效。"));
                 panel.Add(fold);
             }
             return panel;
@@ -33,7 +33,8 @@ namespace UnsoundedSea.Runtime
         public static string EvidenceLabel(Evidence entry,int currentTurn)
         {
             var scope=entry.Scope==EvidenceScope.Turn?(entry.Turn==currentTurn?"当回合":"历史观察") : entry.Scope==EvidenceScope.Encounter?"本场":entry.Scope==EvidenceScope.Run?"本局":"长期";
-            return scope+" · "+entry.Source+(entry.Rule==""?"":" · 核验 "+entry.Rule);
+            var verified=entry.Rule=="source-v1"?"来源已验证":entry.Rule=="anchor-v1"?"锚点已验证":"";
+            return scope+" · "+entry.Source+(verified==""?"":" · "+verified);
         }
     }
 }

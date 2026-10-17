@@ -183,7 +183,7 @@ namespace UnsoundedSea.Core
             if(victory){foreach(var entry in findings.Where(x=>x.Stable)){var stored=entry.Archive(EvidenceScope.Run);runArchive.RemoveAll(x=>x.Key==stored.Key);runArchive.Add(stored);}if(CurrentFull.Kind==RunNodeKind.Boss)foreach(var id in crewIds.Where(id=>CrewRegion(id)==RegionId))trustedCrew.Add(id);}
             FinishRitualEncounter();
             Health=health; Sanity=sanity;
-            var feedback=new List<string>();if(used.Length>0)feedback.Add("消耗 "+string.Join("、",used.GroupBy(x=>x).Select(x=>SupportCatalog.Item(x.Key).Name+"×"+x.Count())));var archived=victory?findings.Where(x=>x.Stable).Select(x=>x.Key).Distinct(StringComparer.Ordinal).Count():0;if(archived>0)feedback.Add("归档 "+archived+" 条核验");if(feedback.Count>0)log.Add("战后："+string.Join("；",feedback)+"。");
+            var feedback=new List<string>();if(used.Length>0)feedback.Add("消耗 "+string.Join("、",used.GroupBy(x=>x).Select(x=>SupportCatalog.Item(x.Key).Name+"×"+x.Count())));var archived=victory?findings.Where(x=>x.Stable).Select(x=>x.Key).Distinct(StringComparer.Ordinal).Count():0;if(archived>0)feedback.Add("归档 "+archived+" 条证据");if(feedback.Count>0)log.Add("战后："+string.Join("；",feedback)+"。");
             if(!victory||health==0||sanity==0) phase=VoyagePhase.Failed;
             else if(debug) phase=CurrentFull.Kind==RunNodeKind.Boss?VoyagePhase.Completed:VoyagePhase.Reward;
             else if(CurrentFull.Kind==RunNodeKind.Boss) phase=Act==3?VoyagePhase.Completed:VoyagePhase.ActComplete;
@@ -212,8 +212,8 @@ namespace UnsoundedSea.Core
                 case RunNodeKind.Event:return EventChoices();
                 case RunNodeKind.Archive:
                     var routesAvailable=HasUnknownRoutes(CurrentFull);
-                    return new[]{new VoyageNodeChoice("routes","抄录航路",routesAvailable?"揭示此处全部后续航路，并把海况结论写入日志":"所有后续航路已经记录，没有新航路可抄录",routesAvailable||restoring),new VoyageNodeChoice("briefing","研读幕末简报","记录本幕实际威胁的真实机制线索"),new VoyageNodeChoice("seal","封存记录",Sanity<GameBalance.MaxSanity?"恢复5理智":"理智已满，无需封存记录",Sanity<GameBalance.MaxSanity)};
-                case RunNodeKind.Supply:return new[]{new VoyageNodeChoice("rest","休整",Health<GameBalance.MaxHealth||Sanity<GameBalance.MaxSanity?"恢复12生命与5理智":"生命与理智均已恢复至上限",Health<GameBalance.MaxHealth||Sanity<GameBalance.MaxSanity),new VoyageNodeChoice("repair","深度治疗",Supplies==0?"补给不足；需要1补给":Health>=GameBalance.MaxHealth?"生命已满，无需深度治疗":"消耗1补给，恢复24生命",Supplies>0&&Health<GameBalance.MaxHealth),new VoyageNodeChoice("calm","长期安抚",Supplies==0?"补给不足；需要1补给":Sanity>=GameBalance.MaxSanity?"理智已满，无需长期安抚":"消耗1补给，恢复11理智",Supplies>0&&Sanity<GameBalance.MaxSanity),new VoyageNodeChoice("depart","不作整备","继续航行")};
+                    return new[]{new VoyageNodeChoice("routes","抄录航路",routesAvailable?"揭示此处全部后续航路，并记入日志":"后续航路已全部记录",routesAvailable||restoring),new VoyageNodeChoice("briefing","研读幕末简报","了解本幕威胁的行动规律"),new VoyageNodeChoice("seal","封存记录",Sanity<GameBalance.MaxSanity?"恢复5理智":"理智已满",Sanity<GameBalance.MaxSanity)};
+                case RunNodeKind.Supply:return new[]{new VoyageNodeChoice("rest","休整",Health<GameBalance.MaxHealth||Sanity<GameBalance.MaxSanity?"恢复12生命与5理智":"生命与理智已满",Health<GameBalance.MaxHealth||Sanity<GameBalance.MaxSanity),new VoyageNodeChoice("repair","治疗伤势",Supplies==0?"需要1补给":Health>=GameBalance.MaxHealth?"生命已满":"消耗1补给，恢复24生命",Supplies>0&&Health<GameBalance.MaxHealth),new VoyageNodeChoice("calm","安定心神",Supplies==0?"需要1补给":Sanity>=GameBalance.MaxSanity?"理智已满":"消耗1补给，恢复11理智",Supplies>0&&Sanity<GameBalance.MaxSanity),new VoyageNodeChoice("depart","不作整备","继续航行")};
                 default:return Array.Empty<VoyageNodeChoice>();
             }
         }
@@ -225,7 +225,7 @@ namespace UnsoundedSea.Core
                 case 1:return new[]{new VoyageNodeChoice("tow","拖回浮箱","获得1补给，耗时2小时",Supplies<GameBalance.MaxSupplies),new VoyageNodeChoice("listen","核对求救频率","恢复4理智",Sanity<GameBalance.MaxSanity),new VoyageNodeChoice("leave","切断信号","无资源变化")};
                 default:
                     var routesAvailable=HasUnknownRoutes(CurrentFull);
-                    return new[]{new VoyageNodeChoice("dive","下潜检查锚链","获得2补给，失去3理智",Sanity>3&&Supplies<=GameBalance.MaxSupplies-2),new VoyageNodeChoice("mark","标记危险水流",routesAvailable?"揭示此处全部后续航路":"所有后续航路已经记录，没有新水流可标记",routesAvailable||restoring),new VoyageNodeChoice("leave","避开逆流","无资源变化")};
+                    return new[]{new VoyageNodeChoice("dive","下潜检查锚链","获得2补给，失去3理智",Sanity>3&&Supplies<=GameBalance.MaxSupplies-2),new VoyageNodeChoice("mark","标记危险水流",routesAvailable?"揭示此处全部后续航路":"后续航路已全部记录",routesAvailable||restoring),new VoyageNodeChoice("leave","避开逆流","无资源变化")};
             }
         }
         public bool ChooseNode(string id)
@@ -246,8 +246,8 @@ namespace UnsoundedSea.Core
                 case "briefing":outcome=RegionBriefing(true);AddKnowledge(outcome);break;
                 case "seal":Sanity=Math.Min(GameBalance.MaxSanity,Sanity+5);outcome="记录已封存：理智 +5。";break;
                 case "rest":Health=Math.Min(GameBalance.MaxHealth,Health+12+(ActiveCrew("cook")?3:0));Sanity=Math.Min(GameBalance.MaxSanity,Sanity+5+(ActiveCrew("medic")?2:0));outcome="完成短时休整与可用船员照护。";break;
-                case "repair":SpendSupplies(1);Health=Math.Min(GameBalance.MaxHealth,Health+24);outcome="消耗1补给完成深度治疗：生命 +24。";break;
-                case "calm":SpendSupplies(1);Sanity=Math.Min(GameBalance.MaxSanity,Sanity+11);outcome="消耗1补给完成长期安抚：理智 +11。";break;
+                case "repair":SpendSupplies(1);Health=Math.Min(GameBalance.MaxHealth,Health+24);outcome="消耗1补给治疗伤势：生命 +24。";break;
+                case "calm":SpendSupplies(1);Sanity=Math.Min(GameBalance.MaxSanity,Sanity+11);outcome="消耗1补给安定心神：理智 +11。";break;
                 case "depart":outcome="未消耗补给，完成整备检查。";break;
                 case "leave":outcome="保持距离离开，资源未变化。";break;
                 default:return false;

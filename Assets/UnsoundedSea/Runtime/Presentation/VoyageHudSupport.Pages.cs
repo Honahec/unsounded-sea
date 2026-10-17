@@ -201,11 +201,11 @@ namespace UnsoundedSea.Runtime
                 if (entries.Count == 0) return;
                 var group = new Foldout { text = title + "  " + entries.Count, value = expanded };
                 group.AddToClassList("manifest-record-group");
-                if (!expanded) group.tooltip = "过往调查记录；用于当前遭遇时仍需核验。";
+                if (!expanded) group.tooltip = "旧记录需结合本场调查重新查证。";
                 foreach (var evidence in entries)
                 {
                     var record = Element("manifest-record");
-                    record.Add(Text(evidence.Rule == "source-v1" ? "来源核验" : evidence.Rule == "anchor-v1" ? "锚点核验" : "调查记录", "manifest-item-name"));
+                    record.Add(Text(evidence.Rule == "source-v1" ? "来源记录" : evidence.Rule == "anchor-v1" ? "锚点记录" : "调查记录", "manifest-item-name"));
                     record.Add(Text(evidence.Text, "manifest-record-body"));
                     record.tooltip = "记录方式：" + evidence.Source; group.Add(record);
                 }

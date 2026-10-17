@@ -131,7 +131,7 @@ namespace UnsoundedSea.Runtime
             }
             if (!string.IsNullOrEmpty(error)) entries.Add(Text(error, "menu-error"));
             else if (!string.IsNullOrEmpty(VoyageRuntime.EncounterSaveError))
-                entries.Add(Text("遭遇结果尚未保存，请选择继续航程重试：" + VoyageRuntime.EncounterSaveError, "menu-error"));
+                entries.Add(Text("战斗结果保存失败。选择「继续航程」重试：" + VoyageRuntime.EncounterSaveError, "menu-error"));
             column.Add(entries);
             column.SetEnabled(!settingsOpen && !debugSelectionOpen && !choosingCrew);
             root.Add(column);

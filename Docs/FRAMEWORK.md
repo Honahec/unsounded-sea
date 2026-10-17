@@ -247,7 +247,7 @@ UnsoundedSea.Tests.EditMode       NUnit 行为测试，引用 Core / Runtime
 
 `SupportCatalog` 定义 25 道具和 10 船员；`BattleLoadout` 校验最多两份战斗物资、三件不同装备且最多一个引擎、航标和被注视。`BattleSupportRules` 处理 `UseConsumable`、船员、装备触发与显式证据组合；`BattleView.SupplyActions` 提供合法目标。所有扣费先验证，消耗记录在 `SpentConsumables`；每次成功战斗命令写回待续回放，战后由 `ResolveEncounter` 验证携带份数并一次扣库存。装备、受伤与类型化证据均进入回放指纹。
 
-节点主面板将 `GetNodeChoices` 的互斥「本节点选项」与 `GetNodeServices` 的「接驳服务」分组；事件标题读取 `EventTitle`，被注视 3 层时回视处置优先。`VoyageSupport.GetSupportChoices` 保留兼容的配装与事件接口；`IsLoadoutChoice` 限制船上清单仅查看／配装，购买、招聘、治疗、修械、营救邀请、筹备和回望均在主面板，经 `ManageSupport` 验证执行。服务不结算节点，也不能重开一次性节点收益；已结算节点隐藏服务，待邀请候选除外。`BattleSupplyPanel` 继续消费实际物资次数和目标，I14 封泥每场最多推进一次普通／雾海封线。
+节点主面板将 `GetNodeChoices` 的互斥「可选行动」与 `GetNodeServices` 的「接驳服务」分组；事件标题读取 `EventTitle`，被注视 3 层时回视处置优先。`VoyageSupport.GetSupportChoices` 保留兼容的配装与事件接口；`IsLoadoutChoice` 限制船上清单仅查看／配装，购买、招聘、治疗、修械、营救邀请、筹备和回望均在主面板，经 `ManageSupport` 验证执行。服务不结算节点，也不能重开一次性节点收益；已结算节点隐藏服务，待邀请候选除外。`BattleSupplyPanel` 继续消费实际物资次数和目标，I14 封泥每场最多推进一次普通／雾海封线。
 
 奖励页先选牌，再选择「直接编入（替换一张）」或「仅收入行动簿」。独立替换弹窗调用单次 `ClaimReward(id, oldId)`，Esc／右键／取消不修改状态；每次领取清空 UI 选择。`NewRewardCardIds` 只标记尚未整备的新收获，整备保存后清除。适用 Boss 标签读取目录 `BossIds`，在奖励选择、行动簿焦点／悬停摘要与提示中显示，不修改卡面、不把一般推荐等同于专用。险航徽记同时用于已公开航路和海图，普通预览读取 `PreviewStyle` 与公开候选通道，不反推锁定行动。
 

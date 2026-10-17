@@ -157,7 +157,7 @@ namespace UnsoundedSea.Core
                 {
                     var price=item.Kind==ItemKind.Consumable?1:2;
                     Add("buy:"+item.Id,"购买 · "+item.Name,$"{price}补给，每节点买一次。 "+item.Description,Supplies>=price&&CanGain(item.Id));
-                    if(!CanGain(item.Id)&&item.Kind==ItemKind.Consumable)foreach(var old in inventory.Distinct())Add("buy:"+item.Id+"@"+old,"换购 · "+item.Name+"（替换"+SupportCatalog.Item(old).Name+"）",$"明确丢弃一份旧物资并支付{price}补给。",Supplies>=price&&CanGain(item.Id,old));
+                    if(!CanGain(item.Id)&&item.Kind==ItemKind.Consumable)foreach(var old in inventory.Distinct())Add("buy:"+item.Id+"@"+old,"换购 · "+item.Name+"（替换"+SupportCatalog.Item(old).Name+"）",$"丢弃1份旧物资，支付{price}补给。",Supplies>=price&&CanGain(item.Id,old));
                 }
                 if(ServiceAvailable("hire"))foreach(var crew in CrewStock(CurrentFull))
                 {
@@ -165,34 +165,34 @@ namespace UnsoundedSea.Core
                     foreach(var old in replacements)Add("hire:"+crew.Id+(old==null?"":"@"+old),"接驳 · "+crew.Name+(old==null?"":"（替换"+SupportCatalog.CrewMember(old).Name+"）"),$"{HirePrice}补给；"+SupportCatalog.CrewDescription(crew.Kind),Supplies>=HirePrice);
                 }
                 if(inventory.Contains("i12")&&ServiceAvailable("tea"))Add("tea","饮用干燥药茶","消耗1份，恢复5理智，每节点一次。",Sanity<GameBalance.MaxSanity);
-                foreach(var id in crewIds.Where(injuredCrew.Contains))Add("treat:"+id,"治疗 · "+SupportCatalog.CrewMember(id).Name,"2补给；恢复支援与航程职责。",Supplies>=2);
+                foreach(var id in crewIds.Where(injuredCrew.Contains))Add("treat:"+id,"治疗 · "+SupportCatalog.CrewMember(id).Name,"花2补给治好伤势，恢复支援和航程能力。",Supplies>=2);
                 if(ActiveCrew("gunsmith")&&ServiceAvailable("gunsmith")){Add("gunsmith:item","修械补给","获得1份备用弹匣，与恢复工具二选一。",CanGain("i13"));Add("gunsmith:chart","修复海图","恢复1次，不超过2次。",ChartUses<2);Add("gunsmith:lookout","修复望远镜","恢复1次，不超过2次。",LookoutUses<2);}
-                foreach(var id in crewIds.Where(x=>trustedCrew.Contains(x)&&!injuredCrew.Contains(x)&&!supportServices.Contains("trust:"+x)))Add("trust:"+id,"个人交谈 · "+SupportCatalog.CrewMember(id).Name,"信任奖励：学习一张相关未学方案；每人每航程一次。",TrustedCard(id)!=null);
+                foreach(var id in crewIds.Where(x=>trustedCrew.Contains(x)&&!injuredCrew.Contains(x)&&!supportServices.Contains("trust:"+x)))Add("trust:"+id,"个人交谈 · "+SupportCatalog.CrewMember(id).Name,"学习1张新行动；每人每航程一次。",TrustedCard(id)!=null);
             }
             if(phase==VoyagePhase.Arrived&&!nodeResolved&&CurrentFull.Kind==RunNodeKind.Archive)
             {
                 Add("survey","核验航标","不领取补给；揭示全部后续路线，获得已测航标（下一场战斗后过期）。");
-                Add("archive:supply","整理物资记录","获得1补给；与核验航标、档案选项互斥。",Supplies<GameBalance.MaxSupplies);
-                if(ActiveCrew("archivist"))Add("archive:card","档案员交叉索引","额外候选：学习复核证据；仍只选一项。",!learned.Contains("c048"));
-                if(markers.ContainsKey("sealed-specimen")){Add("specimen:supply","交付标本 · 补给","消耗标本，获得1补给。",Supplies<GameBalance.MaxSupplies);Add("specimen:archive","交付标本 · 来源索引","消耗标本，将已有稳定来源档案加入现场索引；没有已验证来源时不可选。",runArchive.Any(x=>x.Rule=="source-v1"));Add("specimen:hint","交付标本 · 处置建议","消耗标本，记录相关已学牌提示，不自动编入牌组。");}
+                Add("archive:supply","整理物资记录","获得1补给，放弃此处其他调查收益。",Supplies<GameBalance.MaxSupplies);
+                if(ActiveCrew("archivist"))Add("archive:card","档案员协助查证","学习「复核证据」，放弃此处其他调查收益。",!learned.Contains("c048"));
+                if(markers.ContainsKey("sealed-specimen")){Add("specimen:supply","交付标本 · 补给","消耗标本，获得1补给。",Supplies<GameBalance.MaxSupplies);Add("specimen:archive","交付标本 · 来源索引","消耗标本，整理已验证的来源档案；需先有一条来源记录。",runArchive.Any(x=>x.Rule=="source-v1"));Add("specimen:hint","交付标本 · 处置建议","消耗标本，记录已学行动的使用建议；牌组不变。");}
             }
             if(phase==VoyagePhase.Arrived&&!nodeResolved&&CurrentFull.Kind==RunNodeKind.Event)
             {
                 if(Watched==3&&ServiceAvailable("return-gaze")){Add("gaze:hide","遮蔽踪迹","花1补给，被注视降至2，然后继续选择事件。",Supplies>0);Add("gaze:keep","保留踪迹","保留被注视3，查看事件；拒绝风险选项没有惩罚。 ");return result;}
                 var candidate=RecruitCandidate;
-                if(candidate!=null&&escortedCrew==null)Add("rescue:"+candidate,"绞盘营救 · "+SupportCatalog.CrewMember(candidate).Name,"花1补给救援（可用潜水员免付）；候选加入待护送位，随后决定邀请。",Supplies>0||ActiveCrew("diver"));
+                if(candidate!=null&&escortedCrew==null)Add("rescue:"+candidate,"绞盘营救 · "+SupportCatalog.CrewMember(candidate).Name,"花1补给救人，潜水员可免费救援；救起后再决定是否招募。",Supplies>0||ActiveCrew("diver"));
                 Add("voucher","接引遇险接驳船","获得接驳凭证；下次成功招聘少付1补给，幕末过期。");
                 Add("specimen","封存漂浮标本","花1补给，获得封存标本；可在档案节点交付。",Supplies>0&&!markers.ContainsKey("sealed-specimen"));
                 Add("repair-boat","修复漂流维修船","支付1补给（轮机长首次免付），获得绝缘钳；放弃其他事件收益。",!learnedTools.Contains("i08")&&(Supplies>0||ActiveCrew("engineer")&&!repairDiscountUsed));
                 if(ActiveCrew("listener"))Add("crew:listen","比对录音","免费核对信号，恢复4理智并记录来源。",Sanity<GameBalance.MaxSanity);
-                if(ActiveCrew("decoder"))Add("crew:decode","核对值班序列","获得本幕实际威胁简报并揭示后续航路。");
-                if(Watched>0)Add("risk:watch","回应异常信号","获得1补给、被注视+1（最高3）；自愿选择。",Supplies<GameBalance.MaxSupplies);
-                foreach(var id in crewIds.Where(x=>!injuredCrew.Contains(x)))Add("risk:"+id,"冒险取回漂箱 · "+SupportCatalog.CrewMember(id).Name,"确定获得2补给；该船员受伤，支援和航程职责暂停，休整需2补给治疗。",Supplies<=GameBalance.MaxSupplies-2);
+                if(ActiveCrew("decoder"))Add("crew:decode","核对值班序列","查明本幕威胁，揭示后续航路。");
+                if(Watched>0)Add("risk:watch","回应异常信号","获得1补给，被注视+1（最高3）。",Supplies<GameBalance.MaxSupplies);
+                foreach(var id in crewIds.Where(x=>!injuredCrew.Contains(x)))Add("risk:"+id,"冒险取回漂箱 · "+SupportCatalog.CrewMember(id).Name,"获得2补给；该船员受伤，暂停支援和航程能力。可在补给船花2补给治疗。",Supplies<=GameBalance.MaxSupplies-2);
             }
             if(escortedCrew!=null&&phase==VoyagePhase.Arrived&&(CurrentFull.Kind==RunNodeKind.Supply||CurrentFull.Kind==RunNodeKind.Event))
             {
-                foreach(var old in crewIds.Count>=4?crewIds.Cast<string>():new string[]{null})Add("accept"+(old==null?"":"@"+old),"邀请 · "+SupportCatalog.CrewMember(escortedCrew).Name+(old==null?"":"（替换"+SupportCatalog.CrewMember(old).Name+"）"),"在安全接驳窗口加入，下场可支援；离船者安全转送。");
-                Add("escort-decline","转送候选至安全船只","放弃此次邀请，无惩罚。");
+                foreach(var old in crewIds.Count>=4?crewIds.Cast<string>():new string[]{null})Add("accept"+(old==null?"":"@"+old),"邀请 · "+SupportCatalog.CrewMember(escortedCrew).Name+(old==null?"":"（替换"+SupportCatalog.CrewMember(old).Name+"）"),"加入船队，下场战斗即可支援；被替换的船员会安全离船。");
+                Add("escort-decline","送往安全船只","不招募，无额外损失。");
             }
             return result;
         }
@@ -220,7 +220,7 @@ namespace UnsoundedSea.Core
                 case "archive":if(id=="supply")Supplies++;else learned.Add("c048");nodeResolved=true;break;
                 case "specimen":
                     if(id==null){SpendSupplies(1);AddMarker("sealed-specimen","交付或航程结束");}
-                    else{markers.Remove("sealed-specimen");if(id=="supply")Supplies++;else if(id=="archive"){if(!learned.Contains("c040"))learned.Add("c040");AddKnowledge("来源索引已整理：用对照旧档激活，再以新声源与复核证据核验。");}else AddKnowledge("标本处置建议："+string.Join("、",learned.Where(x=>new[]{"c008","c046","c048","c090","contradiction"}.Contains(x)).Select(x=>CardCatalog.Get(x).Name)));}nodeResolved=true;break;
+                    else{markers.Remove("sealed-specimen");if(id=="supply")Supplies++;else if(id=="archive"){if(!learned.Contains("c040"))learned.Add("c040");AddKnowledge("来源索引已整理：先用「对照旧档」调出记录，再用「复核证据」与本场声源比对。");}else AddKnowledge("标本处置建议："+string.Join("、",learned.Where(x=>new[]{"c008","c046","c048","c090","contradiction"}.Contains(x)).Select(x=>CardCatalog.Get(x).Name)));}nodeResolved=true;break;
                 case "rescue":if(!ActiveCrew("diver"))SpendSupplies(1);escortedCrew=id;nodeResolved=true;break;
                 case "voucher":AddMarker("docking-voucher","本幕结束或下次成功招聘");nodeResolved=true;break;
                 case "repair-boat":if(ActiveCrew("engineer")&&!repairDiscountUsed)repairDiscountUsed=true;else SpendSupplies(1);learnedTools.Add("i08");nodeResolved=true;break;

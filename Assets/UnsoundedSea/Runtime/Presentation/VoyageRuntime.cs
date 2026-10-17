@@ -298,7 +298,7 @@ namespace UnsoundedSea.Runtime
             if (info.Length > 4 * 1024 * 1024) throw new InvalidDataException("航程存档超过大小限制。");
             var saved = JsonConvert.DeserializeObject<SaveData>(File.ReadAllText(SavePath));
             if (saved == null || saved.Version != 1 || saved.Voyage == null)
-                throw new InvalidDataException("此航程记录不兼容三幕远征，原文件未改动；请从标题明确开始新航程。");
+                throw new InvalidDataException("存档版本不兼容，原文件已保留。请返回标题开始新航程。");
             return saved;
         }
 

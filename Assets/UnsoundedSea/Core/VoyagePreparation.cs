@@ -23,9 +23,9 @@ namespace UnsoundedSea.Core
             get
             {
                 var boss = byId[plan.GoalId].EncounterId;
-                if(!BossPreparation.TryGetValue(boss,out var preparation))return "当前调试航点没有完整幕末威胁；按已公开服务整备。";
+                if(!BossPreparation.TryGetValue(boss,out var preparation))return "本次试玩没有幕末战斗，可在此整备。";
                 var offers = preparation.Select(id => SupportCatalog.Item(id).Name);
-                return "威胁："+RegionBriefing(true).Replace("幕末威胁简报：","")+"\n准备："+string.Join("、", offers)+"（可选）\n基础解法：无需购买或消耗筹备物资。";
+                return "威胁："+RegionBriefing(true).Replace("幕末威胁简报：","")+"\n推荐物资："+string.Join("、", offers)+"（可选）";
             }
         }
 
@@ -36,8 +36,8 @@ namespace UnsoundedSea.Core
                 return visited.Contains(stopId)?stop.Name+"｜已访问\n征兆："+stop.Clue:stop.Name+"｜当前航路不可达";
             var services = stop.Kind == RunNodeKind.Supply ? "交易、招募、休整" : stop.Kind == RunNodeKind.Archive ? "航路、威胁简报、档案" : stop.Kind == RunNodeKind.Event ? "营救、物资或风险取舍" : stop.Kind == RunNodeKind.Reward ? "独立奖励" : stop.Kind == RunNodeKind.Boss ? "幕末威胁" : "普通接舷威胁";
             var details=stop.Kind==RunNodeKind.Supply
-                ? "库存："+string.Join("、",ShopStock(stop).Select(x=>x.Name))+"\n候选船员："+string.Join("、",CrewStock(stop).Select(x=>x.Name))
-                : stop.Kind==RunNodeKind.Event?"营救候选："+(RecruitCandidateAt(stop) is string candidate?SupportCatalog.CrewMember(candidate).Name:"无"):"威胁："+stop.Clue;
+                ? "库存："+string.Join("、",ShopStock(stop).Select(x=>x.Name))+"\n可招募："+string.Join("、",CrewStock(stop).Select(x=>x.Name))
+                : stop.Kind==RunNodeKind.Event?"可营救："+(RecruitCandidateAt(stop) is string candidate?SupportCatalog.CrewMember(candidate).Name:"无"):"威胁："+stop.Clue;
             return stop.Name+"｜"+services+"\n"+details;
         }
 
