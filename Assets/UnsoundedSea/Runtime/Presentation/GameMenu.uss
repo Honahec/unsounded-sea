@@ -43,7 +43,7 @@
 .menu-settings-scrim .settings { left: 50%; top: 50%; translate: -50% -50%; }
 .menu-error { padding: 14px; color: #f2bc9d; background-color: #342527; font-size: 16px; }
 .debug-selector { position: absolute; left: 16%; right: 16%; top: 7%; bottom: 7%; padding: 26px 32px; background-color: rgba(5,15,18,.97); border-width: 1px; border-color: #9e8755; border-top-left-radius: 28px; border-bottom-right-radius: 28px; color: #eee4c9; }
-.debug-head { flex-direction: row; align-items: baseline; margin-bottom: 16px; padding-bottom: 12px; border-bottom-width: 1px; border-bottom-color: rgba(158,135,85,.45); }
+.debug-head { flex-direction: row; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom-width: 1px; border-bottom-color: rgba(158,135,85,.45); }
 .debug-title { font-size: 30px; letter-spacing: 6px; color: #eee4c9; margin-right: 24px; }
 .debug-note { font-size: 15px; color: #d7bd82; }
 .debug-levels { flex-grow: 1; min-height: 0; }
@@ -111,7 +111,7 @@
 .battle-action-book-sheet .collection-list .collection-card { margin: 12px; }
 
 .card-collection { position: absolute; left: 6%; right: 6%; top: 5%; bottom: 5%; min-width: 0; min-height: 0; padding: 22px 28px; background-color: rgba(5,15,18,.94); border-width: 1px; border-color: #9e8755; border-top-left-radius: 28px; border-bottom-right-radius: 28px; color: #eee4c9; }
-.collection-head { flex-direction: row; flex-shrink: 0; align-items: baseline; margin-bottom: 14px; }
+.collection-head { flex-direction: row; flex-shrink: 0; align-items: center; margin-bottom: 14px; }
 .collection-title { flex-shrink: 0; font-size: 30px; color: #eee4c9; letter-spacing: 6px; margin-right: 24px; }
 .collection-copy { flex-grow: 1; flex-shrink: 1; color: #a9b6ad; font-size: 14px; }
 .collection-count { flex-shrink: 0; color: #d7bd82; font-size: 17px; margin-left: 20px; }
@@ -147,3 +147,11 @@
 .pending-choice-sheet { width: 560px; max-height: 76%; padding: 24px 30px; background-color: #0f1f23; border-width: 2px; border-color: #d7bd82; border-top-left-radius: 28px; border-bottom-right-radius: 28px; }
 .pending-choice-title { margin-bottom: 14px; color: #fff0c9; font-size: 22px; -unity-text-align: middle-center; }
 .pending-choice-options { flex-grow: 1; min-height: 0; }
+.game-menu Button, .voyage-hud Button, .ocean-ui .sea-button, .ocean-ui .tool,
+.ocean-ui .boss-target, .ocean-ui .card-target-choice, .ocean-ui .pause-option {
+    transition-property: background-color, color, border-color, scale;
+    transition-duration: .14s;
+    transition-timing-function: ease-out-cubic;
+}
+.game-menu Button:active, .voyage-hud Button:active { scale: 0.98; }
+.reduced-motion Button { transition-duration: 0s; }

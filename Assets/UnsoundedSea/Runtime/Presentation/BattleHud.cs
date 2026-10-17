@@ -48,7 +48,7 @@ namespace UnsoundedSea.Runtime
             {
                 if (interfaceFont == null || interfaceStyle == null)
                     throw new InvalidOperationException("Assign the project HUD font and stylesheet.");
-                root.style.unityFontDefinition = FontDefinition.FromSDFFont(interfaceFont);
+                root.style.unityFontDefinition = FontDefinition.FromSDFFont(UiFont.Get(interfaceFont));
                 // Menu sheet first so the HUD sheet wins equal-specificity label rules.
                 if (menuStyle != null && !root.styleSheets.Contains(menuStyle)) root.styleSheets.Add(menuStyle);
                 if (!root.styleSheets.Contains(interfaceStyle)) root.styleSheets.Add(interfaceStyle);

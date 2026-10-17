@@ -29,7 +29,7 @@ namespace UnsoundedSea.Runtime
             {
                 if (interfaceFont == null || menuStyle == null)
                     throw new InvalidOperationException("Assign the project menu font and stylesheet.");
-                root.style.unityFontDefinition = FontDefinition.FromSDFFont(interfaceFont);
+                root.style.unityFontDefinition = FontDefinition.FromSDFFont(UiFont.Get(interfaceFont));
                 if (!root.styleSheets.Contains(menuStyle)) root.styleSheets.Add(menuStyle);
                 root.AddToClassList("game-menu");
                 Build("menu-start");
@@ -75,6 +75,8 @@ namespace UnsoundedSea.Runtime
 
         private void Build(string focus)
         {
+            UiMotion.BeforeBuild(root);
+            root.schedule.Execute(() => UiMotion.AfterBuild(root));
             root.Clear();
             root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion);
             var column = new VisualElement { pickingMode = PickingMode.Ignore };

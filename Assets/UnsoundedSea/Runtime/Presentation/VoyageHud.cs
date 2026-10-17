@@ -34,7 +34,7 @@ namespace UnsoundedSea.Runtime
             {
                 if (interfaceFont == null || interfaceStyle == null || menuStyle == null || sailingPresentation == null)
                     throw new InvalidOperationException("Assign the voyage font, stylesheets and sailing presentation.");
-                root.style.unityFontDefinition = FontDefinition.FromSDFFont(interfaceFont);
+                root.style.unityFontDefinition = FontDefinition.FromSDFFont(UiFont.Get(interfaceFont));
                 if (!root.styleSheets.Contains(menuStyle)) root.styleSheets.Add(menuStyle);
                 if (!root.styleSheets.Contains(interfaceStyle)) root.styleSheets.Add(interfaceStyle);
                 root.AddToClassList("voyage-hud");
@@ -155,6 +155,8 @@ namespace UnsoundedSea.Runtime
         private void Refresh()
         {
             if (root == null) return;
+            UiMotion.BeforeBuild(root);
+            root.schedule.Execute(() => UiMotion.AfterBuild(root));
             var focus = (root.panel?.focusController.focusedElement as VisualElement)?.name;
             var scrollPositions = root.Query<ScrollView>().ToList().Where(s => !string.IsNullOrEmpty(s.name)).ToDictionary(s => s.name, s => s.scrollOffset);
             sailing?.Pause();

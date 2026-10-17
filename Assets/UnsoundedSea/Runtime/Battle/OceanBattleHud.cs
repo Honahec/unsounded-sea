@@ -10,7 +10,7 @@ using UnsoundedSea.Core;
 namespace UnsoundedSea.Runtime
 {
     [RequireComponent(typeof(UIDocument), typeof(BattleDirector))]
-    public sealed class OceanBattleHud : MonoBehaviour
+    public sealed partial class OceanBattleHud : MonoBehaviour
     {
         public FontAsset font;
         public StyleSheet styleSheet;
@@ -42,25 +42,29 @@ namespace UnsoundedSea.Runtime
             root.Clear(); root.AddToClassList("ocean-ui"); root.pickingMode = PickingMode.Ignore; root.focusable = true;
             if (menuStyle != null) root.styleSheets.Add(menuStyle);
             if (styleSheet != null) root.styleSheets.Add(styleSheet);
-            if (font != null) root.style.unityFontDefinition = FontDefinition.FromSDFFont(font);
+            if (font != null) root.style.unityFontDefinition = FontDefinition.FromSDFFont(UiFont.Get(font));
             director.Changed += Refresh;
             director.Resolved += OnResolved;
             root.RegisterCallback<KeyDownEvent>(Key, TrickleDown.TrickleDown);
+            InitializeMotion();
             Render();
         }
         private void OnDisable()
         {
+            DisposeMotion();
             chartOpen = false; chartWasPaused = false; bookOpen = false; bookWasPaused = false; showSettings = false; journalOpen = false;
             director.Changed -= Refresh; director.Resolved -= OnResolved; root.UnregisterCallback<KeyDownEvent>(Key, TrickleDown.TrickleDown); root.Clear();
         }
         private void OnResolved(BattleView before, BattleView after, BattleCommand command)
         {
+            PresentResolution(before, after, command);
             if (command.kind != CommandKind.PlayCard) return;
             playedCardFeedback = before.Hand.FirstOrDefault(card => card.InstanceId == command.cardInstanceId)?.Definition.Name;
         }
 
         private void Key(KeyDownEvent evt)
         {
+            if (pointerHeld) { if (evt.keyCode == KeyCode.Escape) CancelDrag(); evt.StopImmediatePropagation(); return; }
             if (director.View?.PendingChoice != null) { evt.StopPropagation(); return; }
             if (inspectedCard != 0)
             {
@@ -139,6 +143,7 @@ namespace UnsoundedSea.Runtime
         }
         private void Refresh()
         {
+            if (submittingDrag) return; // The release path rebuilds once after clearing its gesture state.
             // Finishing an animation changes input availability, not the view contents.
             if (root.focusable && renderedRevision == director.ViewRevision && renderedPaused == director.Paused &&
                 renderedSelection == director.SelectedEnemy && renderedNotice == director.Notice)
@@ -162,6 +167,7 @@ namespace UnsoundedSea.Runtime
         private void Render()
         {
             var focused = (root.panel?.focusController.focusedElement as VisualElement)?.name;
+            BeforeMotionRender();
             var oldHand = root.Q<ScrollView>("hand");
             var handOffset = oldHand?.scrollOffset ?? Vector2.zero;
             var handWidth = oldHand?.contentViewport.resolvedStyle.width ?? 0;
@@ -265,7 +271,7 @@ namespace UnsoundedSea.Runtime
             if (handWidth > 0) fan.style.marginLeft = Mathf.Max(0, (handWidth - fan.style.width.value.value) * .5f);
             hand.RegisterCallback<GeometryChangedEvent>(_ => fan.style.marginLeft = Mathf.Max(0, (hand.contentViewport.resolvedStyle.width - fan.resolvedStyle.width) * .5f));
             var cardPresentation = new HandCardPresentation(hand);
-            var animateDraw = !director.Paused && !chartOpen && v.PendingChoice == null && previousHand.Length > 0 && !GameSettings.ReducedMotion;
+            var animateDraw = !director.Paused && !chartOpen && v.PendingChoice == null && !GameSettings.ReducedMotion;
             var cardIndex = 0;
             foreach (var card in v.Hand)
             {
@@ -287,6 +293,7 @@ namespace UnsoundedSea.Runtime
                     }
                 }, "card-anchor");
                 b.EnableInClassList("encounter-card", c.IsEncounter);
+                BindCardDrag(b, c);
                 b.EnableInClassList("chosen-card", selectedEncounterCard == c.InstanceId);
                 b.RegisterCallback<ContextClickEvent>(evt =>
                 {
@@ -300,7 +307,7 @@ namespace UnsoundedSea.Runtime
                 if (animateDraw && !previousHand.Contains(c.InstanceId))
                 {
                     b.AddToClassList("card-entering");
-                    b.schedule.Execute(() => b.RemoveFromClassList("card-entering")).StartingIn(16);
+                    QueueCardEntry(b, cardIndex);
                 }
                 var face = Box("sea-card"); face.pickingMode = PickingMode.Position;
                 IllustratedCard.Apply(face, def);
@@ -311,6 +318,8 @@ namespace UnsoundedSea.Runtime
                 ActionButton(b, active); fan.Add(b);
             }
             previousHand = v.Hand.Select(card => card.InstanceId).ToArray();
+            var piles = Text($"牌库 {v.DrawCount}  ·  弃牌 {v.DiscardCount}  ·  消耗 {v.ExhaustCount}", "battle-piles");
+            piles.name = "battle-piles"; root.Add(piles);
             RenderCardChoices(v, active);
             RenderSupportChoices(v, active);
             var end = Button("battle-end-turn", "", () => director.Submit(BattleCommand.EndTurn()), "end-turn");
@@ -389,6 +398,7 @@ namespace UnsoundedSea.Runtime
             {
                 foreach (var child in root.Children().ToArray()) child.SetEnabled(false);
                 root.Add(PendingChoice(v.PendingChoice, option => director.Submit(BattleCommand.Reorder(option))));
+                AfterMotionRender();
                 return;
             }
             var inspection = v.Hand.FirstOrDefault(card => card.InstanceId == inspectedCard);
@@ -407,6 +417,7 @@ namespace UnsoundedSea.Runtime
                 if (root.focusable && target != null && target.canGrabFocus) target.Focus();
                 else if (root.focusable && string.IsNullOrEmpty(focused)) root.Focus();
             });
+            AfterMotionRender();
         }
         private bool TryPlaySelectedTarget(string enemyId)
         {
@@ -487,6 +498,7 @@ namespace UnsoundedSea.Runtime
                     if (!result.Success) { selectedEncounterCard = cardId; Render(); }
                 }, "card-target-choice");
                 button.EnableInClassList("target-ready", target.Enabled);
+                button.userData = target;
                 ActionButton(button, active && target.Enabled);
                 button.tooltip = target.Detail;
                 options.Add(button);
@@ -532,6 +544,7 @@ namespace UnsoundedSea.Runtime
                     if (result.Success) { selectedEncounterCard = 0; Render(); }
                 }, "boss-target");
                 button.tooltip = target.Name + "：" + target.Detail;
+                button.userData = target;
                 if (view.BossKind == BossEncounterKind.Watcher) button.text = target.Name;
                 button.EnableInClassList("target-ready", selected != null && target.Enabled);
                 ActionButton(button, active && selected != null && target.Enabled);
@@ -638,6 +651,7 @@ namespace UnsoundedSea.Runtime
         {
             RenderedFrames++;
             PositionLabels();
+            TickMotion();
         }
         private void PositionLabels()
         {
