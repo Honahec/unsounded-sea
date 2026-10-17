@@ -24,6 +24,7 @@ namespace UnsoundedSea.Runtime
 
         public static bool Dispatch(VisualElement root, KeyCode key, Func<KeyCode, bool> handle)
         {
+            if (GameSceneLoader.IsLoading) return true;
             var memo = Memos.GetOrCreateValue(root);
             if (memo.Frame != Time.frameCount) { memo.Frame = Time.frameCount; memo.Keys.Clear(); }
             if (!memo.Keys.Add(key)) return true;

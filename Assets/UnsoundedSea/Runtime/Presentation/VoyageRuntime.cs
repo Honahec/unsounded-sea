@@ -84,6 +84,7 @@ namespace UnsoundedSea.Runtime
 
         public static void StartDebugEncounter(string encounterId, string regionId, bool isBoss)
         {
+            if (GameSceneLoader.IsLoading) return;
             var scenario = VoyageEncounterCatalog.Resolve(encounterId);
             scenario.ValidatePresentation();
             if (!Application.CanStreamedLevelBeLoaded(BattleScene))
@@ -94,18 +95,19 @@ namespace UnsoundedSea.Runtime
                 throw new InvalidOperationException("调试遭遇无法开始。");
             pendingScenario = scenario;
             SceneManager.sceneLoaded += ConfigureEncounter;
-            SceneManager.LoadScene(BattleScene);
+            GameSceneLoader.Load(BattleScene);
         }
 
         public static void StartDebugNode(string regionId, RunNodeKind kind)
         {
+            if (GameSceneLoader.IsLoading) return;
             if (kind == RunNodeKind.Battle || kind == RunNodeKind.Boss)
                 throw new ArgumentException("战斗调试必须指定遭遇。", nameof(kind));
             if (!Application.CanStreamedLevelBeLoaded(VoyageScene))
                 throw new InvalidOperationException("航程场景未加入构建列表。");
             ResetEncounterState();
             Session = VoyageSession.CreateDebug(NewSeed(), regionId, kind);
-            SceneManager.LoadScene(VoyageScene);
+            GameSceneLoader.Load(VoyageScene);
         }
 
         private static uint NewSeed()
@@ -177,6 +179,7 @@ namespace UnsoundedSea.Runtime
 
         public static void EnterEncounter()
         {
+            if (GameSceneLoader.IsLoading) return;
             if (Session == null) throw new InvalidOperationException("没有进行中的航程。");
             if (pendingScenario != null) return;
             var scenario = VoyageEncounterCatalog.Resolve(Session.Current.EncounterId);
@@ -197,21 +200,22 @@ namespace UnsoundedSea.Runtime
             pendingScenario = scenario;
             SceneManager.sceneLoaded -= ConfigureEncounter;
             SceneManager.sceneLoaded += ConfigureEncounter;
-            SceneManager.LoadScene(BattleScene);
+            GameSceneLoader.Load(BattleScene);
         }
 
         public static void ReturnToVoyage()
         {
+            if (GameSceneLoader.IsLoading) return;
             if (IsDebugSession)
             {
-                SceneManager.LoadScene(Session.Phase == VoyagePhase.Completed || Session.Phase == VoyagePhase.Failed
+                GameSceneLoader.Load(Session.Phase == VoyagePhase.Completed || Session.Phase == VoyagePhase.Failed
                     ? MainMenuScene : VoyageScene);
                 return;
             }
             try
             {
                 Checkpoint();
-                SceneManager.LoadScene(VoyageScene);
+                GameSceneLoader.Load(VoyageScene);
             }
             catch (Exception exception)
             {

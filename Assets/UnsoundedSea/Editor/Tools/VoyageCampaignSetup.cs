@@ -153,6 +153,7 @@ namespace UnsoundedSea.Editor
             EditorUtility.SetDirty(catalog);
             AssetDatabase.SaveAssetIfDirty(catalog);
             foreach (var entry in entries) entry.scenario.ValidatePresentation();
+            VoyageEncounterLoadingSetup.Configure(catalog);
             return $"Voyage campaign synchronized: {entries.Count} encounter scenarios.";
         }
 

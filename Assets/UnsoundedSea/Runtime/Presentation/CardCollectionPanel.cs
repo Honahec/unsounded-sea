@@ -76,7 +76,6 @@ namespace UnsoundedSea.Runtime
             if (target == page) return;
             page = target;
             RenderPage();
-            Resources.UnloadUnusedAssets();
         }
 
         private void RenderPage()

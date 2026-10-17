@@ -61,7 +61,7 @@ namespace UnsoundedSea.Runtime
         {
             HotkeyRelay.Poll(root, HandleKey);
             sailingPresentation?.Tick(Time.unscaledDeltaTime,
-                paused || settingsOpen || journalOpen || chartOpen || deckOpen || supportOpen || replacingReward || Session?.DebriefPending==true || Session?.RegionIntroPending==true || !string.IsNullOrEmpty(saveError) || !string.IsNullOrEmpty(loadError),
+                GameSceneLoader.IsLoading || paused || settingsOpen || journalOpen || chartOpen || deckOpen || supportOpen || replacingReward || Session?.DebriefPending==true || Session?.RegionIntroPending==true || !string.IsNullOrEmpty(saveError) || !string.IsNullOrEmpty(loadError),
                 GameSettings.ReducedMotion);
         }
         private void OnDisable()
@@ -185,7 +185,7 @@ namespace UnsoundedSea.Runtime
                 var error = Element("voyage-load-error");
                 error.Add(Text("无法读取航海记录", "panel-title")); error.Add(Text(loadError ?? "航程尚未创建。", "body"));
                 error.Add(Text("原记录未被覆盖。返回标题后可重试，或明确开始新航程。", "muted"));
-                error.Add(Action("load-title", "返回标题", "primary", () => SceneManager.LoadScene(VoyageRuntime.MainMenuScene)));
+                error.Add(Action("load-title", "返回标题", "primary", () => GameSceneLoader.Load(VoyageRuntime.MainMenuScene)));
                 root.Add(error); return;
             }
             var session = Session;
@@ -406,7 +406,7 @@ namespace UnsoundedSea.Runtime
                 case VoyagePhase.Completed:
                 case VoyagePhase.Failed:
                     BuildVoyageSummary(panel, session);
-                    panel.Add(Action("voyage-finish", "返回标题", "primary", () => SceneManager.LoadScene(VoyageRuntime.MainMenuScene))); break;
+                    panel.Add(Action("voyage-finish", "返回标题", "primary", () => GameSceneLoader.Load(VoyageRuntime.MainMenuScene))); break;
             }
         }
         private static void BuildVoyageSummary(VisualElement panel, VoyageSession session)
@@ -889,7 +889,7 @@ namespace UnsoundedSea.Runtime
                 pause.Add(Text("暂停", "pause-overline"));
                 pause.Add(KeyBadge.Attach(Action("pause-resume", "继续", "pause-option", () => { paused = false; Refresh(); }), "Esc"));
                 pause.Add(Action("pause-settings", "设置", "pause-option", () => { settingsOpen = true; Refresh(); }));
-                pause.Add(Action("pause-title", "保存并返回标题", "pause-option", () => { Save(); if (string.IsNullOrEmpty(saveError)) SceneManager.LoadScene(VoyageRuntime.MainMenuScene); else Refresh(); }));
+                pause.Add(Action("pause-title", "保存并返回标题", "pause-option", () => { if (GameSceneLoader.IsLoading) return; Save(); if (string.IsNullOrEmpty(saveError)) GameSceneLoader.Load(VoyageRuntime.MainMenuScene); else Refresh(); }));
                 scrim.Add(pause);
             }
             root.Add(scrim); if (!settingsOpen) root.schedule.Execute(() => root.Q<Button>("pause-resume")?.Focus());
