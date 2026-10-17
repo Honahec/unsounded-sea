@@ -49,16 +49,14 @@
     "target_performance_tested": false
   },
   "unity": {
-    "model": "Assets/UnsoundedSea/Art/Models/TideBonesChoirmaster_LOD0.glb",
+    "runtime_manifest": "ArtSource/Bosses/TideBonesChoirmaster_BANG-manifest.json",
     "prefab": "Assets/UnsoundedSea/Art/Prefabs/TideBonesChoirmaster.prefab",
     "scene": "Assets/UnsoundedSea/Scenes/BossM02.unity",
-    "archived_lod0_sha256_matches": true,
-    "imported_triangles": 84999,
     "stage_anchor_scale": 20,
     "stage_anchor_position": [-45, -55, 280]
   },
   "notes": [
-    "LOD0 is imported for a playable static-mesh encounter; this does not imply art approval or animation readiness.",
+    "The unsplit LOD0 remains archived; the playable encounter now uses the BANG runtime manifest. This does not imply art approval or animation readiness.",
     "Provider reported 85000 triangles; actual indexed triangle count is 84999."
   ]
 }

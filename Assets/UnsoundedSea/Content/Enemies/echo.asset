@@ -15,24 +15,24 @@ MonoBehaviour:
   id: echo
   displayName: "\u706F\u5854\u4E0B\u7684\u56DE\u58F0"
   health: 999
-  candidateDescription: "\u903C\u8FD1\uFF1A8 \u751F\u547D\u4F24\u5BB3 / \u94C3\u9E23\uFF1A4 \u7406\u667A\u51B2\u51FB"
+  candidateDescription: "\u6C89\u91CD\u811A\u6B65\uFF1A20 \u751F\u547D\u4F24\u5BB3 / \u65E0\u98CE\u94C3\u9E23\uFF1A10 \u7406\u667A\u51B2\u51FB\uFF1B\u5747\u5728\u672C\u56DE\u5408\u660E\u786E\u9884\u544A\u4E14\u53EF\u6253\u65AD"
   intents:
   - id: approach
     displayName: "\u6C89\u91CD\u811A\u6B65"
     clue: "\u6F5C\u6C34\u670D\u7F13\u6162\u9760\u8FD1\uFF1B\u811A\u6B65\u58F0\u6E05\u6670\u3002"
     channel: 0
-    amount: 8
+    amount: 20
     isPublic: 1
     visibleAction: 1
-    interruptible: 0
+    interruptible: 1
     soundSource: "\u76EE\u6807\u672C\u4F53"
   - id: bells
     displayName: "\u65E0\u98CE\u94C3\u9E23"
     clue: "\u58F0\u6E90\u5F02\u5E38\uFF1B\u6F5C\u6C34\u670D\u9759\u6B62\u4E0D\u52A8\u3002"
     channel: 1
-    amount: 4
-    isPublic: 0
+    amount: 10
+    isPublic: 1
     visibleAction: 0
-    interruptible: 0
+    interruptible: 1
     soundSource: "\u5899\u4E0A\u7684\u94DC\u94C3"
   presentationPrefab: {fileID: 6536484850760832164, guid: d6e078df63125453e87419a8e7f51e6d, type: 3}

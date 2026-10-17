@@ -113,6 +113,14 @@ MonoBehaviour:
     scenario: {fileID: 11400000, guid: cce0972e94ec147f4b9cc19b531a4660, type: 2}
     group: "\u65E0\u661F\u6DF1\u6E0A"
     isBoss: 0
+  - id: storm-gauntlet
+    scenario: {fileID: 11400000, guid: 895f1859fc33449b9af9bc39fc3ddf33, type: 2}
+    group: "\u533A\u57DF Boss"
+    isBoss: 1
+  - id: hollow-beacon
+    scenario: {fileID: 11400000, guid: 5edd55d7c1866467086137f2bb82be54, type: 2}
+    group: "\u533A\u57DF Boss"
+    isBoss: 1
   - id: fog-visitors
     scenario: {fileID: 11400000, guid: 580c88669e831483ebd024807d14fe7d, type: 2}
     group: "\u96FE\u6D77"

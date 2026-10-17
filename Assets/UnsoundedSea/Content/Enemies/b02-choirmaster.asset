@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: b02-choirmaster
   displayName: "\u53D1\u58F0\u56CA"
-  health: 36
+  health: 42
   candidateDescription: "\u7279\u6B8A\u906D\u9047\u89C4\u5219\u63A7\u5236\u516C\u5F00\u610F\u56FE"
   intents:
   - id: boss-script

@@ -1,0 +1,226 @@
+{
+  "asset": "InvertedSurveyor",
+  "provider": "Hyper3D BANG",
+  "source_generation": "409bcb0b-309b-4377-ad77-ad69cf1ec0df",
+  "source_asset": "760c2406-78da-50d4-bf94-c7f19bb5cb5c",
+  "request": {
+    "asset_id": "760c2406-78da-50d4-bf94-c7f19bb5cb5c",
+    "geometry_file_format": "glb"
+  },
+  "privacy": {
+    "basis": "API output is not published to public ASSETS or shared with other users.",
+    "policy": "https://docs.hyper3d.ai/en/legal/data-retention-policy"
+  },
+  "method": "BANG semantic split; independent rigid part pivots; Blender decimation",
+  "parts": 9,
+  "part_mapping": [
+    {
+      "pivot": "Part_01",
+      "source_mesh": "root.0",
+      "center": [
+        -0.033082664012908936,
+        0.008550256490707397,
+        0.2824190855026245
+      ],
+      "minimum": [
+        -0.40942147374153137,
+        -0.3974464237689972,
+        -0.37767648696899414
+      ],
+      "maximum": [
+        0.3432561457157135,
+        0.414546936750412,
+        0.9425146579742432
+      ]
+    },
+    {
+      "pivot": "Part_02",
+      "source_mesh": "root.1",
+      "center": [
+        -0.2773163914680481,
+        -0.026778757572174072,
+        0.05240577459335327
+      ],
+      "minimum": [
+        -0.4919552505016327,
+        -0.29320311546325684,
+        -0.8288722634315491
+      ],
+      "maximum": [
+        -0.0626775324344635,
+        0.2396456003189087,
+        0.9336838126182556
+      ]
+    },
+    {
+      "pivot": "Part_03",
+      "source_mesh": "root.2",
+      "center": [
+        0.2841278910636902,
+        -0.033062100410461426,
+        0.17371219396591187
+      ],
+      "minimum": [
+        0.07700343430042267,
+        -0.299907922744751,
+        -0.5798997282981873
+      ],
+      "maximum": [
+        0.4912523627281189,
+        0.23378372192382812,
+        0.927324116230011
+      ]
+    },
+    {
+      "pivot": "Part_04",
+      "source_mesh": "root.3",
+      "center": [
+        -0.1088695228099823,
+        -0.10776565968990326,
+        -0.35781532526016235
+      ],
+      "minimum": [
+        -0.36016717553138733,
+        -0.26056763529777527,
+        -0.9476890563964844
+      ],
+      "maximum": [
+        0.14242812991142273,
+        0.04503631591796875,
+        0.23205840587615967
+      ]
+    },
+    {
+      "pivot": "Part_05",
+      "source_mesh": "root.4",
+      "center": [
+        0.18932348489761353,
+        -0.20550405979156494,
+        -0.4026738703250885
+      ],
+      "minimum": [
+        0.1156516894698143,
+        -0.2700636386871338,
+        -0.6885061264038086
+      ],
+      "maximum": [
+        0.26299527287483215,
+        -0.1409444808959961,
+        -0.11684161424636841
+      ]
+    },
+    {
+      "pivot": "Part_06",
+      "source_mesh": "root.5",
+      "center": [
+        0.0940382182598114,
+        -0.2624198794364929,
+        0.6092946529388428
+      ],
+      "minimum": [
+        -0.002764757489785552,
+        -0.40753206610679626,
+        0.31254181265830994
+      ],
+      "maximum": [
+        0.1908411979675293,
+        -0.11730766296386719,
+        0.9060474634170532
+      ]
+    },
+    {
+      "pivot": "Part_07",
+      "source_mesh": "root.6",
+      "center": [
+        -0.3767998218536377,
+        0.1487625539302826,
+        0.6703642010688782
+      ],
+      "minimum": [
+        -0.48631295561790466,
+        0.12523812055587769,
+        0.47662353515625
+      ],
+      "maximum": [
+        -0.26728665828704834,
+        0.1722869873046875,
+        0.8641048669815063
+      ]
+    },
+    {
+      "pivot": "Part_08",
+      "source_mesh": "root.7",
+      "center": [
+        0.34214848279953003,
+        0.14897321164608002,
+        0.6696357131004333
+      ],
+      "minimum": [
+        0.228541299700737,
+        0.12493178248405457,
+        0.47666898369789124
+      ],
+      "maximum": [
+        0.45575565099716187,
+        0.17301464080810547,
+        0.8626024127006531
+      ]
+    },
+    {
+      "pivot": "Part_09",
+      "source_mesh": "root.8",
+      "center": [
+        -0.03661758452653885,
+        0.1843007355928421,
+        -0.4366810917854309
+      ],
+      "minimum": [
+        -0.08603252470493317,
+        0.1302887499332428,
+        -0.5815228819847107
+      ],
+      "maximum": [
+        0.012797355651855469,
+        0.2383127212524414,
+        -0.2918393015861511
+      ]
+    }
+  ],
+  "decimate_ratio": 0.18,
+  "triangles_before": 500000,
+  "triangles_after": 89995,
+  "source_spec": {
+    "bytes": 31499844,
+    "triangles": 500000,
+    "vertices": 354370,
+    "meshes": 9,
+    "materials": 9,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "runtime_spec": {
+    "bytes": 18393912,
+    "triangles": 89995,
+    "vertices": 100880,
+    "meshes": 9,
+    "materials": 9,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "outputs": {
+    "source": "ArtSource/Bosses/InvertedSurveyor_BANG_High.glb",
+    "glb": "Assets/UnsoundedSea/Art/Models/InvertedSurveyor_BANG_LOD0.glb",
+    "preview": "ArtSource/Bosses/InvertedSurveyor_BANG-preview.png"
+  },
+  "sha256": {
+    "source": "f95e9055f3209d4efbf3c965488d21e7e3eb0c61a6ec6f2e1767e0eef90b56eb",
+    "glb": "6ae17694ba9702a32be54238a756ee66eedfe2717c409b6b2cc5932196d42414",
+    "preview": "77d61f312fe9392831670acf3920dbec0f808725ed32c86daca2721a9436c746"
+  },
+  "animation_ready": false,
+  "notes": [
+    "Part pivots preserve the assembled silhouette. Anatomical joint calibration and combat animation are not included."
+  ]
+}

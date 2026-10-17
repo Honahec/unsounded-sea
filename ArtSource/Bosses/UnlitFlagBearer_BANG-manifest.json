@@ -1,0 +1,131 @@
+{
+  "asset": "UnlitFlagBearer",
+  "provider": "Hyper3D BANG",
+  "source_generation": "8d53af76-3933-4dbf-aa3c-443736f00da4",
+  "source_asset": "bc75e1ea-badc-5ebc-8aac-798c73193353",
+  "request": {
+    "asset_id": "bc75e1ea-badc-5ebc-8aac-798c73193353",
+    "geometry_file_format": "glb"
+  },
+  "privacy": {
+    "basis": "API output is not published to public ASSETS or shared with other users.",
+    "policy": "https://docs.hyper3d.ai/en/legal/data-retention-policy"
+  },
+  "method": "BANG semantic split; independent rigid part pivots; Blender decimation",
+  "parts": 4,
+  "part_mapping": [
+    {
+      "pivot": "Part_01",
+      "source_mesh": "root.0",
+      "center": [
+        0.2541404366493225,
+        0.00033727288246154785,
+        0.8347535133361816
+      ],
+      "minimum": [
+        -0.17456142604351044,
+        -0.3229054808616638,
+        0.0
+      ],
+      "maximum": [
+        0.6828423142433167,
+        0.3235800266265869,
+        1.6695070266723633
+      ]
+    },
+    {
+      "pivot": "Part_02",
+      "source_mesh": "root.1",
+      "center": [
+        -0.37058213353157043,
+        -0.16993147134780884,
+        0.9690139889717102
+      ],
+      "minimum": [
+        -0.687252938747406,
+        -0.3073631525039673,
+        0.045795559883117676
+      ],
+      "maximum": [
+        -0.05391132831573486,
+        -0.03249979019165039,
+        1.8922324180603027
+      ]
+    },
+    {
+      "pivot": "Part_03",
+      "source_mesh": "root.2",
+      "center": [
+        0.007251530885696411,
+        0.04524195194244385,
+        1.275973916053772
+      ],
+      "minimum": [
+        -0.12094338238239288,
+        -0.10438203811645508,
+        1.1372265815734863
+      ],
+      "maximum": [
+        0.1354464441537857,
+        0.19486594200134277,
+        1.4147212505340576
+      ]
+    },
+    {
+      "pivot": "Part_04",
+      "source_mesh": "root.3",
+      "center": [
+        0.43519651889801025,
+        -0.01967024803161621,
+        1.2662696838378906
+      ],
+      "minimum": [
+        0.31524839997291565,
+        -0.1775035858154297,
+        1.137257695198059
+      ],
+      "maximum": [
+        0.5551446080207825,
+        0.13816308975219727,
+        1.3952815532684326
+      ]
+    }
+  ],
+  "decimate_ratio": 0.075,
+  "triangles_before": 1200000,
+  "triangles_after": 89998,
+  "source_spec": {
+    "bytes": 56179668,
+    "triangles": 1200000,
+    "vertices": 998120,
+    "meshes": 4,
+    "materials": 4,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "runtime_spec": {
+    "bytes": 14373456,
+    "triangles": 89998,
+    "vertices": 102048,
+    "meshes": 4,
+    "materials": 4,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "outputs": {
+    "source": "ArtSource/Bosses/UnlitFlagBearer_BANG_High.glb",
+    "glb": "Assets/UnsoundedSea/Art/Models/UnlitFlagBearer_BANG_LOD0.glb",
+    "preview": "ArtSource/Bosses/UnlitFlagBearer_BANG-preview.png"
+  },
+  "sha256": {
+    "source": "7ce687d8ea8f59b2300af1e38eba76381a106285ccefdb78e51fd1fb2e1fa4d3",
+    "glb": "b81e1345a7eb414855e8c82aab6f633ce304502491cb0f5cc405ea03c4d62536",
+    "preview": "30bc86447d3d568868944a3b230be22ff2f74842510aa1e52dd82d0e4fe223c7"
+  },
+  "animation_ready": false,
+  "notes": [
+    "Part pivots preserve the assembled silhouette. Anatomical joint calibration and combat animation are not included."
+  ]
+}

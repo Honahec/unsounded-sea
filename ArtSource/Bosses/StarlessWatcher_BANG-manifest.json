@@ -1,0 +1,150 @@
+{
+  "asset": "StarlessWatcher",
+  "provider": "Hyper3D BANG",
+  "source_generation": "5d772709-ad20-4832-bb1c-48e0a6512054",
+  "source_asset": "094af0ac-8e6b-599f-99d1-1c6176e0eaf6",
+  "request": {
+    "asset_id": "094af0ac-8e6b-599f-99d1-1c6176e0eaf6",
+    "geometry_file_format": "glb"
+  },
+  "privacy": {
+    "basis": "API output is not published to public ASSETS or shared with other users.",
+    "policy": "https://docs.hyper3d.ai/en/legal/data-retention-policy"
+  },
+  "method": "BANG semantic split; independent rigid part pivots; Blender decimation",
+  "parts": 5,
+  "part_mapping": [
+    {
+      "pivot": "Part_01",
+      "source_mesh": "root.0",
+      "center": [
+        0.009028255939483643,
+        -0.0028990507125854492,
+        0.8895590305328369
+      ],
+      "minimum": [
+        -0.5757481455802917,
+        -0.49132293462753296,
+        0.0
+      ],
+      "maximum": [
+        0.593804657459259,
+        0.48552483320236206,
+        1.7791180610656738
+      ]
+    },
+    {
+      "pivot": "Part_02",
+      "source_mesh": "root.1",
+      "center": [
+        0.3424910604953766,
+        0.14441345632076263,
+        0.9508885145187378
+      ],
+      "minimum": [
+        0.017694711685180664,
+        -0.03567972779273987,
+        0.0005459785461425781
+      ],
+      "maximum": [
+        0.6672874093055725,
+        0.32450664043426514,
+        1.901231050491333
+      ]
+    },
+    {
+      "pivot": "Part_03",
+      "source_mesh": "root.2",
+      "center": [
+        -0.3424883484840393,
+        0.14441418647766113,
+        0.9508903622627258
+      ],
+      "minimum": [
+        -0.6672840118408203,
+        -0.03567862510681152,
+        0.0005497932434082031
+      ],
+      "maximum": [
+        -0.0176926851272583,
+        0.3245069980621338,
+        1.9012309312820435
+      ]
+    },
+    {
+      "pivot": "Part_04",
+      "source_mesh": "root.3",
+      "center": [
+        0.37407732009887695,
+        -0.18852651119232178,
+        0.615799069404602
+      ],
+      "minimum": [
+        0.2887258529663086,
+        -0.32029175758361816,
+        0.3105314373970032
+      ],
+      "maximum": [
+        0.4594287574291229,
+        -0.05676126480102539,
+        0.9210667014122009
+      ]
+    },
+    {
+      "pivot": "Part_05",
+      "source_mesh": "root.4",
+      "center": [
+        -0.37407729029655457,
+        -0.18852673470973969,
+        0.6158039569854736
+      ],
+      "minimum": [
+        -0.4594285488128662,
+        -0.320292204618454,
+        0.31054121255874634
+      ],
+      "maximum": [
+        -0.2887260317802429,
+        -0.05676126480102539,
+        0.9210667014122009
+      ]
+    }
+  ],
+  "decimate_ratio": 0.075,
+  "triangles_before": 1200000,
+  "triangles_after": 89997,
+  "source_spec": {
+    "bytes": 56645784,
+    "triangles": 1200000,
+    "vertices": 938085,
+    "meshes": 5,
+    "materials": 5,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "runtime_spec": {
+    "bytes": 16526228,
+    "triangles": 89997,
+    "vertices": 95885,
+    "meshes": 5,
+    "materials": 5,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "outputs": {
+    "source": "ArtSource/Bosses/StarlessWatcher_BANG_High.glb",
+    "glb": "Assets/UnsoundedSea/Art/Models/StarlessWatcher_BANG_LOD0.glb",
+    "preview": "ArtSource/Bosses/StarlessWatcher_BANG-preview.png"
+  },
+  "sha256": {
+    "source": "3c433e43a47fc5f222273accae98da7a4c8865dc172685b657cce7db6cffbd3c",
+    "glb": "635e245013070b36f27f395c26686ed044cf345342c423973679083e8c0c4737",
+    "preview": "6553cd8df12372fdf5e3cc298243d535c82d5a4f46d5c10919ec1129361a2034"
+  },
+  "animation_ready": false,
+  "notes": [
+    "Part pivots preserve the assembled silhouette. Anatomical joint calibration and combat animation are not included."
+  ]
+}

@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-fleet-enemy-4
   displayName: "\u9508\u94FE\u62BC\u8FD0\u8005"
-  health: 24
-  candidateDescription: "\u77ED\u94FE\u7EDE\u51FB\uFF1A9 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u94C1\u6263\u9707\u54CD\uFF1A3 \u7406\u667A\u51B2\u51FB"
+  health: 30
+  candidateDescription: "\u77ED\u94FE\u7EDE\u51FB\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u94C1\u6263\u9707\u54CD\uFF1A4 \u7406\u667A\u51B2\u51FB"
   intents:
   - id: chain
     displayName: "\u77ED\u94FE\u7EDE\u51FB"
     clue: "\u4E24\u81C2\u9508\u94FE\u540C\u65F6\u6536\u7D27\uFF0C\u94FE\u5C3E\u6CA1\u6709\u62D6\u5730\u3002"
     channel: 0
-    amount: 9
+    amount: 10
     isPublic: 1
     visibleAction: 1
     interruptible: 0
@@ -30,7 +30,7 @@ MonoBehaviour:
     displayName: "\u94C1\u6263\u9707\u54CD"
     clue: "\u8170\u95F4\u5927\u94C1\u6263\u53CD\u590D\u649E\u51FB\uFF0C\u53CC\u81C2\u6CA1\u6709\u6325\u52A8\u3002"
     channel: 1
-    amount: 3
+    amount: 4
     isPublic: 0
     visibleAction: 1
     interruptible: 1

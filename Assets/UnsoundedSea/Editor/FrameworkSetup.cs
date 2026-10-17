@@ -93,19 +93,15 @@ namespace UnsoundedSea.Editor
             });
             var echo = Asset<EnemyDefinition>(Root + "/Content/Enemies", "echo", e =>
             {
-                e.id = "echo"; e.displayName = "灯塔下的回声"; e.health = 999; e.candidateDescription = "逼近：8 生命伤害 / 铃鸣：4 理智冲击";
+                e.id = "echo"; e.displayName = "灯塔下的回声"; e.health = 999; e.candidateDescription = "沉重脚步：20 生命伤害 / 无风铃鸣：10 理智冲击；均公开且可打断";
                 e.intents = new[]
                 {
-                    new IntentData { id = "approach", displayName = "沉重脚步", clue = "潜水服缓慢靠近；脚步声清晰。", amount = 8, isPublic = true },
-                    new IntentData { id = "bells", displayName = "无风铃鸣", clue = "声源异常；潜水服静止不动。", amount = 4, channel = DamageChannel.Sanity, visibleAction = false, soundSource = "墙上的铜铃" }
+                    new IntentData { id = "approach", displayName = "沉重脚步", clue = "潜水服缓慢靠近；脚步声清晰。", amount = 20, isPublic = true, interruptible = true },
+                    new IntentData { id = "bells", displayName = "无风铃鸣", clue = "声源异常；潜水服静止不动。", amount = 10, channel = DamageChannel.Sanity, isPublic = true, visibleAction = false, soundSource = "墙上的铜铃", interruptible = true }
                 };
             });
-            var starterNumbers = new[] { 1, 2, 12, 19, 20, 21, 22, 37, 39, 41, 55, 71 };
-            var starter = starterNumbers.Select(number =>
-            {
-                var spec = CardCatalog.All.Single(card => CardCatalog.Number(card.Id) == number);
-                return AssetDatabase.LoadAssetAtPath<CardDefinition>(Root + "/Content/Cards/" + spec.Id + ".asset");
-            }).ToArray();
+            var starter = CardCatalog.Starter.Select(spec =>
+                AssetDatabase.LoadAssetAtPath<CardDefinition>(Root + "/Content/Cards/" + spec.Id + ".asset")).ToArray();
             var equipped = new[] { lantern, listener };
             EncounterDefinition Encounter(string id, string title, EnemyDefinition enemy, ObjectiveKind objective, CardDefinition[] deck) =>
                 Asset<EncounterDefinition>(Root + "/Content/Encounters", id, e =>

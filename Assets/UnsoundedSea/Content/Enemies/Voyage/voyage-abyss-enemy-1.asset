@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-abyss-enemy-1
   displayName: "\u6DF1\u6E0A\u542C\u5DEE"
-  health: 19
-  candidateDescription: "\u4F20\u58F0\u7B52\u56DE\u97F3\uFF1A4 \u7406\u667A\u51B2\u51FB / \u4F4E\u5934\u5954\u649E\uFF1A8 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  health: 38
+  candidateDescription: "\u4F20\u58F0\u7B52\u56DE\u97F3\uFF1A5 \u7406\u667A\u51B2\u51FB / \u4F4E\u5934\u5954\u649E\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
   intents:
   - id: tube
     displayName: "\u4F20\u58F0\u7B52\u56DE\u97F3"
     clue: "\u7A7A\u94DC\u7B52\u53E3\u671D\u5411\u8231\u95E8\uFF0C\u56DE\u58F0\u5374\u6765\u81EA\u8237\u5916\u3002"
     channel: 1
-    amount: 4
+    amount: 5
     isPublic: 0
     visibleAction: 1
     interruptible: 1
@@ -30,7 +30,7 @@ MonoBehaviour:
     displayName: "\u4F4E\u5934\u5954\u649E"
     clue: "\u4F20\u58F0\u7B52\u8D34\u56DE\u8170\u4FA7\uFF0C\u7A84\u80A9\u538B\u4F4E\u3002"
     channel: 0
-    amount: 8
+    amount: 10
     isPublic: 1
     visibleAction: 1
     interruptible: 0

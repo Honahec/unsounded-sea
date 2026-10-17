@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: b05-guard-lamp
   displayName: "\u706F\u5B88\u536B"
-  health: 12
+  health: 16
   candidateDescription: "\u6BCF\u56DE\u5408 3 \u7406\u667A"
   intents:
   - id: boss-script

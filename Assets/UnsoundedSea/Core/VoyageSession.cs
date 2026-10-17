@@ -5,11 +5,12 @@ using System.Linq;
 namespace UnsoundedSea.Core
 {
     public enum VoyagePhase { ChoosingRoute, Sailing, Arrived, Encounter, Reward, ActComplete, Completed, Failed }
-    public enum VoyageActionKind { Select, SetSail, Arrive, Continue, BeginEncounter, ResolveEncounter, RevealRoutes, ScoutAhead, ChooseNode, ClaimReward, SetDeck, SetTools, ChooseNextAct }
+    public enum VoyageActionKind { Select, SetSail, Arrive, Continue, BeginEncounter, ResolveEncounter, RevealRoutes, ScoutAhead, ChooseNode, ClaimReward, SetDeck, SetTools, ChooseNextAct, ManageSupport }
 
     [Serializable] public sealed class VoyageActionData
     {
         public VoyageActionKind Kind; public string StopId; public bool Victory; public int Health; public int Sanity; public string Value; public string[] Values;
+        public Evidence[] Evidence;
     }
     [Serializable] public sealed class VoyageCheckpoint { public int Version; public VoyageMapData Map; public string CrewId; public VoyageActionData[] History; }
 
@@ -22,14 +23,13 @@ namespace UnsoundedSea.Core
         public VoyageNodeChoice(string id,string title,string description,bool enabled=true) { Id=id; Title=title; Description=description; Enabled=enabled; }
     }
 
-    public sealed class VoyageSession
+    public sealed partial class VoyageSession
     {
-        public const int CheckpointVersion=5;
+        public const int CheckpointVersion=8;
         public const int ActLength=11;
         private const int InitialToolUses=2, MaxHistory=512;
-        private static readonly string[] StarterDeck={"revolver","contradiction","c012","cover","steady","intuition","bandage","notes","light","c041","tear","c071"};
         private static readonly string[] InitialTools={"lantern","listener","shell"};
-        private static readonly int[] CommonRewards = { 3, 5, 7, 9, 14, 18, 23, 24, 27, 28, 29, 31, 33, 35, 38, 40, 45, 49, 50, 51, 53, 54 };
+        private static readonly int[] CommonRewards = { 3, 5, 7, 9, 14, 16, 18, 23, 24, 26, 27, 28, 29, 31, 32, 33, 35, 38, 40, 42, 45, 48, 49, 50, 51, 53, 54 };
         private static readonly Dictionary<string, int[]> RegionRewards = new Dictionary<string, int[]>
         {
             ["fog"] = new[] { 6, 11, 16, 25, 32, 36, 47, 48, 58, 64, 70 },
@@ -43,15 +43,15 @@ namespace UnsoundedSea.Core
         private readonly List<string> visited=new List<string>(), log=new List<string>(), knowledge=new List<string>();
         private readonly List<VoyageActionData> history=new List<VoyageActionData>();
         private readonly HashSet<string> knownStopIds=new HashSet<string>(StringComparer.Ordinal), knownRouteKeys=new HashSet<string>(StringComparer.Ordinal);
-        private readonly List<string> deck=new List<string>(StarterDeck), learned=new List<string>(StarterDeck);
+        private readonly List<string> deck=new List<string>(CardCatalog.Starter.Select(card=>card.Id)), learned=new List<string>(CardCatalog.Starter.Select(card=>card.Id));
         private readonly List<string> tools=new List<string>{"lantern","listener"}, learnedTools=new List<string>(InitialTools);
         private VoyageStop selected; private VoyagePhase phase; private int elapsedHours; private bool nodeResolved; private bool initialPreparation=true;
         private string nextRegion;
-        private bool debug;
+        private bool debug, restoring;
         private VoyageSession(VoyagePlan first,string crew)
         {
             if(crew!="medic"&&crew!="listener") throw new ArgumentException("Unknown initial crew.",nameof(crew));
-            initialMap=first.Export(); initialCrew=crew; CrewId=crew; Health=60; Sanity=30; Supplies=3; SetPlan(first);
+            initialMap=first.Export(); initialCrew=crew; CrewId=crew; Health=60; Sanity=30; Supplies=3;crewIds.Add(crew); SetPlan(first);
         }
         private VoyageSession(VoyagePlan plan,string crew,bool isDebug) : this(plan,crew)
         {
@@ -61,6 +61,7 @@ namespace UnsoundedSea.Core
         }
         private void SetPlan(VoyagePlan value)
         {
+            if(plan!=null&&plan.Act!=value.Act){markers.Remove("docking-voucher");Watched=Math.Max(0,Watched-1);}
             plan=value; byId=plan.Stops.ToDictionary(x=>x.Id,StringComparer.Ordinal);
             map=new RunMap(plan.Stops.Select(x=>new RunNode(x.Id,x.Kind,x.Clue,string.IsNullOrEmpty(x.EncounterId)?x.Id:x.EncounterId,x.Next)),plan.StartId);
             visited.Clear(); visited.Add(plan.StartId); knownStopIds.Clear(); knownRouteKeys.Clear(); knownStopIds.Add(plan.StartId); selected=null;
@@ -117,33 +118,42 @@ namespace UnsoundedSea.Core
             if(phase!=VoyagePhase.Arrived||IsEncounter(CurrentFull)||CurrentFull.Kind==RunNodeKind.Reward||!nodeResolved)return false;
             FinishNode(); Record(VoyageActionKind.Continue); return true;
         }
+        public bool CanContinue=>phase==VoyagePhase.Arrived&&!IsEncounter(CurrentFull)&&CurrentFull.Kind!=RunNodeKind.Reward&&nodeResolved;
         public bool BeginEncounter()
         {
             if(phase!=VoyagePhase.Arrived||!IsEncounter(CurrentFull)||string.IsNullOrEmpty(CurrentFull.EncounterId))return false;
             phase=VoyagePhase.Encounter; Record(VoyageActionKind.BeginEncounter); return true;
         }
-        public bool ResolveEncounter(bool victory,int health,int sanity)
+        public bool ResolveEncounter(bool victory,int health,int sanity,IEnumerable<string> spent=null,int? finalWatched=null,IEnumerable<Evidence> evidence=null)
         {
             if(phase!=VoyagePhase.Encounter||health<0||health>60||sanity<0||sanity>30)return false;
+            var used=(spent??Array.Empty<string>()).ToArray();var findings=(evidence??Array.Empty<Evidence>()).ToArray();
+            if(used.Any(id=>!carriedItems.Contains(id))||used.GroupBy(x=>x).Any(g=>g.Count()>carriedItems.Count(x=>x==g.Key)||g.Count()>inventory.Count(x=>x==g.Key))||finalWatched<0||finalWatched>3||findings.Any(x=>x==null))return false;
+            foreach(var id in used){inventory.Remove(id);carriedItems.Remove(id);}Watched=finalWatched??Watched;markers.Remove("surveyed-beacon");
+            if(victory){foreach(var entry in findings.Where(x=>x.Stable)){var stored=entry.Archive(EvidenceScope.Run);runArchive.RemoveAll(x=>x.Key==stored.Key);runArchive.Add(stored);}if(CurrentFull.Kind==RunNodeKind.Boss)foreach(var id in crewIds.Where(id=>CrewRegion(id)==RegionId))trustedCrew.Add(id);}
             Health=health; Sanity=sanity;
             if(!victory||health==0||sanity==0) phase=VoyagePhase.Failed;
             else if(debug) phase=CurrentFull.Kind==RunNodeKind.Boss?VoyagePhase.Completed:VoyagePhase.Reward;
             else if(CurrentFull.Kind==RunNodeKind.Boss) phase=Act==3?VoyagePhase.Completed:VoyagePhase.ActComplete;
             else phase=VoyagePhase.Reward;
-            Record(VoyageActionKind.ResolveEncounter,victory:victory,health:health,sanity:sanity); return true;
+            if(phase==VoyagePhase.Completed||phase==VoyagePhase.Failed)markers.Clear();
+            Record(VoyageActionKind.ResolveEncounter,victory:victory,health:health,sanity:sanity,value:Watched.ToString(System.Globalization.CultureInfo.InvariantCulture),values:used);history[history.Count-1].Evidence=findings;return true;
         }
-        public bool RevealRoutes(){if(!CanRevealRoutes)return false;RevealAllRoutes(CurrentFull);ChartUses--;Record(VoyageActionKind.RevealRoutes);return true;}
-        public bool ScoutAhead(){if(!CanScoutAhead)return false;RevealAllRoutes(selected);LookoutUses--;Record(VoyageActionKind.ScoutAhead);return true;}
+        public bool RevealRoutes(){if(!CanRevealRoutes)return false;RevealAllRoutes(CurrentFull);if(!FreeNavigationUse())ChartUses--;Record(VoyageActionKind.RevealRoutes);return true;}
+        public bool ScoutAhead(){if(!CanScoutAhead)return false;RevealAllRoutes(selected);if(!FreeNavigationUse())LookoutUses--;Record(VoyageActionKind.ScoutAhead);return true;}
 
         public IReadOnlyList<VoyageNodeChoice> GetNodeChoices()
         {
             if(phase==VoyagePhase.ActComplete && Act==1) return new[]{new VoyageNodeChoice("bones","尸骸之海","巨型鲸骸与召唤媒介"),new VoyageNodeChoice("inverted","倒悬潮庭","盐格推理与理智压力"),new VoyageNodeChoice("fleet","无灯裂海","舰队装置与承压作业")};
             if(phase!=VoyagePhase.Arrived||nodeResolved)return Array.Empty<VoyageNodeChoice>();
+            if(CurrentFull.Kind==RunNodeKind.Event&&Watched==3&&ServiceAvailable("return-gaze"))return Array.Empty<VoyageNodeChoice>();
             switch(CurrentFull.Kind)
             {
                 case RunNodeKind.Event:return EventChoices();
-                case RunNodeKind.Archive:return new[]{new VoyageNodeChoice("routes","抄录航路","揭示此处全部后续航路，并把海况结论写入日志"),new VoyageNodeChoice("briefing","研读威胁简报","记录本海域区域威胁的真实机制线索"),new VoyageNodeChoice("seal","封存记录","恢复5理智",Sanity<30)};
-                case RunNodeKind.Supply:return new[]{new VoyageNodeChoice("rest","休整","恢复12生命与5理智",Health<60||Sanity<30),new VoyageNodeChoice("repair","深度治疗","消耗1补给，恢复24生命",Supplies>0&&Health<60&&!CurrentFull.Id.EndsWith("n1",StringComparison.Ordinal)),new VoyageNodeChoice("calm","长期安抚","消耗1补给，恢复11理智",Supplies>0&&Sanity<30&&!CurrentFull.Id.EndsWith("n0",StringComparison.Ordinal)),new VoyageNodeChoice("depart","不作整备","继续航行")};
+                case RunNodeKind.Archive:
+                    var routesAvailable=HasUnknownRoutes(CurrentFull);
+                    return new[]{new VoyageNodeChoice("routes","抄录航路",routesAvailable?"揭示此处全部后续航路，并把海况结论写入日志":"所有后续航路已经记录，没有新航路可抄录",routesAvailable||restoring),new VoyageNodeChoice("briefing","研读威胁简报","记录本海域区域威胁的真实机制线索"),new VoyageNodeChoice("seal","封存记录",Sanity<30?"恢复5理智":"理智已满，无需封存记录",Sanity<30)};
+                case RunNodeKind.Supply:return new[]{new VoyageNodeChoice("rest","休整",Health<60||Sanity<30?"恢复12生命与5理智":"生命与理智均已恢复至上限",Health<60||Sanity<30),new VoyageNodeChoice("repair","深度治疗",Supplies==0?"补给不足；需要1补给":Health>=60?"生命已满，无需深度治疗":"消耗1补给，恢复24生命",Supplies>0&&Health<60),new VoyageNodeChoice("calm","长期安抚",Supplies==0?"补给不足；需要1补给":Sanity>=30?"理智已满，无需长期安抚":"消耗1补给，恢复11理智",Supplies>0&&Sanity<30),new VoyageNodeChoice("depart","不作整备","继续航行")};
                 default:return Array.Empty<VoyageNodeChoice>();
             }
         }
@@ -153,7 +163,9 @@ namespace UnsoundedSea.Core
             {
                 case 0:return new[]{new VoyageNodeChoice("salvage","登船拆取","获得2补给，失去5生命",Health>5&&Supplies<=6),new VoyageNodeChoice("observe","绕船观测","恢复3理智",Sanity<30),new VoyageNodeChoice("leave","保持航向","无资源变化")};
                 case 1:return new[]{new VoyageNodeChoice("tow","拖回浮箱","获得1补给，耗时2小时",Supplies<8),new VoyageNodeChoice("listen","核对求救频率","恢复4理智",Sanity<30),new VoyageNodeChoice("leave","切断信号","无资源变化")};
-                default:return new[]{new VoyageNodeChoice("dive","下潜检查锚链","获得2补给，失去3理智",Sanity>3&&Supplies<=6),new VoyageNodeChoice("mark","标记危险水流","揭示此处全部后续航路"),new VoyageNodeChoice("leave","避开逆流","无资源变化")};
+                default:
+                    var routesAvailable=HasUnknownRoutes(CurrentFull);
+                    return new[]{new VoyageNodeChoice("dive","下潜检查锚链","获得2补给，失去3理智",Sanity>3&&Supplies<=6),new VoyageNodeChoice("mark","标记危险水流",routesAvailable?"揭示此处全部后续航路":"所有后续航路已经记录，没有新水流可标记",routesAvailable||restoring),new VoyageNodeChoice("leave","避开逆流","无资源变化")};
             }
         }
         public bool ChooseNode(string id)
@@ -172,7 +184,7 @@ namespace UnsoundedSea.Core
                 case "routes":RevealAllRoutes(CurrentFull);outcome="档案潮汐表与当前海况吻合，所有后续航路可见。";AddKnowledge("航路记录："+RegionBriefing(false));break;
                 case "briefing":outcome=RegionBriefing(true);AddKnowledge(outcome);break;
                 case "seal":Sanity=Math.Min(30,Sanity+5);outcome="记录已封存：理智 +5。";break;
-                case "rest":Health=Math.Min(60,Health+12);Sanity=Math.Min(30,Sanity+5);outcome="完成短时休整：生命 +12，理智 +5。";break;
+                case "rest":Health=Math.Min(60,Health+12+(ActiveCrew("cook")?3:0));Sanity=Math.Min(30,Sanity+5+(ActiveCrew("medic")?2:0));outcome="完成短时休整与可用船员照护。";break;
                 case "repair":Supplies--;Health=Math.Min(60,Health+24);outcome="消耗1补给完成深度治疗：生命 +24。";break;
                 case "calm":Supplies--;Sanity=Math.Min(30,Sanity+11);outcome="消耗1补给完成长期安抚：理智 +11。";break;
                 case "depart":outcome="未消耗补给，完成整备检查。";break;
@@ -184,7 +196,8 @@ namespace UnsoundedSea.Core
         public bool ClaimReward(string cardId)
         {
             if(phase!=VoyagePhase.Reward)return false;
-            if(cardId==null)Supplies=Math.Min(8,Supplies+1); else {var card=RewardCards.FirstOrDefault(x=>x.Id==cardId);if(card==null)return false;learned.Add(card.Id);}
+            if(cardId!=null&&cardId.StartsWith("item:",StringComparison.Ordinal)){if(!ClaimItemReward(cardId.Substring(5)))return false;}
+            else if(cardId==null){Supplies=Math.Min(8,Supplies+1);} else {var card=RewardCards.FirstOrDefault(x=>x.Id==cardId);if(card==null)return false;learned.Add(card.Id);}
             map.CompleteCurrent();
             if(debug)phase=VoyagePhase.Completed;
             else if(CurrentFull.Kind==RunNodeKind.Boss)
@@ -198,12 +211,12 @@ namespace UnsoundedSea.Core
         public bool SetDeck(IEnumerable<string> ids)
         {
             var values=ids?.ToArray(); if(!CanEditDeck||values==null||values.Length!=12||values.Distinct(StringComparer.Ordinal).Count()!=12||values.Any(x=>!learned.Contains(x)))return false;
-            deck.Clear();deck.AddRange(values);Record(VoyageActionKind.SetDeck,values:values);return true;
+            if(deck.SequenceEqual(values,StringComparer.Ordinal))return true;deck.Clear();deck.AddRange(values);Record(VoyageActionKind.SetDeck,values:values);return true;
         }
         public bool SetTools(IEnumerable<string> ids)
         {
-            var values=ids?.ToArray();if(!CanEditDeck||values==null||values.Length>2||values.Distinct(StringComparer.Ordinal).Count()!=values.Length||values.Any(x=>!learnedTools.Contains(x)))return false;
-            tools.Clear();tools.AddRange(values);Record(VoyageActionKind.SetTools,values:values);return true;
+            var values=ids?.ToArray();if(!CanEditDeck||values==null||values.Length+carriedItems.Count(x=>x=="i09")>2||values.Distinct(StringComparer.Ordinal).Count()!=values.Length||values.Any(x=>!learnedTools.Contains(x)))return false;
+            if(tools.SequenceEqual(values,StringComparer.Ordinal))return true;tools.Clear();tools.AddRange(values);Record(VoyageActionKind.SetTools,values:values);return true;
         }
         public bool ChooseNextAct(string region)
         {
@@ -221,7 +234,7 @@ namespace UnsoundedSea.Core
         public static VoyageSession Restore(VoyageCheckpoint checkpoint)
         {
             if(checkpoint==null)throw new ArgumentNullException(nameof(checkpoint));if(checkpoint.Version!=CheckpointVersion||checkpoint.Map==null||checkpoint.History==null||checkpoint.History.Length>MaxHistory)throw new ArgumentException("Invalid voyage checkpoint.",nameof(checkpoint));
-            var session=new VoyageSession(VoyageMapGenerator.Restore(checkpoint.Map),checkpoint.CrewId);foreach(var action in checkpoint.History)session.Replay(action);return session;
+            var session=new VoyageSession(VoyageMapGenerator.Restore(checkpoint.Map),checkpoint.CrewId);session.restoring=true;try{foreach(var action in checkpoint.History)session.Replay(action);}finally{session.restoring=false;}return session;
         }
         private void Replay(VoyageActionData action)
         {
@@ -234,7 +247,8 @@ namespace UnsoundedSea.Core
                 case VoyageActionKind.Arrive: succeeded=Arrive(); break;
                 case VoyageActionKind.Continue: succeeded=Continue(); break;
                 case VoyageActionKind.BeginEncounter: succeeded=BeginEncounter(); break;
-                case VoyageActionKind.ResolveEncounter: succeeded=ResolveEncounter(action.Victory,action.Health,action.Sanity); break;
+                case VoyageActionKind.ResolveEncounter: succeeded=ResolveEncounter(action.Victory,action.Health,action.Sanity,action.Values,int.Parse(action.Value,System.Globalization.CultureInfo.InvariantCulture),action.Evidence); break;
+                case VoyageActionKind.ManageSupport: succeeded=ManageSupport(action.Value,action.Values?.SingleOrDefault());break;
                 case VoyageActionKind.RevealRoutes: succeeded=RevealRoutes(); break;
                 case VoyageActionKind.ScoutAhead: succeeded=ScoutAhead(); break;
                 case VoyageActionKind.ChooseNode: succeeded=ChooseNode(action.Value); break;
@@ -251,10 +265,10 @@ namespace UnsoundedSea.Core
             if(action==null||!Enum.IsDefined(typeof(VoyageActionKind),action.Kind))throw new ArgumentException("Unknown voyage action.");
             var usesStop=action.Kind==VoyageActionKind.Select;
             var usesOutcome=action.Kind==VoyageActionKind.ResolveEncounter;
-            var usesValue=action.Kind==VoyageActionKind.ChooseNode||action.Kind==VoyageActionKind.ClaimReward||action.Kind==VoyageActionKind.ChooseNextAct;
-            var usesValues=action.Kind==VoyageActionKind.SetDeck||action.Kind==VoyageActionKind.SetTools;
+            var usesValue=action.Kind==VoyageActionKind.ChooseNode||action.Kind==VoyageActionKind.ClaimReward||action.Kind==VoyageActionKind.ChooseNextAct||usesOutcome||action.Kind==VoyageActionKind.ManageSupport;
+            var usesValues=action.Kind==VoyageActionKind.SetDeck||action.Kind==VoyageActionKind.SetTools||usesOutcome||action.Kind==VoyageActionKind.ManageSupport;
             if(usesStop==string.IsNullOrEmpty(action.StopId)||(!usesOutcome&&(action.Victory||action.Health!=0||action.Sanity!=0))||
-                (!usesValue&&action.Value!=null)||(!usesValues&&action.Values!=null))
+                (!usesValue&&action.Value!=null)||(!usesValues&&action.Values!=null)||(!usesOutcome&&action.Evidence!=null)||usesOutcome&&!int.TryParse(action.Value,out _))
                 throw new ArgumentException("Voyage history action has invalid fields.");
         }
         private IReadOnlyList<CardSpec> BuildRewards()
@@ -265,21 +279,27 @@ namespace UnsoundedSea.Core
         private bool UsefulInRegion(CardSpec card)
         {
             var number=CardCatalog.Number(card.Id);
+            if(number>=91)return number==91?runArchive.Any(x=>x.Rule=="source-v1"):number==92||number==93||number==94||number==95&&inventory.Any(x=>x!="i12")||number==96&&markers.ContainsKey("surveyed-beacon");
+            if ((Act >= 2 || nextRegion != null) && (number == 76 || number == 83)) return true;
             return Array.IndexOf(CommonRewards, number) >= 0 || Array.IndexOf(RegionRewards[nextRegion??RegionId], number) >= 0;
         }
         private string RegionBriefing(bool boss)
         {
-            var text=RegionId=="fog"?"灰雾访客的封线目标不要求击倒显现体：每回合可支付1行动刻一段封线，累计4段获胜。":
-                RegionId=="bones"?"唱序约束可逐条公开；按正确顺序关闭三只唱诗匣后本体才会失去护持。":
-                RegionId=="inverted"?"测读盐格只公开相邻八格危险数；激活四枚安全封栓即可完成调查。":
-                RegionId=="fleet"?"先将双继电器校正为公开极性，再依序释放三段闸锁，最后击退执旗者。":
+            var encounter=byId[plan.GoalId].EncounterId;
+            var text=encounter=="fog-visitors"?"漂灯回声无法靠击倒终止：绘制封线基础消耗3行动，每回合一次；现有场景折扣仍可降低费用，累计4段撤离。":
+                encounter=="drowned-bell"?"沉钟在敌方结算时推进撤离；巨浪造成21生命伤害，钟鸣造成11理智冲击且可打断，撑过五轮。":
+                encounter=="m02"?"唱序约束可逐条公开；按正确顺序关闭三只唱诗匣后本体才会失去护持。":
+                encounter=="m03"?"测读盐格只公开相邻八格危险数；激活四枚安全封栓即可完成调查。":
+                encounter=="m04"?"先将双继电器校正为公开极性，再依序释放三段闸锁，最后击退执旗者。":
+                encounter=="storm-gauntlet"?"黑潮每回合公开18点生命冲击或9点理智冲击，均可用对应防护或打断反制；撑过五轮即可脱离。":
+                encounter=="hollow-beacon"?"空心航标本体有48生命；公开的10点生命攻击或5点理智冲击均可打断，击破本体获胜。":
                 "先建立撤离绳，再牵引守卫并关闭五座锚点，最后收绞两次归航绳。";
             return (boss?"区域威胁简报：":"海况结论：")+text;
         }
         private void AddKnowledge(string entry){if(!knowledge.Contains(entry))knowledge.Add(entry);}
         private void FinishNode(){map.CompleteCurrent();phase=map.IsFinished?VoyagePhase.Completed:VoyagePhase.ChoosingRoute;}
         private void RevealInitialRoutes(){foreach(var id in CurrentFull.Next)RevealRoute(CurrentFull.Id,id);}
-        private void RevealDefaultRoutes(VoyageStop stop){if(stop.Next.Count>0)RevealRoute(stop.Id,stop.Next[(int)(VoyageSeeds.Derive(Seed,"visibility",stop.Id)%stop.Next.Count)]);}
+        private void RevealDefaultRoutes(VoyageStop stop){foreach(var id in stop.Next.Take(2))RevealRoute(stop.Id,id);}
         private void RevealAllRoutes(VoyageStop stop){foreach(var id in stop.Next)RevealRoute(stop.Id,id);}
         private void RevealRoute(string from,string to){knownRouteKeys.Add(RouteKey(from,to));knownStopIds.Add(to);}
         private VoyageStop CurrentFull=>byId[map.CurrentId];
@@ -288,8 +308,18 @@ namespace UnsoundedSea.Core
         private bool IsKnownRouteFromCurrent(string id)=>knownRouteKeys.Contains(RouteKey(CurrentFull.Id,id));
         private static string RouteKey(string a,string b)=>a+"\n"+b; private static bool IsEncounter(VoyageStop s)=>s.Kind==RunNodeKind.Battle||s.Kind==RunNodeKind.Boss;
         private void Record(VoyageActionKind kind,string stopId=null,bool victory=false,int health=0,int sanity=0,string value=null,string[] values=null)
-        {if(kind==VoyageActionKind.Select&&history.Count>0&&history[history.Count-1].Kind==VoyageActionKind.Select){history[history.Count-1].StopId=stopId;return;}history.Add(new VoyageActionData{Kind=kind,StopId=stopId,Victory=victory,Health=health,Sanity=sanity,Value=value,Values=values?.ToArray()});}
-        private static VoyageActionData CopyAction(VoyageActionData a)=>new VoyageActionData{Kind=a.Kind,StopId=a.StopId,Victory=a.Victory,Health=a.Health,Sanity=a.Sanity,Value=a.Value,Values=a.Values?.ToArray()};
+        {
+            if(kind==VoyageActionKind.Select||kind==VoyageActionKind.SetDeck||kind==VoyageActionKind.SetTools)
+                for(var i=history.Count-1;i>=0;i--)
+                {
+                    var previous=history[i];
+                    if(previous.Kind!=VoyageActionKind.Select&&previous.Kind!=VoyageActionKind.SetDeck&&previous.Kind!=VoyageActionKind.SetTools)break;
+                    if(previous.Kind!=kind)continue;
+                    previous.StopId=stopId;previous.Values=values?.ToArray();return;
+                }
+            history.Add(new VoyageActionData{Kind=kind,StopId=stopId,Victory=victory,Health=health,Sanity=sanity,Value=value,Values=values?.ToArray()});
+        }
+        private static VoyageActionData CopyAction(VoyageActionData a)=>new VoyageActionData{Kind=a.Kind,StopId=a.StopId,Victory=a.Victory,Health=a.Health,Sanity=a.Sanity,Value=a.Value,Values=a.Values?.ToArray(),Evidence=a.Evidence?.ToArray()};
         private static VoyageMapData CloneMap(VoyageMapData data)=>VoyageMapGenerator.Restore(data).Export();
     }
 }

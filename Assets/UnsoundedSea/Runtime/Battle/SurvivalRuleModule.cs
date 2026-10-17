@@ -15,6 +15,7 @@ namespace UnsoundedSea.Runtime
             public int Progress { get; private set; }
             public int Target { get; }
             public bool AllowsTaskAction => false;
+            public int ActionCost => 0;
             public SurvivalObjective(string description, int target) { Description = description; Target = target; }
             public void Advance(int amount) { }
             public void OnTurnResolved() { Progress = System.Math.Min(Target, Progress + 1); }

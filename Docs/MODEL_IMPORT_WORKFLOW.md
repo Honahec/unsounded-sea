@@ -44,6 +44,8 @@ Deemos Agent 是可选生产工具，不是每件资产的必经步骤。高模�
 
 当前采用 BANG 分件 → Blender 低模与支点 → Unity 刚性部件动画，未使用柔性骨骼蒙皮。整网格骨骼试验的取舍、当前生产步骤、根部约束与重量感设计，以及后续骨骼链方案，统一见[沉钟之母动画设计](BELL_MOTHER_ANIMATION_DESIGN.md)。规格以 [BANG manifest](../ArtSource/Bosses/BellMother_BANG-manifest.json) 为准，测试范围见[验证记录](FRAMEWORK_VALIDATION.md#沉钟之母-bang-分件与刚性动作流程)。
 
+M02–M05 同样使用私有 API 的 BANG 分件，保留源母版、运行时低模与独立 `Body/Part_XX` 支点。`Tools/BossBangBuild.py` 复用沉钟之母的减面、导出和预览步骤，读取各自原 manifest 的预算；用 `Blender -b --python Tools/BossBangBuild.py -- TideBonesChoirmaster`（或另外三个模型名）重建，再经 Unity CLI 执行 `BossExpansionSetup.ImportModels` 更新原 Prefab，保留 GUID、海面锚点、镜头和战斗规则。分件结果与 SHA 以 `ArtSource/Bosses/*_BANG-manifest.json` 为准；原未分件 LOD0 只保留在 ArtSource，不再重复留在 Assets。当前支点位于部件中心，尚未做解剖关节校准、蒙皮或战斗动作；不挂载沉钟之母专用动画组件。导入、材质、尺度与四场实机回合检查见 [BANG Unity 验证](../ArtSource/Bosses/BANG-unity-validation.json)；这不代表动画或目标设备性能通过。
+
 ### 下载后的最低检查
 
 检查 GLB 声明长度与文件长度、SHA-256、网格/primitive、索引拓扑与实际三角面、顶点、材质槽、UV/法线、图片尺寸和通道，以及 skins/animations。只有 TRIANGLES 拓扑才能直接按索引数 ÷ 3 计面；其它拓扑需转换统计。外部纹理/缓冲依赖也必须归档，不能只下载壳文件。

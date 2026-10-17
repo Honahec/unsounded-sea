@@ -67,6 +67,27 @@
       "reference": "Assets/UnsoundedSea/Resources/CardArt/contradiction.png",
       "generator": "xd://generate_image",
       "model": "openai-codex/gpt-image-2"
+    },
+    "bossEncounter": {
+      "status": "complete",
+      "generator": "xd://generate_image",
+      "model": "openai-codex/gpt-image-2 (provider response: gpt-image-2-codex)",
+      "reference": "Assets/UnsoundedSea/Resources/CardArt/contradiction.png",
+      "size": [1024, 1536],
+      "aspectRatio": "2:3",
+      "count": 10,
+      "sharedPrompt": "Use case: stylized-concept. Full-bleed portrait game-card background in maritime gothic realistic oil painting style; Cthulhu nautical dread, ink blue, fog gray, aged brass and salt ivory, tactile wet timber, rope and metal, restrained amber upper-left light and cold teal rim light. Continuous detailed scene through the bottom edge with natural darker lower-center visual calm. No text, letters, numbers, glyphs, symbols, notation, UI, card frame, logo, watermark, land, islands, blank lower panel or neon."
+    },
+    "support-systems": {
+      "generator": "Built-in image_gen.imagegen",
+      "created": "2026-10-17",
+      "reference": "Assets/UnsoundedSea/Resources/CardArt/contradiction.png",
+      "referenceSha256": "83153cab4a0794499b27ebc4ce7a5c6a06f2e73a2d8a02792215c71da28ce311",
+      "size": [
+        1024,
+        1536
+      ],
+      "count": 6
     }
   },
   "cards": [
@@ -1068,6 +1089,172 @@
       "prompt": "Use case: stylized-concept. Asset type: full-bleed portrait game-card background. An investigator holds a blank ivory identity tag over a verified small sea-spawn pinned only by converging reflections in brass instruments; as the tag is left behind, the creature's impossible disguise peels away like wet translucent skin, revealing its precise deep-sea form. No writing on the tag, restrained and non-graphic, no glowing magic. Match Image 1 maritime gothic realistic oil-painting texture, palette and tactile restraint, distinct scene. No land/islands; no text, letters, numbers, glyphs, symbols, UI, frame, logo, watermark, neon. Entire 2:3 portrait continuous and detailed to bottom edge, no empty lower panel. Action: places the blank true-name token beside the verified creature, exposing it completely. Scene: wet evidence table on the open deck of an old research vessel. Composition: 2:3 portrait, hand tag and revealed creature upper-middle, magnifying lens, brass dividers, sample jars, rope, wet timber and draining water detailed through bottom. Lighting: restrained amber lamp upper-left, cool teal sea rim, legible midtones. Style: maritime gothic realistic oil painting; ink blue, fog gray, aged brass, salt ivory; tactile ivory, glass, wet organic skin and timber; subtle cosmic evidence and precision.",
       "number": 90,
       "batch": "forbidden"
+    },
+    {
+      "id": "E01-01",
+      "title": "绘制封线",
+      "source": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a97f31de2a0171.webp",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/E01-01.png",
+      "sha256": "5be35d253a2bf70a0763527a7c1e623248df4fe2f66a441076d230c81f3ead8c",
+      "prompt": "A gloved investigator draws one taut sealing line across wet ship planks with chalk and black salt while pale fog recoils at the boundary.",
+      "parameterHash": "c0367757ed14fb4b8723087639880b63ef61c19a2a9906d1ca01dc271aac93fe",
+      "batch": "bossEncounter"
+    },
+    {
+      "id": "E02-01",
+      "title": "聆听唱序",
+      "source": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a97f66c52a0175.webp",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/E02-01.png",
+      "sha256": "ca761d7f977c5186b9cd6302d9e05c58805c086090cc1b5363d16f2590baad76",
+      "prompt": "An investigator listens through a weathered brass ear trumpet toward three closed bone-and-wood choir boxes suspended among wet rigging.",
+      "parameterHash": "1a2b2bfd5b31b3bf1741bca43496ca6a64f10167dffc2605e95be0f82adba86a",
+      "batch": "bossEncounter"
+    },
+    {
+      "id": "E02-02",
+      "title": "按序封匣",
+      "source": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a97f9aa3ea0179.webp",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/E02-02.png",
+      "sha256": "6511b61ed09f0d233168e3dd70db3e1bfd3aebd350b724e05fbc59adb418a8c2",
+      "prompt": "Gloved hands fasten the lid of the correct bone-and-wet-wood choir box among three uncanny shipboard reliquaries.",
+      "parameterHash": "0fcf6e1f70b2632b95c3f9a2d2f8f4f07378b07c70951a1113eec088d1ce3525",
+      "batch": "bossEncounter"
+    },
+    {
+      "id": "E03-01",
+      "title": "开启盐格",
+      "source": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a97fcda02a017b.webp",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/E03-01.png",
+      "sha256": "b57032f18d9bd6d0b2041d7b830c3ddf446c949690492c8c18db8d00c542c618",
+      "prompt": "A gloved hand cautiously lifts one square hatch in a salt-crusted brass grid built into a flooded ship deck.",
+      "parameterHash": "4226b260222417005b912c2b6c795a5275558c252f720e265ab65632b8c78f2c",
+      "batch": "bossEncounter"
+    },
+    {
+      "id": "E03-02",
+      "title": "测读盐格",
+      "source": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a9800702ea017d.webp",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/E03-02.png",
+      "sha256": "d43de8ec4259b38991cdbb1b240f9410bf51322269bcf26c84cd386d523c4f37",
+      "prompt": "A navigator measures one sealed square of a salt-crusted brass deck grid with dividers and a glass sounding tube; adjacent cells reveal only physical clues.",
+      "parameterHash": "a4ef229ab6abf34967ce276bc9320fe124db89119f1b97e51ab48708b4d7311b",
+      "batch": "bossEncounter"
+    },
+    {
+      "id": "E04-01",
+      "title": "调校继电器",
+      "source": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a9803b166a017f.webp",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/E04-01.png",
+      "sha256": "d2dd03854ee35aca639d048560d58b38dc78bbc41100ba74069240ffc1e45caf",
+      "prompt": "A sailor tunes one of two heavy brass shipboard relays with an insulated lever; opposing contacts and a wet compass needle physically show orientation.",
+      "parameterHash": "ec9b6f9b3b27eb3885f04502c4131468ea93917b453b3bbb5bc546c4980ef837",
+      "batch": "bossEncounter"
+    },
+    {
+      "id": "E04-02",
+      "title": "释放闸锁",
+      "source": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a98076112a0182.webp",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/E04-02.png",
+      "sha256": "833e1e600e501a87feb1846adef8fd90ed6fe5f46b67bfd3cae6afdbb8cd78c6",
+      "prompt": "Gloved hands release one massive corroded floodgate lock in a chain of three shipboard gate latches while deeper locks remain taut.",
+      "parameterHash": "0e2587b024ffc9d66021ecbed7c702cdf2a4767ab4295045d5d7c4099bf2fac0",
+      "batch": "bossEncounter"
+    },
+    {
+      "id": "E05-01",
+      "title": "建立撤离绳",
+      "source": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a980a0a0ea0184.webp",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/E05-01.png",
+      "sha256": "ee4e65560a193bb387a810ce5da61e3d27aa12dbf9d347eb393a90ae2f420856",
+      "prompt": "A crew member fastens a thick weathered evacuation rope from the research ship to a fog-shrouded buoy rig as an immense watcher looms beyond.",
+      "parameterHash": "a7882c2ede427be20be2678ac1a17e685cf8843ea2fe6c4517c4a5c4b35e6746",
+      "batch": "bossEncounter"
+    },
+    {
+      "id": "E05-02",
+      "title": "接合引索",
+      "source": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a980c987ea0186.webp",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/E05-02.png",
+      "sha256": "b188496b4f4925eb52ba16b3d44843464428c7acf8303db45fdd17e1b4e2fb04",
+      "prompt": "Two sailors couple a wet guide line from an uncanny brass-and-bone guardian anchor to its matching unlit sea beacon with a heavy shackle.",
+      "parameterHash": "db6f423d7d30a0f04fc46a7a18dbbfd889d1561876c125676f8431241269f678",
+      "batch": "bossEncounter"
+    },
+    {
+      "id": "E05-03",
+      "title": "收绞归航绳",
+      "source": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a980fff1aa0188.webp",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/E05-03.png",
+      "sha256": "3e67568d67bf0d680a85b9cb6fb4700aeec64cf11b642edc02b2fc8bd3929841",
+      "prompt": "A desperate crew hauls a thick homeward rope through a corroded ship capstan while an immense watcher recedes behind rough open water.",
+      "parameterHash": "ce48f97c0c8f76b488244056899e24e123493adc4eef112f7d9d5f77546b54b4",
+      "batch": "bossEncounter"
+    },
+    {
+      "id": "c091",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/c091.png",
+      "prompt": "Create one original portrait 2:3 (1024x1536) full-bleed game card background. Maritime gothic realistic textured oil painting: ocean ink blue, fog gray, old brass and salt ivory, restrained warm amber lamp from upper left, cold teal rim light, wet timber, waxed cloth, worn physical maritime equipment. Clear single focal action in upper/middle; a continuous detailed physical scene through the entire lower half, never a blank panel. No text, letters, glyphs, numerals, UI, frame, logo, watermark, land, islands, neon or magic aura. Match the tactile sober old maritime visual language of the reference image, but make a distinct composition. An archivist's gloved hands comparing a weathered bound maritime archive with a freshly collected shell fragment and tracing translucent paper, brass index clips and neatly divided tabs, oil lamp, wet shipboard desk; records shown as abstract rubbed marks and diagrams without writing. No weapons. It conveys matching old records to present evidence.",
+      "source": "C:\\Users\\Alex\\.codex\\generated_images\\01a148b0-e2a4-7e72-97b4-5c6582265c12\\exec-9bfc448a-f98f-42b7-9c69-4fc8ff57207c.png",
+      "inspection": "Visual inspection passed: continuous full-bleed maritime scene, clear distinct subject, no visible text/frame/UI.",
+      "title": "校档索引",
+      "number": 91,
+      "batch": "support-systems",
+      "sha256": "6f52617c73721355adc5d099455e38b804d25c7934eb2a2c8fe2ca832b2d738d"
+    },
+    {
+      "id": "c092",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/c092.png",
+      "prompt": "Create one original portrait 2:3 (1024x1536) full-bleed game card background. Maritime gothic realistic textured oil painting: ocean ink blue, fog gray, old brass and salt ivory, restrained warm amber lamp from upper left, cold teal rim light, wet timber, waxed cloth, worn physical maritime equipment. Clear single focal action in upper/middle; a continuous detailed physical scene through the entire lower half, never a blank panel. No text, letters, glyphs, numerals, UI, frame, logo, watermark, land, islands, neon or magic aura. Match the tactile sober old maritime visual language of the reference image, but make a distinct composition. An investigator at a shipboard desk aligns two different pieces of physical evidence: a brass listening tube and a lens over a fresh clawed impression in wax. Beside the converging evidence lies a restrained old revolver ready for precise action, not firing. Tight composition conveying cross-examination before a shot; no human face.",
+      "source": "C:\\Users\\Alex\\.codex\\generated_images\\01a148b0-e2a4-7e72-97b4-5c6582265c12\\exec-8253fed4-8f42-4e68-8a45-1e65edd712a0.png",
+      "inspection": "Visual inspection passed: continuous full-bleed maritime scene, clear distinct subject, no visible text/frame/UI.",
+      "title": "交叉质证",
+      "number": 92,
+      "batch": "support-systems",
+      "sha256": "44ab10501933213cdd9ffacbb45dbf0e06b552410f7d37bce18161adcae6cfa5"
+    },
+    {
+      "id": "c093",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/c093.png",
+      "prompt": "Create one original portrait 2:3 (1024x1536) full-bleed game card background. Maritime gothic realistic textured oil painting: ocean ink blue, fog gray, old brass and salt ivory, restrained warm amber lamp from upper left, cold teal rim light, wet timber, waxed cloth, worn physical maritime equipment. Clear single focal action in upper/middle; a continuous detailed physical scene through the entire lower half, never a blank panel. No text, letters, glyphs, numerals, UI, frame, logo, watermark, land, islands, neon or magic aura. Match the tactile sober old maritime visual language of the reference image, but make a distinct composition. Two sailors' gloved hands exchanging a brass hand lantern and a dry rolled chart across the rail of a rain-wet night watch station on a ship, second coat sleeve visible, taut safety rope and timber continuously filling the lower scene. Cooperation and orderly change of watch, no visible faces or writing.",
+      "source": "C:\\Users\\Alex\\.codex\\generated_images\\01a148b0-e2a4-7e72-97b4-5c6582265c12\\exec-06ebf67a-ec8a-4317-9bd7-70f547f38b0e.png",
+      "inspection": "Visual inspection passed: continuous full-bleed maritime scene, clear distinct subject, no visible text/frame/UI.",
+      "title": "轮值交接",
+      "number": 93,
+      "batch": "support-systems",
+      "sha256": "d23b2688519699b7e67efa0613a43c6a9fa1a000bd50f459f17e48a746058213"
+    },
+    {
+      "id": "c094",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/c094.png",
+      "prompt": "Create one original portrait 2:3 (1024x1536) full-bleed game card background. Maritime gothic realistic textured oil painting: ocean ink blue, fog gray, old brass and salt ivory, restrained warm amber lamp from upper left, cold teal rim light, wet timber, waxed cloth, worn physical maritime equipment. Clear single focal action in upper/middle; a continuous detailed physical scene through the entire lower half, never a blank panel. No text, letters, glyphs, numerals, UI, frame, logo, watermark, land, islands, neon or magic aura. Match the tactile sober old maritime visual language of the reference image, but make a distinct composition. A gloved technician carefully checking a brass directional listening instrument against a small physical tuning fork and damp tracing paper under a lamp on a ship's workbench. The instrument is distinct and central; spare screws, leather straps and salt crystals extend through lower scene. Precise mechanical verification, no electronics or letters.",
+      "source": "C:\\Users\\Alex\\.codex\\generated_images\\01a148b0-e2a4-7e72-97b4-5c6582265c12\\exec-b69ca16e-be07-4a1f-822c-cd2ed18219fb.png",
+      "inspection": "Visual inspection passed: continuous full-bleed maritime scene, clear distinct subject, no visible text/frame/UI.",
+      "title": "器材复核",
+      "number": 94,
+      "batch": "support-systems",
+      "sha256": "f87047767fdf408dea52e9b0fe524a981770f8ec3e248d668b81b4565d05ac83"
+    },
+    {
+      "id": "c095",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/c095.png",
+      "prompt": "Create one original portrait 2:3 (1024x1536) full-bleed game card background. Maritime gothic realistic textured oil painting: ocean ink blue, fog gray, old brass and salt ivory, restrained warm amber lamp from upper left, cold teal rim light, wet timber, waxed cloth, worn physical maritime equipment. Clear single focal action in upper/middle; a continuous detailed physical scene through the entire lower half, never a blank panel. No text, letters, glyphs, numerals, UI, frame, logo, watermark, land, islands, neon or magic aura. Match the tactile sober old maritime visual language of the reference image, but make a distinct composition. A gloved field medic on a storm-tossed ship pulls clean folded linen dressing from an open leather emergency medical kit, an opened used vial and carefully secured safety strap visible. No blood or wound, emphasis on practical emergency care and prepared supplies. Full continuous wooden deck foreground.",
+      "source": "C:\\Users\\Alex\\.codex\\generated_images\\01a148b0-e2a4-7e72-97b4-5c6582265c12\\exec-b40a8968-e320-4fcb-b0a1-942c8417affe.png",
+      "inspection": "Visual inspection passed: continuous full-bleed maritime scene, clear distinct subject, no visible text/frame/UI.",
+      "title": "应急处置",
+      "number": 95,
+      "batch": "support-systems",
+      "sha256": "456140d28a5f6239d979f1cdbd05ba9bcec6eef6eedb962589da1c7f928882f9"
+    },
+    {
+      "id": "c096",
+      "file": "Assets/UnsoundedSea/Resources/CardArt/c096.png",
+      "prompt": "Create one original portrait 2:3 (1024x1536) full-bleed game card background. Maritime gothic realistic textured oil painting: ocean ink blue, fog gray, old brass and salt ivory, restrained warm amber lamp from upper left, cold teal rim light, wet timber, waxed cloth, worn physical maritime equipment. Clear single focal action in upper/middle; a continuous detailed physical scene through the entire lower half, never a blank panel. No text, letters, glyphs, numerals, UI, frame, logo, watermark, land, islands, neon or magic aura. Match the tactile sober old maritime visual language of the reference image, but make a distinct composition. A gloved sailor follows a taut guide line past a small brass maritime survey beacon clamped to the ship rail in dense blue-gray fog; a warm lamp lights the marked rope physically leading toward the viewer across wet planks. Night sea beyond, no land, no written markings, safe route recognition not magical glow.",
+      "source": "C:\\Users\\Alex\\.codex\\generated_images\\01a148b0-e2a4-7e72-97b4-5c6582265c12\\exec-2330a3bc-a48d-446c-b45f-ec8f7ffadabe.png",
+      "inspection": "Visual inspection passed: continuous full-bleed maritime scene, clear distinct subject, no visible text/frame/UI.",
+      "title": "沿标归线",
+      "number": 96,
+      "batch": "support-systems",
+      "sha256": "33df2d8b9e96581b1151ca69a12fec5bbf0889c0b39c88d7df021900d352a564"
     }
   ]
 }

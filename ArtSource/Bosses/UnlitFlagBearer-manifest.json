@@ -71,11 +71,9 @@
     "target_performance_tested": false
   },
   "unity": {
-    "model": "Assets/UnsoundedSea/Art/Models/UnlitFlagBearer_LOD0.glb",
+    "runtime_manifest": "ArtSource/Bosses/UnlitFlagBearer_BANG-manifest.json",
     "prefab": "Assets/UnsoundedSea/Art/Prefabs/UnlitFlagBearer.prefab",
     "scene": "Assets/UnsoundedSea/Scenes/BossM04.unity",
-    "archived_lod0_sha256_matches": true,
-    "imported_triangles": 85000,
     "stage_anchor_scale": 45,
     "stage_anchor_position": [-20, -20, 230]
   }

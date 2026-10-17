@@ -50,18 +50,16 @@ public static class BossExpansionSetup
     public static string ImportModels()
     {
         if (EditorApplication.isPlaying) throw new InvalidOperationException("Stop Play before importing boss models.");
-        Folder(Models); Folder(BossArt); Folder(Root+"/Art/Prefabs");
+        foreach (var spec in Specs)
+            if (!File.Exists(Models + "/" + spec.Model + "_BANG_LOD0.glb"))
+                throw new FileNotFoundException("Build the archived BANG model with Tools/BossBangBuild.py first.", spec.Model);
+        Folder(BossArt); Folder(Root+"/Art/Prefabs");
         foreach (var spec in Specs)
         {
-            var source=Path.GetFullPath("ArtSource/Bosses/"+spec.Model+"_LOD0.glb");
-            var destination=Path.GetFullPath(Models+"/"+spec.Model+"_LOD0.glb");
-            if(!File.Exists(source))throw new FileNotFoundException("Missing archived low model",source);
-            if(!File.Exists(destination)||File.GetLastWriteTimeUtc(source)!=File.GetLastWriteTimeUtc(destination))
-            {File.Copy(source,destination,true);File.SetLastWriteTimeUtc(destination,File.GetLastWriteTimeUtc(source));}
-            AssetDatabase.ImportAsset(Models+"/"+spec.Model+"_LOD0.glb",ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.ImportAsset(Models+"/"+spec.Model+"_BANG_LOD0.glb",ImportAssetOptions.ForceSynchronousImport);
             NormalizeModel(spec);
         }
-        return "Imported and normalized four archived LOD0 boss models.";
+        return "Imported and normalized four BANG rigid-part boss models; preserved encounter rules and stage placement.";
     }
 
     public static string Build()
@@ -86,8 +84,10 @@ public static class BossExpansionSetup
 
     static void NormalizeModel(Spec spec)
     {
-        var source=AssetDatabase.LoadAssetAtPath<GameObject>(Models+"/"+spec.Model+"_LOD0.glb");
+        var source=AssetDatabase.LoadAssetAtPath<GameObject>(Models+"/"+spec.Model+"_BANG_LOD0.glb");
         if(source==null)throw new InvalidOperationException(spec.Model+" is still importing.");
+        if(source.GetComponentsInChildren<MeshFilter>(true).Length < 2)
+            throw new InvalidOperationException(spec.Model+" is not a split BANG model.");
         var root=new GameObject(spec.Name);
         try
         {
@@ -253,13 +253,12 @@ public static class BossExpansionSetup
         return prefab;
     }
     static int EnemyHealth(BossEncounterKind kind,int slot)
-    {if(slot==0)return kind==BossEncounterKind.Choirmaster?36:kind==BossEncounterKind.FlagBearer?48:1;if(kind==BossEncounterKind.Choirmaster)return slot==1?8:10;if(kind==BossEncounterKind.Surveyor)return 6;return 12;}
+    {return UnsoundedSea.Editor.CombatBalanceSetup.BossHealth(kind,slot);}
     static string EnemyIntent(BossEncounterKind kind,int slot)
-    {if(slot==0)return "特殊遭遇规则控制公开意图";if(kind==BossEncounterKind.Choirmaster)return slot==1?"每回合 3 生命":"恢复发声囊 6";if(kind==BossEncounterKind.Surveyor)return "每回合 2 理智";if(kind==BossEncounterKind.FlagBearer)return "每回合 4 生命";return slot==1?"每回合 5 生命":slot==2?"每回合 3 理智":slot==3?"奇数活动回合 6 理智":slot==4?"每回合 4 生命":"每回合 2 理智";}
+    {return UnsoundedSea.Editor.CombatBalanceSetup.BossIntent(kind,slot);}
     static IntentData[] Intents(BossEncounterKind kind,int slot)
     {
-        var sanity=EnemyIntent(kind,slot).Contains("理智");var amount=slot==0?0:kind==BossEncounterKind.Choirmaster?(slot==1?3:0):kind==BossEncounterKind.Surveyor?2:kind==BossEncounterKind.FlagBearer?4:slot==1?5:slot==2?3:slot==3?6:slot==4?4:2;
-        return new[]{new IntentData{id="boss-script",displayName=slot==0?"规则阶段":"公开行动",clue=EnemyIntent(kind,slot),channel=sanity?DamageChannel.Sanity:DamageChannel.Health,amount=amount,isPublic=true,visibleAction=true,interruptible=false,soundSource=slot==0?"舷外":"甲板"}};
+        return UnsoundedSea.Editor.CombatBalanceSetup.BossIntents(kind,slot);
     }
     static GameObject Obj(string name,Transform parent,Vector3 position)
     {var go=new GameObject(name);go.transform.SetParent(parent,false);go.transform.localPosition=position;return go;}

@@ -160,18 +160,36 @@ namespace UnsoundedSea.Tests
             }
         }
 
-        [Test] public void SealCanBeCompletedWithoutInvestigationOrKilling()
+        [Test] public void SealCardPersistsAndCompletesWithoutInvestigationOrKilling()
         {
-            var session = new BattleSession(Definition(objective: ObjectiveKind.Seal), 1);
+            var definition = Definition(objective: ObjectiveKind.Seal);
+            var session = new BattleSession(definition, 1);
+            var seal = session.View.Hand.Single(x => x.IsEncounter);
+            Assert.That(seal.Definition.Name, Is.EqualTo("绘制封线")); Assert.That(seal.Definition.Cost, Is.EqualTo(3));
             for (var i = 0; i < 4; i++)
             {
-                Assert.That(session.Execute(BattleCommand.Task()).Success, Is.True);
-                Assert.That(session.Execute(BattleCommand.Task()).Success, Is.False);
+                Assert.That(session.Execute(BattleCommand.Play(seal.InstanceId)).Success, Is.True);
+                Assert.That(session.Execute(BattleCommand.Play(seal.InstanceId)).Success, Is.False);
+                Assert.That(session.View.Hand.Single(x => x.IsEncounter).InstanceId, Is.EqualTo(seal.InstanceId));
                 if (i < 3) session.Execute(BattleCommand.EndTurn());
             }
             Assert.That(session.View.Phase, Is.EqualTo(BattlePhase.Victory));
             Assert.That(session.View.Enemies[0].Health, Is.EqualTo(30));
             Assert.That(session.View.Evidence, Is.Empty);
+            var restored = BattleReplay.Capture(session).Restore(definition);
+            Assert.That(restored.View.Phase, Is.EqualTo(BattlePhase.Victory));
+            Assert.That(restored.View.ObjectiveProgress, Is.EqualTo(4));
+        }
+
+        [Test] public void SealActionCostExposesTheActualDiscountedRequirementAndSnapshotsIt()
+        {
+            var session = new BattleSession(Definition(Enumerable.Repeat(CardCatalog.Get("c064"), 6).ToArray(), ObjectiveKind.Seal), 1);
+            var seal = session.View.Hand.Single(x => x.IsEncounter);
+            Assert.That(seal.ActionCost, Is.EqualTo(3));
+            var discount = session.View.Hand.First(x => x.Definition.Id == "c064");
+            Assert.That(session.Execute(BattleCommand.Play(discount.InstanceId)).Success, Is.True);
+            Assert.That(session.View.Hand.Single(x => x.IsEncounter).ActionCost, Is.EqualTo(2));
+            Assert.That(seal.ActionCost, Is.EqualTo(3), "Published snapshots must not mutate.");
         }
 
         [Test] public void SurviveObjectiveCountsResolvedTurns()

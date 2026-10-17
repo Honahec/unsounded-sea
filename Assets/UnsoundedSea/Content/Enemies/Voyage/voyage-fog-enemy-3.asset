@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-fog-enemy-3
   displayName: "\u6E7F\u8863\u5F15\u822A\u5458"
-  health: 17
-  candidateDescription: "\u8896\u4E0B\u7A81\u88AD\uFF1A7 \u751F\u547D\u4F24\u5BB3"
+  health: 24
+  candidateDescription: "\u8896\u4E0B\u7A81\u88AD\uFF1A8 \u751F\u547D\u4F24\u5BB3"
   intents:
   - id: sleeve
     displayName: "\u8896\u4E0B\u7A81\u88AD"
     clue: "\u53CC\u624B\u4ECD\u85CF\u5728\u8D34\u8EAB\u6E7F\u8896\u91CC\uFF0C\u91CD\u5FC3\u7A81\u7136\u524D\u79FB\u3002"
     channel: 0
-    amount: 7
+    amount: 8
     isPublic: 0
     visibleAction: 0
     interruptible: 0

@@ -114,7 +114,7 @@ namespace UnsoundedSea.Runtime
                 if (VoyageRuntime.HasSavedVoyage)
                     entries.Add(Entry("menu-continue", "继续航程", ContinueGame));
                 entries.Add(Entry("menu-debug", "调试选关", () => { debugSelectionOpen = true; error = null; Build(null); }));
-                entries.Add(Entry("menu-collection", "行动图鉴 / 初始船员", () => { collectionOpen = true; Build(null); }));
+                entries.Add(Entry("menu-collection", "卡牌图鉴", () => { collectionOpen = true; Build(null); }));
                 var settings = Entry("menu-settings", "设置", () => { settingsOpen = true; error = null; Build(null); });
                 settings.EnableInClassList("open", settingsOpen);
                 entries.Add(settings);
@@ -138,7 +138,7 @@ namespace UnsoundedSea.Runtime
             {
                 column.SetEnabled(false);
                 root.Add(new CardCollectionPanel(() => { collectionOpen = false; Build("menu-collection"); }));
-                root.schedule.Execute(() => root.Q<Button>("collection-toggle")?.Focus());
+                root.schedule.Execute(() => root.Q<Button>("collection-close")?.Focus());
             }
             else
             if (settingsOpen)

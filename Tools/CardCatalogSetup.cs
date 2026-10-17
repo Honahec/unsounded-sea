@@ -37,7 +37,7 @@ public static class CardCatalogSetup
 
     public static string Validate()
     {
-        if (CardCatalog.All.Count != 90) throw new InvalidOperationException($"Expected 90 catalog cards, found {CardCatalog.All.Count}.");
+        if (CardCatalog.All.Count != 96) throw new InvalidOperationException($"Expected 96 catalog cards, found {CardCatalog.All.Count}.");
         if (CardCatalog.All.Select(card => card.Id).Distinct().Count() != CardCatalog.All.Count) throw new InvalidOperationException("Card IDs must be unique.");
         foreach (var card in CardCatalog.All)
         {
@@ -55,6 +55,6 @@ public static class CardCatalogSetup
         var starter = new[] { 1, 2, 12, 19, 20, 21, 22, 37, 39, 41, 55, 71 };
         if (starter.Select(number => CardCatalog.All.Single(card => CardCatalog.Number(card.Id) == number).Id).Distinct().Count() != 12)
             throw new InvalidOperationException("Starter deck must contain 12 unique cards.");
-        return "Validated 90 card assets, art files, and the 12-card starter deck.";
+        return "Validated 96 card assets, art files, and the 12-card starter deck.";
     }
 }

@@ -11,6 +11,8 @@ namespace UnsoundedSea.Runtime
         public float WaterRadius => IsSeaActor ? placement.waterRadius : 0;
         private Transform body;
         private LineRenderer ring;
+        internal bool HasSelectionRing => ring != null;
+        private float ringRadius;
         private BattleDirector director;
         private BattleAnchor placement;
         private Vector3 bodyPosition, labelPosition;
@@ -59,8 +61,8 @@ namespace UnsoundedSea.Runtime
             ring = new GameObject("Target sigil").AddComponent<LineRenderer>(); ring.transform.SetParent(transform, false);
             ring.sharedMaterial = ringMaterial; ring.useWorldSpace = false; ring.loop = true;
             ring.widthMultiplier = 0.025f; ring.positionCount = 64;
-            var radius = Mathf.Max(0.7f, Mathf.Max(bounds.extents.x, bounds.extents.z));
-            for (var i = 0; i < 64; i++) { var a = i * Mathf.PI / 32; ring.SetPosition(i, new Vector3(Mathf.Cos(a) * radius, 0.035f, Mathf.Sin(a) * radius)); }
+            ringRadius = Mathf.Max(0.7f, Mathf.Max(bounds.extents.x, bounds.extents.z));
+            for (var i = 0; i < 64; i++) { var a = i * Mathf.PI / 32; ring.SetPosition(i, new Vector3(Mathf.Cos(a) * ringRadius, 0.035f, Mathf.Sin(a) * ringRadius)); }
             Select(false);
         }
 
@@ -94,6 +96,20 @@ namespace UnsoundedSea.Runtime
         }
 
         public void Select(bool selected) { if (ring != null) ring.enabled = selected && Alive; }
+        internal void ShowCardTarget(bool selected)
+        {
+            if (ring == null) return;
+            ring.enabled = Alive;
+            ring.widthMultiplier = selected ? 0.06f : 0.025f;
+        }
+        internal bool HitSelectionRing(Ray ray)
+        {
+            if (ring == null || !ring.enabled || !Alive) return false;
+            var plane = new Plane(transform.up, transform.TransformPoint(new Vector3(0, 0.035f, 0)));
+            if (!plane.Raycast(ray, out var distance)) return false;
+            var local = transform.InverseTransformPoint(ray.GetPoint(distance));
+            return local.x * local.x + local.z * local.z <= ringRadius * ringRadius;
+        }
         public void Feedback(bool damaged, bool attacking, bool alive, bool ritual = false, bool observing = false, float delay = 0)
         {
             Alive = alive;

@@ -18,11 +18,60 @@ namespace UnsoundedSea.Tests
                 var paths=new Stack<Tuple<string,int>>();paths.Push(Tuple.Create(plan.StartId,1));var count=0;
                 while(paths.Count>0){var item=paths.Pop();if(item.Item1==plan.GoalId){Assert.That(item.Item2,Is.EqualTo(11));count++;continue;}foreach(var next in byId[item.Item1].Next)paths.Push(Tuple.Create(next,item.Item2+1));}
                 Assert.That(count,Is.GreaterThan(1));
-                Assert.That(byId[plan.GoalId].EncounterId,Is.EqualTo(act==1?"fog-visitors":act==3?"m05":region=="bones"?"m02":region=="inverted"?"m03":"m04"));
+                Assert.That(byId[plan.GoalId].EncounterId,Is.EqualTo(VoyageMapGenerator.BossEncounter(seed,act,region)));
                 Assert.That(plan.Stops.Where(x=>x.Kind==RunNodeKind.Battle).All(x=>x.EncounterId.StartsWith("voyage-"+region+"-",StringComparison.Ordinal)),Is.True);
                 var battles=plan.Stops.Where(x=>x.Kind==RunNodeKind.Battle).GroupBy(x=>x.Layer).Select(x=>x.First().EncounterId).ToArray();
                 Assert.That(battles,Has.Length.EqualTo(4)); Assert.That(battles,Is.Unique);
+                Assert.That(plan.Stops.Count(x=>x.Kind==RunNodeKind.Reward),Is.EqualTo(plan.Stops.Count(x=>x.Layer==4)));
+                Assert.That(plan.Stops.Count(x=>x.Kind==RunNodeKind.Boss),Is.EqualTo(1));
             }
+        }
+
+        [Test]
+        public void FirstTwoActsShareSevenBossesWithoutRepeatingAndFinaleIsFixed()
+        {
+            var seen=new HashSet<string>();
+            for(uint seed=0;seed<256;seed++)
+            {
+                var first=VoyageMapGenerator.BossEncounter(seed,1,"fog");
+                var second=VoyageMapGenerator.BossEncounter(seed,2,"bones");
+                Assert.That(second,Is.Not.EqualTo(first));
+                Assert.That(VoyageMapGenerator.BossEncounter(seed,2,"fleet"),Is.EqualTo(second),"Region choice must not bind the boss.");
+                Assert.That(VoyageMapGenerator.BossEncounter(seed,3,"abyss"),Is.EqualTo("m05"));
+                seen.Add(first);seen.Add(second);
+            }
+            Assert.That(seen,Is.EquivalentTo(new[]{"fog-visitors","drowned-bell","m02","m03","m04","storm-gauntlet","hollow-beacon"}));
+        }
+
+        [Test]
+        public void SeededRoutesAverageAtLeastOneBranchPerTwoVisitedStopsAndEveryStopIsViable()
+        {
+            long branchStops=0,visitedStops=0;
+            foreach(var region in new[]{"fog","bones","inverted","fleet","abyss"})
+            for(uint seed=0;seed<64;seed++)
+            {
+                var act=region=="fog"?1:region=="abyss"?3:2;
+                var plan=VoyageMapGenerator.Generate(seed,act,region);
+                var byId=plan.Stops.ToDictionary(x=>x.Id);
+                var reachable=new HashSet<string>{plan.StartId};
+                var pending=new Queue<string>();pending.Enqueue(plan.StartId);
+                while(pending.Count>0)foreach(var next in byId[pending.Dequeue()].Next)if(reachable.Add(next))pending.Enqueue(next);
+                Assert.That(reachable,Is.EquivalentTo(byId.Keys),"Every generated waypoint needs an inbound route from the start.");
+                Assert.That(plan.Stops.Where(x=>x.Id!=plan.GoalId).All(x=>x.Next.Count>0),Is.True);
+                Assert.That(plan.Stops.Where(x=>x.Layer==1).Count(),Is.EqualTo(2));
+                Assert.That(Enumerable.Range(1,9).Select(layer=>plan.Stops.Count(x=>x.Layer==layer)),Has.All.InRange(1,3));
+
+                var paths=new Stack<Tuple<string,int,int>>();paths.Push(Tuple.Create(plan.StartId,0,0));
+                while(paths.Count>0)
+                {
+                    var path=paths.Pop();var stop=byId[path.Item1];
+                    var branches=path.Item2+(stop.Next.Count>1?1:0);var visits=path.Item3+1;
+                    if(stop.Id==plan.GoalId){branchStops+=branches;visitedStops+=visits;continue;}
+                    foreach(var next in stop.Next)paths.Push(Tuple.Create(next,branches,visits));
+                }
+            }
+            Assert.That(branchStops*2,Is.GreaterThanOrEqualTo(visitedStops),
+                $"Visible branch density was {branchStops/(double)visitedStops:P1}; expected at least 50.0% across complete 11-stop routes.");
         }
 
         [Test]

@@ -7,17 +7,18 @@ namespace UnsoundedSea.Core
         public int InstanceId { get; }
         public CardSpec Definition { get; }
         public bool IsEncounter { get; }
+        public int ActionCost { get; internal set; }
         public bool Enabled { get; internal set; }
         public string DisabledReason { get; internal set; }
         public IReadOnlyList<EncounterTargetView> Targets { get; internal set; }
         public CardView(int instanceId, CardSpec definition, bool isEncounter = false)
         {
-            InstanceId = instanceId; Definition = definition; IsEncounter = isEncounter; Enabled = true;
+            InstanceId = instanceId; Definition = definition; IsEncounter = isEncounter; Enabled = true; ActionCost = definition.Cost;
             DisabledReason = ""; Targets = new List<EncounterTargetView>().AsReadOnly();
         }
         internal CardView Snapshot()
         {
-            var copy = new CardView(InstanceId, Definition, IsEncounter) { Enabled = Enabled, DisabledReason = DisabledReason };
+            var copy = new CardView(InstanceId, Definition, IsEncounter) { Enabled = Enabled, DisabledReason = DisabledReason, ActionCost = ActionCost };
             copy.Targets = new List<EncounterTargetView>(Targets).AsReadOnly();
             return copy;
         }
@@ -104,6 +105,10 @@ namespace UnsoundedSea.Core
         public IReadOnlyList<CrewSupportView> Supports { get; internal set; }
         public IReadOnlyList<Evidence> Evidence { get; internal set; }
         public IReadOnlyList<string> Log { get; internal set; }
+        public IReadOnlyList<SupplyActionView> SupplyActions { get; internal set; }
+        public IReadOnlyList<string> SpentConsumables { get; internal set; }
+        public IReadOnlyList<string> Equipment { get; internal set; }
+        public bool SurveyedBeacon { get; internal set; }
     }
 
     [System.Serializable]
@@ -119,6 +124,7 @@ namespace UnsoundedSea.Core
         public static BattleCommand Play(int card, string target = null) => new BattleCommand { kind = CommandKind.PlayCard, cardInstanceId = card, targetId = target };
         public static BattleCommand Investigate(string tool, string target) => new BattleCommand { kind = CommandKind.UseTool, toolId = tool, targetId = target };
         public static BattleCommand Support(string support, string target = null) => new BattleCommand { kind = CommandKind.UseCrewSupport, supportId = support, targetId = target };
+        public static BattleCommand Consume(string item, string target = null) => new BattleCommand { kind = CommandKind.UseConsumable, toolId = item, targetId = target };
         public static BattleCommand Reorder(string orderId) => new BattleCommand { kind = CommandKind.ReorderDeck, targetId = orderId };
         public static BattleCommand EndTurn() => new BattleCommand { kind = CommandKind.EndTurn };
         public static BattleCommand Task() => new BattleCommand { kind = CommandKind.AdvanceObjective };

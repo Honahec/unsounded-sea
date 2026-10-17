@@ -30,7 +30,13 @@ namespace UnsoundedSea.Runtime
                 empty.AddToClassList("map-empty"); Add(empty); return;
             }
 
-            Chart = new VoyageChart(session, select, interactive); Add(Chart);
+            Chart = new VoyageChart(session, select, interactive);
+            var chartScroll = new ScrollView(ScrollViewMode.Vertical) { name = "voyage-map-scroll" };
+            chartScroll.AddToClassList("map-chart-scroll");
+            chartScroll.contentContainer.style.alignItems = Align.Stretch;
+            chartScroll.Add(Chart);
+            Add(chartScroll);
+            chartScroll.schedule.Execute(() => chartScroll.ScrollTo(Chart.Q<Button>("node-" + session.Current.Id)));
             var legend = new VisualElement { pickingMode = PickingMode.Ignore };
             legend.AddToClassList("map-legend");
             AddLegend(legend, "current", "在此"); AddLegend(legend, "available", "可航行");

@@ -4,11 +4,11 @@
 .sea-top { position: absolute; top: 24px; right: 28px; flex-direction: row; }
 .sea-button { min-height: 38px; margin-left: 8px; padding: 8px 14px; border-width: 1px; border-radius: 2px; border-color: rgba(158,135,85,.4); background-color: rgba(8,19,22,.82); color: #eee4c9; }
 .sea-button:hover { background-color: rgba(30,53,52,.94); border-color: #b3a482; }
-.sea-top .sea-button { min-width: 72px; margin-left: 12px; border-color: transparent; background-color: transparent; font-size: 14px; }
-.sea-top .sea-button:hover, .sea-top .sea-button:focus { border-bottom-color: #b3a482; background-color: rgba(8,19,22,.65); }
-.sea-button:focus, .tool:focus, .end-turn:focus, .task-button:focus { border-color: #eee4c9; }
-.sea-card:focus, .actor-label:focus { border-color: #eee4c9; border-width: 2px; }
-.tool:disabled, .end-turn:disabled, .task-button:disabled { opacity: .4; }
+.sea-top .sea-button { min-width: 92px; margin-left: 12px; padding: 7px 4px; border-width: 0; background-color: transparent; font-size: 14px; }
+.sea-top .sea-button:hover, .sea-top .sea-button:focus { color: #d7bd82; background-color: rgba(8,19,22,.55); }
+.sea-button:focus, .tool:focus, .end-turn:focus { border-color: #eee4c9; }
+.sea-card:focus, .actor-label:focus { border-bottom-color: #eee4c9; }
+.tool:disabled, .end-turn:disabled { opacity: .4; }
 .ocean-ui .feedback-locked:disabled { opacity: 1; }
 .intel-name { color: #d7bd82; font-size: 12px; letter-spacing: 2px; }
 .clue { margin-top: 3px; font-size: 15px; -unity-text-align: middle-center; text-shadow: 0 1px 2px #020708; }
@@ -22,10 +22,6 @@
 .objective-label { font-size: 18px; color: #eee4c9; margin-right: 18px; text-shadow: 0 2px 5px #040a0c; }
 .objective-count { font-size: 20px; color: #d7bd82; text-shadow: 0 2px 5px #040a0c; }
 .turn-controls { position: absolute; right: 28px; bottom: 28px; width: 128px; }
-.task-button { min-height: 64px; margin: 0 0 22px; padding: 8px; border-radius: 2px; border-width: 1px; border-color: #65766c; background-color: rgba(8,19,22,.9); color: #eee4c9; align-items: center; justify-content: center; }
-.task-button:hover { background-color: #263b36; border-color: #b3a482; }
-.task-label { font-size: 16px; }
-.task-cost { margin-top: 5px; font-size: 13px; color: #c6b58e; }
 .turn-number { font-size: 13px; color: #a9b6ad; -unity-text-align: middle-right; text-shadow: 0 2px 5px #040a0c; }
 .action-budget { flex-direction: row; justify-content: space-between; align-items: center; min-height: 42px; margin-bottom: 10px; }
 .action-label { font-size: 15px; color: #c6b58e; }
@@ -44,8 +40,9 @@
 .hand .unity-scroll-view__content-container { min-width: 100%; height: 434px; padding: 0 15px; }
 .fan-track { position: relative; height: 426px; min-width: 620px; }
 .card-anchor { position: absolute; bottom: 8px; width: 180px; height: 245px; padding: 0; border-width: 0; background-color: rgba(0,0,0,0); transform-origin: 50% 100%; }
-.sea-card { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 10px 13px; border-radius: 9px 9px 3px 3px; border-width: 1px; border-bottom-width: 3px; border-color: #9e8755; background-color: #d8cbaa; color: #172526; transform-origin: 50% 100%; transition-property: translate, scale, rotate, background-color; transition-duration: .14s; -unity-text-align: upper-left; }
+.sea-card { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 10px 13px; border-radius: 9px 9px 3px 3px; border-width: 1px; border-bottom-width: 3px; border-color: #9e8755; background-color: #d8cbaa; color: #172526; transform-origin: 50% 100%; transition-property: translate, scale, rotate, background-color, opacity; transition-duration: .14s; -unity-text-align: upper-left; }
 .card-anchor.inspecting .sea-card { translate: 0 -150px; scale: 1.1; rotate: 0deg; background-color: #eee4c9; }
+.card-anchor.card-entering .sea-card { translate: 0 42px; opacity: 0; }
 .fan--3 { rotate: -11deg; translate: 0 15px; }.fan--2 { rotate: -7deg; translate: 0 7px; }.fan--1 { rotate: -3deg; translate: 0 2px; }.fan-1 { rotate: 3deg; translate: 0 2px; }.fan-2 { rotate: 7deg; translate: 0 7px; }.fan-3 { rotate: 11deg; translate: 0 15px; }
 
 .card-head { flex-direction: row; justify-content: space-between; align-items: center; }
@@ -55,13 +52,16 @@
 .card-name { font-size: 17px; color: #202b2c; }
 .card-description { font-size: 15px; color: #303c3b; flex-grow: 1; }
 .fine-print { font-size: 10px; color: #7d3e35; }
-.end-turn { min-height: 48px; margin: 0; padding: 10px 8px; border-radius: 2px; border-width: 1px; border-color: #998b69; background-color: rgba(41,54,50,.96); color: #eee4c9; font-size: 17px; -unity-text-align: middle-center; }
-.end-turn:hover { background-color: #3c4e46; border-color: #d0bb88; }
-.battle-notice { position: absolute; bottom: 300px; left: 30%; right: 30%; padding: 5px 10px; -unity-text-align: middle-center; background-color: rgba(8,19,22,.72); }
-.actor-label { position: absolute; width: 164px; min-height: 48px; padding: 3px 8px; border-width: 0; background-color: rgba(0,0,0,0); color: #eee4c9; }
-.actor-name, .actor-status { -unity-text-align: middle-center; text-shadow: 0 1px 3px #000; }.actor-name { font-size: 19px; }.actor-status { font-size: 13px; color: #80b5a5; }
-.actor-health { height: 4px; margin-top: 5px; background-color: rgba(8,19,22,.7); }.actor-health-fill { height: 4px; background-color: #9b5d50; }
-.actor-label.selected { width: 300px; padding: 10px 14px; border-bottom-width: 2px; border-bottom-color: #d7bd82; background-color: rgba(5,16,18,.82); border-top-left-radius: 22px; border-bottom-right-radius: 22px; }
+.end-turn { align-self: center; width: 88px; height: 88px; min-height: 88px; flex-shrink: 0; margin: 0; padding: 0; border-width: 0; background-color: transparent; }
+.end-turn:hover, .end-turn:focus { background-color: transparent; }
+.end-turn SeaUiArt { width: 88px; height: 88px; }
+.end-turn:hover SeaUiArt, .end-turn:focus SeaUiArt { scale: 1.08; }
+.end-title { margin-top: 10px; font-size: 17px; color: #eee4c9; -unity-text-align: middle-center; }
+.battle-subtitle { position: absolute; bottom: 310px; left: 25%; right: 25%; padding: 8px 14px; font-size: 18px; white-space: normal; -unity-text-align: middle-center; color: #eee4c9; text-shadow: 0 2px 4px #000; background-color: rgba(8,19,22,.78); }
+.actor-label { position: absolute; width: 285px; min-height: 48px; padding: 3px 8px; border-width: 0; background-color: transparent; color: #eee4c9; align-items: flex-start; }
+.actor-name, .actor-status { -unity-text-align: middle-left; text-shadow: 0 1px 3px #000; }.actor-name { font-size: 18px; }.actor-status { font-size: 13px; color: #80b5a5; }
+.actor-health { width: 164px; height: 4px; margin-top: 5px; background-color: rgba(8,19,22,.7); }.actor-health-fill { height: 4px; background-color: #9b5d50; }
+.actor-label.selected { border-left-width: 2px; border-left-color: #d7bd82; }
 .boss-status { position: absolute; left: 26px; top: 70px; max-width: 360px; color: #eee4c9; font-size: 16px; text-shadow: 0 1px 3px #000; }
 .boss-target { position: absolute; min-width: 44px; min-height: 40px; max-width: 170px; padding: 3px 7px; margin: 0; border-width: 1px; border-radius: 12px 3px; border-color: rgba(158,135,85,.65); color: #eee4c9; background-color: rgba(8,19,22,.83); font-size: 13px; -unity-text-align: middle-center; white-space: normal; }
 .boss-target:disabled { opacity: 1; color: #c4c7b5; background-color: rgba(8,19,22,.65); }
@@ -70,7 +70,6 @@
 .boss-target-prompt { position: absolute; left: 30%; right: 30%; top: 18px; -unity-text-align: middle-center; color: #d7bd82; text-shadow: 0 1px 3px #000; }
 .salt-board { position: absolute; left: 32px; top: 180px; width: 320px; flex-direction: row; flex-wrap: wrap; padding: 10px; background-color: rgba(8,19,22,.9); border-width: 2px; border-color: #8f7951; border-radius: 24px 5px; }
 .boss-target.salt-cell { position: relative; width: 68px; height: 68px; min-width: 68px; margin: 3px; padding: 2px; font-size: 15px; border-radius: 3px; }
-.actor-label.actor-intent { width: 300px; }
 .boss-target.mechanism-dial { width: 90px; height: 90px; min-width: 90px; border-radius: 45px; border-width: 2px; border-color: #b59b62; font-size: 17px; background-color: rgba(12,31,32,.94); }
 .encounter-card .sea-card { border-color: #80b5a5; border-top-width: 3px; }
 .chosen-card .sea-card { translate: 0 -90px; border-color: #f6e8ac; border-width: 3px; }
@@ -78,10 +77,14 @@
 .ocean-sheet { width: 620px; max-height: 92%; padding: 26px 38px; background-color: rgb(15,31,35); border-width: 1px; border-color: #9e8755; }
 .modal-title { font-size: 28px; margin-bottom: 12px; letter-spacing: 3px; }.modal-copy { color: #b9cbc2; margin-bottom: 12px; }.journal { height: 180px; margin-bottom: 14px; }.log-line { font-size: 13px; color: #80b5a5; margin-bottom: 5px; }
 .ocean-sheet .settings { position: relative; left: 0; top: 0; width: 100%; translate: 0 0; }
+.ocean-sheet.pause { position: relative; left: auto; top: auto; translate: 0 0; width: 360px; }
+.ocean-sheet .pause-option { min-height: 44px; padding: 10px 14px; margin-top: 10px; border-width: 0; border-bottom-width: 1px; border-color: rgba(158,135,85,.35); background-color: transparent; color: #eee4c9; font-size: 19px; }
+.ocean-sheet .pause-option:hover, .ocean-sheet .pause-option:focus { color: #d7bd82; background-color: rgba(38,62,54,.6); }
+.ocean-sheet .pause-option, .sea-top .sea-button { white-space: nowrap; }
 .battle-chart-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 24px; background-color: rgba(1,8,13,.96); }
 .battle-chart-overlay VoyageMapPanel { flex-grow: 1; }
 .battle-chart-close { position: absolute; right: 38px; bottom: 30px; min-width: 128px; min-height: 40px; padding: 8px 14px; border-width: 1px; border-color: #d7bd82; background-color: #19383c; color: #eee4c9; }
-.ocean-ui.reduced-motion Button, .reduced-motion .card, .reduced-motion .sea-card { transition-duration: 0s; }.ocean-ui.reduced-motion .card-anchor.inspecting .sea-card { translate: 0 -150px; }
+.ocean-ui.reduced-motion Button, .reduced-motion .card, .reduced-motion .sea-card { transition-duration: 0s; }.ocean-ui.reduced-motion .card-anchor.inspecting .sea-card { translate: 0 -150px; }.ocean-ui.reduced-motion .card-anchor.card-entering .sea-card { translate: 0 0; opacity: 1; }
 
 /* Keep the resting hit area stable while straightening the inspected face. */
 .fan--3.inspecting .sea-card { rotate: 11deg; }
@@ -90,10 +93,17 @@
 .fan-1.inspecting .sea-card { rotate: -3deg; }
 .fan-2.inspecting .sea-card { rotate: -7deg; }
 .fan-3.inspecting .sea-card { rotate: -11deg; }
-.card-target-panel { position: absolute; left: 50%; top: 90px; width: 420px; max-height: 470px; translate: -50% 0; padding: 14px 18px; background-color: rgba(5,16,18,.95); border-width: 1px; border-color: #9e8755; border-top-left-radius: 22px; border-bottom-right-radius: 22px; }
+.card-target-panel { position: absolute; right: 32px; top: 118px; width: 310px; max-height: 430px; padding: 14px 18px; background-color: rgba(5,16,18,.95); border-width: 1px; border-color: #9e8755; border-top-left-radius: 22px; border-bottom-right-radius: 22px; }
 .card-target-title { color: #d7bd82; font-size: 18px; margin-bottom: 8px; -unity-text-align: middle-center; }
 .card-target-choice { min-height: 48px; margin: 4px 0; padding: 6px 10px; white-space: normal; color: #eee4c9; background-color: #19383c; border-width: 1px; border-color: rgba(158,135,85,.65); }
 .card-target-choice.target-ready:hover, .card-target-choice.target-ready:focus { border-width: 2px; border-color: #eee4c9; background-color: #254b48; }
+.card-target-cancel { min-height: 34px; margin-top: 7px; color: #c6b58e; background-color: rgba(0,0,0,0); border-width: 0; }
+.card-target-cancel:hover, .card-target-cancel:focus { color: #eee4c9; }
 .card-disabled .sea-card { opacity: .72; border-color: #8b6258; }
+.card-play-feedback { position: absolute; left: 50%; bottom: 282px; translate: -50% 0; padding: 6px 14px; color: #fff0c9; background-color: rgba(8,19,22,.9); border-bottom-width: 1px; border-bottom-color: #d7bd82; opacity: 1; transition-property: translate, opacity; transition-duration: .16s; }
+.card-play-feedback.departing { translate: -50% -18px; opacity: 0; }
+.ocean-ui.reduced-motion .card-play-feedback { transition-duration: 0s; }
 
 .pile-summary { color: #c6b58e; font-size: 14px; margin-bottom: 14px; }
+.enemy-choice { position: absolute; width: 48px; height: 48px; margin: 0; border-width: 2px; border-color: #d7bd82; border-radius: 24px; background-color: rgba(0,0,0,0); }
+.enemy-choice:hover, .enemy-choice:focus, .enemy-choice.selected { border-color: #fff0c9; background-color: #254b48; }

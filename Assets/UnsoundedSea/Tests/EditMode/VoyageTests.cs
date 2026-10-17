@@ -7,6 +7,25 @@ namespace UnsoundedSea.Tests
 {
     public sealed class VoyageTests
     {
+        [Test] public void SynergyRewardsAreReachableAndForbiddenRecoveryStartsWithSecondAct()
+        {
+            var first = new System.Collections.Generic.HashSet<string>();
+            var next = new System.Collections.Generic.HashSet<string>();
+            for (uint seed = 0; seed < 100; seed++)
+            {
+                var s = VoyageSession.Create(seed);
+                MoveToLayer(s, 4);
+                foreach (var card in s.RewardCards) first.Add(card.Id);
+                var damaged = true; CompleteAct(s, ref damaged);
+                Assert.That(s.ChooseNextAct("bones"), Is.True);
+                foreach (var card in s.RewardCards) next.Add(card.Id);
+                Assert.That(VoyageSession.Restore(s.Export()).RewardCards.Select(c => c.Id), Is.EqualTo(s.RewardCards.Select(c => c.Id)));
+            }
+            Assert.That(first, Is.SupersetOf(new[] { "c016", "c026", "c032" }));
+            Assert.That(first, Does.Not.Contain("c076")); Assert.That(first, Does.Not.Contain("c083"));
+            Assert.That(next, Is.SupersetOf(new[] { "c016", "c026", "c032", "c076", "c083" }));
+        }
+
         [Test]
         public void NewVoyageSupportsInitialCrewDeckToolsAndSafePreparation()
         {
@@ -95,6 +114,39 @@ namespace UnsoundedSea.Tests
         }
 
         [Test]
+        public void NormalExplorationShowsTwoViableExitsAndAveragesOneBranchPerTwoStops()
+        {
+            var branchStops=0;var visitedStops=0;var keptChartDiscovery=false;
+            for(uint seed=0;seed<64;seed++)
+            {
+                var session=VoyageSession.Create(seed);
+                var fullById=session.Export().Map.Stops.ToDictionary(x=>x.Id);
+                while(session.Current.Layer<VoyageMapGenerator.Layers-1)
+                {
+                    if(session.Phase==VoyagePhase.ChoosingRoute)
+                    {
+                        Assert.That(session.Choices.Select(x=>x.Id),Is.SupersetOf(fullById[session.Current.Id].Next.Take(2)));
+                        Assert.That(session.Choices.Select(x=>x.Id),Is.SubsetOf(fullById[session.Current.Id].Next));
+                        if(fullById[session.Current.Id].Next.Length==3&&session.Choices.Count==2){Assert.That(session.CanRevealRoutes,Is.True);keptChartDiscovery=true;}
+                        if(session.Choices.Count>1)branchStops++;
+                        visitedStops++;
+                        Sail(session);
+                    }
+                    else if(session.Phase==VoyagePhase.Arrived)
+                    {
+                        if(session.Current.Kind==RunNodeKind.Battle){session.BeginEncounter();session.ResolveEncounter(true,session.Health,session.Sanity);}
+                        else {var choice=session.GetNodeChoices().First(x=>x.Enabled);session.ChooseNode(choice.Id);session.Continue();}
+                    }
+                    else if(session.Phase==VoyagePhase.Reward)session.ClaimReward(null);
+                }
+                visitedStops++; // Boss is the eleventh visited waypoint and has no outgoing branch.
+            }
+            Assert.That(branchStops*2,Is.GreaterThanOrEqualTo(visitedStops),
+                $"Visible branch density was {branchStops/(double)visitedStops:P1} across all 11 visited stops and {branchStops/(double)(visitedStops-64):P1} across the 10 navigable stops; expected at least 50.0% across visits.");
+            Assert.That(keptChartDiscovery,Is.True);
+        }
+
+        [Test]
         public void ArchiveKnowledgeHasTruthfulEffectAndSurvivesRestore()
         {
             var routes=VoyageSession.Create(121);MoveToLayer(routes,7);
@@ -110,6 +162,68 @@ namespace UnsoundedSea.Tests
             Assert.That(briefing.ChooseNode("briefing"),Is.True);
             Assert.That(briefing.ChooseNode("routes"),Is.False);
             Assert.That(VoyageSession.Restore(briefing.Export()).Knowledge,Is.EqualTo(briefing.Knowledge));
+        }
+
+        [Test]
+        public void SupplyServicesDependOnlyOnResourcesNotGeneratedNodeSuffix()
+        {
+            var s=VoyageSession.Create(2);MoveToLayer(s,1);
+            Assert.That(s.BeginEncounter(),Is.True);Assert.That(s.ResolveEncounter(true,40,20),Is.True);Assert.That(s.ClaimReward(null),Is.True);
+            MoveToLayer(s,5);
+            Assert.That(s.GetNodeChoices().Single(x=>x.Id=="repair").Enabled,Is.True);
+            Assert.That(s.GetNodeChoices().Single(x=>x.Id=="calm").Enabled,Is.True);
+        }
+
+        [Test]
+        public void KnownRouteChoicesAreDisabledButLegacyCheckpointStillRestores()
+        {
+            var s=VoyageSession.Create(121);MoveToLayer(s,6);
+            Assert.That(s.BeginEncounter(),Is.True);Assert.That(s.ResolveEncounter(true,s.Health,s.Sanity),Is.True);Assert.That(s.ClaimReward(null),Is.True);
+            Assert.That(s.Select(s.Choices[0].Id),Is.True);Assert.That(s.ScoutAhead(),Is.True);Assert.That(s.SetSail(),Is.True);Assert.That(s.Arrive(),Is.True);
+            var routes=s.GetNodeChoices().Single(x=>x.Id=="routes");
+            Assert.That(routes.Enabled,Is.False);Assert.That(routes.Description,Does.Contain("没有新航路"));Assert.That(s.ChooseNode("routes"),Is.False);
+
+            var legacy=s.Export();
+            legacy.History=legacy.History.Concat(new[]{new VoyageActionData{Kind=VoyageActionKind.ChooseNode,Value="routes"}}).ToArray();
+            var restored=VoyageSession.Restore(legacy);
+            Assert.That(restored.Continue(),Is.True);
+        }
+
+        [Test]
+        public void MarkCannotConsumeAnEventWhenThereIsNoRouteToReveal()
+        {
+            var s=Enumerable.Range(0,100).Select(seed=>VoyageSession.CreateDebug((uint)seed,"fog",RunNodeKind.Event))
+                .First(x=>x.GetNodeChoices().Any(choice=>choice.Id=="mark"));
+            var mark=s.GetNodeChoices().Single(x=>x.Id=="mark");
+            Assert.That(mark.Enabled,Is.False);Assert.That(mark.Description,Does.Contain("没有新水流"));Assert.That(s.ChooseNode("mark"),Is.False);
+            Assert.That(s.ChooseNode("leave"),Is.True);
+        }
+
+        [Test]
+        public void SavingUnchangedPreparationDoesNotGrowCheckpointHistory()
+        {
+            var s=VoyageSession.Create(5);var before=s.Export().History.Length;
+            for(var i=0;i<600;i++){Assert.That(s.SetDeck(s.DeckIds),Is.True);Assert.That(s.SetTools(s.ToolIds),Is.True);}
+            Assert.That(s.Export().History,Has.Length.EqualTo(before));
+            var restored=VoyageSession.Restore(s.Export());
+            Assert.That(restored.DeckIds,Is.EqualTo(s.DeckIds));Assert.That(restored.ToolIds,Is.EqualTo(s.ToolIds));
+        }
+
+        [Test]
+        public void RepeatedPreparationEditsAndRoutePreviewsRestoreFinalChoices()
+        {
+            var s=VoyageSession.Create(5);
+            for(var i=0;i<600;i++)
+            {
+                s.SetTools(i%2==0?new[]{"lantern"}:new[]{"listener"});
+                s.SetDeck(s.DeckIds.Reverse());s.Select(s.Choices[i%2].Id);
+            }
+            var restored=VoyageSession.Restore(s.Export());
+            Assert.That(restored.DeckIds,Is.EqualTo(s.DeckIds));
+            Assert.That(restored.ToolIds,Is.EqualTo(new[]{"listener"}));
+            Assert.That(restored.Selected.Id,Is.EqualTo(s.Choices[1].Id));
+            Assert.That(restored.SetSail(),Is.True);Assert.That(restored.Arrive(),Is.True);
+            Assert.That(VoyageSession.Restore(restored.Export()).Current.Id,Is.EqualTo(s.Choices[1].Id));
         }
 
         [Test]

@@ -107,17 +107,17 @@ public static class OceanBattleSetup
         var stageAsset=PrefabUtility.SaveAsPrefabAsset(stageRoot,Art+"/FogSeaStage.prefab").GetComponent<BattleStage>();UnityEngine.Object.DestroyImmediate(stageRoot);
         CardDefinition Card(string id)=>AssetDatabase.LoadAssetAtPath<CardDefinition>(Root+"/Content/Cards/"+id+".asset");
         EnemyDefinition Enemy(string id)=>AssetDatabase.LoadAssetAtPath<EnemyDefinition>(Root+"/Content/Enemies/"+id+".asset");
-        var prayer=Enemy("prayer");var echo=Enemy("echo");
+        var echo=Enemy("echo");
         // Scenario overrides leave the older rule examples independent from this art direction.
         var encounter=Asset<EncounterDefinition>(Root+"/Content/Encounters/fog-visitors.asset",e=>
         {e.id="fog-visitors";e.displayName="雾海来客";e.objective=ObjectiveKind.Seal;e.objectiveTarget=4;e.playerHealth=60;e.playerSanity=30;e.actionsPerTurn=3;e.drawPerTurn=5;
-        e.enemies=new[]{prayer,echo};e.deck=new[]{Card("revolver"),Card("revolver"),Card("revolver"),Card("cover"),Card("cover"),Card("steady"),Card("steady"),Card("intuition"),Card("notes"),Card("tear"),Card("light"),Card("contradiction")};
+        e.enemies=new[]{echo};e.deck=new[]{Card("revolver"),Card("revolver"),Card("revolver"),Card("cover"),Card("cover"),Card("steady"),Card("steady"),Card("intuition"),Card("notes"),Card("tear"),Card("light"),Card("contradiction")};
         e.equippedTools=new[]{AssetDatabase.LoadAssetAtPath<ToolDefinition>(Root+"/Content/Tools/lantern.asset"),AssetDatabase.LoadAssetAtPath<ToolDefinition>(Root+"/Content/Tools/listener.asset")};});
         var rules=Asset<SealingRuleModule>(Root+"/Content/Scenarios/FogSealing.asset",r=>r.objectiveDescription="完成四段封线，驶离回声海域");
         var scenario=Asset<BattleScenario>(Root+"/Content/Scenarios/FogVisitors.asset",s=>
         {s.encounter=encounter;s.stagePrefab=stageAsset;s.rules=rules;s.chapter="01 / 雾海来客";s.location="鸦号调查船 · 北纬 47° · 02:17";
-        s.actorOverrides=new[]{AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/Art/Prefabs/Prayer.prefab"),AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/Art/Prefabs/Echo.prefab")};
-        s.introduction="雾中多了两位乘客。每回合刻下一段封线，同时防备它们的行动。";s.taskLabel="刻下封线";
+        s.actorOverrides=new[]{AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/Art/Prefabs/Echo.prefab")};
+        s.introduction="完成四段封线，驶离回声海域。";s.taskLabel="刻下封线";
         s.victoryText="第四段封线闭合。船头终于划开浓雾。\n身后的脚步消失了，海图上却多出一条不属于你的笔迹。";
         s.defeatText="呼号淹没在潮声里。\n没有人能确定，船上究竟曾有多少乘客。";});
         scenario.ValidatePresentation();
@@ -127,6 +127,6 @@ public static class OceanBattleSetup
         var hud=host.AddComponent<OceanBattleHud>();hud.font=AssetDatabase.LoadAssetAtPath<UnityEngine.TextCore.Text.FontAsset>("Assets/Fonts/default_zh.asset");hud.styleSheet=AssetDatabase.LoadAssetAtPath<StyleSheet>(Root+"/Runtime/Battle/OceanBattleHud.uss");hud.menuStyle=AssetDatabase.LoadAssetAtPath<StyleSheet>(Root+"/Runtime/Presentation/GameMenu.uss");
         var scenePath=Root+"/Scenes/OceanBattle.unity";EditorSceneManager.SaveScene(scene,scenePath);
         EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene(Root+"/Scenes/MainMenu.unity",true),new EditorBuildSettingsScene(scenePath,true)}.Concat(EditorBuildSettings.scenes.Where(x=>x.path!=scenePath&&x.path!=Root+"/Scenes/MainMenu.unity")).ToArray();
-        AssetDatabase.SaveAssets();EditorSceneManager.OpenScene(scenePath);return "Built OceanBattle with a replaceable stage, two actors and four-seal objective.";
+        AssetDatabase.SaveAssets();EditorSceneManager.OpenScene(scenePath);return "Built OceanBattle with a replaceable stage, one actor and four-seal objective.";
     }
 }

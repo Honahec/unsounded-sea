@@ -25,7 +25,7 @@ namespace UnsoundedSea.Runtime
             "voyage-inverted-0", "voyage-inverted-1", "voyage-inverted-2", "voyage-inverted-3", "voyage-inverted-4",
             "voyage-fleet-0", "voyage-fleet-1", "voyage-fleet-2", "voyage-fleet-3", "voyage-fleet-4",
             "voyage-abyss-0", "voyage-abyss-1", "voyage-abyss-2", "voyage-abyss-3", "voyage-abyss-4",
-            "fog-visitors", "m02", "m03", "m04", "m05", "drowned-bell"
+            "fog-visitors", "m02", "m03", "m04", "m05", "drowned-bell", "storm-gauntlet", "hollow-beacon"
         };
         [SerializeField] private Entry[] entries = Array.Empty<Entry>();
         [SerializeField] private ToolDefinition[] tools = Array.Empty<ToolDefinition>();

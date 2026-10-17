@@ -47,15 +47,31 @@ namespace UnsoundedSea.Tests
             Assert.That(session.View.Enemies.All(x => x.Health == 96), Is.True);
         }
 
-        [Test] public void CrewSupportCostsActionAndIsOncePerEncounter()
+        [Test] public void CrewSupportUsesItsOwnCostAndRemainsOncePerEncounter()
         {
             var medic = new CrewSupportSpec("medic", "医务员", CrewSupportKind.Medic);
-            var session = new BattleSession(Definition(CardCatalog.Get("cover"), supports: new[] { medic }), 1);
-            Assert.That(session.Execute(BattleCommand.Support("medic")).Success, Is.True);
-            Assert.That(session.View.Actions, Is.EqualTo(2));
-            Assert.That(session.Execute(BattleCommand.Support("medic")).Success, Is.False);
-            session.Execute(BattleCommand.EndTurn());
-            Assert.That(session.View.Supports.Single().Enabled, Is.False);
+            var listener = new CrewSupportSpec("listener", "听测员", CrewSupportKind.Listener);
+            var medicSession = new BattleSession(Definition(CardCatalog.Get("cover"), health: 10, supports: new[] { medic }), 1);
+            Assert.That(medic.Cost, Is.EqualTo(1));
+            Assert.That(medicSession.Execute(BattleCommand.EndTurn()).Success, Is.True);
+            Assert.That(medicSession.View.Health, Is.EqualTo(4));
+            Assert.That(medicSession.Execute(BattleCommand.Support("medic")).Success, Is.True);
+            Assert.That(medicSession.View.Health, Is.EqualTo(6));
+            Assert.That(medicSession.Execute(BattleCommand.Support("medic")).Success, Is.False);
+            Assert.That(medicSession.View.Supports.Single().Enabled, Is.False);
+
+            var listenerSession = new BattleSession(Definition(CardCatalog.Get("cover"), supports: new[] { listener }), 1);
+            Assert.That(listener.Cost, Is.EqualTo(2));
+            Assert.That(listenerSession.Execute(BattleCommand.Support("listener", "enemy")).Success, Is.True);
+            Assert.That(listenerSession.View.Actions, Is.EqualTo(1));
+            var insufficient = new BattleSession(Definition(CardCatalog.Get("cover"), supports: new[] { listener }), 1);
+            Assert.That(insufficient.Execute(BattleCommand.Play(Card(insufficient).InstanceId)).Success, Is.True);
+            Assert.That(insufficient.Execute(BattleCommand.Play(Card(insufficient).InstanceId)).Success, Is.True);
+            Assert.That(insufficient.View.Actions, Is.EqualTo(1));
+            Assert.That(insufficient.View.Supports.Single().Enabled, Is.False);
+            Assert.That(insufficient.Execute(BattleCommand.Support("listener", "enemy")).Success, Is.False);
+            Assert.That(insufficient.View.Actions, Is.EqualTo(1));
+            Assert.That(insufficient.View.Supports.Single().Used, Is.False);
         }
 
         [Test] public void ArchiveFallbackUsesOnlySuppliedEvidence()
@@ -80,7 +96,8 @@ namespace UnsoundedSea.Tests
         [Test] public void RetainCanChooseAnyHandCardAndReconstructionChoosesTargets()
         {
             var hidden = new IntentSpec("hidden", "攻击", "征兆", DamageChannel.Health, 6, false, true);
-            var enemies = new[] { "a", "b", "c" }.Select(x => new EnemySpec(x, x, 20, "攻击", new[] { hidden })).ToArray();
+            var hiddenOther = new IntentSpec("hidden-other", "戒备", "征兆", DamageChannel.Health, 4, false, true);
+            var enemies = new[] { "a", "b", "c" }.Select(x => new EnemySpec(x, x, 20, "攻击 / 戒备", new[] { hidden, hiddenOther })).ToArray();
             var deck = new[] { CardCatalog.Get("c045"), CardCatalog.Get("revolver"), CardCatalog.Get("c053") };
             var session = new BattleSession(new BattleDefinition("retain", deck, enemies, Array.Empty<ToolSpec>(), drawCount: 3), 1);
             var retain = session.View.Hand.Single(x => x.Definition.Id == "c045");
@@ -115,7 +132,8 @@ namespace UnsoundedSea.Tests
 
         [Test] public void CourseCorrectionIsPaidBeforeRevealMandatoryAtZeroActionsAndReplayable()
         {
-            var definition = Definition(CardCatalog.Get("c054"));
+            var definition = new BattleDefinition("reorder", Enumerable.Repeat(CardCatalog.Get("c054"), 8),
+                new[] { new EnemySpec("enemy", "敌人", 100, "攻击", new[] { Hit }) }, Array.Empty<ToolSpec>());
             var session = new BattleSession(definition, 7);
             for (var play = 0; play < 3; play++)
             {
@@ -140,8 +158,9 @@ namespace UnsoundedSea.Tests
         [Test] public void ReconstructionDrawsTwoWhenNoVisibleUnknownIntentExists()
         {
             var hidden = new IntentSpec("hidden", "潜伏", "无可见动作", DamageChannel.Health, 6, false, false);
+            var otherHidden = new IntentSpec("other-hidden", "等待", "无可见动作", DamageChannel.Health, 0, false, false);
             var definition = new BattleDefinition("reconstruct-fallback", Enumerable.Repeat(CardCatalog.Get("c053"), 8),
-                new[] { new EnemySpec("enemy", "敌人", 20, "潜伏", new[] { hidden }) }, Array.Empty<ToolSpec>(), drawCount: 5);
+                new[] { new EnemySpec("enemy", "敌人", 20, "潜伏 / 等待", new[] { hidden, otherHidden }) }, Array.Empty<ToolSpec>(), drawCount: 5);
             var session = new BattleSession(definition, 2);
             var card = Card(session);
             Assert.That(card.Targets, Is.Empty);
@@ -207,13 +226,14 @@ namespace UnsoundedSea.Tests
         {
             var source = Definition(CardCatalog.Get("c087"));
             var session = new BattleSession(new BattleDefinition("task", source.Deck, source.Enemies, source.Tools,
-                ObjectiveKind.Seal, 4), 1);
-            Assert.That(session.Execute(BattleCommand.Task()).Success, Is.True);
+                ObjectiveKind.Seal, 4, actions: 7), 1);
+            var seal = session.View.Hand.Single(x => x.IsEncounter);
+            Assert.That(session.Execute(BattleCommand.Play(seal.InstanceId)).Success, Is.True);
             var card = Card(session);
             Assert.That(session.Execute(BattleCommand.Play(card.InstanceId, card.Targets.Single().Id)).Success, Is.True);
-            Assert.That(session.View.Actions, Is.EqualTo(1));
+            Assert.That(session.View.Actions, Is.EqualTo(3));
             Assert.That(session.View.ObjectiveProgress, Is.EqualTo(1));
-            Assert.That(session.Execute(BattleCommand.Task()).Success, Is.True);
+            Assert.That(session.Execute(BattleCommand.Play(seal.InstanceId)).Success, Is.True);
             Assert.That(session.View.Actions, Is.Zero);
             Assert.That(session.View.ObjectiveProgress, Is.EqualTo(2));
         }
@@ -233,6 +253,52 @@ namespace UnsoundedSea.Tests
             Assert.That(session.View.Sanity, Is.EqualTo(before.Sanity));
             Assert.That(session.Commands, Is.Empty);
         }
+
+        [Test] public void DeterministicHiddenIntentCountsConfirmedButAmbiguousHiddenIntentDoesNot()
+        {
+            var hidden = new IntentSpec("hidden", "伏击", "黑影逼近", DamageChannel.Health, 6, false, false);
+            var card = CardCatalog.Get("contradiction");
+            var deterministicDefinition = new BattleDefinition("deterministic", Enumerable.Repeat(card, 6),
+                new[] { new EnemySpec("enemy", "敌人", 30, "未知", new[] { hidden }) }, Array.Empty<ToolSpec>());
+            var deterministic = new BattleSession(deterministicDefinition, 1);
+            Assert.That(deterministic.View.Enemies.Single().IntentConfirmed, Is.True);
+            var deterministicCard = Card(deterministic);
+            Assert.That(deterministic.Execute(BattleCommand.Play(deterministicCard.InstanceId, deterministicCard.Targets.Single().Id)).Success, Is.True);
+            var confirmedHealth = deterministic.View.Enemies.Single().Health;
+
+            var other = new IntentSpec("other", "低语", "黑影逼近", DamageChannel.Sanity, 4, false, false);
+            var ambiguousDefinition = new BattleDefinition("ambiguous", Enumerable.Repeat(card, 6),
+                new[] { new EnemySpec("enemy", "敌人", 30, "伏击 / 低语", new[] { hidden, other }) }, Array.Empty<ToolSpec>());
+            var ambiguous = new BattleSession(ambiguousDefinition, 1);
+            Assert.That(ambiguous.View.Enemies.Single().IntentConfirmed, Is.False);
+            Assert.That(ambiguous.View.Enemies.Single().Intent, Is.EqualTo("伏击 / 低语"));
+            var ambiguousCard = Card(ambiguous);
+            Assert.That(ambiguous.Execute(BattleCommand.Play(ambiguousCard.InstanceId, ambiguousCard.Targets.Single().Id)).Success, Is.True);
+            Assert.That(ambiguous.View.Enemies.Single().Health, Is.LessThan(30));
+            Assert.That(confirmedHealth, Is.LessThan(ambiguous.View.Enemies.Single().Health), "The same card must use its stronger confirmed-intent branch.");
+        }
+        [TestCase(true, 6, true)]
+        [TestCase(false, 5, false)]
+        public void DeterministicIntentControlsConditionalDrawAndKnownOnlyTargets(bool deterministic, int expectedHand, bool hasKnownTarget)
+        {
+            var hit = new IntentSpec("hit", "伏击", "黑影逼近", DamageChannel.Health, 6, false, false, interruptible: true);
+            var intents = deterministic
+                ? new[] { hit }
+                : new[] { hit, new IntentSpec("whisper", "低语", "黑影逼近", DamageChannel.Sanity, 4, false, false, interruptible: true) };
+            var enemy = new EnemySpec("enemy", "敌人", 30, "伏击 / 低语", intents);
+            var draw = CardCatalog.Get("c050");
+            var drawSession = new BattleSession(new BattleDefinition("conditional-draw-" + deterministic,
+                Enumerable.Repeat(draw, 8), new[] { enemy }, Array.Empty<ToolSpec>()), 1);
+            var drawCard = Card(drawSession);
+            Assert.That(drawSession.Execute(BattleCommand.Play(drawCard.InstanceId, drawCard.Targets.Single().Id)).Success, Is.True);
+            Assert.That(drawSession.View.Hand.Count, Is.EqualTo(expectedHand));
+
+            var interrupt = CardCatalog.Get("c070");
+            var targetSession = new BattleSession(new BattleDefinition("known-target-" + deterministic,
+                Enumerable.Repeat(interrupt, 6), new[] { enemy }, Array.Empty<ToolSpec>()), 1);
+            Assert.That(Card(targetSession).Targets.Any(x => x.Id == "enemy:enemy"), Is.EqualTo(hasKnownTarget));
+        }
+
 
     }
 }

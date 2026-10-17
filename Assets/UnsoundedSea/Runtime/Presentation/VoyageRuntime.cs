@@ -109,6 +109,7 @@ namespace UnsoundedSea.Runtime
 
         private static void ResetEncounterState()
         {
+            if (unsavedOutcome) Checkpoint();
             SceneManager.sceneLoaded -= ConfigureEncounter;
             SceneManager.sceneUnloaded -= ReleaseEncounter;
             if (encounterDirector != null) encounterDirector.Resolved -= RecordEncounterCommand;
@@ -196,7 +197,7 @@ namespace UnsoundedSea.Runtime
             if (encounterDirector == null || !IsVoyageEncounter) return;
             if (after.Phase == BattlePhase.Victory || after.Phase == BattlePhase.Defeat)
             {
-                if (!Session.ResolveEncounter(after.Phase == BattlePhase.Victory, after.Health, after.Sanity))
+                if (!Session.ResolveEncounter(after.Phase == BattlePhase.Victory, after.Health, after.Sanity,after.SpentConsumables,after.Watched,after.Evidence))
                     throw new InvalidOperationException("航程拒绝了战斗结算。");
                 PendingReplay = null;
             }

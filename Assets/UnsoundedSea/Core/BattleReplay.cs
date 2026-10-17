@@ -8,7 +8,7 @@ namespace UnsoundedSea.Core
     [Serializable]
     public sealed class BattleReplay
     {
-        public const int CurrentVersion = 4;
+        public const int CurrentVersion = 8;
         public int version;
         public string contentHash;
         public uint seed;
@@ -70,10 +70,13 @@ namespace UnsoundedSea.Core
                     { writer.Write(tool.Id); writer.Write(tool.Name); writer.Write((int)tool.Kind); writer.Write(tool.Uses); writer.Write(tool.SanityCost); }
                     writer.Write(definition.Supports.Count);
                     foreach (var support in definition.Supports)
-                    { writer.Write(support.Id); writer.Write(support.Name); writer.Write((int)support.Kind); }
+                    { writer.Write(support.Id); writer.Write(support.Name); writer.Write((int)support.Kind); writer.Write(support.Cost); writer.Write(support.Injured); }
+                    writer.Write(definition.Loadout.Consumables.Count);foreach(var id in definition.Loadout.Consumables)writer.Write(id);
+                    writer.Write(definition.Loadout.Equipment.Count);foreach(var id in definition.Loadout.Equipment)writer.Write(id);
+                    writer.Write(definition.Loadout.SurveyedBeacon);writer.Write(definition.Loadout.Watched);
                     writer.Write(definition.Archive.Count);
                     foreach (var evidence in definition.Archive)
-                    { writer.Write(evidence.Key); writer.Write(evidence.Text); writer.Write(evidence.Source); writer.Write((int)evidence.Level); }
+                    { writer.Write(evidence.Key); writer.Write(evidence.Text); writer.Write(evidence.Source); writer.Write((int)evidence.Level);writer.Write((int)evidence.Scope);writer.Write(evidence.SubjectId);writer.Write(evidence.SubjectType);writer.Write(evidence.Question);writer.Write(evidence.EncounterId);writer.Write(evidence.Turn);writer.Write(evidence.Rule);writer.Write(evidence.Fact);writer.Write(evidence.Supports.Count);foreach(var id in evidence.Supports)writer.Write(id); }
                 }
                 using (var hash = SHA256.Create()) return BitConverter.ToString(hash.ComputeHash(stream.ToArray())).Replace("-", "");
             }
