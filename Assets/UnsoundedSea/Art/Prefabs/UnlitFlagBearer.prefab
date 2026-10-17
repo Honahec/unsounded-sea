@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2049033385250950329}
   m_Layer: 0
-  m_Name: Pole sea release
+  m_Name: Physical pole cap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 3395990189630360336}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.030000001, y: -1.04, z: -0.030000001}
+  m_LocalPosition: {x: 0.00041261315, y: -1.0397794, z: -0.07523274}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -266,6 +266,8 @@ MonoBehaviour:
   contactTime: 1.539
   waveAmplitude: 80
   breathPeriod: 8.4
+  poleMaxAdvance: 8
+  poleDrawDistance: 4
   strike:
     serializedVersion: 2
     m_Curve:

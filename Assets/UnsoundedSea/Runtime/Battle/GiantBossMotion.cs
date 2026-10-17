@@ -27,6 +27,7 @@ namespace UnsoundedSea.Runtime
         public Color effectColor = new Color(.45f,.68f,.66f,1);
         public float duration = 2.8f, contactTime = 1.45f, waveAmplitude = 65;
         public float breathPeriod = 7;
+        public float poleMaxAdvance = 32, poleDrawDistance = 14;
         public AnimationCurve strike = DeckActorMotion.Curve(0,0,.34f,-.5f,.46f,-.54f,.57f,1,.65f,.82f,1,0);
         public AnimationCurve follow = DeckActorMotion.Curve(0,0,.39f,-.22f,.63f,1,.76f,.6f,1,0);
         public AnimationCurve resonance = DeckActorMotion.Curve(0,0,.28f,.45f,.55f,1,.72f,.8f,1,0);
@@ -159,8 +160,8 @@ namespace UnsoundedSea.Runtime
             var toTarget = target - pole.bone.position;
             var tip = effectOrigin.position - pole.bone.position;
             var phase = Mathf.Clamp01(ActionTime / duration);
-            var advance = Mathf.Clamp(toTarget.magnitude - tip.magnitude, -32, 32);
-            body.bone.position += toTarget.normalized * (advance * poleDrive.Evaluate(phase) - 14 * poleDraw.Evaluate(phase));
+            var advance = Mathf.Clamp(toTarget.magnitude - tip.magnitude, -poleMaxAdvance, poleMaxAdvance);
+            body.bone.position += toTarget.normalized * (advance * poleDrive.Evaluate(phase) - poleDrawDistance * poleDraw.Evaluate(phase));
             var aimed = Quaternion.FromToRotation(effectOrigin.position - pole.bone.position, target - pole.bone.position) * pole.bone.rotation;
             var aim = phase < .3f ? Mathf.SmoothStep(0, 1, phase / .3f) : phase < .72f ? 1 : 1 - Mathf.SmoothStep(0, 1, (phase - .72f) / .28f);
             pole.bone.rotation = Quaternion.Slerp(pole.bone.rotation, aimed, aim);

@@ -1,0 +1,601 @@
+{
+  "date": "2026-10-18",
+  "status": "passed",
+  "scope": "Offline sample decoding, source/output hashes, 48 kHz, finite/nonempty samples, no reconstructed clipping, loop seams <0.03 amplitude, four aligned three-stem scores. Not a subjective listening or device-performance approval.",
+  "runtime_clip_count": 74,
+  "source_file_count": 36,
+  "clips": [
+    {
+      "id": "hit_body_0",
+      "samples": 24244,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -20.25,
+      "estimated_true_peak_dbtp": -3.74,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hit_body_1",
+      "samples": 27457,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -20.4,
+      "estimated_true_peak_dbtp": -3.74,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hit_body_2",
+      "samples": 27471,
+      "peak_dbfs": -3.74,
+      "rms_dbfs": -20.18,
+      "estimated_true_peak_dbtp": -3.74,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hit_metal_0",
+      "samples": 13044,
+      "peak_dbfs": -9.68,
+      "rms_dbfs": -26.66,
+      "estimated_true_peak_dbtp": -9.6,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hit_metal_1",
+      "samples": 6885,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -25.02,
+      "estimated_true_peak_dbtp": -8.37,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hit_metal_2",
+      "samples": 5718,
+      "peak_dbfs": -11.64,
+      "rms_dbfs": -27.98,
+      "estimated_true_peak_dbtp": -11.62,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hit_bone_0",
+      "samples": 15968,
+      "peak_dbfs": -10.76,
+      "rms_dbfs": -29.79,
+      "estimated_true_peak_dbtp": -10.76,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hit_bone_1",
+      "samples": 15968,
+      "peak_dbfs": -10.54,
+      "rms_dbfs": -29.7,
+      "estimated_true_peak_dbtp": -10.54,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hit_bone_2",
+      "samples": 15968,
+      "peak_dbfs": -10.99,
+      "rms_dbfs": -29.61,
+      "estimated_true_peak_dbtp": -10.99,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "block_0",
+      "samples": 37392,
+      "peak_dbfs": -4.44,
+      "rms_dbfs": -27.45,
+      "estimated_true_peak_dbtp": -4.43,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "block_1",
+      "samples": 37392,
+      "peak_dbfs": -4.44,
+      "rms_dbfs": -24.16,
+      "estimated_true_peak_dbtp": -4.43,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "block_2",
+      "samples": 37392,
+      "peak_dbfs": -4.44,
+      "rms_dbfs": -24.71,
+      "estimated_true_peak_dbtp": -4.42,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hull_0",
+      "samples": 18782,
+      "peak_dbfs": -2.85,
+      "rms_dbfs": -22.05,
+      "estimated_true_peak_dbtp": -2.85,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hull_1",
+      "samples": 18782,
+      "peak_dbfs": -2.85,
+      "rms_dbfs": -22.19,
+      "estimated_true_peak_dbtp": -2.85,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hull_2",
+      "samples": 18782,
+      "peak_dbfs": -2.85,
+      "rms_dbfs": -21.21,
+      "estimated_true_peak_dbtp": -2.85,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "card_0",
+      "samples": 36895,
+      "peak_dbfs": -9.9,
+      "rms_dbfs": -40.17,
+      "estimated_true_peak_dbtp": -9.44,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "card_1",
+      "samples": 20661,
+      "peak_dbfs": -9.9,
+      "rms_dbfs": -37.49,
+      "estimated_true_peak_dbtp": -9.87,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "card_2",
+      "samples": 11069,
+      "peak_dbfs": -9.9,
+      "rms_dbfs": -36.47,
+      "estimated_true_peak_dbtp": -9.89,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "cloth_0",
+      "samples": 31730,
+      "peak_dbfs": -8.87,
+      "rms_dbfs": -31.53,
+      "estimated_true_peak_dbtp": -8.87,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "cloth_1",
+      "samples": 19923,
+      "peak_dbfs": -8.87,
+      "rms_dbfs": -28.06,
+      "estimated_true_peak_dbtp": -8.78,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "cloth_2",
+      "samples": 22875,
+      "peak_dbfs": -8.87,
+      "rms_dbfs": -27.86,
+      "estimated_true_peak_dbtp": -8.87,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "creak_0",
+      "samples": 39662,
+      "peak_dbfs": -9.9,
+      "rms_dbfs": -27.51,
+      "estimated_true_peak_dbtp": -9.89,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "creak_1",
+      "samples": 49808,
+      "peak_dbfs": -9.9,
+      "rms_dbfs": -27.7,
+      "estimated_true_peak_dbtp": -9.89,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "creak_2",
+      "samples": 20292,
+      "peak_dbfs": -9.9,
+      "rms_dbfs": -23.85,
+      "estimated_true_peak_dbtp": -9.89,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "confirm",
+      "samples": 21400,
+      "peak_dbfs": -10.46,
+      "rms_dbfs": -37.4,
+      "estimated_true_peak_dbtp": -10.45,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "mechanism",
+      "samples": 12544,
+      "peak_dbfs": -6.02,
+      "rms_dbfs": -28.06,
+      "estimated_true_peak_dbtp": -5.64,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "heal",
+      "samples": 34681,
+      "peak_dbfs": -9.12,
+      "rms_dbfs": -36.15,
+      "estimated_true_peak_dbtp": -9.11,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "insight",
+      "samples": 7379,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -29.21,
+      "estimated_true_peak_dbtp": -8.33,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "seal",
+      "samples": 11069,
+      "peak_dbfs": -7.96,
+      "rms_dbfs": -27.6,
+      "estimated_true_peak_dbtp": -7.88,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "slash",
+      "samples": 28778,
+      "peak_dbfs": -5.19,
+      "rms_dbfs": -24.27,
+      "estimated_true_peak_dbtp": -4.94,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "reload",
+      "samples": 21400,
+      "peak_dbfs": -7.96,
+      "rms_dbfs": -25.42,
+      "estimated_true_peak_dbtp": -7.81,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "guard",
+      "samples": 16234,
+      "peak_dbfs": -7.96,
+      "rms_dbfs": -31.47,
+      "estimated_true_peak_dbtp": -7.95,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "shot_0",
+      "samples": 36000,
+      "peak_dbfs": -2.37,
+      "rms_dbfs": -28.61,
+      "estimated_true_peak_dbtp": -2.16,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hit_giant_0",
+      "samples": 62400,
+      "peak_dbfs": -4.73,
+      "rms_dbfs": -24.67,
+      "estimated_true_peak_dbtp": -4.72,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "shot_1",
+      "samples": 36000,
+      "peak_dbfs": -2.03,
+      "rms_dbfs": -27.59,
+      "estimated_true_peak_dbtp": -1.82,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hit_giant_1",
+      "samples": 62400,
+      "peak_dbfs": -4.73,
+      "rms_dbfs": -21.91,
+      "estimated_true_peak_dbtp": -4.73,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "shot_2",
+      "samples": 36000,
+      "peak_dbfs": -2.39,
+      "rms_dbfs": -28.05,
+      "estimated_true_peak_dbtp": -2.38,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "hit_giant_2",
+      "samples": 62400,
+      "peak_dbfs": -4.73,
+      "rms_dbfs": -22.8,
+      "estimated_true_peak_dbtp": -4.73,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "sanity",
+      "samples": 72000,
+      "peak_dbfs": -5.19,
+      "rms_dbfs": -18.88,
+      "estimated_true_peak_dbtp": -5.15,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "pay",
+      "samples": 48000,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -18.38,
+      "estimated_true_peak_dbtp": -8.4,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "ward",
+      "samples": 57600,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -18.79,
+      "estimated_true_peak_dbtp": -8.4,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "bell",
+      "samples": 216000,
+      "peak_dbfs": -5.19,
+      "rms_dbfs": -20.15,
+      "estimated_true_peak_dbtp": -5.19,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "ritual",
+      "samples": 110399,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -20.85,
+      "estimated_true_peak_dbtp": -8.4,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "victory",
+      "samples": 192000,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -17.15,
+      "estimated_true_peak_dbtp": -8.4,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "retreat",
+      "samples": 192000,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -16.96,
+      "estimated_true_peak_dbtp": -8.4,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "defeat",
+      "samples": 192000,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -17.49,
+      "estimated_true_peak_dbtp": -8.4,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "turn",
+      "samples": 16800,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -16.34,
+      "estimated_true_peak_dbtp": -8.4,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "reject",
+      "samples": 8640,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -14.27,
+      "estimated_true_peak_dbtp": -8.4,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "interrupt",
+      "samples": 24000,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -16.37,
+      "estimated_true_peak_dbtp": -8.4,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "emerge",
+      "samples": 115200,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -22.91,
+      "estimated_true_peak_dbtp": -8.4,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "pressure",
+      "samples": 67200,
+      "peak_dbfs": -5.19,
+      "rms_dbfs": -18.86,
+      "estimated_true_peak_dbtp": -5.17,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "windstrike",
+      "samples": 67200,
+      "peak_dbfs": -8.4,
+      "rms_dbfs": -21.12,
+      "estimated_true_peak_dbtp": -8.4,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "lap_0",
+      "samples": 84000,
+      "peak_dbfs": -6.02,
+      "rms_dbfs": -25.08,
+      "estimated_true_peak_dbtp": -5.94,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "lap_1",
+      "samples": 155869,
+      "peak_dbfs": -6.02,
+      "rms_dbfs": -26.27,
+      "estimated_true_peak_dbtp": -5.97,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "lap_2",
+      "samples": 113018,
+      "peak_dbfs": -6.02,
+      "rms_dbfs": -21.71,
+      "estimated_true_peak_dbtp": -5.95,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "lap_3",
+      "samples": 96950,
+      "peak_dbfs": -6.02,
+      "rms_dbfs": -25.66,
+      "estimated_true_peak_dbtp": -6.01,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "sea",
+      "samples": 2880000,
+      "peak_dbfs": -9.26,
+      "rms_dbfs": -29.31,
+      "estimated_true_peak_dbtp": -9.26,
+      "loop_boundary_delta": 4.7e-05
+    },
+    {
+      "id": "wind",
+      "samples": 2208000,
+      "peak_dbfs": -15.47,
+      "rms_dbfs": -31.36,
+      "estimated_true_peak_dbtp": -15.46,
+      "loop_boundary_delta": 0.004829
+    },
+    {
+      "id": "wake",
+      "samples": 1920000,
+      "peak_dbfs": -10.49,
+      "rms_dbfs": -25.1,
+      "estimated_true_peak_dbtp": -10.48,
+      "loop_boundary_delta": 0.018853
+    },
+    {
+      "id": "splash_0",
+      "samples": 126000,
+      "peak_dbfs": -3.35,
+      "rms_dbfs": -20.95,
+      "estimated_true_peak_dbtp": -3.34,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "splash_1",
+      "samples": 233803,
+      "peak_dbfs": -3.35,
+      "rms_dbfs": -22.27,
+      "estimated_true_peak_dbtp": -3.31,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "splash_2",
+      "samples": 169527,
+      "peak_dbfs": -3.35,
+      "rms_dbfs": -18.3,
+      "estimated_true_peak_dbtp": -3.34,
+      "loop_boundary_delta": null
+    },
+    {
+      "id": "music_harbor_0",
+      "samples": 4320000,
+      "peak_dbfs": -12.59,
+      "rms_dbfs": -22.15,
+      "estimated_true_peak_dbtp": -12.58,
+      "loop_boundary_delta": 0.003033
+    },
+    {
+      "id": "music_harbor_1",
+      "samples": 4320000,
+      "peak_dbfs": -13.57,
+      "rms_dbfs": -26.44,
+      "estimated_true_peak_dbtp": -13.57,
+      "loop_boundary_delta": 0.003038
+    },
+    {
+      "id": "music_harbor_2",
+      "samples": 4320000,
+      "peak_dbfs": -23.24,
+      "rms_dbfs": -31.43,
+      "estimated_true_peak_dbtp": -23.24,
+      "loop_boundary_delta": 0.001343
+    },
+    {
+      "id": "music_voyage_0",
+      "samples": 6144000,
+      "peak_dbfs": -11.01,
+      "rms_dbfs": -20.52,
+      "estimated_true_peak_dbtp": -11.01,
+      "loop_boundary_delta": 0.005168
+    },
+    {
+      "id": "music_voyage_1",
+      "samples": 6144000,
+      "peak_dbfs": -14.4,
+      "rms_dbfs": -27.45,
+      "estimated_true_peak_dbtp": -14.39,
+      "loop_boundary_delta": 0.005308
+    },
+    {
+      "id": "music_voyage_2",
+      "samples": 6144000,
+      "peak_dbfs": -21.69,
+      "rms_dbfs": -30.34,
+      "estimated_true_peak_dbtp": -21.68,
+      "loop_boundary_delta": 0.001768
+    },
+    {
+      "id": "music_deck_0",
+      "samples": 4480000,
+      "peak_dbfs": -12.41,
+      "rms_dbfs": -21.86,
+      "estimated_true_peak_dbtp": -12.4,
+      "loop_boundary_delta": 0.003061
+    },
+    {
+      "id": "music_deck_1",
+      "samples": 4480000,
+      "peak_dbfs": -15.83,
+      "rms_dbfs": -28.66,
+      "estimated_true_peak_dbtp": -15.83,
+      "loop_boundary_delta": 0.005261
+    },
+    {
+      "id": "music_deck_2",
+      "samples": 4480000,
+      "peak_dbfs": -15.8,
+      "rms_dbfs": -33.15,
+      "estimated_true_peak_dbtp": -15.79,
+      "loop_boundary_delta": 0.000603
+    },
+    {
+      "id": "music_boss_0",
+      "samples": 6144000,
+      "peak_dbfs": -10.37,
+      "rms_dbfs": -19.73,
+      "estimated_true_peak_dbtp": -10.36,
+      "loop_boundary_delta": 0.006485
+    },
+    {
+      "id": "music_boss_1",
+      "samples": 6144000,
+      "peak_dbfs": -13.7,
+      "rms_dbfs": -26.67,
+      "estimated_true_peak_dbtp": -13.7,
+      "loop_boundary_delta": 0.00643
+    },
+    {
+      "id": "music_boss_2",
+      "samples": 6144000,
+      "peak_dbfs": -15.01,
+      "rms_dbfs": -33.68,
+      "estimated_true_peak_dbtp": -15.01,
+      "loop_boundary_delta": 0.000355
+    }
+  ]
+}

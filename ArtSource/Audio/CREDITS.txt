@@ -1,0 +1,28 @@
+THE UNSOUNDED SEA — first audio palette (2026-10-18)
+
+CC0 source recordings:
+- Kenney: Impact Sounds 1.0
+  https://kenney.nl/assets/impact-sounds
+- Kenney: RPG Audio
+  https://kenney.nl/assets/rpg-audio
+- transitking: Water Waves; extracted and submitted by qubodup
+  https://opengameart.org/content/water-waves
+  Original recording: https://freesound.org/people/transitking/sounds/11505/
+
+License: Creative Commons Zero 1.0
+https://creativecommons.org/publicdomain/zero/1.0/
+Supplied licenses and download provenance are retained under Sources/.
+These recordings were resampled, trimmed, filtered, gain-adjusted and/or layered.
+Exact selected sources, output mapping and SHA-256 hashes: manifest.json.
+
+Original work for this project:
+Four three-stem scores, modal/additive synthesis, gunshot and giant-body layers,
+wind/wake textures, uncanny feedback and outcome cues, authored in Tools/build_audio.py.
+No external instrument samples, paid services or artist-style imitation were used.
+Original project material is not relicensed as CC0 by this credits file.
+
+Rebuild with Python + numpy/scipy/soundfile and ffmpeg:
+  python Tools/build_audio.py
+  python Tools/check_audio.py
+Runtime audio is imported through Tools/AudioSetup.cs using Unity CLI run_script.
+Masters are outside Assets and are not included in the game build.

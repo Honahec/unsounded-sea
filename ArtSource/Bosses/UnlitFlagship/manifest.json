@@ -1,0 +1,66 @@
+{
+  "asset": "M04 UnlitFlagship",
+  "purpose": "Drifting derelict flagship supporting the captive flag bearer; separate static hull with runtime rigid motion.",
+  "source": {
+    "provider": "Hyper3D Rodin MCP",
+    "generation_id": "c8a9c639-811e-40ea-9892-59f0413633a4",
+    "display_url": "https://hyper3d.ai/workspace/rodin/c8a9c639-811e-40ea-9892-59f0413633a4",
+    "tier": "Gen-2.5-High",
+    "mesh_mode": "Raw",
+    "quality_override": 60000,
+    "texture_delight": true,
+    "geometry_file_format": "glb",
+    "agent_used": false,
+    "archive": "ArtSource/Bosses/UnlitFlagship/UnlitFlagship_source.glb",
+    "sha256": "840916398217438befd1bc59e6eadb3fba3cbc076f9949426a442a2d33b83e75"
+  },
+  "specification": {
+    "triangles": 60000,
+    "vertices": 92708,
+    "meshes": 1,
+    "materials": 1,
+    "images": 3,
+    "has_uv_normals": true,
+    "skins": 0,
+    "animations": 0
+  },
+  "runtime": {
+    "path": "Assets/UnsoundedSea/Art/Models/UnlitFlagship_LOD0.glb",
+    "sha256": "f80cbfdd4cd2a8e28aee400927f5242aed8d77f5113d4f9a0f81c265e074921c",
+    "processing": "Budgeted source geometry used directly; lossless PNG extraction, BC7 import, unused image BIN payload removed. No decimation, retopology or skeletal binding required for rigid hull.",
+    "texture_manifest": "ArtSource/RuntimeTextures/manifest.json"
+  },
+  "presentation": {
+    "setup": "Assets/UnsoundedSea/Editor/Tools/UnlitFlagshipSetup.cs",
+    "component": "Assets/UnsoundedSea/Runtime/Battle/FlagshipPresentation.cs",
+    "retained_character": "UnlitFlagBearer_BANG_LOD0.glb, original rig and texture images unchanged",
+    "details": "Four dynamically meshed iron tethers, bounded hull roll, timber dust, public stage-three ward fade. Authored supports use shared iron materials."
+  },
+  "validation": {
+    "date": "2026-10-18",
+    "platform": "macOS Metal / Unity 6000.6.5f1",
+    "targeted_editmode": {
+      "passed": 13,
+      "failed": 0
+    },
+    "runtime_result": "PASS M04: socket error=2.521659E-05m; visible mesh distance=0.7134774m; one contact; stress bursts=2; shared hull parent; pause stable; public relay/three-lock path reached stage 3; ward fully extinguished; reduced-motion hull stable.",
+    "visual_evidence": "Docs/ArtReferences/unlit-flagship-review.jpg",
+    "scope": "M04 real first enemy turn, hit response, legal relay and three-lock route into phase 3; pause, reduced motion; external texture integrity. Not a full victory playthrough.",
+    "target_device_performance": "not benchmarked",
+    "remote_lfs": {
+      "status": "verified",
+      "revision": "52811e05a45ed3d5b7d7bc27ad6920823d1e6ed8",
+      "files": 6,
+      "report": "ArtSource/Bosses/UnlitFlagship/remote-readback.json"
+    },
+    "texture_import": {
+      "triangles": 60000,
+      "external_textures": 3,
+      "resolution": 2048,
+      "mip_levels": 12,
+      "standalone_format": "BC7",
+      "embedded_textures": 0,
+      "sha256_verified": true
+    }
+  }
+}

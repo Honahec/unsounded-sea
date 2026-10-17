@@ -39,6 +39,7 @@ public static class GiantBossSetup
         for(int i=0;i<Names.Length-1;i++)Stage(i);
         ConfigureM05Stage();
         UnsoundedSea.Editor.BossAtmosphereSetup.Apply();
+        UnsoundedSea.Editor.UnlitFlagshipSetup.Apply();
         return "Updated four boss actors and their existing stages; M05 uses its dedicated frontal six-slot composition.";
     }
     public static string BuildM05()

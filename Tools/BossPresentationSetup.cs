@@ -24,7 +24,7 @@ public static class BossPresentationSetup
             {
                 var stage = root.GetComponent<BattleStage>();
                 // Bring M04 within the real pole's reach; keep a clear three-quarter view of the thrust.
-                if (number == 4)
+                if (number == 4 && root.GetComponent<FlagshipPresentation>() == null)
                 {
                     stage.actorAnchors[0].localPosition = new Vector3(-20, -55, 120);
                     stage.battleCamera.transform.localPosition = new Vector3(115, 55, -145);
@@ -46,7 +46,8 @@ public static class BossPresentationSetup
             }
             finally { PrefabUtility.UnloadPrefabContents(root); }
         }
-        return "Retargeted M02-M04 fill/rim lights and M04's pole-reach composition; no model or encounter rebuild, other stages retained.";
+        UnsoundedSea.Editor.UnlitFlagshipSetup.Apply();
+        return "Retargeted M02-M04 lights and retained M04's captive flagship composition; no encounter rebuild.";
     }
     public static string ConfigureWindResource()
     {

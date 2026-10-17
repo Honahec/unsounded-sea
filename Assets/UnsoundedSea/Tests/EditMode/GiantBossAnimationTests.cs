@@ -14,6 +14,20 @@ namespace UnsoundedSea.Tests
         private static BattleScenario Scenario(int number) => AssetDatabase.LoadAssetAtPath<BattleScenario>(
             "Assets/UnsoundedSea/Content/Scenarios/M0" + number + ".asset");
 
+        [Test] public void FlagBearerIsSupportedByTheWreckAndRetainsAllMechanismTargets()
+        {
+            var stage=Scenario(4).stagePrefab;
+            var wreck=stage.GetComponent<FlagshipPresentation>();
+            Assert.That(wreck,Is.Not.Null);
+            Assert.That(stage.actorAnchors[0].IsChildOf(wreck.hull),Is.True);
+            Assert.That(stage.actorAnchors[0].GetComponent<BattleAnchor>().emergeDepth,Is.Zero,
+                "The captive must not rise through the solid wreck.");
+            var ids=stage.GetComponentsInChildren<BossTargetAnchor>();
+            Assert.That(ids.Select(t=>t.targetId),Is.EquivalentTo(new[]{"R1:off","R1:positive","R1:reverse","R2:off","R2:positive","R2:reverse","lock-I","lock-II","lock-III"}));
+            Assert.That(ids.All(t=>t.transform.IsChildOf(wreck.hull)),Is.True);
+            Assert.That(wreck.tetherRoots.Length,Is.EqualTo(wreck.bodyAttachments.Length));
+        }
+
         [TestCase(2)] [TestCase(3)] [TestCase(4)]
         public void RitualAndCallingPosesDifferFromPhysicalStrikesWithoutLaunchingWaves(int number)
         {
@@ -172,6 +186,14 @@ namespace UnsoundedSea.Tests
                 var contacts = 0; motion.VesselImpact += () => contacts++;
                 var distanceAtContact = float.PositiveInfinity;
                 motion.VesselImpact += () => distanceAtContact = Vector3.Distance(motion.PoleTip, motion.StrikeTarget);
+                var meshDistanceAtContact=float.PositiveInfinity;
+                if(number==4)motion.VesselImpact+=()=>
+                {
+                    var pole=actor.GetComponentsInChildren<SkinnedMeshRenderer>().Single(r=>r.name=="FlagPole");
+                    var baked=new Mesh();
+                    try{pole.BakeMesh(baked,true);meshDistanceAtContact=baked.vertices.Min(v=>Vector3.Distance(pole.transform.TransformPoint(v),motion.StrikeTarget));}
+                    finally{Object.DestroyImmediate(baked);}
+                };
                 var position = actor.transform.localPosition;
                 motion.PlayAttack();
                 for (var i = 0; i < 200; i++) motion.Tick(.025f);
@@ -194,6 +216,7 @@ namespace UnsoundedSea.Tests
                 {
                     Assert.That(effects.PoleContactCount, Is.EqualTo(1));
                     Assert.That(distanceAtContact, Is.LessThan(2), "The real pole tip must reach the vessel at contact.");
+                    Assert.That(meshDistanceAtContact,Is.LessThan(2),"The visible mesh must contact the boat, not only an empty socket.");
                 }
             }
             finally

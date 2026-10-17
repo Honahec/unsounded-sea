@@ -97,6 +97,8 @@ namespace UnsoundedSea.Runtime
             }
             if (water != null) water.Bind(battleCamera);
             foreach (var target in GetComponentsInChildren<BossTargetAnchor>()) target.Bind(view, owner);
+            var flagship = GetComponent<FlagshipPresentation>();
+            if (flagship != null) flagship.Bind(owner, actors[0].GiantMotion);
             owner.Resolved += Present; RefreshSelection();
         }
         public void RefreshSelection() { foreach (var actor in actors) actor.Select(actor.EnemyId == director.SelectedEnemy); }
