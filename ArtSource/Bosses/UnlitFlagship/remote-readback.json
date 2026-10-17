@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-18",
+  "remote": "https://github.com/Honahec/unsounded-sea.git",
+  "revision": "52811e05a45ed3d5b7d7bc27ad6920823d1e6ed8",
+  "method": "Independent shallow clone with empty dedicated LFS storage; fetch from origin and compare SHA-256 with local binaries.",
+  "files": [
+    {
+      "path": "ArtSource/Bosses/UnlitFlagship/UnlitFlagship_source.glb",
+      "sha256": "840916398217438befd1bc59e6eadb3fba3cbc076f9949426a442a2d33b83e75",
+      "bytes": 13206396,
+      "match": true
+    },
+    {
+      "path": "Assets/UnsoundedSea/Art/Models/UnlitFlagship_LOD0.glb",
+      "sha256": "f80cbfdd4cd2a8e28aee400927f5242aed8d77f5113d4f9a0f81c265e074921c",
+      "bytes": 3688616,
+      "match": true
+    },
+    {
+      "path": "Docs/ArtReferences/unlit-flagship-review.jpg",
+      "sha256": "c9a8546fde75c60421f8524233827b0e54055faf2bcbd68e4d6ce59c68b8c95c",
+      "bytes": 278802,
+      "match": true
+    },
+    {
+      "path": "Assets/UnsoundedSea/Art/Textures/RuntimeModels/97c810993ffca2faf82c27d4110c81ddf2274b82fe6deeac0d3e2cf0523efe5b_linear.png",
+      "sha256": "97c810993ffca2faf82c27d4110c81ddf2274b82fe6deeac0d3e2cf0523efe5b",
+      "bytes": 3073014,
+      "match": true
+    },
+    {
+      "path": "Assets/UnsoundedSea/Art/Textures/RuntimeModels/d27ba7c6298b5e745661fa4e304050b1f525f2b898d9bdb5c3f7fd2ce68bec70_srgb.png",
+      "sha256": "d27ba7c6298b5e745661fa4e304050b1f525f2b898d9bdb5c3f7fd2ce68bec70",
+      "bytes": 3977730,
+      "match": true
+    },
+    {
+      "path": "Assets/UnsoundedSea/Art/Textures/RuntimeModels/4ee8490e1c128111098ee58d3efbbc284bcbf6b992f2e270a0fc4e0c0dc2b6be_linear.png",
+      "sha256": "4ee8490e1c128111098ee58d3efbbc284bcbf6b992f2e270a0fc4e0c0dc2b6be",
+      "bytes": 2467240,
+      "match": true
+    }
+  ]
+}

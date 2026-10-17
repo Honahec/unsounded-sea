@@ -47,6 +47,20 @@
     "visual_evidence": "Docs/ArtReferences/unlit-flagship-review.jpg",
     "scope": "M04 real first enemy turn, hit response, legal relay and three-lock route into phase 3; pause, reduced motion; external texture integrity. Not a full victory playthrough.",
     "target_device_performance": "not benchmarked",
-    "remote_lfs": "pending"
+    "remote_lfs": {
+      "status": "verified",
+      "revision": "52811e05a45ed3d5b7d7bc27ad6920823d1e6ed8",
+      "files": 6,
+      "report": "ArtSource/Bosses/UnlitFlagship/remote-readback.json"
+    },
+    "texture_import": {
+      "triangles": 60000,
+      "external_textures": 3,
+      "resolution": 2048,
+      "mip_levels": 12,
+      "standalone_format": "BC7",
+      "embedded_textures": 0,
+      "sha256_verified": true
+    }
   }
 }
