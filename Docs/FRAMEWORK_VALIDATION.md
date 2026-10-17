@@ -212,6 +212,8 @@
 
 ## M02–M05 Boss 战
 
+2026-10-18，macOS Metal，M04 漂流旗舰场景：`GiantBossAnimationTests` **13/13 通过**；`FlagshipQA.Start` 经真实结束回合和遭遇牌完成接线、三锁与第三阶段护持解除，暂停及减少动效通过。网格烘焙检查补足了旧命中挂点验收：修正实际杆端后，命中时可见网格距船上目标约 **0.71 m**，一次直刺只发布一次接触。检查待机／攻击／受击画面，舰体与本体共享支点，下身由舰艏遮挡；[实机对照](ArtReferences/unlit-flagship-review.jpg)。舰体来源、规格与回读状态见[旗舰 manifest](../ArtSource/Bosses/UnlitFlagship/manifest.json)。本次未重跑整场胜利、独立 Player 或目标设备性能；下方旧 M04 画面由此替代。
+
 2026-10-18，macOS Metal / Unity 6000.6.5f1，领唱者飞行与四场环境修复：
 
 - 合并 `a6d1a1a` 纹理外置／异步加载更新后，完整 EditMode **307 通过／0 失败／0 跳过**。`BossImplementationQA.Attacks` 真实首回合分别得到 M02 声压 1 次／M03 风流 1 次／M04 杆端命中 1 次，三场攻击海浪均为 0；逐次资源表现都在接触后发生，M04 杆端误差小于 0.001 m。

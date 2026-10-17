@@ -11828,6 +11828,68 @@
         8
       ],
       "sourceBinSha256": "4d88d58326891181a36501840b7a7712483e42bfc096794c43985272d23e1b14"
+    },
+    "Assets/UnsoundedSea/Art/Models/UnlitFlagship_LOD0.glb": {
+      "originalGlbSha256": "840916398217438befd1bc59e6eadb3fba3cbc076f9949426a442a2d33b83e75",
+      "runtimeGlbSha256": "f80cbfdd4cd2a8e28aee400927f5242aed8d77f5113d4f9a0f81c265e074921c",
+      "sourceBinSha256": "c8cc0003f5fe661943c74dc9ed4145d8db7c48cc7fb5915b86903543e49f3285",
+      "textures": [
+        {
+          "name": "texture_normal",
+          "path": "Assets/UnsoundedSea/Art/Textures/RuntimeModels/97c810993ffca2faf82c27d4110c81ddf2274b82fe6deeac0d3e2cf0523efe5b_linear.png",
+          "sha256": "97c810993ffca2faf82c27d4110c81ddf2274b82fe6deeac0d3e2cf0523efe5b",
+          "width": 2048,
+          "height": 2048,
+          "srgb": false,
+          "format": "BC7"
+        },
+        {
+          "name": "texture_diffuse",
+          "path": "Assets/UnsoundedSea/Art/Textures/RuntimeModels/d27ba7c6298b5e745661fa4e304050b1f525f2b898d9bdb5c3f7fd2ce68bec70_srgb.png",
+          "sha256": "d27ba7c6298b5e745661fa4e304050b1f525f2b898d9bdb5c3f7fd2ce68bec70",
+          "width": 2048,
+          "height": 2048,
+          "srgb": true,
+          "format": "BC7"
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "path": "Assets/UnsoundedSea/Art/Textures/RuntimeModels/4ee8490e1c128111098ee58d3efbbc284bcbf6b992f2e270a0fc4e0c0dc2b6be_linear.png",
+          "sha256": "4ee8490e1c128111098ee58d3efbbc284bcbf6b992f2e270a0fc4e0c0dc2b6be",
+          "width": 2048,
+          "height": 2048,
+          "srgb": false,
+          "format": "BC7"
+        }
+      ],
+      "runtimeBinSha256": "219a0c8b7d374f097f048060bd4ee0f3d4cd5751323a18ce9c420251c0ec30a6",
+      "retainedBufferViews": [
+        {
+          "index": 0,
+          "sha256": "c79652a606937d9ddd2a1755cc6f6a5176973d5f65f4e7d8bd7263ccc928a5fd",
+          "length": 1112496
+        },
+        {
+          "index": 1,
+          "sha256": "7745fea5fd02d3e1fc791867f6e9ac8dd225a2655753e779750604afe2373462",
+          "length": 1112496
+        },
+        {
+          "index": 2,
+          "sha256": "cbf886f191e4c8c7ae37d056e4134f0e9bc9cdc64d94e5a2b41fdb5cfafe35af",
+          "length": 741664
+        },
+        {
+          "index": 3,
+          "sha256": "092061be952c5da51d83b174ac324f5a769fb7bad281a24165c9038d558ebf20",
+          "length": 720000
+        }
+      ],
+      "externalizedImageBufferViews": [
+        4,
+        5,
+        6
+      ]
     }
   }
 }

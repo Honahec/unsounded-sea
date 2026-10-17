@@ -53,6 +53,10 @@ Deemos Agent 是可选生产工具，不是每件资产的必经步骤。高模�
 3. **导入**：复制输出到本机，退出 Play、保存编辑；Unity CLI 执行 `Tools/GiantBossSetup.cs` 的 `Import`（参数为输出目录；默认 `Logs/GiantBosses`），再执行 `Build`。保留 GLB `.meta`，重新计算归一尺寸与底部原点：增加 armature 会改变 glTF 子节点 ID，旧嵌套 Prefab 缩放覆盖可能失效，不能照抄。只改天空／表面参数时，使用 `UnsoundedSea.Editor.BossAtmosphereSetup.Apply`，不重新绑定或导入；独立材质从当前 GLB 导入材质复制外部压缩贴图引用，环境反射 Cubemap 随资产走 LFS。`Build` 会重设四个 Boss 的动作、构图和舞台参数；手调前先检查差异，不运行全遭遇重建工具。
 4. **运行与归档**：动画由 `GiantBossMotion` 程序曲线驱动真实骨骼，GLB 没有内嵌 clips；不要把 `animations: 0` 当作静态模型。先验收 `GiantBossAnimationTests`，再在 Play 中运行 `GiantBossQA.Record(index)` / `Hit(index)`，index 为 0–3。材质图片按字节比较，最终镜头检查重量、接缝、波浪和船的响应。流程、动作设计与边界分别见[框架](FRAMEWORK.md#m02m05-巨兽骨骼表现)和[验证记录](FRAMEWORK_VALIDATION.md#m02m05-boss-战)。输出与母版按 LFS 归档，忽略的 Logs 只放临时帧和完整日志。
 
+### M04 漂流旗舰场景
+
+舰体是独立的刚性环境资产，用 Hyper3D MCP 生成一个候选，没有调用 Agent 或重新生成执旗者。预算内网格直接使用，外置贴图后清理冗余图片缓冲；来源与实测规格只记录在[旗舰 manifest](../ArtSource/Bosses/UnlitFlagship/manifest.json)。`UnsoundedSea.Editor.UnlitFlagshipSetup.Apply` 经 Editor API 更新 M04 舞台、铁肋／锁链支点及九个既有机关锚点；角色继续使用原分件、骨骼与 UV。新舰体无需柔性蒙皮，运行时按共同支点摇摆，环链按端点生成表现网格。验收入口为 `Tools/FlagshipQA.Start`，先开启隔离验证会话并加载 `BossM04`。
+
 ### M05 五守卫资产
 
 五份守卫 `StarlessGuardAnchor`、`StarlessGuardLamp`、`StarlessGuardBell`、`StarlessGuardSail`、`StarlessGuardEye` 均获用户公开生成授权；前三份由 Hyper3D Agent 制作，后两份在 Agent 连续失败后按用户要求改用 Hyper3D API。该授权仅覆盖本批五守卫。每份保留原高模与真实 BANG 分件高模，运行时文件为 `Assets/UnsoundedSea/Art/Models/<name>_BANG_LOD0.glb`，Prefab 使用同名 `<name>.prefab`。部件数、三角面、来源与哈希记录在各自 `*-manifest.json`／`*_BANG-manifest.json`，本文不复制汇总计数；认证密钥不进入仓库或 manifest。
