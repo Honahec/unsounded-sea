@@ -221,8 +221,7 @@ public static class CombatBalanceQA
         if (v.BossKind == BossEncounterKind.Watcher && !v.Enemies.Skip(1).Any(e => e.Health > 0))
         {
             var summon = v.Hand.FirstOrDefault(c => c.Definition.Id == "E05-01" && c.Enabled);
-            target = summon?.Targets.FirstOrDefault(t => t.Enabled)?.Id;
-            if (target != null) cardId = "E05-01";
+            if (summon != null) cardId = "E05-01";
         }
         var card = v.Hand.FirstOrDefault(c => c.Definition.Id == cardId && c.Enabled);
         if (card == null || card.Targets.Count > 0 && !card.Targets.Any(t => t.Id == target && t.Enabled)) return false;

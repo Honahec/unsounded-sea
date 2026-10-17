@@ -66,10 +66,10 @@ namespace UnsoundedSea.Tests
 
         [Test] public void SummonDefenseAndTrueNameApplyOnlyToLivingVerifiedSummons()
         {
-            var s = Boss(BossEncounterKind.Watcher, new[] { "b05-watcher", "b05-guard-anchor", "b05-guard-lamp", "b05-guard-bell", "b05-guard-sail", "b05-guard-eye" }, new[] { "c034", "c046", "c090", "cover" });
+            var s = Boss(BossEncounterKind.Watcher, new[] { "b05-watcher", "b05-guard-anchor", "b05-guard-lamp", "b05-guard-bell", "b05-guard-sail", "b05-guard-eye" }, new[] { "c034", "c046", "c090", "cover" }, seed: 12);
             Play(s, "c034"); Assert.That(s.View.Block, Is.EqualTo(6));
             Assert.That(s.View.Hand.Single(c => c.Definition.Id == "c090").Enabled, Is.False);
-            Play(s, "E05-01", "b05-guard-anchor"); s.Execute(BattleCommand.EndTurn());
+            Play(s, "E05-01"); s.Execute(BattleCommand.EndTurn());
             Play(s, "c034"); Assert.That(s.View.Block, Is.EqualTo(12));
             var name = s.View.Hand.Single(c => c.Definition.Id == "c090");
             Assert.That(name.Targets.All(t => !t.Id.Contains("b05-watcher")), Is.True);

@@ -161,7 +161,7 @@ namespace UnsoundedSea.Tests
         {
             var session = Session(BossEncounterKind.Watcher, "c082");
             var rope = Encounter(session, "E05-01");
-            Play(session, rope, rope.Targets.First(x => x.Enabled).Id);
+            Play(session, rope);
             End(session);
             var card = Card(session, "c082");
             var target = card.Targets.First();

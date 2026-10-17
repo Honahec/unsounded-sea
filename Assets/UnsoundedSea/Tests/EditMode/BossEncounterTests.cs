@@ -101,24 +101,26 @@ namespace UnsoundedSea.Tests
             Assert.That(s.View.ObjectiveTarget, Is.EqualTo(5));
             Assert.That(s.View.ObjectiveProgress, Is.Zero, "Uncalled guards are not defeated.");
             Assert.That(s.View.Enemies[0].Targetable, Is.False);
-            Play(s, "E05-01", "b05-guard-anchor");
+            Assert.That(Encounter(s, "E05-01").Targets, Is.Empty);
             var actions = s.View.Actions; var commands = s.Commands.Count;
             Assert.That(s.Execute(BattleCommand.Play(Encounter(s, "E05-01").InstanceId, "b05-guard-anchor")).Success, Is.False);
             Assert.That(s.View.Actions, Is.EqualTo(actions)); Assert.That(s.Commands.Count, Is.EqualTo(commands));
-            Play(s, "E05-01", "b05-guard-lamp"); Play(s, "E05-01", "b05-guard-bell");
+            var control = new BattleSession(Definition(BossEncounterKind.Watcher), 0, boss: BossEncounterKind.Watcher);
+            Play(s, "E05-01"); Play(control, "E05-01");
+            Assert.That(s.View.Enemies.Select(x => x.Health), Is.EqualTo(control.View.Enemies.Select(x => x.Health)), "Rejected targets must not consume summon RNG.");
+            Play(s, "E05-01"); Play(s, "E05-01");
             s.Execute(BattleCommand.EndTurn());
-            Play(s, "E05-01", "b05-guard-sail"); Play(s, "E05-01", "b05-guard-eye");
+            Play(s, "E05-01"); Play(s, "E05-01");
             Assert.That(s.View.Enemies.Count(x => x.Id.Contains("guard") && x.Health > 0), Is.EqualTo(5));
             Assert.That(s.View.Hand.Any(x => x.Definition.Id == "E05-01"), Is.False);
-            foreach (var id in new[] { "anchor", "lamp", "bell", "sail", "eye" })
+            foreach (var target in s.View.Enemies.Where(x => x.Id.Contains("guard")).Select(x => x.Id).ToArray())
             {
-                var target = "b05-guard-" + id;
                 while (s.View.Enemies.Single(x => x.Id == target).Health > 0)
                 {
                     if (s.View.Actions == 0 || !s.View.Hand.Any(x => !x.IsEncounter)) s.Execute(BattleCommand.EndTurn());
                     Shoot(s, target);
                 }
-                if (id != "eye") Assert.That(s.View.Phase, Is.EqualTo(BattlePhase.PlayerTurn));
+                if (target != "b05-guard-eye") Assert.That(s.View.Phase, Is.EqualTo(BattlePhase.PlayerTurn));
             }
             Assert.That(s.View.ObjectiveProgress, Is.EqualTo(5));
             Assert.That(s.View.Phase, Is.EqualTo(BattlePhase.Victory));
@@ -132,14 +134,41 @@ namespace UnsoundedSea.Tests
             var ward = s.View.Hand.Single(x => x.Definition.Id == "c035");
             Assert.That(s.Execute(BattleCommand.Play(ward.InstanceId)).Success, Is.True); s.Execute(BattleCommand.EndTurn());
             Assert.That(s.View.Sanity, Is.EqualTo(30), "3 ward must absorb the first-turn 2 sanity.");
+            Assert.That(s.View.ResolvedEnemyActions.Single().Ward, Is.EqualTo(1));
+            Assert.That(s.View.ResolvedEnemyActions.Single().Sanity, Is.EqualTo(30));
             s.Execute(BattleCommand.EndTurn());
             Assert.That(s.View.Sanity, Is.EqualTo(28));
         }
+        [Test] public void WatcherSanityPressureEscalatesAtPublishedTurnBoundariesAndCapsAtTen()
+        {
+            var expected = new[] { 2, 2, 2, 2, 2, 3, 3, 4, 4, 5, 6, 7, 8, 9, 10, 10 };
+            var s = new BattleSession(Definition(BossEncounterKind.Watcher, sanity: 200), 0, boss: BossEncounterKind.Watcher);
+            foreach (var damage in expected)
+            {
+                Assert.That(s.View.Enemies[0].Intent, Does.Contain($"{damage} 点理智冲击"));
+                Assert.That(s.Execute(BattleCommand.EndTurn()).Success, Is.True);
+                var action = s.View.ResolvedEnemyActions.Single(x => x.EnemyId == "b05-watcher");
+                Assert.That(action.Amount, Is.EqualTo(damage));
+            }
+        }
+
+        [Test] public void WatcherBossDoesNotAttackAfterAnEarlierGuardDefeatsThePlayer()
+        {
+            var s = new BattleSession(Definition(BossEncounterKind.Watcher, health: 5), 12, boss: BossEncounterKind.Watcher);
+            Play(s, "E05-01");
+            s.Execute(BattleCommand.EndTurn());
+            var sanity = s.View.Sanity;
+            s.Execute(BattleCommand.EndTurn());
+            Assert.That(s.View.Phase, Is.EqualTo(BattlePhase.Defeat));
+            Assert.That(s.View.Sanity, Is.EqualTo(sanity));
+            Assert.That(s.View.ResolvedEnemyActions.Select(x => x.EnemyId), Is.EqualTo(new[] { "b05-guard-anchor" }));
+        }
+
 
         [Test] public void WatcherGuardsTelegraphPhysicalPressureAndAlternatingBellBurst()
         {
-            var s = new BattleSession(Definition(BossEncounterKind.Watcher), 0, boss: BossEncounterKind.Watcher);
-            Play(s, "E05-01", "b05-guard-lamp"); Play(s, "E05-01", "b05-guard-bell");
+            var s = new BattleSession(Definition(BossEncounterKind.Watcher), 3, boss: BossEncounterKind.Watcher);
+            Play(s, "E05-01"); Play(s, "E05-01");
             s.Execute(BattleCommand.EndTurn());
             Assert.That(s.View.Health, Is.EqualTo(100), "New guards do not attack on their summon turn.");
             Assert.That(s.View.Sanity, Is.EqualTo(98));
@@ -148,13 +177,21 @@ namespace UnsoundedSea.Tests
             s.Execute(BattleCommand.EndTurn());
             Assert.That(s.View.Health, Is.EqualTo(96));
             Assert.That(s.View.Sanity, Is.EqualTo(91));
+            Assert.That(s.View.ResolvedEnemyActions.Select(x => x.EnemyId), Is.EqualTo(new[]
+            {
+                "b05-guard-lamp", "b05-guard-bell", "b05-watcher"
+            }));
+            Assert.That(s.View.ResolvedEnemyActions.Select(x => (x.Health, x.Sanity)), Is.EqualTo(new[]
+            {
+                (96, 98), (96, 93), (96, 91)
+            }), "Each action publishes its exact post-mitigation resources in guard-then-boss order.");
             Assert.That(s.View.Enemies.Single(x => x.Id.EndsWith("bell")).Intent, Does.Contain("本回合停手"));
         }
 
         [Test] public void ReplayIncludesBossIdentityAndRestoresSummonedGuardState()
         {
             var definition = Definition(BossEncounterKind.Watcher); var s = new BattleSession(definition, 7, boss: BossEncounterKind.Watcher);
-            Play(s, "E05-01", "b05-guard-anchor"); s.Execute(BattleCommand.EndTurn());
+            Play(s, "E05-01"); s.Execute(BattleCommand.EndTurn());
             var replay = BattleReplay.Capture(s); var json = Newtonsoft.Json.JsonConvert.SerializeObject(replay);
             var restored = Newtonsoft.Json.JsonConvert.DeserializeObject<BattleReplay>(json).Restore(definition);
             Assert.That(replay.bossKind, Is.EqualTo(BossEncounterKind.Watcher));
@@ -184,15 +221,36 @@ namespace UnsoundedSea.Tests
             Assert.That(s.View.Actions, Is.EqualTo(1));
         }
 
-        [Test] public void RuntimeSuffixedEnemyIdsAreAcceptedAndUsedByTargets()
+        [Test] public void RuntimeSuffixedEnemyIdsAreSummonedWithoutBecomingCardTargets()
         {
             var plain = Definition(BossEncounterKind.Watcher);
             var enemies = plain.Enemies.Select((x, i) => new EnemySpec(x.Id + ":" + i, x.Name, x.Health, x.Candidates, x.Intents));
             var definition = new BattleDefinition("suffixed", plain.Deck, enemies, plain.Tools, health: 100, sanity: 100);
             var s = new BattleSession(definition, 0, boss: BossEncounterKind.Watcher);
-            Assert.That(Encounter(s, "E05-01").Targets.Any(x => x.Id == "b05-guard-anchor:1"), Is.True);
-            Play(s, "E05-01", "b05-guard-anchor:1");
-            Assert.That(s.View.Enemies.Single(x => x.Id == "b05-guard-anchor:1").Health, Is.EqualTo(26));
+            Assert.That(Encounter(s, "E05-01").Targets, Is.Empty);
+            Play(s, "E05-01");
+            Assert.That(s.View.Enemies.Count(x => x.Id.StartsWith("b05-guard-", StringComparison.Ordinal) && x.Health > 0), Is.EqualTo(1));
+        }
+        
+        [Test] public void WatcherSummonRandomnessIsSeededReplayableAndVariesAcrossSeeds()
+        {
+            var definition = Definition(BossEncounterKind.Watcher);
+            var original = new BattleSession(definition, 0, boss: BossEncounterKind.Watcher);
+            Play(original, "E05-01"); Play(original, "E05-01");
+            var restored = BattleReplay.Capture(original).Restore(definition);
+            Play(original, "E05-01"); Play(restored, "E05-01");
+            original.Execute(BattleCommand.EndTurn()); restored.Execute(BattleCommand.EndTurn());
+            Play(original, "E05-01"); Play(restored, "E05-01");
+            Play(original, "E05-01"); Play(restored, "E05-01");
+            Assert.That(restored.View.Enemies.Select(x => x.Health), Is.EqualTo(original.View.Enemies.Select(x => x.Health)));
+
+            var orders = Enumerable.Range(0, 8).Select(seed =>
+            {
+                var session = new BattleSession(definition, (uint)seed, boss: BossEncounterKind.Watcher);
+                Play(session, "E05-01");
+                return session.View.Enemies.Single(x => x.Id.Contains("guard") && x.Health > 0).Id;
+            });
+            Assert.That(orders.Distinct().Count(), Is.GreaterThan(1));
         }
     }
 }

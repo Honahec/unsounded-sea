@@ -14,11 +14,12 @@ namespace UnsoundedSea.Runtime
         public BattleStage Stage { get; private set; }
         public string SelectedEnemy { get; private set; }
         public bool Paused { get; private set; }
-        public bool Busy => Time.unscaledTime < feedbackUntil || (Stage != null && (Stage.HasPendingSeaAttack || Stage.HasPendingDeckMotion));
+        public bool Busy => Time.unscaledTime < feedbackUntil || (Stage != null && (Stage.DelaysHudUntilImpact || Stage.HasPendingSeaAttack || Stage.HasPendingDeckMotion));
         public string Notice { get; private set; }
         public bool NoticeIsError { get; private set; }
         public event Action Changed;
         public event Action<BattleView, BattleView, BattleCommand> Resolved;
+        public event Action<ResolvedEnemyAction> PresentedEnemyAction;
         private BattleSession session;
         private float feedbackUntil;
         private float noticeUntil;
@@ -94,7 +95,11 @@ namespace UnsoundedSea.Runtime
             if (!Stage.DelaysHudUntilImpact) Changed?.Invoke();
             return result;
         }
-        internal void NotifyPresentationImpact() => Changed?.Invoke();
+        internal void NotifyPresentationImpact(ResolvedEnemyAction action = null)
+        {
+            if (action != null) PresentedEnemyAction?.Invoke(action);
+            if (Stage == null || !Stage.DelaysHudUntilImpact) Changed?.Invoke();
+        }
         private void OnDestroy() { if (Stage != null) Destroy(Stage.gameObject); }
     }
 }

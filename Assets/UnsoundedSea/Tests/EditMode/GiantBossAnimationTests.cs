@@ -104,9 +104,9 @@ namespace UnsoundedSea.Tests
             var gaze = session.View.ResolvedEnemyActions.Single(a => a.EnemyId == id);
             Assert.That(gaze.Channel, Is.EqualTo(DamageChannel.Sanity)); Assert.That(gaze.Amount, Is.EqualTo(2));
             var summon = session.View.Hand.Single(c => c.Definition.Id == "E05-01");
-            var guardId = summon.Targets.First(t => t.Enabled).Id;
-            Assert.That(session.Execute(BattleCommand.Play(summon.InstanceId, guardId)).Success, Is.True);
-            Assert.That(session.View.Enemies.Single(e => e.Id == guardId).Health, Is.GreaterThan(0));
+            Assert.That(summon.Targets, Is.Empty);
+            Assert.That(session.Execute(BattleCommand.Play(summon.InstanceId)).Success, Is.True);
+            Assert.That(session.View.Enemies.Skip(1).Count(e => e.Health > 0), Is.EqualTo(1));
             session.Execute(BattleCommand.EndTurn());
             var replay = BattleReplay.Capture(session).Restore(scenario.encounter.Build());
             Assert.That(replay.View.ResolvedEnemyActions.Select(a => a.Amount), Is.EqualTo(session.View.ResolvedEnemyActions.Select(a => a.Amount)));

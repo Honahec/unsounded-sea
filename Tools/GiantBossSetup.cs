@@ -67,14 +67,14 @@ public static class GiantBossSetup
         {
             var stage=root.GetComponent<BattleStage>();
             foreach(var anchor in stage.actorAnchors)if(anchor!=null)UnityEngine.Object.DestroyImmediate(anchor.gameObject);
-            var positions=new[]{new Vector3(0,-68,300),new Vector3(-62,-8,186),new Vector3(-32,-8,166),new Vector3(0,-8,198),new Vector3(32,-8,166),new Vector3(62,-8,186)};
+            var positions=new[]{new Vector3(0,-68,300),new Vector3(-129.9f,-8,225),new Vector3(-210,-8,75),new Vector3(0,-8,235),new Vector3(210,-8,75),new Vector3(129.9f,-8,225)};
             stage.actorAnchors=new Transform[positions.Length];
             for(var i=0;i<positions.Length;i++)
             {
                 var go=new GameObject(i==0?"Boss actor — frontal sea":"Sea guard — "+M05GuardIds[i-1]);
                 go.transform.SetParent(stage.transform,false);go.transform.localPosition=positions[i];
                 go.transform.localRotation=Quaternion.Euler(0,180,0);
-                go.transform.localScale=Vector3.one*(i==0?10.5f:1);
+                go.transform.localScale=Vector3.one*(i==0?10.5f:i==3?2.625f:3.15f);
                 var anchor=go.AddComponent<BattleAnchor>();anchor.environment=BattleEnvironment.Sea;
                 anchor.showSelectionRing=i>0;anchor.labelHeight=i==0?.62f:.9f;
                 anchor.labelOffset=i==0?new Vector3(0,0,4):new Vector3(0,.8f,0);
@@ -83,10 +83,11 @@ public static class GiantBossSetup
                 if(i>0)go.AddComponent<BossTargetAnchor>().targetId=M05GuardIds[i-1];
                 stage.actorAnchors[i]=go.transform;
             }
-            stage.vessel.localPosition=new Vector3(0,stage.vessel.localPosition.y,32);
+            stage.vessel.localPosition=new Vector3(0,stage.vessel.localPosition.y,75);
+            stage.vessel.localScale=Vector3.one*1.4f;
             stage.vessel.localRotation=Quaternion.identity;
-            stage.battleCamera.transform.localPosition=new Vector3(0,24,-55);
-            stage.battleCamera.transform.localRotation=Quaternion.LookRotation(new Vector3(0,40,140)-stage.battleCamera.transform.localPosition,Vector3.up);
+            stage.battleCamera.transform.localPosition=new Vector3(0,120,-200);
+            stage.battleCamera.transform.localRotation=Quaternion.LookRotation(new Vector3(0,80,170)-stage.battleCamera.transform.localPosition,Vector3.up);
             stage.battleCamera.fieldOfView=65;
             stage.vesselFollowsWater=true;stage.placeholderCombatMotion=false;stage.cameraShake=.035f;
             PrefabUtility.SaveAsPrefabAsset(root,path);
@@ -103,7 +104,7 @@ public static class GiantBossSetup
         scenario.actorOverrides=Array.Empty<GameObject>();
         scenario.chapter="M05 / 无星王座";
         scenario.objectiveHeading="召唤并击退五名守卫";
-        scenario.objectiveHint="本体每回合造成2点理智冲击。";
+        scenario.objectiveHint="守卫先行动；本体理智冲击逐回合增强，上限10。";
         scenario.introduction="召唤并击退五名守卫。";
         scenario.taskLabel="";
         scenario.victoryText="五名守卫沉没，无星海域的封锁解除。";

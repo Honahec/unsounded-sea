@@ -39,7 +39,7 @@ namespace UnsoundedSea.Core
 
     public sealed partial class VoyageSession
     {
-        public const int CheckpointVersion=11;
+        public const int CheckpointVersion=12;
         public const int ActLength=11;
         private const int InitialToolUses=2, MaxHistory=512;
         private static readonly string[] InitialTools={"lantern","listener","shell"};

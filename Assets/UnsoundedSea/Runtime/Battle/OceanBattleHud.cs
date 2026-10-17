@@ -45,6 +45,7 @@ namespace UnsoundedSea.Runtime
             if (font != null) root.style.unityFontDefinition = FontDefinition.FromSDFFont(UiFont.Get(font));
             director.Changed += Refresh;
             director.Resolved += OnResolved;
+            director.PresentedEnemyAction += PresentEnemyActionImpact;
             root.RegisterCallback<KeyDownEvent>(Key, TrickleDown.TrickleDown);
             InitializeMotion();
             Render();
@@ -53,7 +54,8 @@ namespace UnsoundedSea.Runtime
         {
             DisposeMotion();
             chartOpen = false; chartWasPaused = false; bookOpen = false; bookWasPaused = false; showSettings = false; journalOpen = false;
-            director.Changed -= Refresh; director.Resolved -= OnResolved; root.UnregisterCallback<KeyDownEvent>(Key, TrickleDown.TrickleDown); root.Clear();
+            director.Changed -= Refresh; director.Resolved -= OnResolved; director.PresentedEnemyAction -= PresentEnemyActionImpact;
+            root.UnregisterCallback<KeyDownEvent>(Key, TrickleDown.TrickleDown); root.Clear();
         }
         private void OnResolved(BattleView before, BattleView after, BattleCommand command)
         {
@@ -259,8 +261,8 @@ namespace UnsoundedSea.Runtime
             actionValue.name = "battle-actions"; action.Add(actionValue); controls.Add(action);
 
             var vitals = Box("battle-vitals"); root.Add(vitals);
-            Vital(vitals, "生命", v.Health, scenario.encounter.playerHealth, "health", v.Block, "格挡");
-            Vital(vitals, "理智", v.Sanity, scenario.encounter.playerSanity, "sanity", v.Ward, "防护");
+            Vital(vitals, "生命", waitingForImpact ? presentedHealth : v.Health, scenario.encounter.playerHealth, "health", waitingForImpact ? presentedBlock : v.Block, "格挡");
+            Vital(vitals, "理智", waitingForImpact ? presentedSanity : v.Sanity, scenario.encounter.playerSanity, "sanity", waitingForImpact ? presentedWard : v.Ward, "防护");
 
             var hand = new ScrollView(ScrollViewMode.Horizontal); hand.name = "hand"; hand.AddToClassList("hand");
             // Ignore the full built-in scroll shell, including the content/vertical-scroll wrapper.
@@ -682,8 +684,11 @@ namespace UnsoundedSea.Runtime
                 }
                 else if (presentedBoss == BossEncounterKind.Watcher)
                 {
-                    plate.style.left = Mathf.Clamp(p.x + (screen.x < .5f ? -width - 34 : 34), 18, Mathf.Max(18, root.resolvedStyle.width - width - 18));
-                    plate.style.top = Mathf.Clamp(p.y - height * .5f, 100, Mathf.Max(100, root.resolvedStyle.height - height - 250));
+                    plate.style.width = 210;
+                    var right = i >= 4;
+                    plate.style.left = i == 3 ? root.resolvedStyle.width * .34f - 105 : right ? root.resolvedStyle.width - 228 : 18;
+                    plate.style.top = i == 3 ? Mathf.Max(100, root.resolvedStyle.height - height - 245) :
+                        Mathf.Min(root.resolvedStyle.height * (i == 1 || i == 5 ? .25f : .55f), Mathf.Max(100, root.resolvedStyle.height - height - 245));
                 }
                 else if (presentedBoss != BossEncounterKind.None)
                 {

@@ -29,6 +29,8 @@ namespace UnsoundedSea.Runtime
         public GiantBossMotion GiantMotion { get; private set; }
         public bool HasPendingDeckMotion => deckMotion != null && deckMotion.Busy;
         public float DeckActionImpact => deckMotion == null ? 0 : deckMotion.ActionImpact;
+        internal bool HasPendingGenericAttack => GiantMotion == null && deckMotion == null && !skeletalPresentation && !rigidPresentation && attack > 0;
+        internal bool GenericAttackAtImpact => attack <= .5f;
         private Coroutine actionSequence;
         private bool skeletalPresentation;
         private bool rigidPresentation;
@@ -106,6 +108,7 @@ namespace UnsoundedSea.Runtime
             var bounds = new Bounds(); bool first = true;
             foreach (var renderer in root.GetComponentsInChildren<Renderer>())
             {
+                if (!(renderer is MeshRenderer) && !(renderer is SkinnedMeshRenderer)) continue;
                 var local = renderer.localBounds;
                 // A skin's culling bounds can be expressed relative to its root bone and
                 // deliberately padded for motion. Use baked geometry for selection/labels.

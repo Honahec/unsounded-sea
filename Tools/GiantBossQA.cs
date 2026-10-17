@@ -36,7 +36,7 @@ public static class GiantBossQA
         var initial=Time.frameCount;var m=d.Stage.Actors[0].GiantMotion;var prefix="Logs/GiantBosses/M0"+(index+2);Directory.CreateDirectory(prefix);
         if(index==3)
         {
-            var card=d.View.Hand.Single(c=>c.Definition.Id=="E05-01");var prepare=d.Submit(BattleCommand.Play(card.InstanceId,card.Targets.First(t=>t.Enabled).Id));if(!prepare.Success)throw new Exception(prepare.Error);
+            var card=d.View.Hand.Single(c=>c.Definition.Id=="E05-01");var prepare=d.Submit(BattleCommand.Play(card.InstanceId));if(!prepare.Success)throw new Exception(prepare.Error);
             await WaitReady();
         }
         // Two real enemy turns include a physical strike and a summon/ritual when applicable.
@@ -115,20 +115,38 @@ public static class GiantBossQA
         {
             if(d.View.Actions==0){var end=d.Submit(BattleCommand.EndTurn());if(!end.Success)throw new Exception(end.Error);await WaitReady();}
             var card=d.View.Hand.Single(c=>c.Definition.Id=="E05-01");
-            var target=card.Targets.First(t=>t.Enabled);
-            var actor=d.Stage.Actors.Single(a=>a.EnemyId==target.Id);
-            var crossed=false;actor.BrokeSurface+=_=>crossed=true;
-            var result=d.Submit(BattleCommand.Play(card.InstanceId,target.Id));if(!result.Success)throw new Exception(result.Error);
-            if(!actor.IsEmerging||actor.HighestPointY>=d.Stage.water.SurfaceHeight(actor.transform.position))throw new Exception("Guard did not start underwater: "+target.Id);
+            var dormant=d.Stage.Actors.Where(a=>!a.Alive).ToArray();
+            var crossed=false;
+            foreach(var candidate in dormant)candidate.BrokeSurface+=_=>crossed=true;
+            var result=d.Submit(BattleCommand.Play(card.InstanceId));if(!result.Success)throw new Exception(result.Error);
+            var actor=dormant.Single(a=>a.Alive);
+            if(!actor.IsEmerging||actor.HighestPointY>=d.Stage.water.SurfaceHeight(actor.transform.position))throw new Exception("Guard did not start underwater: "+actor.EnemyId);
             await WaitReady();
-            if(!crossed||actor.IsEmerging)throw new Exception("Guard did not finish breaking the surface: "+target.Id);
+            if(!crossed||actor.IsEmerging)throw new Exception("Guard did not finish breaking the surface: "+actor.EnemyId);
         }
         if(d.View.Enemies.Skip(1).Count(e=>e.Health>0)!=5||d.View.ObjectiveProgress!=0)throw new Exception("Five summoned guards must remain alive without victory progress.");
-        var positions=d.Stage.Actors.Skip(1).Select(a=>d.Stage.battleCamera.WorldToViewportPoint(a.transform.position).x).OrderBy(x=>x).ToArray();
-        if(positions[1]>=.45f||positions[3]<=.55f||Mathf.Abs(positions[2]-.5f)>.05f)throw new Exception("Guard slots are not left two, center one, right two.");
+        var actors=d.Stage.Actors.ToArray();var authoredCenter=d.Stage.transform.TransformPoint(new Vector3(0,0,150));var center=new Vector2(authoredCenter.x,authoredCenter.z);
+        var expected=new[]{new Vector2(0,150),new Vector2(-129.9f,75),new Vector2(-210,-75),new Vector2(0,85),new Vector2(210,-75),new Vector2(129.9f,75)};
+        for(var i=0;i<actors.Length;i++)
+        {
+            var offset=new Vector2(actors[i].transform.position.x,actors[i].transform.position.z)-center;
+            if(Vector2.Distance(offset,expected[i])>.2f)throw new Exception("M05 actor is outside its stage slot: "+i+" offset="+offset+" expected="+expected[i]);
+        }
+        var bossHeight=BattleActorView.MeasureLocalBounds(actors[0].transform).size.y*actors[0].transform.lossyScale.y;
+        var guardHeights=actors.Skip(1).Select(a=>BattleActorView.MeasureLocalBounds(a.transform).size.y*a.transform.lossyScale.y).ToArray();
+        for(var i=0;i<guardHeights.Length;i++)
+            if(Mathf.Abs(guardHeights[i]/bossHeight-(i==2?1f/3:.4f))>.02f)throw new Exception("Guard height differs from intended boss proportion: "+i);
+        var projected=actors.Select(a=>d.Stage.battleCamera.WorldToViewportPoint(a.transform.position)).ToArray();
+        var projectedTops=actors.Select(a=>d.Stage.battleCamera.WorldToViewportPoint(a.transform.TransformPoint(Vector3.up*BattleActorView.MeasureLocalBounds(a.transform).max.y))).ToArray();
+        if(projected.Concat(projectedTops).Any(p=>p.z<=0||p.x<.04f||p.x>.96f||p.y<.04f||p.y>.96f))throw new Exception("M05 formation does not fit the camera.");
+        var ship=d.Stage.battleCamera.WorldToViewportPoint(d.Stage.vessel.position);
+        if(ship.x<.45f||ship.x>.55f||ship.y<.15f||ship.y>.45f)throw new Exception("Vessel is not lower-center: "+ship);
+        if(Mathf.Abs(projected[3].x-.5f)>.02f||actors[3].transform.position.z<=d.Stage.vessel.position.z)throw new Exception("Central guardian must stand ahead of the vessel, centered before the boss.");
+        var positions=projected.Skip(1).Select(p=>p.x).OrderBy(x=>x).ToArray();
+        if(positions[1]>=.45f||positions[3]<=.55f)throw new Exception("Guard slots do not span both sides of the vessel.");
         Capture(d.Stage.battleCamera,"Logs/GiantBosses/M05-all-guards.png");
         if(saved!=(File.Exists(VoyageRuntime.SavePath)?File.ReadAllText(VoyageRuntime.SavePath):null))throw new Exception("Formal save changed.");
-        return "Five real summons emerged; slots="+string.Join(",",positions.Select(x=>x.ToString("F3")))+"; formal save unchanged.";
+        return "Five real summons emerged; two left, two right, one central; boss="+bossHeight.ToString("F1")+"m; guards="+string.Join(",",guardHeights.Select(h=>h.ToString("F1")))+"m; vessel="+ship.ToString("F3")+"; slots="+string.Join(",",positions.Select(x=>x.ToString("F3")))+"; formal save unchanged.";
     }
     public static void Capture(Camera camera,string path)
     {

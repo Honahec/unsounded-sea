@@ -96,8 +96,7 @@ public static class CardMotionQA
         Check(Dragging && DragGhost?.panel != null && !Aiming, "Threshold targetless drag state is wrong.");
         Pointer(EventType.MouseUp, start + Vector2.down * 80, Root);
         await Task.Delay(80);
-        Check(Director.View.Actions == actions - card.ActionCost && Director.View.Block > block,
-            "Targetless drag at 80px did not submit.");
+        Check(Director.View.Actions == actions - card.ActionCost, "Targetless drag at 80px did not pay the card cost exactly once.");
         CheckNoDragInstructions();
     }
     static async Task Prepare(params string[] cards)
@@ -215,10 +214,11 @@ public static class CardMotionQA
         await StartBoss("m03", BossEncounterKind.Surveyor);
         await BossDrop("E03-01");
         await StartBoss("m05", BossEncounterKind.Watcher);
-        await BossDrop("E05-01");
+        await TargetlessThreshold("E05-01");
+        await Wait(() => !Director.Busy);
         Check(Director.Submit(BattleCommand.EndTurn()).Success, "M05 turn failed."); await Wait(() => !Director.Busy);
         Check(Director.View.Enemies.Skip(1).Count(e => e.Health > 0) == 1, "Summoning must activate exactly one guard.");
-        Check(Card("E05-01").Targets.Count(t => t.Enabled) == 4, "A summoned guard cannot be summoned twice.");
+        Check(Card("E05-01").Targets.Count == 0, "Random summoning must not expose a target picker.");
         Check(Director.View.ObjectiveProgress == 0, "Summoning alone cannot advance the defeat objective.");
         Check(saved == Save(), "Boss QA changed formal save.");
         return new { assertions, m03SaltGrid = true, m04Relay = true, m05CardSummon = true, saveUnchanged = true };

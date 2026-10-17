@@ -21,7 +21,7 @@ namespace UnsoundedSea.Runtime
         float dragWidth, dragHeight, pressPanelY;
         string nextTurnBanner;
         BattleView impactView;
-        int pendingSanityDelta;
+        int presentedHealth, presentedSanity, presentedBlock, presentedWard;
 
         void QueueCardEntry(VisualElement card, int index)
         {
@@ -55,7 +55,7 @@ namespace UnsoundedSea.Runtime
             root?.UnregisterCallback<PointerCaptureOutEvent>(LostPointer);
             root?.UnregisterCallback<PointerCancelEvent>(CancelTouch);
             motion?.ClearMotion(); motion = null; dragGhost = null;
-            impactView = null; pendingSanityDelta = 0;
+            impactView = null;
         }
         void BindCardDrag(Button button, CardView card)
         {
@@ -298,11 +298,7 @@ namespace UnsoundedSea.Runtime
             if (motion == null) return;
             if (pointerHeld && (director.Paused || bookOpen || chartOpen || inspectedCard != 0 || director.View?.PendingChoice != null)) CancelDrag();
             if (!director.Paused && impactView != null && director.Stage != null && !director.Stage.DelaysHudUntilImpact)
-            {
-                if (pendingSanityDelta != 0)
-                    motion.Pulse(PlayerPoint + new Vector2(0, -70), BattleMotionLayer.Cue.Ward, "理智 " + pendingSanityDelta.ToString("+0;-0"));
-                impactView = null; pendingSanityDelta = 0;
-            }
+                impactView = null;
             if (!director.Paused) motion.Tick(Time.unscaledDeltaTime);
             if (!director.Paused && !director.Busy && nextTurnBanner != null)
             { motion.Banner(nextTurnBanner); nextTurnBanner = null; }
@@ -328,8 +324,12 @@ namespace UnsoundedSea.Runtime
         {
             resolvedMotion = true;
             var waitsForImpact = command.kind == CommandKind.EndTurn && after.BossKind == BossEncounterKind.Watcher &&
-                after.ResolvedEnemyActions.Any(a => a.EnemyId == after.Enemies[0].Id && a.Channel == DamageChannel.Sanity && a.Amount > 0);
-            if (waitsForImpact) { impactView = before; pendingSanityDelta = after.Sanity - before.Sanity; }
+                after.ResolvedEnemyActions.Count > 0;
+            if (waitsForImpact)
+            {
+                impactView = before;
+                presentedHealth = before.Health; presentedSanity = before.Sanity; presentedBlock = before.Block; presentedWard = before.Ward;
+            }
             var card = before.Hand.FirstOrDefault(c => c.InstanceId == command.cardInstanceId);
             if (command.kind == CommandKind.PlayCard && card != null)
             {
@@ -358,7 +358,7 @@ namespace UnsoundedSea.Runtime
             }
             if (after.Block > before.Block) motion.Pulse(PlayerPoint, BattleMotionLayer.Cue.Guard, "格挡 +" + (after.Block - before.Block));
             if (after.Ward > before.Ward) motion.Pulse(PlayerPoint + new Vector2(0, -70), BattleMotionLayer.Cue.Ward, "防护 +" + (after.Ward - before.Ward), .08f);
-            if (after.Health != before.Health) motion.Pulse(PlayerPoint, after.Health > before.Health ? BattleMotionLayer.Cue.Heal : BattleMotionLayer.Cue.Impact, "生命 " + (after.Health - before.Health).ToString("+0;-0"), .15f);
+            if (!waitsForImpact && after.Health != before.Health) motion.Pulse(PlayerPoint, after.Health > before.Health ? BattleMotionLayer.Cue.Heal : BattleMotionLayer.Cue.Impact, "生命 " + (after.Health - before.Health).ToString("+0;-0"), .15f);
             if (!waitsForImpact && after.Sanity != before.Sanity) motion.Pulse(PlayerPoint + new Vector2(0, -70), BattleMotionLayer.Cue.Ward, "理智 " + (after.Sanity - before.Sanity).ToString("+0;-0"), .2f);
             if (after.ObjectiveProgress > before.ObjectiveProgress) motion.Pulse(new Vector2(165, 65), BattleMotionLayer.Cue.Progress, "进度 +" + (after.ObjectiveProgress - before.ObjectiveProgress));
             if (after.Evidence.Count > before.Evidence.Count && !after.Enemies.Any(e => e.IntentConfirmed && before.Enemies.Any(b => b.Id == e.Id && !b.IntentConfirmed)))
@@ -377,8 +377,29 @@ namespace UnsoundedSea.Runtime
                 // Use only executed actions, including blocked attacks; never peek at locked intent.
                 int physical = after.ResolvedEnemyActions.Where(a => a.Channel == DamageChannel.Health).Sum(a => a.Amount);
                 int blocked = Mathf.Min(before.Block, physical);
-                if (blocked > 0) motion.Pulse(PlayerPoint, BattleMotionLayer.Cue.Guard, "防御", .25f);
+                if (!waitsForImpact && blocked > 0) motion.Pulse(PlayerPoint, BattleMotionLayer.Cue.Guard, "防御", .25f);
             }
+        }
+        void PresentEnemyActionImpact(ResolvedEnemyAction action)
+        {
+            if (impactView == null) return;
+            var healthDelta = action.Health - presentedHealth;
+            var sanityDelta = action.Sanity - presentedSanity;
+            if (healthDelta != 0) motion.Pulse(PlayerPoint, BattleMotionLayer.Cue.Impact, "生命 " + healthDelta.ToString("+0;-0"));
+            if (sanityDelta != 0) motion.Pulse(PlayerPoint + new Vector2(0, -70), BattleMotionLayer.Cue.Ward, "理智 " + sanityDelta.ToString("+0;-0"));
+            SetPresentedVital("health", action.Health, director.scenario.encounter.playerHealth, action.Block, "格挡");
+            SetPresentedVital("sanity", action.Sanity, director.scenario.encounter.playerSanity, action.Ward, "防护");
+            presentedHealth = action.Health; presentedSanity = action.Sanity; presentedBlock = action.Block; presentedWard = action.Ward;
+        }
+
+        void SetPresentedVital(string name, int value, int max, int protection, string protectionName)
+        {
+            var label = root.Q<Label>("battle-" + name);
+            if (label != null) label.text = $"{value} / {max}";
+            var fill = root.Q(className: name)?.Q(className: "vital-fill");
+            if (fill != null) fill.style.width = Length.Percent(max > 0 ? Mathf.Clamp01((float)value / max) * 100 : 0);
+            var guard = root.Q<Label>("battle-" + name + "-guard");
+            if (guard != null) guard.text = protection > 0 ? $"{protectionName}  {protection}" : string.Empty;
         }
     }
 }

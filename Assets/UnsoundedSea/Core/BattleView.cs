@@ -79,8 +79,15 @@ namespace UnsoundedSea.Core
         public string EnemyId { get; }
         public DamageChannel Channel { get; }
         public int Amount { get; }
-        public ResolvedEnemyAction(string enemyId, DamageChannel channel, int amount)
-        { EnemyId = enemyId; Channel = channel; Amount = amount; }
+        public int Health { get; }
+        public int Sanity { get; }
+        public int Block { get; }
+        public int Ward { get; }
+        public ResolvedEnemyAction(string enemyId, DamageChannel channel, int amount, int health = 0, int sanity = 0, int block = 0, int ward = 0)
+        {
+            EnemyId = enemyId; Channel = channel; Amount = amount;
+            Health = health; Sanity = sanity; Block = block; Ward = ward;
+        }
     }
     public sealed class BattleView
     {
