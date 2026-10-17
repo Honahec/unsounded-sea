@@ -62,20 +62,20 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 ```
 
 - **换场景**：复制或创建带 `BattleStage` 的 Prefab，配置 `battleCamera`、`vessel`（所有随船运动的物体父节点）、`actorAnchors` 和选中材质，再替换 Scenario 的 `stagePrefab`。海面与音响可选；当前舞台不支持角色移动/导航。
-- **镜头构图**：海面 Boss 的相机独立于船体 rig，船体摇晃不带动镜头；位置 `(85,22,-26)`、看向 `(0,8,70)`、垂直 FOV 60°。换船或海怪后需一起检查尺度、距离、海面覆盖、名牌和 HUD 遮挡，不能只移动相机。
+- **镜头构图**：海面 Boss 的相机独立于船体 rig，船体横摇不带动镜头；巨浪来临时按前方水位预判升高并调整俯角，浪后回到基础构图。基础位置 `(85,22,-26)`、看向 `(0,8,70)`、垂直 FOV 60°。换船或海怪后需一起检查尺度、距离、海面覆盖、名牌和 HUD 遮挡，不能只移动相机。
 - **甲板 / 海面锚点**：普通锚点保持甲板表现；海面锚点挂 `BattleAnchor` 并设为 `Sea`，必须放在船体 rig 之外，校验会拒绝错误挂载。设置独立位置、浸没深度、名牌高度/偏移、轻微升沉与扰流半径；海面角色通常关闭脚底选中环。碰撞范围按模型局部包围盒计算，锚点旋转/缩放不重复放大范围。
 - **换角色**：修改 Enemy 的 `presentationPrefab`，或在 Scenario 的 `actorOverrides` 按敌人槽位覆写。模型约定脚底 y=0、正面 +Z、真实米制；锚点决定位置和朝向。同种敌人可以重复引用，规则实例 ID 为 `id:槽位`。出生前校验相机、船体、锚点和模型引用。
 - **换遭遇**：Scenario 指向另一个 Encounter；牌组、资源、敌人意图和工具仍属于规则数据。UI 按快照更新，不依赖两只敌人的名字。新增敌人需增加相应舞台锚点并检查名牌排布。
 - **特殊战入口**：派生 `BattleRuleModule`，为每次会话创建新的 `EffectRegistry` / `IEncounterObjective`。`SealingRuleModule` 用于雾海封线；`SurvivalRuleModule` 用于海面撤离，按已结算轮数计数。两者均不靠敌人全部死亡判胜。模块资产只存配置，不能共享可变进度。需要新命令、敌人阶段策略或即时玩法时仍需扩展 Core 与测试；当前入口不等于这些玩法已实现。
-- **反馈事件**：Director 的 `Resolved(before, after, command)` 通知舞台，`Changed` 通知 UI；短暂反馈期间拒绝连点，规则仍同步确定性结算。暂停冻结舞台运动与环境声；减少动效关闭船体摇晃、镜头震动和角色摆动。
+- **反馈事件**：Director 的 `Resolved(before, after, command)` 通知舞台，`Changed` 通知 UI；短暂反馈期间拒绝连点，规则仍同步确定性结算。暂停冻结舞台运动与环境声；减少动效关闭船体横移/倾斜、镜头震动和角色摆动，但保留随慢速水面的升沉与防淹没镜头升高。
 
 「沉钟海域」使用 **Uber Stylized Water**：多向不规则涌浪、细波法线、半分辨率破碎倒影、浪尖/接触泡沫和海雾；深海材质关闭折射与岸边透明渐隐，浅深色均为不透明；甲板战保留原轻量水面。巨兽扰流与钟声只负责表现，不影响规则随机数。场景雾、月光、暖色船灯、Bloom/Vignette 构成海洋氛围；沉钟之母使用 BANG 拆出的 12 个刚性部件，由 `BellMotherRigidMotion` 播放短前摇、抬起触手、低位拍击、沉重命中和死亡动作。攻击时主体小幅上浮蓄力、拍下后下沉并延迟回稳，倾斜小于 1°；冠部和触手根部随同一躯干变换移动，保持相对连接。仅左右外侧两条粗触手（Prefab 的 `attackTentacles`，当前为 `Tentacle_02/06`）使用各自根部/外端采样点，缓慢抬起后加速下砸，触水后减速下压、低位停留，再缓慢回收；身体稍晚下沉，避免立即反弹。具体时序及采样见[验证记录](FRAMEWORK_VALIDATION.md#沉钟之母-bang-分件与刚性动作流程)；其余四条保持低位，不到 1° 的轻摆随回收淡出。禁止独立平移整段触手或按编号猜旋转方向。`SurfaceStruck` 在两条触手下落穿过 `BattleWater.SurfaceHeight` 时各触发一次，`BattleStage` 接入冲击浪与水花；不会把出水或动画末尾当成入水。攻击尚未结束时拒绝新命令，避免拍击被提前打断。受击不再使用正弦弹跳，只做短促后仰与下沉。`BattleActorView` 的表现层只消费 `Resolved` 结果，规则仍独立结算；旧 Generic Rig 资产保留作回溯样例，没有骨骼的旧模型继续使用兼容的简化反馈。`BattleStage.placeholderCombatMotion` 只控制无动画模型的占位运动。
 
 ### 海面配置
 
 - `BattleStage.water` 可选接入 `BattleWater`，`surface` 指向同一海面 Renderer；使用 `Art/SeaBoss/DeepOcean.mat` 和 `DeepOceanMesh.asset`。水面保持水平、单位缩放，放在 Water（4）层，反射层排除水面；一场战斗只启用一个平面反射水体。当前网格为固定战斗镜头设计，不是无限海洋。
-- `BattleWater` 在每场开始克隆材质并创建反射组件，停用时恢复原材质、清理相机和 RT。`_SeaTime` 驱动全部水面动画，暂停冻结时钟及反射；减少动效时以 1/4 速率连续推进，不跳变相位。`_Threat` 负责常态巨兽扰流；每个水体独立维护最多 8 个有寿命的拍击波，`SeaImpactWave` 与 `BattleWaterWake.hlsl` 共用同一波形、时钟和来源参数，波峰、尾随波谷、法线与破碎泡沫一起向外传播。`SeaImpactSpray` 负责触水点的弹道水花与水雾，跟随水体时钟暂停并在解绑时清理；`Tools/SeaImpactSetup.cs` 只给现有舞台配置水花材质；其他巨兽可把自身入水事件接到 `BattleWater.EmitImpact`。避免直接修改共享材质。
-- 常态海况由两组基础波与四组方向、尺度、速度各异的相位扰动涌浪组成；浪尖按噪声破碎，巨兽周围持续产生宽范围不对称扰流。`DeepOcean.mat` 的 Storm 参数可在材质 Inspector 调整，修改后重开战斗刷新船体采样。`vesselFollowsWater` 使用同一组波参数、扰流和拍击波采样船体中心、首尾及左右水位，`VesselWaveResponse` 用带阻尼的升沉/姿态响应保留惯性；冲击波到船处后才增加抬升、沿传播方向的有限横移和倾斜，常态目标俯仰限 6°、横摇限 9°，冲击期间最多增加 6°／7°。换船后调整 `vesselSampleExtents`；这是受控浮动近似，没有 Rigidbody 碰撞、流体求解或倾覆模拟。暂停冻结海浪和船，减少动效保持船姿态，恢复时平滑追随。
+- `BattleWater` 在每场开始克隆材质并创建反射组件，停用时恢复原材质、清理相机和 RT。`_SeaTime` 驱动全部水面动画，暂停冻结时钟及反射；减少动效时以 1/4 速率连续推进，不跳变相位。`_Threat` 负责常态巨兽扰流；每个水体独立维护最多 8 个有寿命的拍击波，`SeaImpactWave` 与 `BattleWaterWake.hlsl` 共用同一波形、时钟和来源参数，波峰、尾随波谷、法线与破碎泡沫一起向外传播。默认拍击振幅参数 100 m，宽度参数 70 m、传播速度 45 m/s，双触手叠加后平滑限幅至 110 m 以下；当前巨兽约 208 m 总高，近场浪峰按其 1/3–1/2 设计，远处逐渐衰减。材质不透明且关闭折射/岸边渐隐时启用 `_SeaZWrite`，避免浪墙内部前后面错误覆盖；高浪淡出平面倒影并使用环境反射。`SeaImpactSpray` 负责触水点的弹道水花与水雾，跟随水体时钟暂停并在解绑时清理；`Tools/SeaImpactSetup.cs` 只给现有舞台配置水花材质；其他巨兽可把自身入水事件接到 `BattleWater.EmitImpact`。避免直接修改共享材质。
+- 常态海况由两组基础波与四组方向、尺度、速度各异的相位扰动涌浪组成；浪尖按噪声破碎，巨兽周围持续产生宽范围不对称扰流。`DeepOcean.mat` 的 Storm 参数可在材质 Inspector 调整，修改后重开战斗刷新船体采样。`vesselFollowsWater` 使用同一组波参数、扰流和拍击波采样船体中心、首尾及左右水位，`VesselWaveResponse` 用水面速度前馈与带阻尼的升沉/姿态响应保留惯性，避免快速涨水把船埋入浪中；冲击波到船处后才增加抬升、沿传播方向的有限横移和倾斜，常态目标俯仰限 6°、横摇限 9°，冲击期间目标上限为俯仰 24°／横摇 32°（阻尼响应可轻微超调）。换船后调整 `vesselSampleExtents`；这是受控浮动近似，没有 Rigidbody 碰撞、流体求解或倾覆模拟。暂停冻结海浪和船，减少动效收敛横移与倾斜，仍随 1/4 速海面升沉，恢复时平滑追随。
 - `BattleWaterLighting.hlsl` 以水的约 2% 正入射反射率计算 GGX 高光，读取主光/Forward+ 点光的颜色、强度、衰减与阴影；法线像素方差抑制远处闪点。`Specular Tint` 为 0–1 色调，`Roughness` 控制展宽（有效 0.22–0.8），旧 Hardness/Size 不再使用。浪尖泡沫使用 `SurfFoam Color` 作为漫反射色覆盖水面，接受环境与直接光，不作自发光相加；接触泡沫仍为低亮度美术色。
 - PC 管线需要 **Depth Texture / Opaque Texture**；当前 Unity 6000.6.5f1、URP 17.6、Forward+ 已配置。`reflectionScale` 默认 0.5，降低可减少额外渲染成本。移动管线、XR、多相机/多水位组合尚未验收。
 - 上游版本、MIT 许可、原始哈希与本地补丁集中记录在 [UPSTREAM.json](../Assets/ThirdParty/UberStylizedWater/UPSTREAM.json)。只引入运行依赖，不依赖上游 Shader Graph 编辑插件。升级需重新应用时钟、风暴波形/法线/泡沫、光照、扰流和反射补丁，并验证所有 Shader pass；不要用上游重新导出的 Shader 直接覆盖本地版。

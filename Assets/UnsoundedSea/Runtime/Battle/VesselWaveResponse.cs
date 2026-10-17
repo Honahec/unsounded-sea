@@ -9,10 +9,15 @@ namespace UnsoundedSea.Runtime
         public Vector3 Angles { get; private set; }
         private Vector3 velocity, angularVelocity;
 
-        public void Tick(Vector3 displacement, Vector3 angles, float delta)
+        public void Tick(Vector3 displacement, Vector3 angles, float delta, Vector3 surfaceVelocity = default)
         {
             if (delta <= 0) return;
-            Offset = Advance(Offset, ref velocity, displacement, delta, 12f, 0.8f);
+            // Track a moving water surface using its velocity, retaining damped error.
+            // A height-only spring lags metres behind a giant ascending wave and buries the hull.
+            var relativeVelocity = velocity - surfaceVelocity;
+            Offset = Advance(Offset, ref relativeVelocity, displacement - surfaceVelocity * delta, delta, 18f, 0.8f)
+                + surfaceVelocity * delta;
+            velocity = relativeVelocity + surfaceVelocity;
             Angles = Advance(Angles, ref angularVelocity, angles, delta, 4.5f, 0.7f);
         }
 

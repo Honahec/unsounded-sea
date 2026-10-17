@@ -94,11 +94,11 @@ namespace UnsoundedSea.Tests
             var ship = Vector3.right * 135;
             water.EmitImpact(Vector3.zero);
             Assert.That(water.SampleImpactHeight(ship), Is.Zero);
-            water.Tick(2, false, false, Vector4.zero);
+            water.Tick(1.2f, false, false, Vector4.zero);
             Assert.That(water.SampleImpactHeight(ship), Is.Zero, "Ship must not react before the front arrives");
-            water.Tick(1, false, false, Vector4.zero);
+            water.Tick(1.8f, false, false, Vector4.zero);
             var crest = water.SampleImpactHeight(ship);
-            Assert.That(crest, Is.GreaterThan(3));
+            Assert.That(crest, Is.InRange(60f, 100f));
             Assert.That(water.SampleImpactSurge(ship).x, Is.GreaterThan(0));
             water.Tick(10, true, false, Vector4.zero);
             Assert.That(water.SampleImpactHeight(ship), Is.EqualTo(crest));
@@ -111,6 +111,29 @@ namespace UnsoundedSea.Tests
             water.Bind(camera);
             Assert.That(water.ImpactCount, Is.Zero);
             Assert.That(water.SampleImpactHeight(ship), Is.Zero);
+        }
+
+        [Test]
+        public void CatastrophicCrestReachesOneThirdOfBossWithoutUnboundedOverlap()
+        {
+            var impact = new Vector4(0, 0, 0, SeaImpactWave.DefaultAmplitude);
+            float highest = 0;
+            for (int frame = 1; frame <= 200; frame++)
+                highest = Mathf.Max(highest, SeaImpactWave.Combine(SeaImpactWave.Height(new Vector2(45, 0), frame * 0.01f, impact)));
+            Assert.That(highest / 208f, Is.InRange(1f / 3, 0.5f));
+            Assert.That(SeaImpactWave.Combine(800), Is.LessThan(SeaImpactWave.CombinedHeightLimit));
+            var hull = new VesselWaveResponse();
+            float previous = 0, worstLag = 0;
+            for (int frame = 1; frame <= 800; frame++)
+            {
+                float clock = frame * 0.01f;
+                float height = SeaImpactWave.Combine(SeaImpactWave.Height(new Vector2(180, 0), clock, impact) * 2);
+                float speed = (height - previous) / 0.01f;
+                hull.Tick(Vector3.up * height, Vector3.zero, 0.01f, Vector3.up * speed);
+                worstLag = Mathf.Max(worstLag, height - hull.Offset.y);
+                previous = height;
+            }
+            Assert.That(worstLag, Is.LessThan(1.5f), "The reinforced hull must follow a rising wall instead of being buried by spring lag");
         }
 
         [Test]
@@ -132,6 +155,21 @@ namespace UnsoundedSea.Tests
             for (int i = 0; i < 600; i++) a.Tick(Vector3.zero, Vector3.zero, 1f / 60);
             Assert.That(a.Offset.magnitude, Is.LessThan(0.001f));
             Assert.That(a.Angles.magnitude, Is.LessThan(0.001f));
+        }
+
+        [Test]
+        public void OpaqueSeaWritesDepthWithoutChangingTransparentWaterOrSource()
+        {
+            source.SetFloat("_ShoreFade", 0);
+            source.SetColor("_Color_Shallow", Color.black);
+            source.SetColor("_Color_Deep", Color.black);
+            source.DisableKeyword("_ENABLEREFRACTION");
+            water.Bind(camera);
+            Assert.That(water.surface.sharedMaterial.GetFloat("_SeaZWrite"), Is.EqualTo(1));
+            Assert.That(source.GetFloat("_SeaZWrite"), Is.Zero);
+            source.SetColor("_Color_Shallow", new Color(0, 0, 0, 0.5f));
+            water.Bind(camera);
+            Assert.That(water.surface.sharedMaterial.GetFloat("_SeaZWrite"), Is.Zero);
         }
 
         [Test]

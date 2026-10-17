@@ -29,7 +29,8 @@ namespace UnsoundedSea.Runtime
         public bool HasPendingSeaAttack => seaMotions.Exists(m => m != null && m.ActiveAction == "Attack");
         private BattleDirector director;
         private Vector3 shipPosition, cameraPosition;
-        private Quaternion shipRotation;
+        private Quaternion shipRotation, cameraRotation;
+        private float impactCameraLift;
         private float age, shake;
         private bool previousFog;
         private Color previousColor;
@@ -48,6 +49,7 @@ namespace UnsoundedSea.Runtime
         {
             director = owner; shipPosition = vessel.localPosition; shipRotation = vessel.localRotation;
             cameraPosition = battleCamera.transform.localPosition;
+            cameraRotation = battleCamera.transform.localRotation;
             oceanProperties = new MaterialPropertyBlock();
             var view = owner.View;
             for (var i = 0; i < view.Enemies.Count; i++)
@@ -132,7 +134,8 @@ namespace UnsoundedSea.Runtime
             }
             if (vesselFollowsWater && water != null)
             {
-                if (!reduced) FollowWaves(Time.unscaledDeltaTime);
+                FollowWaves(Time.unscaledDeltaTime);
+                FrameImpactWaves(Time.unscaledDeltaTime, reduced);
             }
             else
             {
@@ -147,23 +150,50 @@ namespace UnsoundedSea.Runtime
             var rotation = parent != null ? parent.rotation * shipRotation : shipRotation;
             var forward = rotation * Vector3.forward * Mathf.Max(0.1f, vesselSampleExtents.y);
             var right = rotation * Vector3.right * Mathf.Max(0.1f, vesselSampleExtents.x);
-            float pitch = -Mathf.Atan2(water.SampleDisplacement(rest + forward).y - water.SampleDisplacement(rest - forward).y, forward.magnitude * 2) * Mathf.Rad2Deg;
-            float roll = Mathf.Atan2(water.SampleDisplacement(rest + right).y - water.SampleDisplacement(rest - right).y, right.magnitude * 2) * Mathf.Rad2Deg;
-            var impact = Mathf.Abs(water.SampleImpactHeight(rest));
-            float response = Mathf.Clamp01(impact / 3f);
-            var targetAngles = new Vector3(Mathf.Clamp(pitch, -maxWavePitch - response * 6, maxWavePitch + response * 6),
+            var sampleCenter = rest + Vector3.ProjectOnPlane(vesselResponse.Offset, Vector3.up);
+            float pitch = -Mathf.Atan2(water.SampleDisplacement(sampleCenter + forward).y - water.SampleDisplacement(sampleCenter - forward).y, forward.magnitude * 2) * Mathf.Rad2Deg;
+            float roll = Mathf.Atan2(water.SampleDisplacement(sampleCenter + right).y - water.SampleDisplacement(sampleCenter - right).y, right.magnitude * 2) * Mathf.Rad2Deg;
+            var impact = Mathf.Abs(water.SampleImpactHeight(sampleCenter));
+            float response = Mathf.Clamp01(impact / 25f);
+            var targetAngles = new Vector3(Mathf.Clamp(pitch, -maxWavePitch - response * 18, maxWavePitch + response * 18),
                 Mathf.Sin(water.SeaTime * 0.24f) * vesselYaw,
-                Mathf.Clamp(roll, -maxWaveRoll - response * 7, maxWaveRoll + response * 7));
+                Mathf.Clamp(roll, -maxWaveRoll - response * 23, maxWaveRoll + response * 23));
             // Finite hull footprint filters small ripples; the same travelling crest lifts the hull.
-            var displacement = water.SampleDisplacement(rest);
-            displacement.y = (displacement.y * 2 + water.SampleDisplacement(rest + forward).y
-                + water.SampleDisplacement(rest - forward).y + water.SampleDisplacement(rest + right).y
-                + water.SampleDisplacement(rest - right).y) / 6;
-            displacement += water.SampleImpactSurge(rest);
-            vesselResponse.Tick(displacement, targetAngles, delta);
+            var displacement = water.SampleDisplacement(sampleCenter);
+            displacement.y = (displacement.y * 2 + water.SampleDisplacement(sampleCenter + forward).y
+                + water.SampleDisplacement(sampleCenter - forward).y + water.SampleDisplacement(sampleCenter + right).y
+                + water.SampleDisplacement(sampleCenter - right).y) / 6;
+            displacement += water.SampleImpactSurge(sampleCenter);
+            var verticalSpeed = (water.SampleImpactHeight(sampleCenter, 0.05f) - water.SampleImpactHeight(sampleCenter, -0.05f)) / 0.1f;
+            if (GameSettings.ReducedMotion)
+            {
+                displacement.x = displacement.z = 0;
+                targetAngles = Vector3.zero;
+                verticalSpeed *= 0.25f;
+            }
+            vesselResponse.Tick(displacement, targetAngles, delta, Vector3.up * verticalSpeed);
             vessel.position = rest + vesselResponse.Offset;
             vessel.rotation = rotation * Quaternion.Euler(vesselResponse.Angles);
         }
+        private void FrameImpactWaves(float delta, bool reduced)
+        {
+            var parent = battleCamera.transform.parent;
+            var rest = parent != null ? parent.TransformPoint(cameraPosition) : cameraPosition;
+            var baseRotation = parent != null ? parent.rotation * cameraRotation : cameraRotation;
+            // Anticipate the approaching crest so a 70–100 m wall does not engulf the camera.
+            var speed = reduced ? 0.25f : 1f;
+            float crest = Mathf.Max(0, water.SampleImpactHeight(rest), water.SampleImpactHeight(rest, 0.6f * speed), water.SampleImpactHeight(rest, 1.2f * speed));
+            float shipLift = Mathf.Max(0, vesselResponse.Offset.y);
+            var goal = Mathf.Max(crest, shipLift * 0.85f);
+            impactCameraLift = Mathf.Lerp(impactCameraLift, goal, 1 - Mathf.Exp(-delta * 3f));
+            // Safety clearance also handles reduced motion and overlapping crests.
+            var clearance = Mathf.Max(0, water.SurfaceHeight(rest) + 12 - rest.y);
+            impactCameraLift = Mathf.Max(impactCameraLift, clearance);
+            battleCamera.transform.position = rest + Vector3.up * impactCameraLift;
+            var target = rest + baseRotation * Vector3.forward * 140 + Vector3.up * (shipLift * 0.65f);
+            battleCamera.transform.rotation = Quaternion.LookRotation(target - battleCamera.transform.position, Vector3.up);
+        }
+
         private void OnDisable()
         {
             if (director != null) director.Resolved -= Present;

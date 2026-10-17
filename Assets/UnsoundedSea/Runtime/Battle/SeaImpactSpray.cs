@@ -40,10 +40,11 @@ namespace UnsoundedSea.Runtime
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             renderer.receiveShadows = false;
         }
-        public void Emit(Vector3 contact, int seed)
+        public void Emit(Vector3 contact, int seed, float amplitude)
         {
             // Local RNG cannot advance gameplay or ambient random streams.
             var random = new System.Random(seed * 7919);
+            var scale = Mathf.Clamp(Mathf.Sqrt(amplitude / 9f), 0.5f, 3.5f);
             for (var i = 0; i < 360; i++)
             {
                 float a = (float)random.NextDouble() * Mathf.PI * 2;
@@ -52,10 +53,10 @@ namespace UnsoundedSea.Runtime
                 var mist = i % 3 == 0;
                 var emit = new ParticleSystem.EmitParams
                 {
-                    position = contact + radial * radius,
-                    velocity = radial * (5 + (float)random.NextDouble() * 17) + Vector3.up * (12 + (float)random.NextDouble() * 23),
-                    startLifetime = mist ? 4.5f : 2.6f + (float)random.NextDouble(),
-                    startSize = mist ? 9f : 2.8f + (float)random.NextDouble() * 4f,
+                    position = contact + radial * radius * Mathf.Sqrt(scale),
+                    velocity = radial * (5 + (float)random.NextDouble() * 17) + Vector3.up * (12 + (float)random.NextDouble() * 23) * Mathf.Pow(scale, 0.25f),
+                    startLifetime = (mist ? 4.5f : 2.6f + (float)random.NextDouble()) * Mathf.Sqrt(scale),
+                    startSize = (mist ? 9f : 2.8f + (float)random.NextDouble() * 4f) * Mathf.Sqrt(scale),
                     startColor = new Color(0.9f, 0.98f, 0.95f, mist ? 0.5f : 0.95f),
                     rotation = (float)random.NextDouble() * 360
                 };
