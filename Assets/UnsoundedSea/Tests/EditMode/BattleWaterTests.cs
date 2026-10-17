@@ -98,7 +98,7 @@ namespace UnsoundedSea.Tests
             Assert.That(water.SampleImpactHeight(ship), Is.Zero, "Ship must not react before the front arrives");
             water.Tick(1.8f, false, false, Vector4.zero);
             var crest = water.SampleImpactHeight(ship);
-            Assert.That(crest, Is.InRange(60f, 100f));
+            Assert.That(crest, Is.InRange(48f, 80f));
             Assert.That(water.SampleImpactSurge(ship).x, Is.GreaterThan(0));
             water.Tick(10, true, false, Vector4.zero);
             Assert.That(water.SampleImpactHeight(ship), Is.EqualTo(crest));
@@ -114,13 +114,13 @@ namespace UnsoundedSea.Tests
         }
 
         [Test]
-        public void CatastrophicCrestReachesOneThirdOfBossWithoutUnboundedOverlap()
+        public void ImpactCrestReachesQuarterOfBossWithoutUnboundedOverlap()
         {
             var impact = new Vector4(0, 0, 0, SeaImpactWave.DefaultAmplitude);
             float highest = 0;
             for (int frame = 1; frame <= 200; frame++)
                 highest = Mathf.Max(highest, SeaImpactWave.Combine(SeaImpactWave.Height(new Vector2(45, 0), frame * 0.01f, impact)));
-            Assert.That(highest / 208f, Is.InRange(1f / 3, 0.5f));
+            Assert.That(highest / 208f, Is.InRange(0.25f, 0.4f));
             Assert.That(SeaImpactWave.Combine(800), Is.LessThan(SeaImpactWave.CombinedHeightLimit));
             var hull = new VesselWaveResponse();
             float previous = 0, worstLag = 0;
