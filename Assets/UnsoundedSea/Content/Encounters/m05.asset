@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: m05
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EncounterDefinition
   id: m05
-  displayName: "\u65E0\u661F\u64A4\u79BB"
+  displayName: "\u65E0\u661F\u738B\u5EA7"
   objective: 0
   objectiveTarget: 1
   playerHealth: 60

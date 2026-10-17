@@ -31,6 +31,17 @@ namespace UnsoundedSea.Editor
             return "90 cards, 25 ordinary enemies, 5 independent companions, fog-visitors and Boss numeric assets synchronized.";
         }
 
+        [MenuItem("Unsounded Sea/Content/Synchronize M05 Combat Balance")]
+        public static string SyncM05()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Stop Play Mode before synchronizing content.");
+            var ids = new[] { "b05-watcher", "b05-guard-anchor", "b05-guard-lamp", "b05-guard-bell", "b05-guard-sail", "b05-guard-eye" };
+            var dirty = ids.Select(id => Load<EnemyDefinition>("Enemies/" + id + ".asset")).Where(EditorUtility.IsDirty).Select(asset => asset.name).ToArray();
+            if (dirty.Length > 0) throw new InvalidOperationException("Unsaved M05 content edits: " + string.Join(", ", dirty));
+            SyncBoss(BossEncounterKind.Watcher, ids);
+            return "M05 Watcher and five guardian numeric assets synchronized.";
+        }
+
         private static void SyncBoss(BossEncounterKind kind, params string[] ids)
         {
             for (var slot = 0; slot < ids.Length; slot++)
@@ -70,22 +81,23 @@ namespace UnsoundedSea.Editor
             if (slot == 0) return kind == BossEncounterKind.Choirmaster ? 42 : kind == BossEncounterKind.FlagBearer ? 48 : 1;
             if (kind == BossEncounterKind.Choirmaster) return slot == 1 ? 10 : 12;
             if (kind == BossEncounterKind.Surveyor) return 6;
-            return kind == BossEncounterKind.FlagBearer ? 14 : 16;
+            if (kind == BossEncounterKind.FlagBearer) return 14;
+            return new[] { 0, 26, 20, 22, 28, 18 }[slot];
         }
 
         public static string BossIntent(BossEncounterKind kind, int slot)
         {
-            if (slot == 0) return "特殊遭遇规则控制公开意图";
+            if (slot == 0) return kind == BossEncounterKind.Watcher ? "每回合 2 理智" : "特殊遭遇规则控制公开意图";
             if (kind == BossEncounterKind.Choirmaster) return slot == 1 ? "每回合 3 生命" : "恢复发声囊 6";
             if (kind == BossEncounterKind.Surveyor) return "每回合 2 理智";
             if (kind == BossEncounterKind.FlagBearer) return "每回合 4 生命";
-            return slot == 1 ? "每回合 5 生命" : slot == 2 ? "每回合 3 理智" : slot == 3 ? "奇数活动回合 4 理智" : slot == 4 ? "首次 6 生命，此后 4" : "首次 3 理智，此后 2";
+            return slot == 1 ? "每回合 5 生命" : slot == 2 ? "每回合 4 生命" : slot == 3 ? "奇数活动回合 5 理智，偶数停手" : slot == 4 ? "首次 7 生命，此后 4" : "首次 4 理智，此后 3 生命";
         }
 
         public static IntentData[] BossIntents(BossEncounterKind kind, int slot)
         {
             var clue = BossIntent(kind, slot);
-            var amount = slot == 0 ? 0 : kind == BossEncounterKind.Choirmaster ? (slot == 1 ? 3 : 0) : kind == BossEncounterKind.Surveyor ? 2 : kind == BossEncounterKind.FlagBearer ? 4 : slot == 1 ? 5 : slot == 2 ? 3 : slot == 3 ? 4 : slot == 4 ? 6 : 3;
+            var amount = slot == 0 ? kind == BossEncounterKind.Watcher ? 2 : 0 : kind == BossEncounterKind.Choirmaster ? (slot == 1 ? 3 : 0) : kind == BossEncounterKind.Surveyor ? 2 : kind == BossEncounterKind.FlagBearer ? 4 : slot == 1 ? 5 : slot == 2 ? 4 : slot == 3 ? 5 : slot == 4 ? 7 : 4;
             return new[] { new IntentData { id = "boss-script", displayName = slot == 0 ? "规则阶段" : "公开行动", clue = clue,
                 channel = clue.Contains("理智") ? DamageChannel.Sanity : DamageChannel.Health, amount = amount,
                 isPublic = true, visibleAction = true, soundSource = slot == 0 ? "舷外" : "甲板" } };

@@ -1,0 +1,169 @@
+{
+  "asset": "StarlessGuardLamp",
+  "provider": "Hyper3D BANG",
+  "source_generation": "bf7c9ae4-6ba3-54e1-8639-aba26ffe5f58",
+  "source_asset": "326bd377-06bb-5e38-8c5d-8c0e49231ce4",
+  "request": {
+    "asset_id": "326bd377-06bb-5e38-8c5d-8c0e49231ce4",
+    "geometry_file_format": "glb"
+  },
+  "privacy": {
+    "public_generation_authorized": true,
+    "basis": "User explicitly authorized public generation for these five M05 guardians; no private setting is claimed."
+  },
+  "method": "BANG semantic split; independent rigid part pivots; Blender decimation",
+  "parts": 6,
+  "part_mapping": [
+    {
+      "pivot": "Part_01",
+      "source_mesh": "root.0",
+      "center": [
+        -0.39532092213630676,
+        -0.0137452632188797,
+        1.0153207778930664
+      ],
+      "minimum": [
+        -0.6520611643791199,
+        -0.21465222537517548,
+        0.4836328327655792
+      ],
+      "maximum": [
+        -0.13858067989349365,
+        0.18716169893741608,
+        1.547008752822876
+      ]
+    },
+    {
+      "pivot": "Part_02",
+      "source_mesh": "root.1",
+      "center": [
+        -0.001491934061050415,
+        0.002172142267227173,
+        0.567001223564148
+      ],
+      "minimum": [
+        -0.28182491660118103,
+        -0.21751397848129272,
+        0.0
+      ],
+      "maximum": [
+        0.2788410484790802,
+        0.22185826301574707,
+        1.134002447128296
+      ]
+    },
+    {
+      "pivot": "Part_03",
+      "source_mesh": "root.2",
+      "center": [
+        -0.00031299889087677,
+        -0.007354319095611572,
+        1.4143418073654175
+      ],
+      "minimum": [
+        -0.19420620799064636,
+        -0.22182786464691162,
+        1.1130635738372803
+      ],
+      "maximum": [
+        0.19358021020889282,
+        0.20711922645568848,
+        1.7156200408935547
+      ]
+    },
+    {
+      "pivot": "Part_04",
+      "source_mesh": "root.3",
+      "center": [
+        -0.009158022701740265,
+        -0.1646665632724762,
+        1.299507975578308
+      ],
+      "minimum": [
+        -0.0906420573592186,
+        -0.1817958950996399,
+        1.1812198162078857
+      ],
+      "maximum": [
+        0.07232601195573807,
+        -0.1475372314453125,
+        1.4177961349487305
+      ]
+    },
+    {
+      "pivot": "Part_05",
+      "source_mesh": "root.4",
+      "center": [
+        0.0010164976119995117,
+        0.013791292905807495,
+        1.6686657667160034
+      ],
+      "minimum": [
+        -0.30263301730155945,
+        -0.1738787293434143,
+        1.4421069622039795
+      ],
+      "maximum": [
+        0.30466601252555847,
+        0.2014613151550293,
+        1.8952245712280273
+      ]
+    },
+    {
+      "pivot": "Part_06",
+      "source_mesh": "root.5",
+      "center": [
+        0.2387874722480774,
+        0.0004163086414337158,
+        0.9723392128944397
+      ],
+      "minimum": [
+        -0.17333640158176422,
+        -0.2146548628807068,
+        0.4138176441192627
+      ],
+      "maximum": [
+        0.6509113311767578,
+        0.21548748016357422,
+        1.5308607816696167
+      ]
+    }
+  ],
+  "decimate_ratio": 0.06,
+  "triangles_before": 500000,
+  "triangles_after": 29998,
+  "source_spec": {
+    "bytes": 65394276,
+    "triangles": 500000,
+    "vertices": 459798,
+    "meshes": 6,
+    "materials": 6,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "runtime_spec": {
+    "bytes": 15638612,
+    "triangles": 29998,
+    "vertices": 38639,
+    "meshes": 6,
+    "materials": 6,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "outputs": {
+    "source": "ArtSource/Bosses/StarlessGuardLamp_BANG_High.glb",
+    "glb": "Assets/UnsoundedSea/Art/Models/StarlessGuardLamp_BANG_LOD0.glb",
+    "preview": "ArtSource/Bosses/StarlessGuardLamp_BANG-preview.png"
+  },
+  "sha256": {
+    "source": "61629eaf0918608694b860da25182ad3c873ad74dfc0fc113f67e99b9f462103",
+    "glb": "f63b11072653955a9c19b5cef4deafd09c53fe6785f69a8a2ce80a74529d179a",
+    "preview": "b5bb93f81c7102c3932e3833e458d21154b2470ff55c7840962aebf340f7b7f4"
+  },
+  "animation_ready": false,
+  "notes": [
+    "Part pivots preserve the assembled silhouette. Anatomical joint calibration and combat animation are not included."
+  ]
+}

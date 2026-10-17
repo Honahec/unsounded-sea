@@ -7,6 +7,9 @@ namespace UnsoundedSea.Runtime
         public string EnemyId { get; private set; }
         public Vector3 LabelPosition => transform.TransformPoint(labelPosition);
         public bool Alive { get; private set; } = true;
+        public bool IsEmerging => isActiveAndEnabled && Alive && emergence < 1;
+        public float HighestPointY => transform.TransformPoint(Vector3.up*(emergenceTop+emergenceOffset)).y;
+        public event System.Action<BattleActorView> BrokeSurface;
         public bool IsSeaActor => placement != null && placement.environment == BattleEnvironment.Sea;
         public float WaterRadius => IsSeaActor ? placement.waterRadius : 0;
         private Transform body;
@@ -17,7 +20,9 @@ namespace UnsoundedSea.Runtime
         private BattleAnchor placement;
         private Vector3 bodyPosition, labelPosition;
         private Quaternion bodyRotation;
-        private float height, impulse, attack, fall, age;
+        private float height, impulse, attack, fall, age, emergence = 1, emergenceTop, emergenceOffset;
+        private bool surfaceBroken;
+        private System.Func<Vector3,float> surfaceHeight;
         private Animator animator;
         private BellMotherRigidMotion rigidMotion;
         private DeckActorMotion deckMotion;
@@ -54,6 +59,12 @@ namespace UnsoundedSea.Runtime
             else if (rigidPresentation) rigidMotion.ResetIdle();
             var bounds = MeasureLocalBounds(transform);
             height = bounds.size.y;
+            emergenceTop = bounds.max.y;
+            if (placement != null && placement.emergeDepth > 0)
+            {
+                emergence = 0; surfaceBroken = false; emergenceOffset = -placement.emergeDepth;
+                body.localPosition = bodyPosition + Vector3.up * emergenceOffset;
+            }
             labelPosition = new Vector3(bounds.center.x, Mathf.Lerp(bounds.min.y, bounds.max.y, placement == null ? 1 : placement.labelHeight), bounds.center.z)
                 + (placement == null ? new Vector3(0, 0.28f, 0) : placement.labelOffset);
             // Bounds are measured in actor space, so a 30 m sea creature is selectable across its body,
@@ -72,6 +83,22 @@ namespace UnsoundedSea.Runtime
         public void ConfigureMotion(bool enableLegacyMotion)
         {
             legacyMotion = enableLegacyMotion;
+        }
+        public void ConfigureSeaEmergence(System.Func<Vector3,float> heightAt)
+        {
+            if(placement==null||placement.emergeDepth<=0||heightAt==null)return;
+            surfaceHeight=heightAt;
+            var surface=heightAt(transform.position);
+            var normalTop=transform.TransformPoint(Vector3.up*emergenceTop).y;
+            var scale=Mathf.Max(.001f,Mathf.Abs(transform.lossyScale.y));
+            placement.emergeDepth=Mathf.Max(placement.emergeDepth,(normalTop-surface+1)/scale);
+            emergence=0;surfaceBroken=false;emergenceOffset=-placement.emergeDepth;
+            body.localPosition=bodyPosition+Vector3.up*emergenceOffset;
+        }
+        private void CheckSurfaceBreak()
+        {
+            if(surfaceBroken||surfaceHeight==null||HighestPointY<surfaceHeight(transform.position))return;
+            surfaceBroken=true;BrokeSurface?.Invoke(this);
         }
 
         public static Bounds MeasureLocalBounds(Transform root)
@@ -115,7 +142,9 @@ namespace UnsoundedSea.Runtime
         }
         public void Feedback(bool damaged, bool attacking, bool alive, bool ritual = false, bool observing = false, float delay = 0)
         {
+            var newlyAlive = alive && !Alive;
             Alive = alive;
+            if (newlyAlive && placement != null && placement.emergeDepth > 0) { emergence = 0; surfaceBroken = false; }
             if (GiantMotion != null)
             {
                 if (!alive) GiantMotion.Retire();
@@ -176,25 +205,31 @@ namespace UnsoundedSea.Runtime
             if (GiantMotion != null) { GiantMotion.SetPaused(director.Paused); GiantMotion.Tick(Time.unscaledDeltaTime); }
             if (director.Paused) return;
             var dt = Time.unscaledDeltaTime; age += dt;
+            if (emergence < 1) emergence = Mathf.Min(1, emergence + dt / Mathf.Max(.1f, placement.emergeDuration));
+            emergenceOffset = placement == null ? 0 : -placement.emergeDepth * (1 - Mathf.SmoothStep(0, 1, emergence));
             impulse = Mathf.MoveTowards(impulse, 0, dt * 2.2f); attack = Mathf.MoveTowards(attack, 0, dt * (IsSeaActor ? 0.8f : 1.4f));
             fall = Mathf.MoveTowards(fall, Alive ? 0 : 1, dt * 0.9f);
             var reduced = GameSettings.ReducedMotion;
+            var emergeOffset = emergenceOffset;
             if (deckMotion != null || GiantMotion != null)
             {
-                body.localPosition = bodyPosition;
+                body.localPosition = bodyPosition + Vector3.up * emergeOffset;
                 body.localRotation = bodyRotation;
+                CheckSurfaceBreak();
                 return;
             }
             if ((skeletalPresentation || rigidPresentation) && !legacyMotion)
             {
-                body.localPosition = bodyPosition + Vector3.up * (-fall * height);
+                body.localPosition = bodyPosition + Vector3.up * (-fall * height + emergeOffset);
                 body.localRotation = bodyRotation;
+                CheckSurfaceBreak();
                 return;
             }
             if (IsSeaActor)
             {
-                body.localPosition = bodyPosition + Vector3.up * (-fall * height + (reduced ? 0 : Mathf.Sin(age * 0.34f) * placement.heave + Mathf.Sin(attack * Mathf.PI) * 0.45f));
+                body.localPosition = bodyPosition + Vector3.up * (-fall * height + emergeOffset + (reduced ? 0 : Mathf.Sin(age * 0.34f) * placement.heave + Mathf.Sin(attack * Mathf.PI) * 0.45f));
                 body.localRotation = bodyRotation * Quaternion.Euler(reduced ? 0 : impulse * 0.8f, 0, reduced ? 0 : Mathf.Sin(age * 0.23f) * 0.3f);
+                CheckSurfaceBreak();
             }
             else
             {

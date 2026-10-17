@@ -41,7 +41,7 @@ namespace UnsoundedSea.Core
         private sealed class BossEncounterState
         {
             public int BoundCount => completed.Count(x=>x.EndsWith(":bound",StringComparison.Ordinal));
-            public int EvacuationProgress => kind==BossEncounterKind.Watcher&&stage==3?progress:0;
+            public int EvacuationProgress => 0;
             public int SafeOpenedCount => kind == BossEncounterKind.Surveyor ? completed.Count(x => !b03Initial.Contains(x) && !b03Mines.Contains(x)) : 0;
             public IEnumerable<EncounterTargetView> ConnectionTargets() => GuardAnchorOptions().Where(x=>!s.knowledge.Entries.Any(e=>e.Key=="scene/connection/"+SceneId(x.Id)));
             public bool RevealNextConstraint() { if(kind!=BossEncounterKind.Choirmaster||stage!=1||known>=2)return false;known++;s.Record(Constraint(known-1));if(known>=2)RemoveCard("E02-01");return true; }
@@ -61,28 +61,27 @@ namespace UnsoundedSea.Core
             private readonly HashSet<string> completed = new HashSet<string>(StringComparer.Ordinal);
             private readonly HashSet<string> read = new HashSet<string>(StringComparer.Ordinal);
             private readonly Dictionary<string, int> ages = new Dictionary<string, int>(StringComparer.Ordinal);
-            private readonly Dictionary<string, int> dormantUntil = new Dictionary<string, int>(StringComparer.Ordinal);
+            private readonly Dictionary<string, int> summonedTurn = new Dictionary<string, int>(StringComparer.Ordinal);
             private readonly string[] order;
             private readonly string[] b03Mines;
             private readonly string[] b03Initial;
             private readonly string[] b03Goals;
-            private readonly string[] guardOrder;
-            private int stage = 1, progress, known, summonStep, alarm = 5, opensThisTurn, flagFinalTurn;
-            private bool victory, primaryUsed, secondaryUsed, initialSpawned, sailBurst, eyeBurst, cardsGranted, stagePending, cancelMainThisTurn, cancelSummon, evacuationJustEntered, suppressAlarm;
+            private int stage = 1, progress, known, alarm = 5, opensThisTurn, flagFinalTurn;
+            private bool victory, primaryUsed, secondaryUsed, sailBurst, eyeBurst, cardsGranted, stagePending, cancelMainThisTurn, cancelSummon, suppressAlarm;
             public int Stage => stage;
             public bool IsVictory => victory;
             public int Progress => kind == BossEncounterKind.FlagBearer && stage == 1
                 ? (Relay("R1") == "positive" ? 1 : 0) + (Relay("R2") == "reverse" ? 1 : 0)
                 : progress;
             private int MainHealth => s.enemies[0].Definition.Health;
-            public int Target => kind == BossEncounterKind.Choirmaster ? (stage == 1 ? 3 : MainHealth) : kind == BossEncounterKind.Surveyor ? 4 : kind == BossEncounterKind.FlagBearer ? (stage == 2 ? 3 : stage == 3 ? MainHealth : 2) : stage == 1 ? 1 : stage == 3 ? 2 : 5;
-            public string Objective => kind == BossEncounterKind.Choirmaster ? (stage == 1 ? "按序关闭唱诗匣" : "击破发声囊") : kind == BossEncounterKind.Surveyor ? "激活四枚安全封栓" : kind == BossEncounterKind.FlagBearer ? (stage == 1 ? "校正双继电器" : stage == 2 ? "依序释放三段闸锁" : "击退执旗者") : stage == 1 ? "建立撤离绳" : stage == 2 ? "牵引守卫并关闭五座锚点" : "收绞归航绳";
+            public int Target => kind == BossEncounterKind.Choirmaster ? (stage == 1 ? 3 : MainHealth) : kind == BossEncounterKind.Surveyor ? 4 : kind == BossEncounterKind.FlagBearer ? (stage == 2 ? 3 : stage == 3 ? MainHealth : 2) : 5;
+            public string Objective => kind == BossEncounterKind.Choirmaster ? (stage == 1 ? "按序关闭唱诗匣" : "击破发声囊") : kind == BossEncounterKind.Surveyor ? "激活四枚安全封栓" : kind == BossEncounterKind.FlagBearer ? (stage == 1 ? "校正双继电器" : stage == 2 ? "依序释放三段闸锁" : "击退执旗者") : "召唤并击退五名守卫";
             public string Status => BuildStatus();
             public IReadOnlyList<EncounterTargetView> AllTargets { get { RefreshCards(); return targets.Select(x => new EncounterTargetView(x.Id, x.Name, TargetDetail(x.Id), true)).ToList().AsReadOnly(); } }
 
             public BossEncounterState(BattleSession session, BossEncounterKind encounter, uint seed)
             {
-                s = session; kind = encounter; order = Orders[seed % Orders.Length]; guardOrder = GuardNames.Skip((int)(seed % 5)).Concat(GuardNames.Take((int)(seed % 5))).ToArray();
+                s = session; kind = encounter; order = Orders[seed % Orders.Length];
                 b03Mines = encounter == BossEncounterKind.Surveyor ? TransformSaltCells(B03MineTemplate, seed) : B03MineTemplate;
                 b03Initial = encounter == BossEncounterKind.Surveyor ? TransformSaltCells(B03InitialTemplate, seed) : B03InitialTemplate;
                 b03Goals = encounter == BossEncounterKind.Surveyor ? TransformSaltCells(B03GoalTemplate, seed) : B03GoalTemplate;
@@ -90,6 +89,7 @@ namespace UnsoundedSea.Core
                 for (var i = 1; i < s.enemies.Count; i++) s.enemies[i].Health = 0;
                 BuildTargets();
                 if (kind == BossEncounterKind.Surveyor) foreach (var id in b03Initial) completed.Add(id);
+                if (kind == BossEncounterKind.Watcher) stage = 2;
             }
 
             private void ValidateSlots()
@@ -114,7 +114,7 @@ namespace UnsoundedSea.Core
                     case BossEncounterKind.Choirmaster: ids = new[] { "E02-01", "E02-02" }; names = new[] { "聆听唱序", "按序封匣" }; descriptions = new[] { "公开下一条尚未知的唱序约束", "尝试封匣；错误承受 4 理智冲击" }; costs = new[] { 1, 1 }; break;
                     case BossEncounterKind.Surveyor: ids = new[] { "E03-01", "E03-02" }; names = new[] { "开启盐格", "测读盐格" }; descriptions = new[] { "危险时承受 6 生命与 2 理智", "只测读相邻八格危险数" }; costs = new[] { 1, 2 }; break;
                     case BossEncounterKind.FlagBearer: ids = new[] { "E04-01", "E04-02" }; names = new[] { "调校继电器", "释放闸锁" }; descriptions = new[] { "设置一座继电器的公开极性", "条件满足时释放当前闸锁" }; costs = new[] { 1, 1 }; break;
-                    default: ids = new[] { "E05-01", "E05-02", "E05-03" }; names = new[] { "建立撤离绳", "接合引索", "收绞归航绳" }; descriptions = new[] { "建立撤离绳并开始召唤", "接合守卫与对应航标", "收绞一次；2 次撤离" }; costs = new[] { 1, 1, 1 }; break;
+                    default: ids = new[] { "E05-01" }; names = new[] { "召唤守卫" }; descriptions = new[] { "选择一名尚未召唤的守卫；永久入场" }; costs = new[] { 1 }; break;
                 }
                 for (var i = 0; i < ids.Length; i++) s.hand.Add(new CardView(s.definition.Deck.Count + i + 1,
                     new CardSpec(ids[i], names[i], descriptions[i], costs[i], new[] { new EffectSpec("boss-action", 0) }), isEncounter: true));
@@ -131,17 +131,14 @@ namespace UnsoundedSea.Core
                     targets.Add(T("lock-I", "I 隔离锁")); targets.Add(T("lock-II", "II 导压锁")); targets.Add(T("lock-III", "III 泄压锁"));
                 }
                 else
-                {
-                    targets.Add(T("winch", "主绞盘"));
-                    for (var i = 0; i < GuardNames.Length; i++) targets.Add(T($"{Slot("b05-guard-" + GuardNames[i])}|anchor-{GuardNames[i]}", $"{GuardLabel(GuardNames[i])}与{AnchorLabel(GuardNames[i])}"));
-                }
+                    foreach (var name in GuardNames) targets.Add(T(Slot("b05-guard-" + name), GuardLabel(name)));
             }
             private static EncounterTargetView T(string id, string name, string detail = "") => new EncounterTargetView(id, name, detail, true);
 
             public void BeginPlayerTurn()
             {
                 if (!cardsGranted) { AddCards(); cardsGranted = true; }
-                primaryUsed = secondaryUsed = false; opensThisTurn = 0; evacuationJustEntered = false;
+                primaryUsed = secondaryUsed = false; opensThisTurn = 0;
                 if (stagePending) { stage = 2; progress = 0; stagePending = false; }
                 if (kind == BossEncounterKind.Choirmaster)
                 {
@@ -187,12 +184,10 @@ namespace UnsoundedSea.Core
                     var expected = "lock-" + new[] { "I", "II", "III" }[progress]; if (target != expected) return "必须按公开顺序释放闸锁。";
                     return LockReady(progress) ? null : "公开极性条件未满足。";
                 }
-                if (id == "E05-01") return stage == 1 && target == "winch" ? null : "撤离绳已经建立或目标无效。";
-                if (id == "E05-03") return stage == 3 && !primaryUsed && target == "winch" ? null : "尚未进入撤离或本回合已收绞。";
-                if (stage != 2 || string.IsNullOrEmpty(target)) return "当前不能接合引索。";
-                var pair = target.Split('|'); if (pair.Length != 2) return "需要选择守卫与航标。";
-                var enemy = s.Find(pair[0]); if (enemy == null || enemy.Health == 0 || completed.Contains(pair[0] + ":bound")) return "守卫不在场或已牵引。";
-                return BaseId(pair[0]).Replace("b05-guard-", "anchor-") == pair[1] ? null : "守卫与航标不对应；未消耗行动。";
+                var guard = s.Find(target);
+                return id == "E05-01" && guard != null && s.enemies.IndexOf(guard) > 0 && BaseId(guard.Definition.Id).StartsWith("b05-guard-", StringComparison.Ordinal)
+                    && !completed.Contains(guard.Definition.Id + ":summoned")
+                    ? null : "请选择尚未召唤的守卫；未消耗行动。";
             }
 
             private void Apply(string id, string target)
@@ -203,9 +198,13 @@ namespace UnsoundedSea.Core
                 if (id == "E03-02") { read.Add(target); s.Record($"{target} 相邻危险数：{AdjacentMines(target)}。"); return; }
                 if (id == "E04-01") { primaryUsed = true; var p = target.Split(':'); completed.Remove(p[0] + ":off"); completed.Remove(p[0] + ":positive"); completed.Remove(p[0] + ":reverse"); completed.Add(target); if (stage == 1 && Relay("R1") == "positive" && Relay("R2") == "reverse") { stagePending = true; s.Record("双继电器完成；下一玩家回合进入闸锁阶段。"); } return; }
                 if (id == "E04-02") { secondaryUsed = true; progress++; if (progress == 3) { stage = 3; flagFinalTurn = 0; cancelMainThisTurn = true; progress = MainHealth - s.enemies[0].Health; RemoveCard("E04-01"); RemoveCard("E04-02"); s.Record("第三锁完成；警报与本体理智攻击取消，护持解除。"); } return; }
-                if (id == "E05-01") { stage = 2; summonStep = 0; RemoveCard(id); return; }
-                if (id == "E05-02") { completed.Add(target.Split('|')[0] + ":bound"); return; }
-                primaryUsed = true; progress++; if (progress == 2) { victory = true; RemoveCard(id); }
+                if (id == "E05-01")
+                {
+                    var guard = s.Find(target); completed.Add(guard.Definition.Id + ":summoned"); summonedTurn[guard.Definition.Id] = s.turn;
+                    guard.Health = guard.Definition.Health; ages[guard.Definition.Id] = 0; SetWatcherGuardIntent(guard, false); RevealSummonSource(guard);
+                    if (completed.Count(x => x.EndsWith(":summoned", StringComparison.Ordinal)) == GuardNames.Length) RemoveCard(id);
+                    return;
+                }
             }
 
             public int LimitDamage(string id, int amount, int current)
@@ -219,10 +218,10 @@ namespace UnsoundedSea.Core
             {
                 var e = s.Find(id); if (kind == BossEncounterKind.Choirmaster && BaseId(id) == "b02-choirmaster") { if (stage == 2) progress = MainHealth - e.Health; if (e.Health == 0 && stage == 2) victory = true; }
                 else if (kind == BossEncounterKind.FlagBearer && BaseId(id) == "b04-flag-bearer") { if (stage == 3) progress = MainHealth - e.Health; if (e.Health == 0 && stage == 3) victory = true; }
-                else if (kind == BossEncounterKind.Watcher && BaseId(id).StartsWith("b05-guard-") && e.Health == 0)
+                else if (kind == BossEncounterKind.Watcher && BaseId(id).StartsWith("b05-guard-") && e.Health == 0 && completed.Add(id + ":closed"))
                 {
-                    if (completed.Contains(id + ":bound")) { completed.Add(id + ":closed"); progress++; dormantUntil.Remove(id); if (progress == 5) EnterEvacuation(); }
-                    else dormantUntil[id] = s.turn + 1;
+                    progress++;
+                    if (progress == GuardNames.Length) victory = true;
                 }
             }
 
@@ -279,50 +278,28 @@ namespace UnsoundedSea.Core
 
             private void BeginWatcherTurn()
             {
-                if (stage == 1) return;
-                foreach (var e in s.enemies.Skip(1).Where(x => x.Health > 0))
-                {
-                    ages[e.Definition.Id] = ages.TryGetValue(e.Definition.Id, out var age) ? age + 1 : 1;
-                    var name = BaseId(e.Definition.Id).Substring("b05-guard-".Length);
-                    var amount = name == "anchor" ? 5 : name == "lamp" ? 3 : name == "bell" ? (ages[e.Definition.Id] % 2 == 1 ? 4 : 0) : name == "sail" ? (!sailBurst ? 6 : 4) : !eyeBurst ? 3 : 2;
-                    SetPublicIntent(e, name == "lamp" || name == "bell" || name == "eye" ? DamageChannel.Sanity : DamageChannel.Health, amount, amount == 0 ? "本回合停手" : name == "anchor" ? "铁锚撞击" : name == "lamp" ? "裂灯低鸣" : name == "bell" ? "铜钟震响" : name == "sail" ? "折帆撕扯" : "闭眼凝视");
-                }
+                SetPublicIntent(s.enemies[0], DamageChannel.Sanity, 2, "无星凝视");
+                foreach (var e in s.enemies.Skip(1).Where(x => x.Health > 0)) SetWatcherGuardIntent(e, true);
+            }
+            private void SetWatcherGuardIntent(EnemyState e, bool advanceAge)
+            {
+                var age = ages.TryGetValue(e.Definition.Id, out var activeAge) ? activeAge : 0;
+                if (advanceAge) ages[e.Definition.Id] = ++age;
+                var name = BaseId(e.Definition.Id).Substring("b05-guard-".Length);
+                var amount = name == "anchor" ? 5 : name == "lamp" ? 4 : name == "bell" ? (age % 2 == 1 ? 5 : 0) : name == "sail" ? (!sailBurst ? 7 : 4) : !eyeBurst ? 4 : 3;
+                var channel = name == "bell" || name == "eye" && !eyeBurst ? DamageChannel.Sanity : DamageChannel.Health;
+                SetPublicIntent(e, channel, amount, amount == 0 ? "本回合停手" : name == "anchor" ? "铁锚撞击" : name == "lamp" ? "裂灯灼击" : name == "bell" ? "铜钟震响" : name == "sail" ? "折帆撕扯" : !eyeBurst ? "闭眼凝视" : "眼棘穿刺");
             }
             private void ResolveWatcher()
             {
-                if (stage == 1) return;
-                if (stage == 3) { if (!evacuationJustEntered) s.ApplyEnemyThreat(s.enemies[0], DamageChannel.Sanity, 4, "无星余响"); return; }
-                var activeAtStart = s.enemies.Skip(1).Count(x => x.Health > 0);
-                foreach (var e in s.enemies.Skip(1).Where(x => x.Health > 0 && !x.Interrupted).ToList())
+                var active = s.enemies.Skip(1).Where(x => x.Health > 0).ToList();
+                if (!s.enemies[0].Interrupted) s.ApplyEnemyThreat(s.enemies[0], DamageChannel.Sanity, 2, "无星凝视");
+                foreach (var e in active.Where(x => !x.Interrupted && (!summonedTurn.TryGetValue(x.Definition.Id, out var summoned) || summoned < s.turn)))
                 {
                     var name = BaseId(e.Definition.Id).Substring("b05-guard-".Length);
                     sailBurst |= name == "sail"; eyeBurst |= name == "eye";
                     if (e.ActualIntent.Amount > 0) s.ApplyEnemyThreat(e, e.ActualIntent.Channel, e.ActualIntent.Amount);
                 }
-                summonStep++; if (summonStep % 2 == 0) s.ApplyEnemyThreat(s.enemies[0], DamageChannel.Sanity, activeAtStart == 3 ? 4 : 3, "无星余响");
-                SpawnWatcher(activeAtStart);
-            }
-            private void SpawnWatcher(int activeBefore)
-            {
-                var cap = 3; var active = s.enemies.Skip(1).Count(x => x.Health > 0);
-                foreach (var due in dormantUntil.Where(x => x.Value <= s.turn).OrderBy(x => x.Value).ThenBy(x => Array.IndexOf(guardOrder, BaseId(x.Key).Substring("b05-guard-".Length))).ToList())
-                { if (active >= cap) break; var e = s.Find(due.Key); e.Health = Math.Min(8, e.Definition.Health); RevealSummonSource(e); dormantUntil.Remove(due.Key); active++; }
-                if (!initialSpawned && summonStep == 1)
-                {
-                    foreach (var name in guardOrder.Take(2)) { var e = s.Find(Slot("b05-guard-" + name)); e.Health = e.Definition.Health; RevealSummonSource(e); ages[e.Definition.Id] = 0; }
-                    initialSpawned = true; return;
-                }
-                if (summonStep < 3 || summonStep % 2 == 0 || active >= cap) return;
-                foreach (var name in guardOrder)
-                {
-                    var e = s.Find(Slot("b05-guard-" + name));
-                    if (e.Health == 0 && !dormantUntil.ContainsKey(e.Definition.Id) && !completed.Contains(e.Definition.Id + ":closed"))
-                    { e.Health = e.Definition.Health; RevealSummonSource(e); ages[e.Definition.Id] = 0; break; }
-                }
-            }
-            private void EnterEvacuation()
-            {
-                stage = 3; progress = 0; evacuationJustEntered = true; RemoveCard("E05-02"); foreach (var e in s.enemies.Skip(1)) e.Health = 0; dormantUntil.Clear(); s.Record("五座锚点关闭；所有旧威胁取消，开始撤离。");
             }
 
             private string Relay(string relay) => completed.FirstOrDefault(x => x.StartsWith(relay + ":", StringComparison.Ordinal))?.Split(':')[1] ?? "off";
@@ -351,7 +328,7 @@ namespace UnsoundedSea.Core
                     card.ActionCost = Math.Max(0, card.Definition.Cost - s.sceneDiscount);
                     var reason = ValidateAvailability(card.Definition.Id); card.Enabled = reason == null; card.DisabledReason = reason ?? "";
                     card.Targets = card.Definition.Id == "E02-01" ? EmptyTargets : targets
-                        .Where(x => card.Definition.Id == "E04-01" ? x.Id.Contains(":") : card.Definition.Id == "E04-02" ? x.Id.StartsWith("lock-", StringComparison.Ordinal) : card.Definition.Id == "E05-02" ? x.Id.Contains("|") : card.Definition.Id == "E05-01" || card.Definition.Id == "E05-03" ? x.Id == "winch" : true)
+                        .Where(x => card.Definition.Id == "E04-01" ? x.Id.Contains(":") : card.Definition.Id == "E04-02" ? x.Id.StartsWith("lock-", StringComparison.Ordinal) : true)
                         .Select(x => new EncounterTargetView(x.Id, x.Name, TargetDetail(x.Id), TargetEnabled(card.Definition.Id, x.Id))).ToList().AsReadOnly();
                 }
             }
@@ -360,7 +337,6 @@ namespace UnsoundedSea.Core
                 if (id == "E02-01" && known >= 2 || id == "E02-02" && (stage != 1 || primaryUsed)) return "下回合或职责已完成";
                 if (id == "E03-01" && opensThisTurn >= 2) return "本回合已开启两格";
                 if (id == "E04-01" && (stagePending || stage >= 3 || primaryUsed) || id == "E04-02" && (stage != 2 || secondaryUsed)) return "当前阶段或本回合不可用";
-                if (id == "E05-01" && stage != 1 || id == "E05-02" && stage != 2 || id == "E05-03" && (stage != 3 || primaryUsed)) return "当前阶段不可用";
                 return null;
             }
             private bool TargetEnabled(string card, string id)
@@ -370,8 +346,8 @@ namespace UnsoundedSea.Core
                 if (card == "E03-02") return !completed.Contains(id) && !read.Contains(id);
                 if (card == "E04-01") return id.Contains(":") && Relay(id.Split(':')[0]) != id.Split(':')[1];
                 if (card == "E04-02") return id == "lock-" + new[] { "I", "II", "III" }[Math.Min(progress, 2)] && LockReady(Math.Min(progress, 2));
-                if (card == "E05-02") return id.Contains("|") && s.IsLiving(id.Split('|')[0]) && !completed.Contains(id.Split('|')[0] + ":bound");
-                return id == "winch";
+                if (card == "E05-01") return !completed.Contains(id + ":summoned");
+                return true;
             }
             private string TargetDetail(string id)
             {
@@ -393,7 +369,7 @@ namespace UnsoundedSea.Core
                     var relays = $"R1 {Polarity("R1")} · R2 {Polarity("R2")}";
                     return stage == 1 ? relays : stage == 2 ? $"{relays}\n闸锁 {progress}/3 · 警报 {alarm}\n{TargetDetail("lock-" + new[] { "I", "II", "III" }[Math.Min(progress, 2)])}" : $"主桅暴露 · {s.enemies[0].Health}/{MainHealth}";
                 }
-                return stage == 3 ? $"撤离 {progress}/2" : (stage == 1 ? "撤离绳未建立" : $"锚点 {progress}/5 · 活动守卫 {s.enemies.Skip(1).Count(x => x.Health > 0)}/3") + "\n" + string.Join(" → ", guardOrder.Select(GuardLabel));
+                return $"已击退 {progress}/5 · 已召唤 {completed.Count(x => x.EndsWith(":summoned", StringComparison.Ordinal))}/5";
             }
 
             public IEnumerable<EncounterTargetView> CardTargets(int card)
@@ -415,20 +391,20 @@ namespace UnsoundedSea.Core
                 if (card == 63) return RelayCorrectionTargets();
                 if (card == 65) return kind == BossEncounterKind.FlagBearer && stage == 2 && progress == 1 && s.health > 4 ? new[] { T("scene:lock-II", "强开 II 导压锁") } : EmptyTargets;
                 if (card == 68) return kind == BossEncounterKind.Choirmaster && stage == 1 && known >= 2 && !primaryUsed ? new[] { T("scene:" + order[progress], ChoirLabel(order[progress]), "当前顺位已确定") } : EmptyTargets;
-                if (card == 69) return kind == BossEncounterKind.Watcher && stage == 3 && progress < 2 ? new[] { T("scene:winch", "主绞盘") } : EmptyTargets;
+                if (card == 69) return EmptyTargets;
                 if (card == 86) return kind == BossEncounterKind.FlagBearer && stage == 2 && !secondaryUsed && LockReady(progress) ? new[] { T("scene:lock", "当前闸锁") } : EmptyTargets;
                 if (card == 87) return EmptyTargets;
                 return EmptyTargets;
             }
             public IEnumerable<EncounterTargetView> GuardAnchorOptions()
             {
-                if (kind != BossEncounterKind.Watcher || stage != 2) return EmptyTargets;
-                return targets.Where(x => x.Id.Contains("|") && s.IsLiving(x.Id.Split('|')[0]) && !completed.Contains(x.Id.Split('|')[0] + ":bound")).Select(x => T("scene:" + x.Id, x.Name, TargetDetail(x.Id)));
+                if (kind != BossEncounterKind.Watcher) return EmptyTargets;
+                return targets.Where(x => s.IsLiving(x.Id) && !completed.Contains(x.Id + ":bound")).Select(x => T("scene:" + x.Id + "|" + BaseId(x.Id).Replace("b05-guard-", "anchor-"), x.Name, "公开对应航标"));
             }
             public bool HasCardMechanic(int card)
             {
                 if (card == 43 || card == 44 || card == 67) return kind == BossEncounterKind.Surveyor;
-                if (card == 42 || card == 52 || card == 69) return kind == BossEncounterKind.Watcher;
+                if (card == 42 || card == 52) return kind == BossEncounterKind.Watcher;
                 if (card == 66) return kind == BossEncounterKind.Watcher && CardTargets(66).Any();
                 if (card == 56 || card == 68) return kind == BossEncounterKind.Choirmaster;
                 if (card == 57 || card == 60 || card == 63 || card == 65 || card == 86) return kind == BossEncounterKind.FlagBearer;
@@ -466,7 +442,7 @@ namespace UnsoundedSea.Core
                 if (card == 66) { var subject = SceneId(selection)?.Split('|')[0]; if (!IsVerifiedSource(subject) || !GuardAnchorOptions().Any(x => SceneId(x.Id) == SceneId(selection))) return false; completed.Add(subject + ":bound"); s.AddBlock(4); s.MarkSceneAction(); return true; }
                 if (card == 67) return OpenProvenSafe(selection, false);
                 if (card == 68) { if (kind != BossEncounterKind.Choirmaster || stage != 1 || known < 2 || primaryUsed || id != order[progress]) return false; Apply("E02-02", id); s.AddBlock(6); s.MarkSceneAction(); return true; }
-                if (card == 69) { if (kind != BossEncounterKind.Watcher || stage != 3 || progress >= 2) return false; if (++progress >= 2) victory = true; s.MarkSceneAction(); return true; }
+                if (card == 69) return false;
                 if (card == 86) { if (kind != BossEncounterKind.FlagBearer || stage != 2 || secondaryUsed || !LockReady(progress)) return false; Apply("E04-02", "lock-" + new[] { "I", "II", "III" }[progress]); s.MarkSceneAction(); return true; }
                 if (card == 87) return false;
                 if (card == 56 && kind == BossEncounterKind.Choirmaster && stage == 1 && known >= 2 && !primaryUsed && id == order[progress]) { Apply("E02-02", id); s.MarkSceneAction(); return true; }
@@ -536,13 +512,7 @@ namespace UnsoundedSea.Core
                     if (IsSummonAction(e) || kind == BossEncounterKind.Surveyor && e == s.enemies[0] && s.turn % 2 == 0) result.Add("召唤");
                 }
                 if (kind == BossEncounterKind.FlagBearer && e == s.enemies[0] && ScheduledSoldierAvailable) result.Add("召唤");
-                if (kind == BossEncounterKind.Watcher && e == s.enemies[0] && stage == 2)
-                {
-                    var intent = WatcherIntent();
-                    if (intent.Contains("生命")) result.Add("生命伤害");
-                    if (intent.Contains("理智")) result.Add("理智冲击");
-                    if (intent.Contains("召唤") || intent.Contains("复现")) result.Add("召唤");
-                }
+                if (kind == BossEncounterKind.Watcher && e == s.enemies[0]) result.Add("理智冲击");
                 return result.Distinct().ToArray();
             }
 
@@ -552,27 +522,12 @@ namespace UnsoundedSea.Core
                 return e != null && e.Health > 0 && !(kind == BossEncounterKind.Surveyor && BaseId(id) == "b03-surveyor") && !(kind == BossEncounterKind.Watcher && BaseId(id) == "b05-watcher");
             }
 
-            private string WatcherIntent()
-            {
-                if (stage == 1) return "静默：等待撤离绳";
-                if (stage == 3) return evacuationJustEntered ? "无星余响：本回合停息" : "无星余响：4 点理智冲击";
-                var next = summonStep + 1;
-                var lines = new List<string>();
-                if (next % 2 == 0) lines.Add(s.enemies.Skip(1).Count(x => x.Health > 0) == 3 ? "无星余响：3–4 理智，清至两名则 3" : "无星余响：3 点理智冲击");
-                if (!initialSpawned) lines.Add("召唤：" + string.Join("、", guardOrder.Take(2).Select(GuardLabel)));
-                else if (next >= 3 && next % 2 == 1)
-                {
-                    var name = guardOrder.FirstOrDefault(n => { var e = s.Find(Slot("b05-guard-" + n)); return e.Health == 0 && !dormantUntil.ContainsKey(e.Definition.Id) && !completed.Contains(e.Definition.Id + ":closed"); });
-                    if (name != null) lines.Add("召唤：" + GuardLabel(name) + "（需空位）");
-                }
-                foreach (var id in dormantUntil.Where(x => x.Value <= s.turn).OrderBy(x => x.Value).Select(x => x.Key)) lines.Add("复现：" + s.Find(id).Definition.Name + "（需空位）");
-                return lines.Count == 0 ? "静默：本回合无本体攻击" : string.Join("\n", lines);
-            }
+            private string WatcherIntent() => "无星凝视：2 点理智冲击";
 
             public EnemyView EnemyView(EnemyState e)
             {
                 var dormant = e.Health == 0 && !completed.Contains(e.Definition.Id + ":closed") && !victory;
-                var intent = e.Health == 0 ? dormant ? "未入场／休眠" : "已永久解除" : e.Interrupted ? "已打断：本回合不行动" : e.ActualIntent == null ? "公开规则行动" : e.ActualIntent.Amount == 0 ? e.ActualIntent.Name : Describe(e.ActualIntent);
+                var intent = e.Health == 0 ? kind == BossEncounterKind.Watcher && dormant ? "尚未召唤" : dormant ? "未入场／休眠" : "已永久解除" : e.Interrupted ? "已打断：本回合不行动" : e.ActualIntent == null ? "公开规则行动" : e.ActualIntent.Amount == 0 ? e.ActualIntent.Name : Describe(e.ActualIntent);
                 if (kind == BossEncounterKind.Watcher && e == s.enemies[0]) intent = WatcherIntent();
                 return new EnemyView(e.Definition.Id, e.Definition.Name, e.Health, e.Definition.Health, "", intent, e.Health > 0, IsTargetable(e.Definition.Id));
             }

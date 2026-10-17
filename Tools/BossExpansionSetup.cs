@@ -43,8 +43,8 @@ public static class BossExpansionSetup
             new[]{"b03-surveyor","b03-moth-1","b03-moth-2"},new[]{"倒悬司衡者","雾灯蛾群 I","雾灯蛾群 II"},"在盐格中开启 B4、C1、C4、D2 四枚封栓。","数字只表示相邻危险总数；本体不能用普通武装选中。"),
         new Spec("M04","UnlitFlagBearer","无灯执旗者","无灯旗舰",BossEncounterKind.FlagBearer,3.8f,new Vector3(-20,-20,230),45,145,
             new[]{"b04-flag-bearer","b04-flag-soldier"},new[]{"无灯执旗者","空甲执旗兵"},"校准继电器，依次释放三道闸锁，再击退执旗者。","继电器与当前闸锁条件始终公开；错误接线可以直接纠正。"),
-        new Spec("M05","StarlessWatcher","无星王座守望者","无星撤离",BossEncounterKind.Watcher,30,new Vector3(-30,-60,285),8.5f,150,
-            new[]{"b05-watcher","b05-guard-anchor","b05-guard-lamp","b05-guard-bell","b05-guard-sail","b05-guard-eye"},new[]{"无星守望者","锚守卫","灯守卫","钟守卫","帆守卫","眼守卫"},"牵引并击退五种守卫，关闭航标后收绞撤离。","守卫与航标对应公开；未牵引击退的守卫会复现。")
+        new Spec("M05","StarlessWatcher","无星王座守望者","无星王座",BossEncounterKind.Watcher,30,new Vector3(0,-68,300),10.5f,180,
+            new[]{"b05-watcher","b05-guard-anchor","b05-guard-lamp","b05-guard-bell","b05-guard-sail","b05-guard-eye"},new[]{"无星守望者","锚守卫","灯守卫","钟守卫","帆守卫","眼守卫"},"用遭遇牌召唤五名守卫，击退全部守卫。","本体每回合造成2点理智冲击；守卫召唤当回合不攻击，可分批应对。")
     };
 
     public static string ImportModels()
@@ -69,6 +69,7 @@ public static class BossExpansionSetup
         var template=AssetDatabase.LoadAssetAtPath<GameObject>(SourceStage);
         if(template==null)throw new InvalidOperationException("Build SeaBossSetup and UberWaterSetup first; DrownedBellStage is missing.");
         foreach(var spec in Specs)BuildEncounter(spec,template);
+        GiantBossSetup.BuildM05();
         var settings = Resources.FindObjectsOfTypeAll<EditorBuildSettings>().Single();
         var copy = UnityEngine.Object.Instantiate(settings);
         try

@@ -1,0 +1,15 @@
+{
+  "asset": "StarlessGuardLamp",
+  "content_id": "b05-guard-lamp",
+  "provider": "Hyper3D Agent / Rodin",
+  "project_id": "172e9cd6-b009-4706-ac4f-8a9ca2015582",
+  "high_generation": "326bd377-06bb-5e38-8c5d-8c0e49231ce4",
+  "bang_generation": "bf7c9ae4-6ba3-54e1-8639-aba26ffe5f58",
+  "runtime_budget_triangles": 30000,
+  "runtime_texture_size": 2048,
+  "privacy": {"public_generation_authorized": true, "basis": "User explicitly authorized public generation for these five M05 guardians; no private setting is claimed."},
+  "design": "Tall slender faceless deep-sea lantern keeper; cracked ancient lantern cage as chest and abdomen, cold lamp core, long separate arms, salt-corroded dark iron and cloth, full body with iron boots. No scene or base. Genuine BANG semantic split of its generated mother model.",
+  "outputs": {"high": "ArtSource/Bosses/StarlessGuardLamp_High.glb"},
+  "high_sha256": "273b1a7cd6104a86e0fd44ecbad1cc924b859f06e1498b41bff7cee8f6511177",
+  "display_url": "https://hyper3d.ai/workspace/rodin/326bd377-06bb-5e38-8c5d-8c0e49231ce4"
+}

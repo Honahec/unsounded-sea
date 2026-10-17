@@ -77,11 +77,13 @@ namespace UnsoundedSea.Core
 
     public static class VoyageMapGenerator
     {
-        public const int Version = 7;
+        public const int Version = 8;
         public const int Layers = 11;
-        private static readonly string[] RegionalBosses =
+        private static readonly string[][] ActBosses =
         {
-            "fog-visitors", "drowned-bell", "m02", "m03", "m04", "storm-gauntlet", "hollow-beacon"
+            new[] { "fog-visitors", "storm-gauntlet", "hollow-beacon" },
+            new[] { "m02", "m03", "m04" },
+            new[] { "m05", "drowned-bell" }
         };
         private static readonly RunNodeKind[] Schedule = { RunNodeKind.Supply, RunNodeKind.Battle, RunNodeKind.Event, RunNodeKind.Battle,
             RunNodeKind.Reward, RunNodeKind.Supply, RunNodeKind.Battle, RunNodeKind.Archive, RunNodeKind.Battle, RunNodeKind.Supply, RunNodeKind.Boss };
@@ -236,12 +238,8 @@ namespace UnsoundedSea.Core
         public static string BossEncounter(uint seed, int act, string region)
         {
             ValidateActRegion(act, region);
-            if (act == 3) return "m05";
-            var first = (int)(VoyageSeeds.Derive(seed, "boss", "act-1") % (uint)RegionalBosses.Length);
-            if (act == 1) return RegionalBosses[first];
-            var second = (int)(VoyageSeeds.Derive(seed, "boss", "act-2") % (uint)(RegionalBosses.Length - 1));
-            if (second >= first) second++;
-            return RegionalBosses[second];
+            var pool = ActBosses[act - 1];
+            return pool[VoyageSeeds.Derive(seed, "boss", "act-" + act) % (uint)pool.Length];
         }
         private static string Id(int act,int layer,int index)=>"a"+act+"l"+layer+"n"+index;
         private static bool Finite(float x)=>!float.IsNaN(x)&&!float.IsInfinity(x);

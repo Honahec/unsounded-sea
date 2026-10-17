@@ -28,13 +28,15 @@ namespace UnsoundedSea.Runtime
         private readonly List<BattleActorView> actors = new List<BattleActorView>();
         private readonly List<BellMotherRigidMotion> seaMotions = new List<BellMotherRigidMotion>();
         private readonly VesselWaveResponse vesselResponse = new VesselWaveResponse();
-        public bool HasPendingSeaAttack => seaMotions.Exists(m => m != null && m.ActiveAction == "Attack") || actors.Exists(a => a.GiantMotion != null && a.GiantMotion.Busy);
+        public bool HasPendingSeaAttack => seaMotions.Exists(m => m != null && m.ActiveAction == "Attack") ||
+            actors.Exists(a => a != null && (a.IsEmerging || a.GiantMotion != null && a.GiantMotion.Busy));
         private BattleDirector director;
         private Vector3 shipPosition, cameraPosition;
         private Quaternion shipRotation, cameraRotation;
         private float impactCameraLift;
         private float age, shake, combatSway, combatVelocity, combatTarget;
         public bool HasPendingDeckMotion => actors.Exists(a => a != null && a.isActiveAndEnabled && a.HasPendingDeckMotion);
+        public bool DelaysHudUntilImpact { get; private set; }
         public float CombatSway => combatSway;
         private bool previousFog;
         private Material previousSkybox;
@@ -66,6 +68,7 @@ namespace UnsoundedSea.Runtime
                 var actor = new GameObject(view.Enemies[i].Name).AddComponent<BattleActorView>();
                 actor.transform.SetParent(actorAnchors[i], false);
                 actor.Bind(owner, view.Enemies[i].Id, owner.scenario.ActorPrefab(i), selectionMaterial);
+                if(actor.IsSeaActor&&water!=null)actor.ConfigureSeaEmergence(water.SurfaceHeight);
                 actor.ConfigureMotion(placeholderCombatMotion);
                 if (view.BossKind != BossEncounterKind.None)
                 {
@@ -73,10 +76,12 @@ namespace UnsoundedSea.Runtime
                     actor.gameObject.SetActive(view.Enemies[i].Health > 0);
                 }
                 actors.Add(actor);
+                actor.BrokeSurface += OnBrokeSurface;
                 if (actor.GiantMotion != null)
                 {
                     actor.GiantMotion.BindEffects(water,vessel);
                     actor.GiantMotion.SurfaceReleased += OnGiantRelease;
+                    actor.GiantMotion.VesselImpact += OnVesselImpact;
                 }
                 var motion = actor.GetComponentInChildren<BellMotherRigidMotion>();
                 if (actor.IsSeaActor && motion != null && water != null)
@@ -109,17 +114,34 @@ namespace UnsoundedSea.Runtime
                 }
                 if (!actors[i].IsSeaActor && damaged) combatTarget = Mathf.Max(combatTarget, .65f);
             }
-            if (after.Health < before.Health || after.Sanity < before.Sanity)
-            {
-                shake = placeholderCombatMotion ? 1 : 0;
-                var cue = after.Sanity < before.Sanity && sanityCue != null ? sanityCue : impactCue;
-                if (feedback != null && cue != null) feedback.PlayOneShot(cue);
-            }
+            var watcherSanityHit = command.kind == CommandKind.EndTurn && after.BossKind == BossEncounterKind.Watcher &&
+                after.ResolvedEnemyActions.Any(x => x.EnemyId == after.Enemies[0].Id && x.Channel == DamageChannel.Sanity && x.Amount > 0);
+            DelaysHudUntilImpact = watcherSanityHit;
+            if (!watcherSanityHit && (after.Health < before.Health || after.Sanity < before.Sanity)) PlayPlayerImpact(after.Sanity < before.Sanity);
             if (after.ObjectiveProgress > before.ObjectiveProgress && feedback != null && sealCue != null) feedback.PlayOneShot(sealCue);
             RefreshSelection();
         }
+        private void PlayPlayerImpact(bool sanity)
+        {
+            shake = placeholderCombatMotion ? 1 : 0;
+            var cue = sanity && sanityCue != null ? sanityCue : impactCue;
+            if (feedback != null && cue != null) feedback.PlayOneShot(cue);
+        }
+        private void OnVesselImpact()
+        {
+            if (!DelaysHudUntilImpact) return;
+            DelaysHudUntilImpact = false;
+            PlayPlayerImpact(true);
+            director.NotifyPresentationImpact();
+        }
         private void OnGiantRelease(Vector3 point,float amplitude) { if(water!=null)water.EmitImpact(point,amplitude); }
         private void OnSurfaceStruck(Vector3 point) => water.EmitImpact(point);
+        private void OnBrokeSurface(BattleActorView actor)
+        {
+            if(water==null)return;
+            var point=actor.transform.position;point.y=water.SurfaceHeight(point);
+            water.EmitImpact(point,Mathf.Max(12,actor.WaterRadius*.45f));
+        }
 
         // Runs after actor motion: contacts, water geometry and vessel samples share one frame.
         private void LateUpdate()
@@ -234,7 +256,8 @@ namespace UnsoundedSea.Runtime
             foreach (var motion in seaMotions)
                 if (motion != null) { motion.SurfaceStruck -= OnSurfaceStruck; motion.SurfaceHeight = null; }
             seaMotions.Clear();
-            foreach(var actor in actors) if(actor != null && actor.GiantMotion != null) actor.GiantMotion.SurfaceReleased -= OnGiantRelease;
+            foreach(var actor in actors) if(actor != null && actor.GiantMotion != null) { actor.GiantMotion.SurfaceReleased -= OnGiantRelease; actor.GiantMotion.VesselImpact -= OnVesselImpact; }
+            foreach(var actor in actors)if(actor!=null)actor.BrokeSurface-=OnBrokeSurface;
             if (skybox != null) RenderSettings.skybox = previousSkybox;
             RenderSettings.fog = previousFog; RenderSettings.fogColor = previousColor;
             RenderSettings.fogDensity = previousDensity; RenderSettings.fogMode = previousMode;

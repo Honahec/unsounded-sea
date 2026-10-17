@@ -1,0 +1,15 @@
+{
+  "asset": "StarlessGuardBell",
+  "content_id": "b05-guard-bell",
+  "provider": "Hyper3D Agent / Rodin",
+  "project_id": "172e9cd6-b009-4706-ac4f-8a9ca2015582",
+  "high_generation": "6a91392d-cf83-5bb2-aac4-26a1027abc98",
+  "bang_generation": "54a08d51-2f58-5fd2-92f0-650c967fa1e9",
+  "runtime_budget_triangles": 30000,
+  "runtime_texture_size": 2048,
+  "privacy": {"public_generation_authorized": true, "basis": "User explicitly authorized public generation for these five M05 guardians; no private setting is claimed."},
+  "design": "Broad deep-sea bell guardian with a heavy corroded copper bell chest and visible clapper, arched shoulders, substantial legs, faceless hood, salt-encrusted black iron. Complete isolated full body. Genuine semantic BANG split of the generated mother model.",
+  "outputs": {"high": "ArtSource/Bosses/StarlessGuardBell_High.glb"},
+  "high_sha256": "627edb0e62984c2138ab5107fa4cb8aeb01833d59ce779a3770fef29729549b7",
+  "display_url": "https://hyper3d.ai/workspace/rodin/6a91392d-cf83-5bb2-aac4-26a1027abc98"
+}

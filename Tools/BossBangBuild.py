@@ -1,4 +1,4 @@
-"""Build M02–M05 BANG runtime parts: Blender -b --python Tools/BossBangBuild.py -- <asset>."""
+"""Build Boss/guardian BANG runtime parts: Blender -b --python Tools/BossBangBuild.py -- <asset>."""
 import json
 import struct
 import sys
@@ -42,8 +42,8 @@ def inspect_glb(path):
 
 
 def build(asset):
-    if asset not in JOBS:
-        raise ValueError('Unknown boss: ' + asset)
+    if asset not in JOBS and asset not in {'StarlessGuard' + kind for kind in ('Anchor', 'Lamp', 'Bell', 'Sail', 'Eye')}:
+        raise ValueError('Unknown boss or guardian: ' + asset)
     archive = ROOT / 'ArtSource/Bosses'
     original = json.loads((archive / (asset + '-manifest.json')).read_text())
     source = archive / (asset + '_BANG_High.glb')
@@ -72,6 +72,13 @@ def build(asset):
     budget = original['runtime_budget_triangles']
     ratio = min(1.0, budget / source_stats['triangles'])
     bell.decimate(meshes, ratio)
+    texture_limit = original.get('runtime_texture_size')
+    if texture_limit:
+        for image in bpy.data.images:
+            width, height = image.size
+            if max(width, height) > texture_limit:
+                scale = texture_limit / max(width, height)
+                image.scale(round(width * scale), round(height * scale))
     bell.GLB = str(output)
     bell.PREVIEW = str(preview)
     bell.export(root)
@@ -79,13 +86,13 @@ def build(asset):
     assert runtime_stats['meshes'] == len(meshes)
     assert 0 < runtime_stats['triangles'] <= budget
     assert runtime_stats['skins'] == runtime_stats['animations'] == 0
-    bell.render_preview(root)
+    bell.render_preview(root, front=asset.startswith('StarlessGuard'))
     report = {
         'asset': asset, 'provider': 'Hyper3D BANG',
-        'source_generation': JOBS[asset], 'source_asset': original['high_generation'],
+        'source_generation': original.get('bang_generation', JOBS.get(asset)), 'source_asset': original['high_generation'],
         'request': {'asset_id': original['high_generation'], 'geometry_file_format': 'glb'},
-        'privacy': {'basis': 'API output is not published to public ASSETS or shared with other users.',
-                    'policy': 'https://docs.hyper3d.ai/en/legal/data-retention-policy'},
+        'privacy': original.get('privacy', {'basis': 'API output is not published to public ASSETS or shared with other users.',
+                                          'policy': 'https://docs.hyper3d.ai/en/legal/data-retention-policy'}),
         'method': 'BANG semantic split; independent rigid part pivots; Blender decimation',
         'parts': len(meshes), 'part_mapping': mapping, 'decimate_ratio': ratio,
         'triangles_before': source_stats['triangles'], 'triangles_after': runtime_stats['triangles'],

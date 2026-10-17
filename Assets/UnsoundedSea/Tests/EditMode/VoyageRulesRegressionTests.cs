@@ -40,13 +40,13 @@ namespace UnsoundedSea.Tests
 
         [Test] public void BossRewardPoolsExcludeMechanicDeadCards()
         {
-            var drowned=RewardUnion("drowned-bell");var storm=RewardUnion("storm-gauntlet");var hollow=RewardUnion("hollow-beacon");
+            var drowned=RewardUnion("drowned-bell",3,"abyss");var storm=RewardUnion("storm-gauntlet");var hollow=RewardUnion("hollow-beacon");
             Assert.That(drowned,Does.Not.Contain("c046"));Assert.That(drowned,Does.Not.Contain("c061"));
             Assert.That(drowned,Does.Not.Contain("c062"));Assert.That(drowned,Does.Not.Contain("c078"));
             Assert.That(storm,Does.Not.Contain("c057"));Assert.That(storm,Does.Not.Contain("c065"));
             Assert.That(hollow,Does.Not.Contain("c058"));Assert.That(hollow,Does.Not.Contain("c064"));
-            Assert.That(RewardUnion("m02"),Does.Contain("c062"));
-            Assert.That(RewardUnion("m04"),Does.Contain("c065"));
+            Assert.That(RewardUnion("m02",2,"bones"),Does.Contain("c062"));
+            Assert.That(RewardUnion("m04",2,"bones"),Does.Contain("c065"));
             Assert.That(RewardUnion("fog-visitors"),Does.Contain("c058"));
         }
 
@@ -68,13 +68,22 @@ namespace UnsoundedSea.Tests
         }
 
 
-        private static IReadOnlyCollection<string> RewardUnion(string boss)
+        private static IReadOnlyCollection<string> RewardUnion(string boss,int act=1,string region="fog")
         {
             var result=new HashSet<string>(StringComparer.Ordinal);var matches=0;
             for(uint seed=0;seed<4096&&matches<128;seed++)
             {
-                if(VoyageMapGenerator.BossEncounter(seed,1,"fog")!=boss)continue;
-                var session=VoyageSession.Create(seed);Move(session,4);
+                if(VoyageMapGenerator.BossEncounter(seed,act,region)!=boss)continue;
+                var session=VoyageSession.Create(seed);
+                while(session.Act<act)
+                {
+                    Move(session,10);
+                    Assert.That(session.BeginEncounter(),Is.True);
+                    Assert.That(session.ResolveEncounter(true,session.Health,session.Sanity),Is.True);
+                    Assert.That(session.ChooseNextAct(session.Act==1?"bones":"abyss"),Is.True);
+                    Assert.That(session.ClaimReward(null),Is.True);
+                }
+                Move(session,4);
                 foreach(var card in session.RewardCards)result.Add(card.Id);
                 matches++;
             }

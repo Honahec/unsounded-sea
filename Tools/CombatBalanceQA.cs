@@ -39,11 +39,10 @@ public static class CombatBalanceQA
         public readonly HashSet<int> Carried = new HashSet<int>();
         public readonly HashSet<int> Retain = new HashSet<int>();
         public int Combos;
-        public bool BoundThisTurn, ObservationUsed;
-        public readonly HashSet<string> Bound = new HashSet<string>();
+        public bool ObservationUsed;
         public bool OtherHit(string target, int instance) => target != null && Hit.TryGetValue(target, out var instances) && instances.Any(id => id != instance);
         public void RecordHit(string target, int instance) { if (!Hit.TryGetValue(target, out var instances)) Hit.Add(target, instances = new HashSet<int>()); instances.Add(instance); }
-        public void End() { Hit.Clear(); Answer.Clear(); Questions.Clear(); Carried.Clear(); foreach (var id in Retain) Carried.Add(id); Retain.Clear(); BoundThisTurn = ObservationUsed = false; }
+        public void End() { Hit.Clear(); Answer.Clear(); Questions.Clear(); Carried.Clear(); foreach (var id in Retain) Carried.Add(id); Retain.Clear(); ObservationUsed = false; }
     }
 
     public static string Main() => Run(Decks);
@@ -168,6 +167,28 @@ public static class CombatBalanceQA
         }
         var json = JsonConvert.SerializeObject(rows, Formatting.Indented); File.WriteAllText("Logs/CombatBalance/boss-results.json",json); return json;
     }
+
+    public static string M05Scenario()
+    {
+        var outcomes = new List<object>(); Directory.CreateDirectory("Logs/CombatBalance");
+        var source = AssetDatabase.LoadAssetAtPath<EncounterDefinition>("Assets/UnsoundedSea/Content/Encounters/m05.asset").Build();
+        foreach (var name in new[] { "confirm", "source" })
+        {
+            var definition = new BattleDefinition("m05", Decks[name].Select(n => CardCatalog.All[n-1]), source.Enemies, Array.Empty<ToolSpec>(), source.Objective, source.ObjectiveTarget);
+            for (uint seed = 0; seed < 30; seed++)
+            {
+                var s = new BattleSession(definition, seed, boss: BossEncounterKind.Watcher); var policy = new Policy();
+                while (s.View.Phase == BattlePhase.PlayerTurn && s.View.Turn <= 30)
+                {
+                    Act(s, policy);
+                    if (s.View.Phase == BattlePhase.PlayerTurn) { Must(s.Execute(BattleCommand.EndTurn())); policy.End(); }
+                }
+                outcomes.Add(new { Deck = name, Seed = seed, Phase = s.View.Phase.ToString(), Turns = s.View.Turn, Health = s.View.Health, Sanity = s.View.Sanity });
+            }
+        }
+        var json = JsonConvert.SerializeObject(outcomes, Formatting.Indented);
+        File.WriteAllText("Logs/CombatBalance/m05-seeds.json", json); return json;
+    }
     private static bool SceneAction(BattleSession s, Policy p)
     {
         var v = s.View; if (v.Actions < 1) return false;
@@ -197,21 +218,15 @@ public static class CombatBalanceQA
             if (target != null) cardId="E04-01";
             else if (v.BossStage == 2) { cardId="E04-02"; target="lock-" + new[] { "I","II","III" }[v.ObjectiveProgress]; }
         }
-        if (v.BossKind == BossEncounterKind.Watcher)
+        if (v.BossKind == BossEncounterKind.Watcher && !v.Enemies.Skip(1).Any(e => e.Health > 0))
         {
-            if (v.BossStage == 1) { cardId="E05-01"; target="winch"; }
-            else if (v.BossStage == 3) { cardId="E05-03"; target="winch"; }
-            else if (!p.BoundThisTurn)
-            {
-                var bind = v.Hand.First(c => c.Definition.Id == "E05-02");
-                target = bind.Targets.Where(t => t.Enabled).OrderBy(t => v.Enemies.First(e => e.Id == t.Id.Split('|')[0]).Health).Select(t => t.Id).FirstOrDefault();
-                if (target != null) cardId="E05-02";
-            }
+            var summon = v.Hand.FirstOrDefault(c => c.Definition.Id == "E05-01" && c.Enabled);
+            target = summon?.Targets.FirstOrDefault(t => t.Enabled)?.Id;
+            if (target != null) cardId = "E05-01";
         }
         var card = v.Hand.FirstOrDefault(c => c.Definition.Id == cardId && c.Enabled);
         if (card == null || card.Targets.Count > 0 && !card.Targets.Any(t => t.Id == target && t.Enabled)) return false;
         Must(s.Execute(BattleCommand.Play(card.InstanceId,target)));
-        if (cardId == "E05-02") { p.Bound.Add(target.Split('|')[0]); p.BoundThisTurn=true; }
         return true;
     }
     private static bool ProvenSafe(BattleView v, string target)
@@ -270,7 +285,7 @@ public static class CombatBalanceQA
         var s = Math.Max(0, v.Enemies.Sum(x => Threat(x, true)) - v.Ward);
         Func<int,double> block = amount => Math.Min(h, amount) * 1.1;
         Func<int,double> ward = amount => Math.Min(s, amount) * 1.6;
-        Func<EnemyView,int,double> hit = (enemy, damage) => !enemy.Targetable ? 0 : (Math.Min(enemy.Health, damage) + (enemy.Health <= damage ? 8 + Threat(enemy,false) + Threat(enemy,true)*1.5 : 0)) * (v.BossKind == BossEncounterKind.Watcher && !p.Bound.Contains(enemy.Id) ? .25 : 1);
+        Func<EnemyView,int,double> hit = (enemy, damage) => !enemy.Targetable ? 0 : Math.Min(enemy.Health, damage) + (enemy.Health <= damage ? 8 + Threat(enemy,false) + Threat(enemy,true)*1.5 : 0);
         double value = 0;
         if (n <= 18)
         {

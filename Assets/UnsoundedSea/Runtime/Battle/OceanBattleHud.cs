@@ -174,10 +174,11 @@ namespace UnsoundedSea.Runtime
             var toolOffset = root.Q<ScrollView>(className: "tools")?.scrollOffset ?? Vector2.zero;
             var journalOffset = root.Q<ScrollView>(className: "journal")?.scrollOffset ?? Vector2.zero;
             var oldPositions = nameplates.ToDictionary(p => p.name, p => new Vector2(p.resolvedStyle.left, p.resolvedStyle.top));
-            renderedRevision = director.ViewRevision;
+            var waitingForImpact = impactView != null && director.Stage != null && director.Stage.DelaysHudUntilImpact;
+            renderedRevision = waitingForImpact ? -1 : director.ViewRevision;
             renderedPaused = director.Paused; renderedSelection = director.SelectedEnemy; renderedNotice = director.Notice;
             actionButtons.Clear();
-            root.Clear(); root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion); nameplates.Clear(); var v = director.View; if (v == null) return;
+            root.Clear(); root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion); nameplates.Clear(); var v = waitingForImpact ? impactView : director.View; if (v == null) return;
             root.focusable = v.PendingChoice == null && inspectedCard == 0 && !bookOpen && !chartOpen && !director.Paused && v.Phase == BattlePhase.PlayerTurn;
             encounterLabels.Clear();
             enemyChoices.Clear();

@@ -89,28 +89,28 @@ namespace UnsoundedSea.Tests
                 Assert.That(waves, Is.EqualTo(before), "Rituals and summon cues must not launch physical waves");
                 motion.Retire(); motion.PlayAttack();
                 for (int i = 0; i < 50; i++) motion.Tick(.1f);
-                Assert.That(motion.Busy, Is.False); Assert.That(motion.Retiring, Is.True);
+                Assert.That(motion.Busy, Is.False);
                 Assert.That(waves, Is.EqualTo(before));
             }
             finally { Object.DestroyImmediate(baked); Object.DestroyImmediate(actor); Object.DestroyImmediate(control); }
         }
 
-        [Test] public void WatcherPreparationDoesNotAttackAndSummonIsDistinctFromEcho()
+        [Test] public void WatcherAttacksFromFirstTurnAndPlayerSummonIsReplayable()
         {
             var scenario = Scenario(5); var session = scenario.CreateSession(0);
             Assert.That(session.View.ResolvedEnemyActions, Is.Empty);
             Assert.That(session.Execute(BattleCommand.EndTurn()).Success, Is.True);
-            Assert.That(session.View.ResolvedEnemyActions, Is.Empty, "Unprepared ropes must leave the watcher idle");
-            var prepare = session.View.Hand.Single(c => c.Definition.Id == "E05-01");
-            Assert.That(session.Execute(BattleCommand.Play(prepare.InstanceId, "winch")).Success, Is.True);
-            session.Execute(BattleCommand.EndTurn());
             var id = session.View.Enemies[0].Id;
-            Assert.That(session.View.ResolvedEnemyActions.Single(a => a.EnemyId == id).Amount, Is.Zero);
+            var gaze = session.View.ResolvedEnemyActions.Single(a => a.EnemyId == id);
+            Assert.That(gaze.Channel, Is.EqualTo(DamageChannel.Sanity)); Assert.That(gaze.Amount, Is.EqualTo(2));
+            var summon = session.View.Hand.Single(c => c.Definition.Id == "E05-01");
+            var guardId = summon.Targets.First(t => t.Enabled).Id;
+            Assert.That(session.Execute(BattleCommand.Play(summon.InstanceId, guardId)).Success, Is.True);
+            Assert.That(session.View.Enemies.Single(e => e.Id == guardId).Health, Is.GreaterThan(0));
             session.Execute(BattleCommand.EndTurn());
-            var echo = session.View.ResolvedEnemyActions.Single(a => a.EnemyId == id);
-            Assert.That(echo.Channel, Is.EqualTo(DamageChannel.Sanity)); Assert.That(echo.Amount, Is.GreaterThan(0));
             var replay = BattleReplay.Capture(session).Restore(scenario.encounter.Build());
             Assert.That(replay.View.ResolvedEnemyActions.Select(a => a.Amount), Is.EqualTo(session.View.ResolvedEnemyActions.Select(a => a.Amount)));
+            Assert.That(replay.View.Enemies.Select(e => e.Health), Is.EqualTo(session.View.Enemies.Select(e => e.Health)));
         }
     }
 }

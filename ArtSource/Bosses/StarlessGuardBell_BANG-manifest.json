@@ -1,0 +1,245 @@
+{
+  "asset": "StarlessGuardBell",
+  "provider": "Hyper3D BANG",
+  "source_generation": "54a08d51-2f58-5fd2-92f0-650c967fa1e9",
+  "source_asset": "6a91392d-cf83-5bb2-aac4-26a1027abc98",
+  "request": {
+    "asset_id": "6a91392d-cf83-5bb2-aac4-26a1027abc98",
+    "geometry_file_format": "glb"
+  },
+  "privacy": {
+    "public_generation_authorized": true,
+    "basis": "User explicitly authorized public generation for these five M05 guardians; no private setting is claimed."
+  },
+  "method": "BANG semantic split; independent rigid part pivots; Blender decimation",
+  "parts": 10,
+  "part_mapping": [
+    {
+      "pivot": "Part_01",
+      "source_mesh": "root.0",
+      "center": [
+        -0.4632469415664673,
+        0.028501957654953003,
+        1.1641955375671387
+      ],
+      "minimum": [
+        -0.6826941967010498,
+        -0.14695371687412262,
+        0.831983208656311
+      ],
+      "maximum": [
+        -0.24379965662956238,
+        0.20395763218402863,
+        1.4964079856872559
+      ]
+    },
+    {
+      "pivot": "Part_02",
+      "source_mesh": "root.1",
+      "center": [
+        -0.33813807368278503,
+        0.07534646987915039,
+        1.5176987648010254
+      ],
+      "minimum": [
+        -0.4917532205581665,
+        -0.1287214756011963,
+        1.344226598739624
+      ],
+      "maximum": [
+        -0.18452292680740356,
+        0.27941441535949707,
+        1.6911709308624268
+      ]
+    },
+    {
+      "pivot": "Part_03",
+      "source_mesh": "root.2",
+      "center": [
+        0.011036872863769531,
+        0.005651593208312988,
+        1.7268455028533936
+      ],
+      "minimum": [
+        -0.13192009925842285,
+        -0.17406129837036133,
+        1.5551137924194336
+      ],
+      "maximum": [
+        0.15399384498596191,
+        0.1853644847869873,
+        1.898577094078064
+      ]
+    },
+    {
+      "pivot": "Part_04",
+      "source_mesh": "root.3",
+      "center": [
+        -0.2066498100757599,
+        -0.0017143189907073975,
+        0.36118072271347046
+      ],
+      "minimum": [
+        -0.3748156726360321,
+        -0.2447625994682312,
+        7.140636444091797e-05
+      ],
+      "maximum": [
+        -0.03848394751548767,
+        0.2413339614868164,
+        0.7222900390625
+      ]
+    },
+    {
+      "pivot": "Part_05",
+      "source_mesh": "root.4",
+      "center": [
+        0.0007052943110466003,
+        -0.2449868619441986,
+        1.2135553359985352
+      ],
+      "minimum": [
+        -0.03563963249325752,
+        -0.30697697401046753,
+        1.0062178373336792
+      ],
+      "maximum": [
+        0.03705022111535072,
+        -0.1829967498779297,
+        1.4208927154541016
+      ]
+    },
+    {
+      "pivot": "Part_06",
+      "source_mesh": "root.5",
+      "center": [
+        0.0027625709772109985,
+        -0.28413039445877075,
+        1.3140490055084229
+      ],
+      "minimum": [
+        -0.18085043132305145,
+        -0.4461323022842407,
+        1.1357550621032715
+      ],
+      "maximum": [
+        0.18637557327747345,
+        -0.12212848663330078,
+        1.4923429489135742
+      ]
+    },
+    {
+      "pivot": "Part_07",
+      "source_mesh": "root.6",
+      "center": [
+        0.17502878606319427,
+        -0.003047242760658264,
+        0.5251386761665344
+      ],
+      "minimum": [
+        -0.027159515768289566,
+        -0.24745610356330872,
+        0.0
+      ],
+      "maximum": [
+        0.3772170841693878,
+        0.2413616180419922,
+        1.0502773523330688
+      ]
+    },
+    {
+      "pivot": "Part_08",
+      "source_mesh": "root.7",
+      "center": [
+        0.3381491005420685,
+        0.07534646987915039,
+        1.517696738243103
+      ],
+      "minimum": [
+        0.184545636177063,
+        -0.1287214756011963,
+        1.3442223072052002
+      ],
+      "maximum": [
+        0.491752564907074,
+        0.27941441535949707,
+        1.6911711692810059
+      ]
+    },
+    {
+      "pivot": "Part_09",
+      "source_mesh": "root.8",
+      "center": [
+        0.00048679113388061523,
+        0.0582660436630249,
+        1.1818856000900269
+      ],
+      "minimum": [
+        -0.4508357346057892,
+        -0.3303234577178955,
+        0.6290560960769653
+      ],
+      "maximum": [
+        0.4518093168735504,
+        0.4468555450439453,
+        1.7347151041030884
+      ]
+    },
+    {
+      "pivot": "Part_10",
+      "source_mesh": "root.9",
+      "center": [
+        0.4632384777069092,
+        0.028501972556114197,
+        1.1641956567764282
+      ],
+      "minimum": [
+        0.24380004405975342,
+        -0.1469537317752838,
+        0.831983208656311
+      ],
+      "maximum": [
+        0.6826769113540649,
+        0.2039576768875122,
+        1.4964081048965454
+      ]
+    }
+  ],
+  "decimate_ratio": 0.06,
+  "triangles_before": 500000,
+  "triangles_after": 29993,
+  "source_spec": {
+    "bytes": 62021512,
+    "triangles": 500000,
+    "vertices": 426595,
+    "meshes": 10,
+    "materials": 10,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "runtime_spec": {
+    "bytes": 14752560,
+    "triangles": 29993,
+    "vertices": 35561,
+    "meshes": 10,
+    "materials": 10,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "outputs": {
+    "source": "ArtSource/Bosses/StarlessGuardBell_BANG_High.glb",
+    "glb": "Assets/UnsoundedSea/Art/Models/StarlessGuardBell_BANG_LOD0.glb",
+    "preview": "ArtSource/Bosses/StarlessGuardBell_BANG-preview.png"
+  },
+  "sha256": {
+    "source": "5845055b303a5db823bf50c2b2b679cb87f1c6a48cb4c9a7334bf3538b062a0c",
+    "glb": "89cda3566bf36f1f591b53e570de7374f50cbf77165c8ded8d30ec6f12d90198",
+    "preview": "3ed9e2ba4515ea9333ace940a615f7f7977ac096f927d4b4447e5c0786bdf89f"
+  },
+  "animation_ready": false,
+  "notes": [
+    "Part pivots preserve the assembled silhouette. Anatomical joint calibration and combat animation are not included."
+  ]
+}

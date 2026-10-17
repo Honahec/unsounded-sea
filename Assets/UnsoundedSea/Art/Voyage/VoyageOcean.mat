@@ -133,6 +133,7 @@ Material:
     - _SL_Trail_Fade: 1
     - _SL_WaterDepth: 0.3
     - _SeaTime: 0
+    - _SeaZWrite: 0
     - _ShoreFade: 0
     - _ShoreFade_Smoothness: 0.25
     - _Specular_Hardness: 0

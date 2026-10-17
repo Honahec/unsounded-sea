@@ -52,8 +52,7 @@ namespace UnsoundedSea.Tests
         {
             var session = new BattleSession(Watcher(true, sanity), 0, boss: BossEncounterKind.Watcher);
             var start = session.View.Hand.Single(x => x.IsEncounter && x.Definition.Id == "E05-01");
-            Assert.That(session.Execute(BattleCommand.Play(start.InstanceId, "winch")).Success);
-            Assert.That(session.Execute(BattleCommand.EndTurn()).Success);
+            Assert.That(session.Execute(BattleCommand.Play(start.InstanceId, "b05-guard-anchor")).Success);
             return session;
         }
 

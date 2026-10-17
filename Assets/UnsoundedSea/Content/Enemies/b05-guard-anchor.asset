@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: b05-guard-anchor
   displayName: "\u951A\u5B88\u536B"
-  health: 16
+  health: 26
   candidateDescription: "\u6BCF\u56DE\u5408 5 \u751F\u547D"
+  intentPolicy: 0
   intents:
   - id: boss-script
     displayName: "\u516C\u5F00\u884C\u52A8"
@@ -26,4 +27,4 @@ MonoBehaviour:
     visibleAction: 1
     interruptible: 0
     soundSource: "\u7532\u677F"
-  presentationPrefab: {fileID: 8503010910801479966, guid: 3174b36a4959843a7b46702d709df05d, type: 3}
+  presentationPrefab: {fileID: 620804162334219515, guid: 02e3e71ece5f440dba91ba49ab8cbc6a, type: 3}

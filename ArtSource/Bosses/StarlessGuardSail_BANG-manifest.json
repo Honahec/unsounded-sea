@@ -1,0 +1,131 @@
+{
+  "asset": "StarlessGuardSail",
+  "provider": "Hyper3D BANG",
+  "source_generation": "30e1f882-3f53-4dc2-86ab-f01365c6b366",
+  "source_asset": "b5fae3e5-0846-4f21-a135-15e5370e8c16",
+  "request": {
+    "asset_id": "b5fae3e5-0846-4f21-a135-15e5370e8c16",
+    "geometry_file_format": "glb"
+  },
+  "privacy": {
+    "public_generation_authorized": true,
+    "basis": "User authorized public generation of these five M05 guardians and explicitly requested API generation."
+  },
+  "method": "BANG semantic split; independent rigid part pivots; Blender decimation",
+  "parts": 4,
+  "part_mapping": [
+    {
+      "pivot": "Part_01",
+      "source_mesh": "root.0",
+      "center": [
+        0.0017615556716918945,
+        -0.0010470747947692871,
+        0.000733792781829834
+      ],
+      "minimum": [
+        -0.37011614441871643,
+        -0.2600999176502228,
+        -0.9484700560569763
+      ],
+      "maximum": [
+        0.3736392557621002,
+        0.2580057680606842,
+        0.949937641620636
+      ]
+    },
+    {
+      "pivot": "Part_02",
+      "source_mesh": "root.1",
+      "center": [
+        0.3690739870071411,
+        -0.026919424533843994,
+        0.09846270084381104
+      ],
+      "minimum": [
+        0.16423630714416504,
+        -0.18802142143249512,
+        -0.3205031752586365
+      ],
+      "maximum": [
+        0.5739116668701172,
+        0.13418257236480713,
+        0.5174285769462585
+      ]
+    },
+    {
+      "pivot": "Part_03",
+      "source_mesh": "root.2",
+      "center": [
+        -0.36913126707077026,
+        -0.026795804500579834,
+        0.09846273064613342
+      ],
+      "minimum": [
+        -0.5739481449127197,
+        -0.18769001960754395,
+        -0.3205031156539917
+      ],
+      "maximum": [
+        -0.1643143892288208,
+        0.13409841060638428,
+        0.5174285769462585
+      ]
+    },
+    {
+      "pivot": "Part_04",
+      "source_mesh": "root.3",
+      "center": [
+        0.023036479949951172,
+        0.030312657356262207,
+        0.32600268721580505
+      ],
+      "minimum": [
+        -0.2635219395160675,
+        -0.18984055519104004,
+        -0.05158740654587746
+      ],
+      "maximum": [
+        0.30959489941596985,
+        0.25046586990356445,
+        0.7035927772521973
+      ]
+    }
+  ],
+  "decimate_ratio": 0.2,
+  "triangles_before": 150000,
+  "triangles_after": 29997,
+  "source_spec": {
+    "bytes": 18454620,
+    "triangles": 150000,
+    "vertices": 155110,
+    "meshes": 4,
+    "materials": 4,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "runtime_spec": {
+    "bytes": 13434252,
+    "triangles": 29997,
+    "vertices": 40409,
+    "meshes": 4,
+    "materials": 4,
+    "images": 3,
+    "skins": 0,
+    "animations": 0
+  },
+  "outputs": {
+    "source": "ArtSource/Bosses/StarlessGuardSail_BANG_High.glb",
+    "glb": "Assets/UnsoundedSea/Art/Models/StarlessGuardSail_BANG_LOD0.glb",
+    "preview": "ArtSource/Bosses/StarlessGuardSail_BANG-preview.png"
+  },
+  "sha256": {
+    "source": "c5275896be8264d3e6b08ed63fc10f0e6649d7a14aa0a8d58b0e8382cf492e5b",
+    "glb": "6af3b01c6e8d8128d1581886cfe7b900ebb6e04e8afe3c5814421e933a9b6ed6",
+    "preview": "7181d53c0bd39d70bcef285b3d614eba074fe880d1203dc0b445208c59ce5a22"
+  },
+  "animation_ready": false,
+  "notes": [
+    "Part pivots preserve the assembled silhouette. Anatomical joint calibration and combat animation are not included."
+  ]
+}

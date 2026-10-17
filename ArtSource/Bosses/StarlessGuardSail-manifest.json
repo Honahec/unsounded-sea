@@ -1,0 +1,29 @@
+{
+  "asset": "StarlessGuardSail",
+  "content_id": "b05-guard-sail",
+  "provider": "Hyper3D API / Rodin Gen-2.5",
+  "high_generation": "b5fae3e5-0846-4f21-a135-15e5370e8c16",
+  "bang_generation": "30e1f882-3f53-4dc2-86ab-f01365c6b366",
+  "runtime_budget_triangles": 30000,
+  "runtime_texture_size": 2048,
+  "privacy": {
+    "public_generation_authorized": true,
+    "basis": "User authorized public generation of these five M05 guardians and explicitly requested API generation."
+  },
+  "design": "One full-body colossal abyssal ritual guardian for a dark nautical cosmic horror game. A humanoid mast-and-rib cage skeleton wrapped in torn dark ship sails, heavy corroded iron boots, long separate arms in relaxed A-pose, faceless hood. Distinct tall sail silhouette. Rust-black iron, cold grey bone, aged bronze, salt crust, subtle cold blue accents. Realistic PBR under neutral light. Front facing, complete feet, independent limbs, no base, no pedestal, no scenery, no ocean, no text. Structurally coherent character suitable for semantic part splitting.",
+  "request": {
+    "tier": "Gen-2.5-High",
+    "mesh_mode": "Raw",
+    "quality": "high",
+    "geometry_file_format": "glb"
+  },
+  "bang_request": {
+    "strength": 5,
+    "geometry_file_format": "glb"
+  },
+  "outputs": {
+    "high": "ArtSource/Bosses/StarlessGuardSail_High.glb"
+  },
+  "high_sha256": "b01c7c9001ff38a5b834bd18d79ecaf9c0ccbe64c9c70f06048db3373a303093",
+  "display_url": "https://hyper3d.ai/workspace/rodin/b5fae3e5-0846-4f21-a135-15e5370e8c16"
+}

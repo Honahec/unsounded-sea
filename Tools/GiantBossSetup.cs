@@ -10,6 +10,8 @@ public static class GiantBossSetup
 {
     const string Root="Assets/UnsoundedSea";
     static readonly string[] Names={"TideBonesChoirmaster","InvertedSurveyor","UnlitFlagBearer","StarlessWatcher"};
+    static readonly string[] M05GuardNames={"StarlessGuardAnchor","StarlessGuardLamp","StarlessGuardBell","StarlessGuardSail","StarlessGuardEye"};
+    static readonly string[] M05GuardIds={"b05-guard-anchor","b05-guard-lamp","b05-guard-bell","b05-guard-sail","b05-guard-eye"};
     public static string Import(string directory="Logs/GiantBosses")
     {
         if(EditorApplication.isPlaying)throw new InvalidOperationException("Stop Play before import");
@@ -28,12 +30,86 @@ public static class GiantBossSetup
         if(EditorApplication.isPlaying)throw new InvalidOperationException("Stop Play before authoring");
         for(int i=0;i<UnityEngine.SceneManagement.SceneManager.sceneCount;i++)
             if(UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).isDirty)throw new InvalidOperationException("Unsaved scene");
+        RequireM05Assets();
         var mistPath=Root+"/Art/Bosses/GiantMist.mat";
         var mist=AssetDatabase.LoadAssetAtPath<Material>(mistPath);
         if(mist==null){mist=new Material(AssetDatabase.LoadAssetAtPath<Material>(Root+"/Art/SeaBoss/ImpactSpray.mat"));AssetDatabase.CreateAsset(mist,mistPath);}
         mist.SetFloat("_Emission",.45f);EditorUtility.SetDirty(mist);AssetDatabase.SaveAssets();
-        for(int i=0;i<Names.Length;i++){Actor(i);Stage(i);}
-        return "Updated four boss actors and their existing stages; encounter rules unchanged.";
+        for(int i=0;i<Names.Length;i++)Actor(i);
+        for(int i=0;i<Names.Length-1;i++)Stage(i);
+        ConfigureM05Stage();
+        return "Updated four boss actors and their existing stages; M05 uses its dedicated frontal six-slot composition.";
+    }
+    public static string BuildM05()
+    {
+        if(EditorApplication.isPlaying)throw new InvalidOperationException("Stop Play before authoring");
+        for(int i=0;i<UnityEngine.SceneManagement.SceneManager.sceneCount;i++)
+            if(UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).isDirty)throw new InvalidOperationException("Unsaved scene");
+        RequireM05Assets();
+        Actor(3);
+        ConfigureM05Stage();
+        return "Configured only M05: frontal Watcher, vessel, and five fixed sea guard slots.";
+    }
+    static void RequireM05Assets()
+    {
+        if(AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/Art/Prefabs/StarlessWatcher.prefab")==null)
+            throw new FileNotFoundException("Missing M05 boss prefab",Root+"/Art/Prefabs/StarlessWatcher.prefab");
+        foreach(var name in M05GuardNames)
+            if(AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/Art/Prefabs/"+name+".prefab")==null)
+                throw new FileNotFoundException("Missing M05 guard prefab; import all five guards before configuring the stage.",Root+"/Art/Prefabs/"+name+".prefab");
+    }
+    static void ConfigureM05Stage()
+    {
+        RequireM05Assets();
+        var path=Root+"/Art/Bosses/M05Stage.prefab";
+        var root=PrefabUtility.LoadPrefabContents(path);
+        try
+        {
+            var stage=root.GetComponent<BattleStage>();
+            foreach(var anchor in stage.actorAnchors)if(anchor!=null)UnityEngine.Object.DestroyImmediate(anchor.gameObject);
+            var positions=new[]{new Vector3(0,-68,300),new Vector3(-62,-8,186),new Vector3(-32,-8,166),new Vector3(0,-8,198),new Vector3(32,-8,166),new Vector3(62,-8,186)};
+            stage.actorAnchors=new Transform[positions.Length];
+            for(var i=0;i<positions.Length;i++)
+            {
+                var go=new GameObject(i==0?"Boss actor — frontal sea":"Sea guard — "+M05GuardIds[i-1]);
+                go.transform.SetParent(stage.transform,false);go.transform.localPosition=positions[i];
+                go.transform.localRotation=Quaternion.Euler(0,180,0);
+                go.transform.localScale=Vector3.one*(i==0?10.5f:1);
+                var anchor=go.AddComponent<BattleAnchor>();anchor.environment=BattleEnvironment.Sea;
+                anchor.showSelectionRing=i>0;anchor.labelHeight=i==0?.62f:.9f;
+                anchor.labelOffset=i==0?new Vector3(0,0,4):new Vector3(0,.8f,0);
+                anchor.heave=i==0?.12f:.3f;anchor.waterRadius=i==0?126:8;
+                anchor.emergeDepth=i==0?4:9;anchor.emergeDuration=i==0?4.2f:2.4f;
+                if(i>0)go.AddComponent<BossTargetAnchor>().targetId=M05GuardIds[i-1];
+                stage.actorAnchors[i]=go.transform;
+            }
+            stage.vessel.localPosition=new Vector3(0,stage.vessel.localPosition.y,32);
+            stage.vessel.localRotation=Quaternion.identity;
+            stage.battleCamera.transform.localPosition=new Vector3(0,24,-55);
+            stage.battleCamera.transform.localRotation=Quaternion.LookRotation(new Vector3(0,40,140)-stage.battleCamera.transform.localPosition,Vector3.up);
+            stage.battleCamera.fieldOfView=65;
+            stage.vesselFollowsWater=true;stage.placeholderCombatMotion=false;stage.cameraShake=.035f;
+            PrefabUtility.SaveAsPrefabAsset(root,path);
+        }
+        finally{PrefabUtility.UnloadPrefabContents(root);}
+        for(var i=0;i<M05GuardIds.Length;i++)
+        {
+            var enemy=AssetDatabase.LoadAssetAtPath<EnemyDefinition>(Root+"/Content/Enemies/"+M05GuardIds[i]+".asset");
+            if(enemy==null)throw new InvalidOperationException("Missing M05 guard definition: "+M05GuardIds[i]);
+            enemy.presentationPrefab=AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/Art/Prefabs/"+M05GuardNames[i]+".prefab");
+            EditorUtility.SetDirty(enemy);AssetDatabase.SaveAssetIfDirty(enemy);
+        }
+        var scenario=AssetDatabase.LoadAssetAtPath<BattleScenario>(Root+"/Content/Scenarios/M05.asset");
+        scenario.actorOverrides=Array.Empty<GameObject>();
+        scenario.chapter="M05 / 无星王座";
+        scenario.objectiveHeading="召唤并击退五名守卫";
+        scenario.objectiveHint="本体每回合造成2点理智冲击。";
+        scenario.introduction="召唤并击退五名守卫。";
+        scenario.taskLabel="";
+        scenario.victoryText="五名守卫沉没，无星海域的封锁解除。";
+        scenario.encounter.displayName="无星王座";
+        EditorUtility.SetDirty(scenario.encounter);AssetDatabase.SaveAssetIfDirty(scenario.encounter);
+        EditorUtility.SetDirty(scenario);AssetDatabase.SaveAssetIfDirty(scenario);
     }
     static void Actor(int index)
     {
@@ -56,7 +132,7 @@ public static class GiantBossSetup
             var motion=body.AddComponent<GiantBossMotion>();motion.kind=(BossEncounterKind)(index+1);
             motion.duration=new[]{2.8f,3.1f,2.7f,3.6f}[index];motion.contactTime=motion.duration*.57f;
             motion.breathPeriod=new[]{7.5f,9f,8.4f,12f}[index];motion.waveAmplitude=new[]{65f,75f,80f,0f}[index];
-            motion.effectColor=new[]{new Color(.76f,.8f,.69f),new Color(.53f,.75f,.71f),new Color(.67f,.64f,.49f),new Color(.53f,.58f,.72f)}[index];
+            motion.effectColor=new[]{new Color(.76f,.8f,.69f),new Color(.53f,.75f,.71f),new Color(.67f,.64f,.49f),new Color(.18f,.6f,1.4f)}[index];
             motion.mistMaterial=AssetDatabase.LoadAssetAtPath<Material>(Root+"/Art/Bosses/GiantMist.mat");
             var bones=body.GetComponentsInChildren<Transform>(true).Where(t=>t.name.StartsWith("GB_")).ToArray();
             motion.joints=bones.Select(t=>new GiantJointMotion{bone=t}).ToArray();

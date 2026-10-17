@@ -14,14 +14,14 @@ namespace UnsoundedSea.Runtime
         int pointerId, draggedCard;
         Vector2 pressPoint, pointerPoint, ghostPosition, returnPosition;
         VisualElement dragGhost, hoverTarget;
-        Label dragHint;
         readonly Dictionary<int, Vector2> handPositions = new Dictionary<int, Vector2>();
         readonly Dictionary<string, float> barWidths = new Dictionary<string, float>();
         bool resolvedMotion;
         int motionRevision = -1;
-        float dragWidth, dragHeight;
-        string stagedHint;
+        float dragWidth, dragHeight, pressPanelY;
         string nextTurnBanner;
+        BattleView impactView;
+        int pendingSanityDelta;
 
         void QueueCardEntry(VisualElement card, int index)
         {
@@ -54,7 +54,8 @@ namespace UnsoundedSea.Runtime
             root?.UnregisterCallback<PointerDownEvent>(CancelPointer, TrickleDown.TrickleDown);
             root?.UnregisterCallback<PointerCaptureOutEvent>(LostPointer);
             root?.UnregisterCallback<PointerCancelEvent>(CancelTouch);
-            motion?.ClearMotion(); motion = null; dragGhost = null; dragHint = null;
+            motion?.ClearMotion(); motion = null; dragGhost = null;
+            impactView = null; pendingSanityDelta = 0;
         }
         void BindCardDrag(Button button, CardView card)
         {
@@ -65,6 +66,7 @@ namespace UnsoundedSea.Runtime
                 if (pointerHeld) return;
                 pointerHeld = true; dragging = false; pointerId = evt.pointerId; draggedCard = card.InstanceId;
                 pressPoint = pointerPoint = root.WorldToLocal(evt.position);
+                pressPanelY = evt.position.y;
                 var face = button.Q(className: "sea-card");
                 var bounds = face.worldBound;
                 returnPosition = ghostPosition = root.WorldToLocal(bounds.position);
@@ -106,8 +108,6 @@ namespace UnsoundedSea.Runtime
                 if (selectedEncounterCard != card.InstanceId) enemySelection.Reset();
                 selectedEncounterCard = card.InstanceId; selectedSupport = null;
                 dragGhost = MakeGhost(card); motion.Add(dragGhost);
-                dragHint = new Label { name = "card-drag-hint", pickingMode = PickingMode.Ignore };
-                dragHint.AddToClassList("card-drag-hint"); motion.Add(dragHint);
                 Render();
             }
         }
@@ -119,27 +119,34 @@ namespace UnsoundedSea.Runtime
             ReleaseCapture();
             if (!dragging) { draggedCard = 0; return; } // A mouse click inspects; it never plays a card.
             var card = director.View.Hand.FirstOrDefault(c => c.InstanceId == draggedCard);
-            var target = DropTarget(card, pointerPoint, out var enemy, out _, out _);
+            string target = null, enemy = null;
             bool success = false, staged = false;
             submittingDrag = true;
             try
             {
-                if (target != null && card != null && !director.Paused && !director.Busy)
+                if (card != null && !director.Paused && !director.Busy)
                 {
-                    if (enemy != null)
+                    if (card.Targets.Count == 0)
                     {
-                        if (card.Targets.Any(t => t.Id.StartsWith(enemy + "|", StringComparison.Ordinal)))
-                        {
-                            director.Select(enemy); staged = true;
-                            stagedHint = "守卫已锁定 · 再拖向航标";
-                        }
-                        else if (enemySelection.Choose(card, enemy, out var choice))
-                        {
-                            if (choice == null) { staged = true; stagedHint = "首个目标已锁定 · 再拖向第二个目标（同目标可确认单体）"; }
-                            else success = director.Submit(BattleCommand.Play(card.InstanceId, choice)).Success;
-                        }
+                        if (pressPanelY - evt.position.y >= 80)
+                            success = director.Submit(BattleCommand.Play(card.InstanceId, null)).Success;
                     }
-                    else success = director.Submit(BattleCommand.Play(card.InstanceId, target == "@self" ? null : target)).Success;
+                    else if ((target = DropTarget(card, pointerPoint, out enemy, out _, out _)) != null)
+                    {
+                        if (enemy != null)
+                        {
+                            if (card.Targets.Any(t => t.Id.StartsWith(enemy + "|", StringComparison.Ordinal)))
+                            {
+                                director.Select(enemy); staged = true;
+                            }
+                            else if (enemySelection.Choose(card, enemy, out var choice))
+                            {
+                                if (choice == null) staged = true;
+                                else success = director.Submit(BattleCommand.Play(card.InstanceId, choice)).Success;
+                            }
+                        }
+                        else success = director.Submit(BattleCommand.Play(card.InstanceId, target == "@self" ? null : target)).Success;
+                    }
                 }
             }
             finally { submittingDrag = false; FinishDrag(success, staged); }
@@ -152,7 +159,6 @@ namespace UnsoundedSea.Runtime
         {
             motion.Aiming = false;
             hoverTarget?.RemoveFromClassList("drop-hover"); hoverTarget = null;
-            dragHint?.RemoveFromHierarchy(); dragHint = null;
             var ghost = dragGhost; dragGhost = null; dragging = false; draggedCard = 0;
             if (ghost != null)
             {
@@ -167,7 +173,7 @@ namespace UnsoundedSea.Runtime
                     }, ghost.RemoveFromHierarchy);
                 }
             }
-            if (!staged) { selectedEncounterCard = 0; enemySelection.Reset(); stagedHint = null; }
+            if (!staged) { selectedEncounterCard = 0; enemySelection.Reset(); }
             Render();
         }
         void OnApplicationFocus(bool focus) { if (!focus && pointerHeld) CancelDrag(); }
@@ -191,9 +197,6 @@ namespace UnsoundedSea.Runtime
                 }
                 if (item.ClassListContains("card-target-panel") || item.ClassListContains("salt-board")) return null;
             }
-            bool playerArea = root.Q(className: "battle-vitals")?.worldBound.Contains(world) == true;
-            if (card.Targets.Count == 0 && (playerArea || point.y < root.resolvedStyle.height - 160 && point.y > 75))
-            { enemy = null; return "@self"; }
             if (enemy == null && director.Stage != null && point.y < root.resolvedStyle.height - 150)
             {
                 var ray = director.Stage.battleCamera.ViewportPointToRay(new Vector3(point.x / root.resolvedStyle.width, 1 - point.y / root.resolvedStyle.height));
@@ -207,7 +210,6 @@ namespace UnsoundedSea.Runtime
                 if (!legal) { enemy = null; return null; }
                 at = ActorPoint(id); return "@enemy";
             }
-            // Untargeted cards play over the open battlefield or the player's resource area.
             return null;
         }
 
@@ -256,12 +258,8 @@ namespace UnsoundedSea.Runtime
                 motion.style.display = DisplayStyle.None;
             else motion.style.display = DisplayStyle.Flex;
             if (dragging) root.Q<Button>("card-" + draggedCard)?.AddToClassList("drag-source");
-            if (!dragging && !string.IsNullOrEmpty(stagedHint) && selectedEncounterCard != 0)
-            {
-                var hint = new Label(stagedHint) { pickingMode = PickingMode.Ignore };
-                hint.AddToClassList("battle-subtitle"); root.Add(hint);
-            }
             UiMotion.AfterBuild(root);
+            if (director.Stage != null && director.Stage.DelaysHudUntilImpact) return;
             if (motionRevision == director.ViewRevision) return;
             motionRevision = director.ViewRevision;
             foreach (var b in root.Query<Button>(className: "card-anchor").ToList())
@@ -299,6 +297,12 @@ namespace UnsoundedSea.Runtime
         {
             if (motion == null) return;
             if (pointerHeld && (director.Paused || bookOpen || chartOpen || inspectedCard != 0 || director.View?.PendingChoice != null)) CancelDrag();
+            if (!director.Paused && impactView != null && director.Stage != null && !director.Stage.DelaysHudUntilImpact)
+            {
+                if (pendingSanityDelta != 0)
+                    motion.Pulse(PlayerPoint + new Vector2(0, -70), BattleMotionLayer.Cue.Ward, "理智 " + pendingSanityDelta.ToString("+0;-0"));
+                impactView = null; pendingSanityDelta = 0;
+            }
             if (!director.Paused) motion.Tick(Time.unscaledDeltaTime);
             if (!director.Paused && !director.Busy && nextTurnBanner != null)
             { motion.Banner(nextTurnBanner); nextTurnBanner = null; }
@@ -309,16 +313,23 @@ namespace UnsoundedSea.Runtime
             ghostPosition = GameSettings.ReducedMotion ? desired : Vector2.Lerp(ghostPosition, desired, 1 - Mathf.Exp(-Time.unscaledDeltaTime * 32));
             BattleMotionLayer.Place(dragGhost, ghostPosition);
             var card = director.View.Hand.FirstOrDefault(c => c.InstanceId == draggedCard);
+            if (card?.Targets.Count == 0)
+            {
+                hoverTarget?.RemoveFromClassList("drop-hover"); hoverTarget = null;
+                motion.Aiming = false;
+                return;
+            }
             var target = DropTarget(card, pointerPoint, out _, out var element, out var at);
             if (hoverTarget != element) { hoverTarget?.RemoveFromClassList("drop-hover"); hoverTarget = element; hoverTarget?.AddToClassList("drop-hover"); }
             motion.Aiming = true; motion.ValidTarget = target != null;
             motion.AimFrom = ghostPosition + new Vector2(90, 0); motion.AimTo = at;
-            dragHint.text = target != null ? "松手释放" : stagedHint ?? (card?.Targets.Count == 0 ? "拖向战场释放 · Esc / 右键取消" : "拖向目标释放 · Esc / 右键取消");
-            BattleMotionLayer.Place(dragHint, new Vector2(Mathf.Clamp(pointerPoint.x - 170, 12, root.resolvedStyle.width - 352), Mathf.Max(60, pointerPoint.y - 58)));
         }
         void PresentResolution(BattleView before, BattleView after, BattleCommand command)
         {
             resolvedMotion = true;
+            var waitsForImpact = command.kind == CommandKind.EndTurn && after.BossKind == BossEncounterKind.Watcher &&
+                after.ResolvedEnemyActions.Any(a => a.EnemyId == after.Enemies[0].Id && a.Channel == DamageChannel.Sanity && a.Amount > 0);
+            if (waitsForImpact) { impactView = before; pendingSanityDelta = after.Sanity - before.Sanity; }
             var card = before.Hand.FirstOrDefault(c => c.InstanceId == command.cardInstanceId);
             if (command.kind == CommandKind.PlayCard && card != null)
             {
@@ -348,7 +359,7 @@ namespace UnsoundedSea.Runtime
             if (after.Block > before.Block) motion.Pulse(PlayerPoint, BattleMotionLayer.Cue.Guard, "格挡 +" + (after.Block - before.Block));
             if (after.Ward > before.Ward) motion.Pulse(PlayerPoint + new Vector2(0, -70), BattleMotionLayer.Cue.Ward, "防护 +" + (after.Ward - before.Ward), .08f);
             if (after.Health != before.Health) motion.Pulse(PlayerPoint, after.Health > before.Health ? BattleMotionLayer.Cue.Heal : BattleMotionLayer.Cue.Impact, "生命 " + (after.Health - before.Health).ToString("+0;-0"), .15f);
-            if (after.Sanity != before.Sanity) motion.Pulse(PlayerPoint + new Vector2(0, -70), BattleMotionLayer.Cue.Ward, "理智 " + (after.Sanity - before.Sanity).ToString("+0;-0"), .2f);
+            if (!waitsForImpact && after.Sanity != before.Sanity) motion.Pulse(PlayerPoint + new Vector2(0, -70), BattleMotionLayer.Cue.Ward, "理智 " + (after.Sanity - before.Sanity).ToString("+0;-0"), .2f);
             if (after.ObjectiveProgress > before.ObjectiveProgress) motion.Pulse(new Vector2(165, 65), BattleMotionLayer.Cue.Progress, "进度 +" + (after.ObjectiveProgress - before.ObjectiveProgress));
             if (after.Evidence.Count > before.Evidence.Count && !after.Enemies.Any(e => e.IntentConfirmed && before.Enemies.Any(b => b.Id == e.Id && !b.IntentConfirmed)))
                 motion.Pulse(dragging ? pointerPoint : ActorPoint(director.SelectedEnemy), BattleMotionLayer.Cue.Insight, "获得线索", .1f);

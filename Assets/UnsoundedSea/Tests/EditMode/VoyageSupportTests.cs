@@ -103,8 +103,11 @@ namespace UnsoundedSea.Tests
         [Test] public void FinalSupplyGuaranteesActualRandomBossPreparationOutsideRegionPool()
         {
             VoyageSession s=null;
-            for(uint seed=0;seed<200;seed++)if(VoyageMapGenerator.BossEncounter(seed,1,"fog")=="m03"){s=VoyageSession.Create(seed);break;}
-            Assert.That(s,Is.Not.Null);Move(s,9);
+            for(uint seed=0;seed<200;seed++)if(VoyageMapGenerator.BossEncounter(seed,2,"bones")=="m03"){s=VoyageSession.Create(seed);break;}
+            Assert.That(s,Is.Not.Null);Move(s,10);
+            Assert.That(s.BeginEncounter(),Is.True);Assert.That(s.ResolveEncounter(true,50,25),Is.True);
+            Assert.That(s.ChooseNextAct("bones"),Is.True);Assert.That(s.ClaimReward(null),Is.True);
+            Move(s,9);
             var preview=s.PreviewShopItems(s.Current.Id).Select(x=>x.Id).ToArray();
             Assert.That(preview,Does.Contain("i06"));Assert.That(preview,Does.Contain("i16"));
             Assert.That(s.ShopItems.Select(x=>x.Id),Is.EqualTo(preview));

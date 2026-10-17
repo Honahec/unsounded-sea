@@ -13,5 +13,7 @@ namespace UnsoundedSea.Runtime
         public bool showSelectionRing = true;
         [Min(0)] public float heave = 0.2f;
         [Min(0)] public float waterRadius = 12;
+        [Min(0)] public float emergeDepth;
+        [Min(0.1f)] public float emergeDuration = 2.4f;
     }
 }

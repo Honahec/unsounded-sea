@@ -113,25 +113,28 @@ def export(root):
         export_animations=False, export_skins=False, export_morph=False,
         export_materials='EXPORT', export_image_format='AUTO')
 
-def render_preview(root):
+def render_preview(root, front=False):
     scene = bpy.context.scene
-    scene.render.engine = 'BLENDER_EEVEE'
+    scene.render.engine = 'BLENDER_EEVEE_NEXT' if bpy.app.version < (5, 0, 0) else 'BLENDER_EEVEE'
     scene.render.resolution_x = 720; scene.render.resolution_y = 720; scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = 'PNG'; scene.render.filepath = PREVIEW
     world = bpy.data.worlds.new('BellMotherBangPreviewWorld'); scene.world = world; world.color = (0.008, 0.016, 0.02)
     for obj in list(scene.objects):
         if obj.type in {'CAMERA', 'LIGHT'}: bpy.data.objects.remove(obj, do_unlink=True)
-    renderables = [obj for obj in root.children_recursive if obj.type == 'MESH']
+    renderables = [obj for obj in (root, *root.children_recursive) if obj.type == 'MESH']
     points = [obj.matrix_world @ Vector(corner) for obj in renderables for corner in obj.bound_box]
     low = Vector((min(p.x for p in points), min(p.y for p in points), min(p.z for p in points)))
     high = Vector((max(p.x for p in points), max(p.y for p in points), max(p.z for p in points)))
     target = (low + high) * 0.5
     radius = max((high - low).length, 1.0)
-    camera_location = target + Vector((radius * 0.78, radius * 0.48, radius * 0.88))
+    camera_location = target + (Vector((radius * 0.25, -radius * 1.1, radius * 0.16)) if front else Vector((radius * 0.78, radius * 0.48, radius * 0.88)))
     bpy.ops.object.camera_add(location=camera_location)
     camera = bpy.context.object; scene.camera = camera
     camera.rotation_euler = ((target - camera.location).to_track_quat('-Z', 'Y')).to_euler()
     camera.data.lens = 52
+    if front:
+        camera.data.type = 'ORTHO'
+        camera.data.ortho_scale = max(high.z - low.z, high.x - low.x) * 1.18
     for loc, energy, size in [((2, 3, 3), 950, 3.5), ((-2.5, 1.4, .5), 450, 2.5), ((0, 1, -3), 700, 2)]:
         bpy.ops.object.light_add(type='AREA', location=loc)
         light = bpy.context.object; light.data.energy = energy; light.data.size = size

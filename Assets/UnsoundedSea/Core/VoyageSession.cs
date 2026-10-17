@@ -39,7 +39,7 @@ namespace UnsoundedSea.Core
 
     public sealed partial class VoyageSession
     {
-        public const int CheckpointVersion=10;
+        public const int CheckpointVersion=11;
         public const int ActLength=11;
         private const int InitialToolUses=2, MaxHistory=512;
         private static readonly string[] InitialTools={"lantern","listener","shell"};
@@ -322,7 +322,7 @@ namespace UnsoundedSea.Core
                 encounter=="m04"?"先将双继电器校正为公开极性，再依序释放三段闸锁，最后击退执旗者。":
                 encounter=="storm-gauntlet"?"黑潮每回合公开18点生命冲击或9点理智冲击，均可用对应防护或打断反制；撑过五轮即可脱离。":
                 encounter=="hollow-beacon"?"空心航标本体有48生命；公开的10点生命攻击或5点理智冲击均可打断，击破本体获胜。":
-                "先建立撤离绳，再牵引守卫并关闭五座锚点，最后收绞两次归航绳。";
+                "本体每回合造成2点理智冲击；用遭遇牌分批召唤五名守卫，击退全部守卫即可获胜。";
             return (boss?"幕末威胁简报：":"海况结论：")+text;
         }
         private void AddKnowledge(string entry){if(!knowledge.Contains(entry))knowledge.Add(entry);}

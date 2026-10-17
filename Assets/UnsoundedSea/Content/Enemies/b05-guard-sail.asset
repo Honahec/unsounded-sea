@@ -14,16 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: b05-guard-sail
   displayName: "\u5E06\u5B88\u536B"
-  health: 16
-  candidateDescription: "\u9996\u6B21 6 \u751F\u547D\uFF0C\u6B64\u540E 4"
+  health: 28
+  candidateDescription: "\u9996\u6B21 7 \u751F\u547D\uFF0C\u6B64\u540E 4"
+  intentPolicy: 0
   intents:
   - id: boss-script
     displayName: "\u516C\u5F00\u884C\u52A8"
-    clue: "\u9996\u6B21 6 \u751F\u547D\uFF0C\u6B64\u540E 4"
+    clue: "\u9996\u6B21 7 \u751F\u547D\uFF0C\u6B64\u540E 4"
     channel: 0
-    amount: 6
+    amount: 7
     isPublic: 1
     visibleAction: 1
     interruptible: 0
     soundSource: "\u7532\u677F"
-  presentationPrefab: {fileID: 6536484850760832164, guid: d6e078df63125453e87419a8e7f51e6d, type: 3}
+  presentationPrefab: {fileID: 9013974350265110691, guid: 5d23ec85097bd4d0f9037657774ce103, type: 3}

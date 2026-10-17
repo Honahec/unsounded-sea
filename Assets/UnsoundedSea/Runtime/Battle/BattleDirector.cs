@@ -37,6 +37,7 @@ namespace UnsoundedSea.Runtime
             if (Stage != null) { Stage.gameObject.SetActive(false); Destroy(Stage.gameObject); }
             Stage = Instantiate(scenario.stagePrefab);
             Stage.Bind(this);
+            wasBusy = Busy;
             ViewRevision++;
             Changed?.Invoke();
         }

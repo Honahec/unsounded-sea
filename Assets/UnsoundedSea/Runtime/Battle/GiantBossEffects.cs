@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 namespace UnsoundedSea.Runtime
 {
@@ -9,15 +10,19 @@ namespace UnsoundedSea.Runtime
         private Transform boat;
         private BattleWater water;
         private Color tint;
-        private float age, chargeClock, ambientClock;
+        private float age, chargeClock, ambientClock, effectRadius = 14, pulseDuration = 2.1f;
+        private bool wideCharge;
         private int serial;
         // Field initialization also restores valid slots after an Editor domain reload.
         private readonly Pulse[] pulses = { new Pulse(), new Pulse(), new Pulse(), new Pulse() };
         public int ParticleCount => mist == null ? 0 : mist.particleCount;
+        public event Action VesselImpact;
+        public bool Busy => Array.Exists(pulses, pulse => pulse.active);
         private sealed class Pulse { public Vector3 origin, target; public float time; public bool active; }
-        public void Initialize(Material material, Color color, BattleWater surface, Transform vessel)
+        public void Initialize(Material material, Color color, BattleWater surface, Transform vessel, bool bodyWideCharge)
         {
             tint=color;water=surface;boat=vessel;
+            wideCharge=bodyWideCharge;pulseDuration=bodyWideCharge?.6f:2.1f;
             for(int i=0;i<pulses.Length;i++)pulses[i]=new Pulse();
             var go=new GameObject("Giant salt and resonance");go.transform.SetParent(transform,false);
             mist=go.AddComponent<ParticleSystem>();mist.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -29,6 +34,17 @@ namespace UnsoundedSea.Runtime
             var gradient=new Gradient();gradient.SetKeys(new[]{new GradientColorKey(Color.white,0),new GradientColorKey(Color.white,1)},new[]{new GradientAlphaKey(0,0),new GradientAlphaKey(.7f,.1f),new GradientAlphaKey(.3f,.6f),new GradientAlphaKey(0,1)});colors.color=gradient;
             var renderer=go.GetComponent<ParticleSystemRenderer>();renderer.sharedMaterial=material;renderer.renderMode=ParticleSystemRenderMode.Billboard;
             renderer.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;
+            if(bodyWideCharge)
+            {
+                var properties=new MaterialPropertyBlock();properties.SetFloat("_Emission",1.8f);renderer.SetPropertyBlock(properties);
+                var renderers=transform.parent.GetComponentsInChildren<Renderer>();
+                if(renderers.Length>0)
+                {
+                    var bounds=renderers[0].bounds;
+                    for(var i=1;i<renderers.Length;i++)bounds.Encapsulate(renderers[i].bounds);
+                    effectRadius=Mathf.Max(14,Mathf.Max(bounds.extents.x,bounds.extents.y));
+                }
+            }
         }
         private void Emit(Vector3 position, Vector3 velocity, float size, float lifetime, Color color)
         {
@@ -72,8 +88,8 @@ namespace UnsoundedSea.Runtime
                 for(int i=0;i<4;i++)
                 {
                     float a=age*1.1f+i*Mathf.PI*.5f;
-                    var radial=new Vector3(Mathf.Cos(a)*14,Mathf.Sin(a*1.31f)*7,Mathf.Sin(a)*14);
-                    Emit(origin+radial,-radial*.5f,6,1.2f,new Color(tint.r,tint.g,tint.b,.45f));
+                    var radial=new Vector3(Mathf.Cos(a)*effectRadius,Mathf.Sin(a*1.31f)*effectRadius*(wideCharge?1:.55f),Mathf.Sin(a)*effectRadius);
+                    Emit(origin+radial,-radial*.5f,wideCharge?effectRadius*.12f:6,1.2f,new Color(tint.r,tint.g,tint.b,wideCharge?.7f:.45f));
                 }
             }
             if(!retiring && ambientClock>.18f)
@@ -86,18 +102,32 @@ namespace UnsoundedSea.Runtime
             foreach(var p in pulses)
             {
                 if(!p.active)continue;
-                p.time+=dt;float t=Mathf.Clamp01(p.time/2.1f);
+                p.time+=dt;float t=Mathf.Clamp01(p.time/pulseDuration);
                 var center=Vector3.Lerp(p.origin,p.target,t);
                 var forward=(p.target-p.origin).normalized;var side=Vector3.Cross(forward,Vector3.up).normalized;
                 for(int i=0;i<4;i++)
                 {
                     float a=(age*3+i*1.618f)*Mathf.PI;
-                    var r=(10+Mathf.Sin(t*Mathf.PI)*25);
+                    var r=wideCharge?Mathf.Lerp(effectRadius*.35f,2,t):(10+Mathf.Sin(t*Mathf.PI)*25);
                     var q=center+side*Mathf.Sin(a)*r+Vector3.up*Mathf.Cos(a)*r*.5f;
                     if(water!=null)q.y=Mathf.Max(q.y,water.SurfaceHeight(q)+1);
                     Emit(q,forward*6,5+t*5,.65f,new Color(tint.r,tint.g,tint.b,.3f*(1-t*.5f)));
                 }
-                if(t>=1){p.active=false;Hit(p.target,.6f);}
+                if(t>=1)
+                {
+                    p.active=false;
+                    if(wideCharge)
+                    {
+                        for(var i=0;i<48;i++)
+                        {
+                            var angle=i*2.399963f;
+                            var direction=new Vector3(Mathf.Cos(angle),Mathf.Sin(i*1.7f),Mathf.Sin(angle));
+                            Emit(p.target+direction*2,direction*6,4,.8f,new Color(tint.r,tint.g,tint.b,.8f));
+                        }
+                    }
+                    else Hit(p.target,.6f);
+                    VesselImpact?.Invoke();
+                }
             }
             mist.Simulate(dt,false,false,true);
         }

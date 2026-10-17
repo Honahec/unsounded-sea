@@ -28,19 +28,24 @@ namespace UnsoundedSea.Tests
         }
 
         [Test]
-        public void FirstTwoActsShareSevenBossesWithoutRepeatingAndFinaleIsFixed()
+        public void EachActUsesItsOwnSeededBossPool()
         {
-            var seen=new HashSet<string>();
-            for(uint seed=0;seed<256;seed++)
+            var pools=new[]{new[]{"fog-visitors","storm-gauntlet","hollow-beacon"},new[]{"m02","m03","m04"},new[]{"m05","drowned-bell"}};
+            var regions=new[]{"fog","bones","abyss"};
+            for(var act=1;act<=3;act++)
             {
-                var first=VoyageMapGenerator.BossEncounter(seed,1,"fog");
-                var second=VoyageMapGenerator.BossEncounter(seed,2,"bones");
-                Assert.That(second,Is.Not.EqualTo(first));
-                Assert.That(VoyageMapGenerator.BossEncounter(seed,2,"fleet"),Is.EqualTo(second),"Region choice must not bind the boss.");
-                Assert.That(VoyageMapGenerator.BossEncounter(seed,3,"abyss"),Is.EqualTo("m05"));
-                seen.Add(first);seen.Add(second);
+                var seen=new HashSet<string>();
+                for(uint seed=0;seed<256;seed++)
+                {
+                    var boss=VoyageMapGenerator.BossEncounter(seed,act,regions[act-1]);
+                    Assert.That(pools[act-1],Does.Contain(boss));
+                    var plan=VoyageMapGenerator.Generate(seed,act,regions[act-1]);
+                    Assert.That(plan.Stops.Single(s=>s.Id==plan.GoalId).EncounterId,Is.EqualTo(boss));
+                    if(act==2)Assert.That(VoyageMapGenerator.BossEncounter(seed,2,"fleet"),Is.EqualTo(boss),"Region choice must not bind the boss.");
+                    seen.Add(boss);
+                }
+                Assert.That(seen,Is.EquivalentTo(pools[act-1]));
             }
-            Assert.That(seen,Is.EquivalentTo(new[]{"fog-visitors","drowned-bell","m02","m03","m04","storm-gauntlet","hollow-beacon"}));
         }
 
         [Test]

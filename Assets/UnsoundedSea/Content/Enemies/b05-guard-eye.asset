@@ -14,16 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: b05-guard-eye
   displayName: "\u773C\u5B88\u536B"
-  health: 16
-  candidateDescription: "\u9996\u6B21 3 \u7406\u667A\uFF0C\u6B64\u540E 2"
+  health: 18
+  candidateDescription: "\u9996\u6B21 4 \u7406\u667A\uFF0C\u6B64\u540E 3 \u751F\u547D"
+  intentPolicy: 0
   intents:
   - id: boss-script
     displayName: "\u516C\u5F00\u884C\u52A8"
-    clue: "\u9996\u6B21 3 \u7406\u667A\uFF0C\u6B64\u540E 2"
+    clue: "\u9996\u6B21 4 \u7406\u667A\uFF0C\u6B64\u540E 3 \u751F\u547D"
     channel: 1
-    amount: 3
+    amount: 4
     isPublic: 1
     visibleAction: 1
     interruptible: 0
     soundSource: "\u7532\u677F"
-  presentationPrefab: {fileID: 8503010910801479966, guid: 3174b36a4959843a7b46702d709df05d, type: 3}
+  presentationPrefab: {fileID: 7786876275196414773, guid: dee0b51874c834257831fbd340cbf993, type: 3}

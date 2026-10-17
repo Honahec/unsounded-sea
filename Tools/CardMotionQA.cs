@@ -33,6 +33,24 @@ public static class CardMotionQA
     }
     static Vector2 Enemy(int index) => Root.Q<Button>("actor-" + Director.View.Enemies[index].Id).worldBound.center;
     static Vector2 Battlefield => Root.LocalToWorld(new Vector2(Root.resolvedStyle.width * .55f, 160));
+    static bool Dragging => (bool)typeof(OceanBattleHud).GetField("dragging", Private).GetValue(Hud);
+    static VisualElement DragGhost => (VisualElement)typeof(OceanBattleHud).GetField("dragGhost", Private).GetValue(Hud);
+    static bool Aiming
+    {
+        get
+        {
+            var layer = typeof(OceanBattleHud).GetField("motion", Private).GetValue(Hud);
+            return (bool)layer.GetType().GetField("Aiming").GetValue(layer);
+        }
+    }
+    static void CheckNoDragInstructions()
+    {
+        var labels = Root.Query<Label>().ToList();
+        Check(Root.Q("card-drag-hint") == null &&
+              !labels.Any(x => x.text == "松手释放" || x.text.StartsWith("拖向", StringComparison.Ordinal) ||
+                               x.text.StartsWith("守卫已锁定", StringComparison.Ordinal) || x.text.StartsWith("首个目标已锁定", StringComparison.Ordinal)),
+            "Drag instruction text is visible.");
+    }
     static async Task Lift(string cardId, Vector2 to)
     {
         await Task.Delay(60); // UI Toolkit lays out rebuilt controls on the next panel update.
@@ -43,11 +61,44 @@ public static class CardMotionQA
         await Task.Delay(80);
         Pointer(EventType.MouseDrag, to, Root);
         await Task.Delay(130);
-        Check(Root.Q("battle-motion") != null && Root.Q("card-drag-hint") != null, "Drag never detached from hand: " + cardId + " held=" + typeof(OceanBattleHud).GetField("pointerHeld",Private).GetValue(Hud) + " paused=" + Director.Paused + " busy=" + Director.Busy);
+        bool targeted = card.Targets.Count > 0;
+        Check(Dragging && DragGhost?.panel != null, "Drag never detached from hand: " + cardId + " held=" + typeof(OceanBattleHud).GetField("pointerHeld",Private).GetValue(Hud) + " paused=" + Director.Paused + " busy=" + Director.Busy);
+        Check(Aiming == targeted, targeted ? "Targeted drag did not aim." : "Targetless drag entered aiming mode.");
+        CheckNoDragInstructions();
     }
     static async Task Drop(string cardId, Vector2 to)
     {
         await Lift(cardId, to); Pointer(EventType.MouseUp, to, Root); await Task.Delay(80);
+    }
+    static async Task TargetlessThreshold(string cardId)
+    {
+        await Task.Delay(60);
+        var card = Card(cardId);
+        Check(card.Targets.Count == 0, cardId + " is not targetless.");
+        var button = Root.Q<Button>("card-" + card.InstanceId);
+        var start = button.worldBound.center;
+        int actions = Director.View.Actions;
+        int block = Director.View.Block;
+        Pointer(EventType.MouseDown, start, button);
+        Pointer(EventType.MouseDrag, start + Vector2.down * 79, Root);
+        await Task.Delay(80);
+        Check(Dragging && DragGhost?.panel != null && !Aiming, "Sub-threshold targetless drag state is wrong.");
+        Pointer(EventType.MouseUp, start + Vector2.down * 79, Root);
+        await Task.Delay(250);
+        Check(Director.View.Actions == actions && Director.View.Block == block && !Dragging && DragGhost == null,
+            "Targetless drag under 80px did not return.");
+        CheckNoDragInstructions();
+        button = Root.Q<Button>("card-" + card.InstanceId);
+        start = button.worldBound.center;
+        Pointer(EventType.MouseDown, start, button);
+        Pointer(EventType.MouseDrag, start + Vector2.down * 80, Root);
+        await Task.Delay(80);
+        Check(Dragging && DragGhost?.panel != null && !Aiming, "Threshold targetless drag state is wrong.");
+        Pointer(EventType.MouseUp, start + Vector2.down * 80, Root);
+        await Task.Delay(80);
+        Check(Director.View.Actions == actions - card.ActionCost && Director.View.Block > block,
+            "Targetless drag at 80px did not submit.");
+        CheckNoDragInstructions();
     }
     static async Task Prepare(params string[] cards)
     {
@@ -95,10 +146,12 @@ public static class CardMotionQA
             Check(Director.View.Actions == actions, "Invalid drop charged resources.");
             await Lift("revolver", Enemy(0));
             using (var e = KeyDownEvent.GetPooled('\0', KeyCode.Escape, EventModifiers.None)) { e.target = Root; Root.SendEvent(e); }
-            Check(Director.View.Actions == actions && Root.Q("card-drag-hint") == null, "Escape failed to cancel drag.");
+            Check(Director.View.Actions == actions && !Dragging && DragGhost == null && !Aiming, "Escape failed to cancel drag.");
+            CheckNoDragInstructions();
             await Task.Delay(80);
             await Lift("revolver", Enemy(0)); Pointer(EventType.MouseDown, Enemy(0), Root, 1);
-            Check(Director.View.Actions == actions && Root.Q("card-drag-hint") == null, "Right click failed to cancel.");
+            Check(Director.View.Actions == actions && !Dragging && DragGhost == null && !Aiming, "Right click failed to cancel.");
+            CheckNoDragInstructions();
             await Task.Delay(80);
             int hp = Director.View.Enemies[0].Health;
             await Drop("revolver", Enemy(0));
@@ -107,8 +160,8 @@ public static class CardMotionQA
             Check(Root.Q(className:"health").Q(className:"vital-fill").resolvedStyle.width > 0, "Health bar disappeared during a redraw.");
             Pointer(EventType.MouseUp, Enemy(0), Root); Check(Director.View.Actions == actions - 1, "Repeated release charged twice.");
             await Wait(() => !Director.Busy);
-            await Drop("cover", Battlefield);
-            Check(Director.View.Block > 0 && Effects() > 0, "Defence card did not grant block/feedback.");
+            await TargetlessThreshold("cover");
+            Check(Effects() > 0, "Defence card feedback missing.");
             await Wait(() => !Director.Busy);
             await Drop("steady", Battlefield); Check(Director.View.Ward > 0, "Ward card did not resolve.");
             await Wait(() => !Director.Busy);
@@ -125,7 +178,8 @@ public static class CardMotionQA
             Check(Director.View.Actions == 9, "Hand target drag did not resolve.");
             await Wait(() => !Director.Busy);
             await Lift("cover", Battlefield); Director.SetPaused(true); await Task.Delay(100);
-            Check(Root.Q("card-drag-hint") == null && Director.View.Actions == 9, "Pause did not safely cancel drag.");
+            Check(!Dragging && DragGhost == null && !Aiming && Director.View.Actions == 9, "Pause did not safely cancel drag.");
+            CheckNoDragInstructions();
             int frozen = Effects(); float frozenAge = MotionAge(); await Task.Delay(250); Check(Effects() == frozen && MotionAge() == frozenAge, "Combat effects advanced while paused.");
             Director.SetPaused(false); await Task.Delay(300);
             GameSettings.ReducedMotion = true;
@@ -133,14 +187,14 @@ public static class CardMotionQA
             await Wait(() => !Director.Busy); await Task.Delay(1200);
             Check(Effects() == 0, "Transient animation objects leaked.");
             Check(saved == Save(), "QA changed the formal voyage save.");
-            return new { assertions, pointerEvents = true, attack = true, defence = true, investigation = true, pair = true, handTarget = true, cancel = true, pause = true, reducedMotion = true, saveUnchanged = true };
+            return new { assertions, pointerEvents = true, targetlessThreshold = 80, targetlessNoAim = true, targetedAim = true, noDragInstructions = true, attack = true, defence = true, investigation = true, pair = true, handTarget = true, cancel = true, pause = true, reducedMotion = true, saveUnchanged = true };
         }
         finally { GameSettings.ReducedMotion = reduced; }
     }
     static async Task StartBoss(string id, BossEncounterKind kind)
     {
         VoyageRuntime.StartDebugEncounter(id, id == "m04" ? "fleet" : id == "m03" ? "inverted" : "abyss", true);
-        await Task.Delay(450); await Wait(() => Director?.View?.BossKind == kind); await Task.Delay(300);
+        await Task.Delay(450); await Wait(() => Director?.View?.BossKind == kind && !Director.Busy); await Task.Delay(300);
     }
     static async Task BossDrop(string cardId)
     {
@@ -163,15 +217,11 @@ public static class CardMotionQA
         await StartBoss("m05", BossEncounterKind.Watcher);
         await BossDrop("E05-01");
         Check(Director.Submit(BattleCommand.EndTurn()).Success, "M05 turn failed."); await Wait(() => !Director.Busy);
-        int guard = Enumerable.Range(1, Director.View.Enemies.Count - 1).First(i => Director.View.Enemies[i].Health > 0);
-        string guardId = Director.View.Enemies[guard].Id;
-        int actions = Director.View.Actions;
-        await Drop("E05-02", Enemy(guard));
-        Check(Director.View.Actions == actions, "Guard staging spent actions.");
-        Check(Director.SelectedEnemy == guardId, "Guard was not staged.");
-        await BossDrop("E05-02");
+        Check(Director.View.Enemies.Skip(1).Count(e => e.Health > 0) == 1, "Summoning must activate exactly one guard.");
+        Check(Card("E05-01").Targets.Count(t => t.Enabled) == 4, "A summoned guard cannot be summoned twice.");
+        Check(Director.View.ObjectiveProgress == 0, "Summoning alone cannot advance the defeat objective.");
         Check(saved == Save(), "Boss QA changed formal save.");
-        return new { assertions, m03SaltGrid = true, m04Relay = true, m05GuardAndBeacon = true, saveUnchanged = true };
+        return new { assertions, m03SaltGrid = true, m04Relay = true, m05CardSummon = true, saveUnchanged = true };
     }
     public static async Task<object> Preview()
     {

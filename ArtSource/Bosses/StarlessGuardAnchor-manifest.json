@@ -1,0 +1,15 @@
+{
+  "asset": "StarlessGuardAnchor",
+  "content_id": "b05-guard-anchor",
+  "provider": "Hyper3D Agent",
+  "project_id": "172e9cd6-b009-4706-ac4f-8a9ca2015582",
+  "high_generation": "1574e06b-dad9-50c3-b5d8-ae79f600e0a2",
+  "bang_generation": "c15c942e-f9a3-5e4c-93bd-9133a9d7c970",
+  "runtime_budget_triangles": 30000,
+  "runtime_texture_size": 2048,
+  "privacy": {"public_generation_authorized": true, "basis": "User explicitly authorized public generation for these five M05 guardians; no private setting is claimed."},
+  "design": "Faceless hooded deep-sea iron guardian with an unmistakable anchor-shaped chest cage, broad empty armor, salt-encrusted dark diving cloth and heavy boots. Full isolated body without base or scene; neutral PBR. Automatic BANG semantic split of the generated high model.",
+  "outputs": {"high": "ArtSource/Bosses/StarlessGuardAnchor_High.glb", "concept": "ArtSource/Bosses/StarlessGuardAnchor_Concept.png"},
+  "high_sha256": "5545b78b773171707dff528bfae592ad3bcf54d7493b88122f1ad88b6b95794b",
+  "source_url": "https://hyper3d.ai/workspace/rodin/1574e06b-dad9-50c3-b5d8-ae79f600e0a2"
+}

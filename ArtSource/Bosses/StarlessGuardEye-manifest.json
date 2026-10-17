@@ -1,0 +1,29 @@
+{
+  "asset": "StarlessGuardEye",
+  "content_id": "b05-guard-eye",
+  "provider": "Hyper3D API / Rodin Gen-2.5",
+  "high_generation": "5c9c606e-512b-4490-84bc-16fa6110cf7f",
+  "bang_generation": "8f14ffbe-1370-4a3d-971f-6eac2f4010f2",
+  "runtime_budget_triangles": 30000,
+  "runtime_texture_size": 2048,
+  "privacy": {
+    "public_generation_authorized": true,
+    "basis": "User authorized public generation of these five M05 guardians and explicitly requested API generation."
+  },
+  "design": "One full-body colossal abyssal ritual guardian for a dark nautical cosmic horror game. Head is a single enormous ritual eye in an ancient metallic circular socket, cold blue eye core; tall slender armored humanoid torso, separate long arms in relaxed A-pose and heavy corroded iron boots. Strong recognizable single-eye silhouette. Rust-black iron, cold grey bone, aged bronze, salt crust. Realistic PBR under neutral light. Front facing, complete feet, independent limbs, no base, no pedestal, no scenery, no ocean, no text. Structurally coherent character suitable for semantic part splitting.",
+  "request": {
+    "tier": "Gen-2.5-High",
+    "mesh_mode": "Raw",
+    "quality": "high",
+    "geometry_file_format": "glb"
+  },
+  "bang_request": {
+    "strength": 5,
+    "geometry_file_format": "glb"
+  },
+  "outputs": {
+    "high": "ArtSource/Bosses/StarlessGuardEye_High.glb"
+  },
+  "high_sha256": "36143aff93e28ad8de9aae31d8c060a3d88584973c5fe2613b5fc0164a83b107",
+  "display_url": "https://hyper3d.ai/workspace/rodin/5c9c606e-512b-4490-84bc-16fa6110cf7f"
+}

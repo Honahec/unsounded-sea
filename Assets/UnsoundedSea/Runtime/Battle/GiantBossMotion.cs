@@ -32,10 +32,10 @@ namespace UnsoundedSea.Runtime
         public float Age { get; private set; }
         public float ActionTime { get; private set; } = -1;
         public float HitWeight { get; private set; }
-        public bool Busy => ActionTime >= 0 || retiring && retirement < 1;
-        public bool Retiring => retiring;
+        public bool Busy => ActionTime >= 0 || effects != null && effects.Busy || retiring && retirement < 1;
         public int ReleaseCount { get; private set; }
         public event Action<Vector3,float> SurfaceReleased;
+        public event Action VesselImpact;
         private bool initialized, paused, released, ritual, observing, retiring;
         private float hitTime = -1, hitStart, retirement, hitScale = 1;
         private GiantBossEffects effects;
@@ -58,8 +58,10 @@ namespace UnsoundedSea.Runtime
         {
             Initialize(); water=surface;
             effects=gameObject.AddComponent<GiantBossEffects>();
-            effects.Initialize(mistMaterial, effectColor, water, boat);
+            effects.Initialize(mistMaterial, effectColor, water, boat, kind==BossEncounterKind.Watcher);
+            effects.VesselImpact += OnVesselImpact;
         }
+        private void OnVesselImpact() => VesselImpact?.Invoke();
         public void SetPaused(bool value) => paused=value;
         public void PlayAttack(bool isRitual = false, bool isObservation = false)
         {

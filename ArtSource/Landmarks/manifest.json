@@ -107,6 +107,30 @@
         }
       ],
       "unity_source_bow_axis": "+Z"
+    },
+    {
+      "name": "Lighthouse",
+      "provider": "Hyper3D Rodin Gen-2.5-High",
+      "generation_id": "ac62aee1-ee91-4021-b302-ef33d6cb645b",
+      "display_url": "https://hyper3d.ai/workspace/rodin/ac62aee1-ee91-4021-b302-ef33d6cb645b",
+      "mesh_mode": "Raw",
+      "target_triangles": 30000,
+      "triangles": 30000,
+      "bytes": 13758688,
+      "meshes": 1,
+      "materials": 1,
+      "images": 3,
+      "path": "Assets/UnsoundedSea/Art/Models/Lighthouse_LOD0.glb",
+      "source": "ArtSource/Landmarks/Lighthouse_High.glb",
+      "sha256": "3287a15cb389aad07fb8485bf17d5dc3d660e4f6c2bde200d2dec2c0a4d7911b",
+      "source_sha256": "3287a15cb389aad07fb8485bf17d5dc3d660e4f6c2bde200d2dec2c0a4d7911b",
+      "preview": "ArtSource/Landmarks/Lighthouse-preview.png",
+      "preview_sha256": "87f0d78742ffd5922a0005ba4f9037d9fae5f373ab601cb1af42160a38caa021",
+      "geometry_file_format": "glb",
+      "texture_delight": true,
+      "authoring_tool": "Tools/MainMenuSceneSetup.cs",
+      "notes": "Direct game-budget generation; runtime is the unchanged source GLB, not a separately decimated high model. No BANG or skeletal animation requested for the lighthouse. Main-menu composition pending live verification.",
+      "prompt": "A single complete isolated tall old offshore lighthouse for a dark nautical cosmic-horror game main menu, realistic detailed 3D PBR game asset. Slender slightly tapering weathered pale grey stone tower on a small integral seaworn foundation, dark corroded iron balcony and enclosed lantern room with warm amber glass and black metal conical roof. Strong elegant recognizable lighthouse silhouette, realistic masonry blocks, salt stains, modest metal railing, tiny door and narrow windows. No surrounding land or island, no ocean mesh, no ship, no background objects, no people, no text, no pedestal display base. Complete rear side. Neutral material illumination, do not bake dramatic lighting or a light beam into the mesh. Tower height roughly five times width, lantern and balcony occupy upper fifth. Grounded at base. Suitable for distant right-hand background of sea scene."
     }
   ],
   "scene_catalog": "Assets/UnsoundedSea/Art/Voyage/Nodes/VoyageScenes.asset",
