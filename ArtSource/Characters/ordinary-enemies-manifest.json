@@ -1,0 +1,183 @@
+{
+  "project": "未测之海普通敌人25种",
+  "source": "https://hyper3d.ai/workspace/agent?project=815bddca-e04a-476f-845a-b07f233ec326&thread=674d72a2-889b-4fe5-ab4d-95827faf242f&lang=zh",
+  "method": "User Chrome Hyper3D Agent via computer use",
+  "status": "All 25 enemy static sources archived. LostSailor, WhiteLampSignaller and BarrelThief were regenerated through the original Chrome Agent project and locally checked. The existing 22 rigs remain an incomplete animation checkpoint.",
+  "requestedAssetCount": 25,
+  "checkpoint": {
+    "archivedEnemyCount": 25,
+    "missingSources": [],
+    "notYetRigged": ["LostSailor", "WhiteLampSignaller", "BarrelThief"],
+    "fittingProfiles": "rig-profiles.json",
+    "knownIssues": [
+      "Unity review normalization uses padded SkinnedMeshRenderer bounds; measured Death bottom is 0.144m above ground for AbandonShipMedic.",
+      "Latest held-tool fitting/action corrections have not all been re-exported and imported; archive and Unity copies are a work checkpoint, not a synchronized final release.",
+      "The assets list covers the original two-sample trial and three regenerated sources; other archived source files and per-enemy binding JSON exist but consolidated inventory is not yet complete.",
+      "Existing validation JSON describes earlier trial runs, not acceptance of all 22 current rigs."
+    ]
+  },
+  "prompt": "请实际完成《未测之海》25种普通敌人的独立3D模型制作，不是只写计划，也不是把25人合成一个模型。项目名：未测之海普通敌人25种。先完成01雾中缆工和07骨笛侍从两个样例并自行检查正侧背、穿插、材质与预算，然后按同一风格继续完成其余23个；每种只做一个候选，不额外制作付费动画或多款变体。保留每个独立可下载GLB和资产预览，分批报告进度，失败只重试失败项，不重跑成功项。\n统一要求：原创黑暗克苏鲁航海写实游戏，19世纪旧航海器物、油布、粗麻、旧皮革、氧化黄铜、盐蚀铁与灰骨。普通敌人1.6-2.2米，船上甲板近中景使用；明显不同的剪影与核心器物，不只是换颜色。不要卡通、现代军装、海盗帽、科幻装备、文字商标、发光魔法、地台、船体、海水、背景几何。完整身体/脚/附件，脚底同一地面；稳定中性准备姿势，保留未来动作空间，手臂与躯干不要融合、绳链不得穿体；静态交付即可，不宣称自动动画可用。可独立活动的核心道具尽量分件，做不到须报告。中性照明PBR BaseColor/Normal/MetallicRoughness，UV完整，建议2K纹理。每个LOD0目标40000-60000三角面，优先直接生成预算内；如果源过密，保留源母版并减面到约45000三角面，保持轮廓/UV/PBR。不为了高模字样重复生一个模型。文件命名使用下列英文名_LOD0.glb；确有高模源才另导出英文名_High.glb。报告实测面数、纹理尺寸、skins/animations及是否真正分件，不能只给图或文字。\n25个独立角色清单：\n01 FogRigger 雾中缆工：1.85米前倾粗壮缆工，肩上盘粗湿麻绳形成非对称轮廓，一手短柄锈铁钩、一手收短绳，煤灰油布短衣、粗布裤旧靴，脸半遮。表现收绳—甩钩，不做巨大武器。\n02 LostSailor 失向水手：瘦长人形，破褐绿雨衣，身体与持刀手方向轻微不一致，旧短刀，迷失而非滑稽，露出疲惫下颌，姿势可站稳。\n03 WhiteLampSignaller 白灯司号：短壮司号员，胸前挂带乳白玻璃的铜框提灯，一手旧短号，分层短斗篷，白灯和号的轮廓清楚，灯不烘焙强光。\n04 WetCoatPilot 湿衣引航员：瘦高湿油布长衣贴身，身体微倾，双手和小持物藏在袖下；禁止外露刀或铃泄露隐藏意图，衣下只保留不确定轮廓。\n05 BarrelThief 漂桶窃贼：矮小蜷身拾荒人，腰腹套破木桶但双腿完整外露，背拖小布袋，木桶破口与铁箍清楚，可见双手；无场景道具堆。\n06 TideBoneScavenger 潮骨拾荒者：弓背瘦人形，背负不规则骨筐，短刮骨钩，粗布围腰，盐白骨与深色布对比，不血腥。\n07 BoneFluteAttendant 骨笛侍从：瘦高异常人形，颈部灰白骨管与手持骨笛连接，面部包暗色布，背部垂少量结绳线，无额外召唤物；细长笛管、佝偻脖颈是主剪影。\n08 SaltMarrowPriest 盐髓司祭：宽肩祭司，胸口嵌盐白骨板，双手捧粗糙小髓盏，重布长袍有明确脚部，无浮空祭坛，不血腥。\n09 EmptyHoldKnocker 空舱敲击者：背负窄破舱门板的矮壮异形水手，胸前空木箱，一手短敲槌，门板不能大到像场景墙，旧木铁钉清楚。\n10 BoneNetStitcher 缝骨拖网客：瘦人形拖网工，肩背披缝入骨片的粗网，一手粗骨针、一手短网束；网厚且有清楚孔洞，不铺满地面，不穿身。\n11 InvertedSurveyHand 倒悬测量员：长臂瘦人形，旧测量服，腰腿带可挂船梁的皮带扣，一手折尺，头略侧转；交付站立中性姿势便于后续倒挂，禁止生成船梁或巨大Boss。\n12 ReverseNavigator 反写领航员：中等身材老领航员，双手持倒拿的卷边空白海图，短斗篷、指北器小挂件；纸上没有可读文字，不依文字表达特点。\n13 MirrorTideScribe 镜潮记录员：佝偻书记员，小片氧化镜片遮住眼脸，怀抱厚泡水账本，一手钝笔；面镜与书是主识别，镜面不强反射烘焙场景。\n14 PlumbWatcher 铅垂守望者：高大窄肩人形，胸前悬单个沉重铅坠，粗皮肩带连接，紧束长外衣，铅坠与身体留间隙，脚完整。\n15 DisplacedWatchman 错位值更人：两层不同年代但同属旧航海的制服不对称叠穿，左右袖口不同，面部半遮，站姿轻微不协调；不要生成第二个身体或烘焙地面影子。\n16 UnflaggedBoarder 无旗登船兵：结实登船兵，无标识旧制服，单手粗木铁边舷盾、另一手短刀，盾面明确缺角，没有现代战术装具。\n17 MisfireGunner 哑火炮手：宽胸炮手，旧皮围胸，双手短钝前装铳，腰挂两个小火药筒，装填姿势；不是大炮，不带炮台。\n18 BlackSailMessenger 黑帆传令：瘦高传令员，手持短杆黑色破信号旗，嘴部横着暗铜束具，短外套；旗不要遮整个身体，旗面无符文文字。\n19 AbandonShipMedic 弃舰医官：旧航海医生，盐渍浅灰医疗围裙，单手生锈小药箱，另一手卷起敷料，瘦长手指，布料与金属分明，无现代红十字或血腥。\n20 RustChainEscort 锈链押运者：壮硕押运人，双前臂缠粗锈链，腰挂一个大铁扣，链尾短而收拢供以后连接同伴，不生成另一个角色，面部布罩。\n21 StarlessPeeker 无星窥视者：瘦长非人水手，面部不是五官而是向内凹陷的暗色平滑组织，湿褶旧衣，手指稍长；不做巨大Boss、不做发光眼。\n22 AbyssRunner 深渊听差：窄身矮肩人形，手提空铜传声筒，后背衣褶像重复脚印但不用地面脚印，头微低、旧制服无标识。\n23 LampOutBellkeeper 熄灯司钟：头部包在小型旧铜钟罩内，钟罩为头盔大小不是巨大钟，一手无焰提灯，深灰短袍，手脚完整；不同于巨型沉钟Boss。\n24 LastTideWitness 末潮见证者：纤长静立见证者，长衣下摆缝多排无字窄布签，眼睑不明显但不恐怖血腥，双手收在腹前；无文字人名生成。\n25 RailNameTaker 舷外索名者：1.9米弯腰长臂异常人形，手臂可搭栏杆但本体单独交付，不生成栏杆；头低垂、脸隐在衣领，脚趾长而着地，湿深色皮布，不巨型触手怪。\n请现在执行实际生成；按编号逐项完成并给下载工件。若服务需要明确确认或余额不足，指出具体阻塞，不要假装完成。",
+  "assets": [
+    {
+      "file": "FogRigger_High.glb",
+      "enemy": "FogRigger",
+      "providerTaskId": "c2fdce40-9cb6-5a92-9ce9-48c6918e0e5d",
+      "visualAcceptance": "pending",
+      "bytes": 77670908,
+      "sha256": "4c65b5bb29a3b9e5f4a4ebba197517104c038e5f93c13a274bc7790b5855a8b9",
+      "triangles": 1000000,
+      "vertices": 708756,
+      "meshes": 1,
+      "materials": 1,
+      "images": [
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ]
+      ],
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "file": "FogRigger_LOD0.glb",
+      "enemy": "FogRigger",
+      "providerTaskId": "df3710cb-d6bc-5272-bb7d-9c91f973108d",
+      "visualAcceptance": "pending",
+      "bytes": 55534196,
+      "sha256": "ece5fa87f551e927843250683248418431ffcfd2c61f6b0c66a9e4bf4a847ee1",
+      "triangles": 45000,
+      "vertices": 74170,
+      "meshes": 1,
+      "materials": 1,
+      "images": [
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ]
+      ],
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "file": "BoneFluteAttendant_Source.glb",
+      "enemy": "BoneFluteAttendant",
+      "providerTaskId": "aef8821a-8bfb-5f2e-90f5-224f1c94045a",
+      "visualAcceptance": "pending",
+      "bytes": 41755836,
+      "sha256": "6824adcf221a5670ce298ffb5451f5f721b796d466590f99f17d6c54653d0d64",
+      "triangles": 50000,
+      "vertices": 62058,
+      "meshes": 1,
+      "materials": 1,
+      "images": [
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ],
+        [
+          4096,
+          4096
+        ]
+      ],
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "file": "LostSailor_Source.glb",
+      "enemy": "LostSailor",
+      "providerTaskId": "8b111f7b-0b5b-5ae2-aa08-a4d0f59bb2fc",
+      "providerArtifactId": "a88b91c5-a8aa-47e3-a10f-3ad2fe2261cc",
+      "visibility": "public",
+      "bytes": 39233952,
+      "sha256": "5f6e011c2994bdc48deb1a84a9768fc21291ab87452b01fe02fc010c6895289f",
+      "triangles": 45000,
+      "vertices": 36028,
+      "meshes": 1,
+      "materials": 1,
+      "images": [[4096,4096],[4096,4096],[4096,4096]],
+      "skins": 0,
+      "animations": 0,
+      "visualAcceptance": "Blender import and source-view inspection completed; no rig or animation acceptance."
+    },
+    {
+      "file": "WhiteLampSignaller_Source.glb",
+      "enemy": "WhiteLampSignaller",
+      "providerTaskId": "ce4f9cb7-d32d-5136-90cf-f7bc8d2ba980",
+      "providerArtifactId": "61a71bfc-922c-40a3-a0d2-cc398d5e541b",
+      "visibility": "public",
+      "bytes": 24097056,
+      "sha256": "3eafe585ac7a97a514d9d29cb08c4ef4fa47c47533aaccd36c82df1cbf0e1056",
+      "triangles": 45000,
+      "vertices": 37661,
+      "meshes": 1,
+      "materials": 1,
+      "images": [[4096,4096],[4096,4096],[4096,4096]],
+      "skins": 0,
+      "animations": 0,
+      "visualAcceptance": "Blender import and source-view inspection completed; no rig or animation acceptance."
+    },
+    {
+      "file": "BarrelThief_Source.glb",
+      "enemy": "BarrelThief",
+      "providerTaskId": "554c24df-aa98-50a9-9330-58b7464973e3",
+      "providerArtifactId": "29c7f3a0-553f-4aa4-83fc-d40d98793b9c",
+      "visibility": "public",
+      "bytes": 37147488,
+      "sha256": "a097ca2ccc094964614a1c14880d64042e5695d4b6676209da8ab7317e394357",
+      "triangles": 45000,
+      "vertices": 52497,
+      "meshes": 1,
+      "materials": 1,
+      "images": [[4096,4096],[4096,4096],[4096,4096]],
+      "skins": 0,
+      "animations": 0,
+      "visualAcceptance": "Blender import and source-view inspection completed; generated tricorn hat deviates from original art direction; no rig or animation acceptance."
+    }
+  ],
+  "rigTrial": {
+    "tool": "Blender 5.2.2 LTS",
+    "reproduce": "Tools/rig_enemy_trials.py",
+    "sources": ["FogRigger_LOD0.glb", "BoneFluteAttendant_Source.glb"],
+    "outputs": ["RigTrials/FogRigger_Rigged.glb", "RigTrials/FogRigger_Rigged.blend", "RigTrials/BoneFluteAttendant_Rigged.glb", "RigTrials/BoneFluteAttendant_Rigged.blend"],
+    "structuralEvidence": "RigTrials/validation.json",
+    "unityScene": "Assets/UnsoundedSea/Scenes/EnemyRigReview.unity",
+    "unityVerification": "Each imported sample has one SkinnedMeshRenderer, 20 bones and RigValidation clip. BakeMesh at rest versus arm pose confirmed local vertex deformation; live Game view rendered after Editor restart.",
+    "acceptance": "Binding trial only; user visual acceptance pending",
+    "limitations": ["No finger bones or Humanoid retargeting validation", "Fused rope, flute and clothing remain part of the skinned source mesh; no independent prop or cloth control", "Test motion only, not attack/hit/death gameplay animation", "Target-device performance not measured"],
+    "agentRiggingRetry": {
+      "targetArtifact": "b6a27a63-a64c-4e4e-aac5-eb4b3ae0a299",
+      "result": "No bound model produced. In the existing Chrome Agent conversation, requested humanoid binding of the original FogRigger asset without regeneration. Visible execution activated pro-refine and rodin-3d and read existing-task-operations.md; Agent reported no exposed rigging/skinning or script-execution tool.",
+      "scope": "Limitation reported by this Agent session, not proof that all Hyper3D products lack rigging."
+    }
+  },
+  "requirements": {
+    "rigging": "Required for all 25: embedded skeleton and normalized skin weights; static sources are not final delivery",
+    "workflow": "User approved installing Blender for local rigging; source generation remains Chrome Hyper3D Agent",
+    "deformationChecks": [
+      "arm raise",
+      "elbow flex",
+      "knee flex",
+      "torso twist"
+    ]
+  }
+}

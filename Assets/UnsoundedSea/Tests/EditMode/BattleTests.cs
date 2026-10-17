@@ -24,6 +24,39 @@ namespace UnsoundedSea.Tests
             }, tools ?? new[] { new ToolSpec("lamp", "提灯", InvestigationKind.VisibleAction), new ToolSpec("ear", "听筒", InvestigationKind.SoundSource) },
                 objective, 4, health, sanity, drawCount: draw);
 
+        [Test] public void CarriedResourcesCanRecoverAboveEncounterStartingValues()
+        {
+            var source = Definition(new[] { Card("heal", 8), CardCatalog.Get("c081") });
+            var definition = new BattleDefinition(source.Id, source.Deck, source.Enemies, source.Tools,
+                initialHealth: 40, initialSanity: 12);
+            var session = new BattleSession(definition, 42);
+            Assert.That(session.View.Health, Is.EqualTo(40));
+            Assert.That(session.View.Sanity, Is.EqualTo(12));
+            Assert.That(session.Execute(BattleCommand.Play(session.View.Hand.Single(x => x.Definition.Id == "heal").InstanceId)).Success, Is.True);
+            Assert.That(session.View.Health, Is.EqualTo(48));
+            Assert.That(session.Execute(BattleCommand.Play(session.View.Hand.Single(x => x.Definition.Id == "c081").InstanceId)).Success, Is.True);
+            Assert.That(session.View.Health, Is.EqualTo(43));
+            Assert.That(session.View.Sanity, Is.EqualTo(15));
+            var replay = BattleReplay.Capture(session);
+            var restored = replay.Restore(definition);
+            Assert.That(restored.View.Health, Is.EqualTo(43));
+            Assert.That(restored.View.Sanity, Is.EqualTo(15));
+            var differentStart = new BattleDefinition(source.Id, source.Deck, source.Enemies, source.Tools,
+                initialHealth: 41, initialSanity: 12);
+            Assert.Throws<InvalidDataException>(() => replay.Restore(differentStart));
+        }
+
+        [TestCase(0, 10)]
+        [TestCase(61, 10)]
+        [TestCase(10, 0)]
+        [TestCase(10, 31)]
+        public void InvalidCarriedResourcesAreRejected(int health, int sanity)
+        {
+            var source = Definition();
+            Assert.Throws<ArgumentOutOfRangeException>(() => new BattleDefinition(source.Id, source.Deck,
+                source.Enemies, source.Tools, initialHealth: health, initialSanity: sanity));
+        }
+
         [Test] public void StartsWithFiveCardsThreeActionsAndLockedHiddenIntent()
         {
             var view = new BattleSession(Definition(), 42).View;

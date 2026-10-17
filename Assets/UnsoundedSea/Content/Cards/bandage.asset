@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
   id: bandage
   displayName: "\u5E94\u6025\u5305\u624E"
-  description: "\u6062\u590D 4 \u751F\u547D\uFF1B\u4F7F\u7528\u540E\u6D88\u8017\u3002"
+  description: "\u6062\u590D4\u751F\u547D\u3002\u6D88\u8017\u3002"
   actionCost: 1
   sanityCost: 0
   exhaust: 1
   effects:
-  - effectId: heal
+  - effectId: c022
     amount: 4

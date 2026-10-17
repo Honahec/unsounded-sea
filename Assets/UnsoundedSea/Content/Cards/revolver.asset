@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
   id: revolver
   displayName: "\u5DE6\u8F6E\u5C04\u51FB"
-  description: "\u5BF9\u76EE\u6807\u9020\u6210 6 \u4F24\u5BB3\u3002"
+  description: "\u5BF9\u4E00\u540D\u654C\u4EBA\u9020\u62106\u4F24\u5BB3\u3002"
   actionCost: 1
   sanityCost: 0
   exhaust: 0
   effects:
-  - effectId: damage
+  - effectId: c001
     amount: 6

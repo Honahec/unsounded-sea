@@ -29,6 +29,9 @@ namespace UnsoundedSea.Runtime
         private bool menuOpen;
         private bool settingsOpen;
         private bool chartOpen, chartWasMenuOpen, chartWasJournalOpen;
+        private int selectedCard;
+        private int inspectedCard;
+        private string selectedSupport;
         private int[] previousHand = Array.Empty<int>();
         private readonly HashSet<string> revealed = new HashSet<string>();
         public BattleView CurrentView => session?.View;
@@ -65,7 +68,13 @@ namespace UnsoundedSea.Runtime
         private void Resize(GeometryChangedEvent evt) { root.EnableInClassList("compact", evt.newRect.width < 1200 || evt.newRect.height < 740); }
         private void OnKey(KeyDownEvent evt)
         {
+            if (inspectedCard != 0)
+            {
+                if (evt.keyCode == KeyCode.Escape) CloseInspection();
+                evt.StopPropagation(); return;
+            }
             if (session == null) return;
+            if (session.View.PendingChoice != null) { evt.StopPropagation(); return; }
             if (chartOpen)
             {
                 if (evt.keyCode != KeyCode.Escape && evt.keyCode != KeyCode.M) return;
@@ -76,7 +85,16 @@ namespace UnsoundedSea.Runtime
             else if (evt.keyCode == KeyCode.Escape && menuOpen) ToggleMenu();
             else if (menuOpen) return;
             else if (evt.keyCode == KeyCode.J) ToggleJournal();
+            else if (evt.keyCode == KeyCode.Escape && !string.IsNullOrEmpty(selectedSupport)) { selectedSupport = null; Refresh(); }
+            else if (evt.keyCode == KeyCode.Escape && selectedCard != 0) { selectedCard = 0; Refresh(); }
             else if (evt.keyCode == KeyCode.Escape && journalOpen) ToggleJournal();
+            else if (evt.keyCode == KeyCode.D)
+            {
+                var focused = root.panel?.focusController.focusedElement as VisualElement;
+                if (focused == null || focused.name == null || !focused.name.StartsWith("card-", StringComparison.Ordinal) ||
+                    !int.TryParse(focused.name.Substring(5), out var id) || !session.View.Hand.Any(card => card.InstanceId == id)) return;
+                inspectedCard = id; Refresh();
+            }
             else if (evt.keyCode == KeyCode.Escape) ToggleMenu();
             else return;
             evt.StopPropagation();
@@ -112,20 +130,25 @@ namespace UnsoundedSea.Runtime
             if (encounters == null || index < 0 || index >= encounters.Length || encounters[index] == null)
                 throw new InvalidOperationException("Assign encounter assets on BattleHud.");
             encounterIndex = index;
-            definition = encounters[index].Build();
+            definition = CardDeckPreparation.Apply(encounters[index].Build());
             session = new BattleSession(definition, unchecked((uint)seed));
             selectedEnemy = session.View.Enemies[0].Id;
             message = "";
             journalOpen = false;
             menuOpen = false; settingsOpen = false;
             chartOpen = false; chartWasMenuOpen = false; chartWasJournalOpen = false;
+            selectedCard = 0;
             previousHand = Array.Empty<int>();
             revealed.Clear();
             Refresh();
         }
         public CommandResult Send(BattleCommand command)
         {
+            var before = session.View;
             var result = session.Execute(command);
+            var after = session.View;
+            if (result.Success && before.Phase != BattlePhase.Victory && after.Phase == BattlePhase.Victory)
+                CardDeckPreparation.StoreVerified(after.Evidence);
             message = result.Success ? "" : result.Error;
             Refresh();
             return result;
@@ -217,6 +240,7 @@ namespace UnsoundedSea.Runtime
             if (view.Enemies.All(e => e.Id != selectedEnemy || e.Health == 0))
                 selectedEnemy = (view.Enemies.FirstOrDefault(e => e.Health > 0) ?? view.Enemies[0]).Id;
             root.Clear();
+            root.focusable = view.PendingChoice == null && inspectedCard == 0;
             root.EnableInClassList("concluded", concluded);
             root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion);
 
@@ -290,6 +314,21 @@ namespace UnsoundedSea.Runtime
                 foot.Add(Text(spent ? "已用尽" : $"×{tool.RemainingUses}", spent ? "tool-spent" : "tool-uses"));
                 button.Add(foot);
                 button.tooltip = $"{tool.Definition.Name}：{ToolQuestion(tool.Definition.Kind)}。对象为当前目标。";
+                tools.Add(button);
+            }
+            foreach (var support in view.Supports)
+            {
+                var crew = support;
+                var button = Button("crew-" + crew.Definition.Id, "", "tool", () =>
+                {
+                    if (crew.Targets.Count == 0) Send(BattleCommand.Support(crew.Definition.Id));
+                    else { selectedSupport = selectedSupport == crew.Definition.Id ? null : crew.Definition.Id; selectedCard = 0; Refresh(); }
+                }, playing && crew.Enabled);
+                button.EnableInClassList("spent", crew.Used);
+                button.Add(new SeaUiArt(crew.Definition.Kind == CrewSupportKind.Medic ? "heart" : "ear"));
+                button.Add(Text(crew.Definition.Name, "tool-name"));
+                button.Add(Text(crew.Used ? "本场已用" : "1 行动 · 船员支援", crew.Used ? "tool-spent" : "tool-uses"));
+                button.tooltip = crew.Enabled ? "每回合最多一次，每名船员每场一次。" : crew.DisabledReason;
                 tools.Add(button);
             }
             root.Add(tools);
@@ -368,29 +407,59 @@ namespace UnsoundedSea.Runtime
                 var id = card.InstanceId; var data = card.Definition;
                 var shortAction = view.Actions < data.Cost;
                 var shortSanity = view.Sanity <= data.SanityCost;
-                var button = Button("card-" + id, "", "card-anchor", () => Send(BattleCommand.Play(id, selectedEnemy)), playing && !shortAction && !shortSanity);
+                var button = Button("card-" + id, "", "card-anchor", () =>
+                {
+                    if (!card.Enabled || shortAction || shortSanity) { inspectedCard = id; Refresh(); return; }
+                    selectedSupport = null;
+                    if (card.Targets.Count == 0) { selectedCard = 0; Send(BattleCommand.Play(id)); }
+                    else { selectedCard = selectedCard == id ? 0 : id; Refresh(); }
+                }, playing);
                 button.tabIndex = cardIndex + 1; button.style.left = cardIndex * 110;
                 button.AddToClassList("fan-" + Mathf.Clamp(cardIndex++ - (view.Hand.Count - 1) / 2, -3, 3));
                 cardPresentation.Add(button);
-                button.EnableInClassList("unaffordable", playing && (shortAction || shortSanity));
-                button.tooltip = data.Name + "：" + data.Description;
+                button.EnableInClassList("unaffordable", playing && (shortAction || shortSanity || !card.Enabled));
+                button.EnableInClassList("chosen-card", selectedCard == id);
+                button.RegisterCallback<ContextClickEvent>(evt => { inspectedCard = id; Refresh(); evt.StopPropagation(); });
+                button.tooltip = data.Name + "：" + data.Description + (!card.Enabled ? "\n" + card.DisabledReason : "") + "\n右键或聚焦后按 D 查看大图";
                 var face = Element("card"); face.pickingMode = PickingMode.Position;
-                var effect = data.Effects[0].Id;
-                var motif = effect.Contains("damage") ? "gun" : effect == "block" ? "shield" : effect == "ward" ? "eye" : effect.Contains("investigate") ? "lantern" : "scroll";
-                var top = Element("card-top");
-                top.Add(Text(data.Cost.ToString(), "card-cost"));
-                top.Add(Text("行动", "card-cost-label"));
-                face.Add(top);
-                face.Add(new SeaUiArt(motif));
-                face.Add(Text(data.Name, "card-name"));
-                face.Add(Text(data.Description, "card-description"));
-                if (data.SanityCost > 0) face.Add(Text($"代价 · 主动支付 {data.SanityCost} 理智", "card-price"));
-                if (data.Exhaust) face.Add(Text("本场限用一次", "card-exhaust"));
-                if (playing && (shortAction || shortSanity)) face.Add(Text(shortAction ? "行动不足" : "理智不足", "card-blocked"));
                 IllustratedCard.Apply(face, data);
+                face.Add(Text("D 详情", "card-detail-hint"));
+                if (!card.Enabled) face.Add(Text(card.DisabledReason, "card-blocked"));
                 button.Add(face); fan.Add(button);
             }
             root.Add(hand);
+            var choiceCard = view.Hand.FirstOrDefault(card => card.InstanceId == selectedCard);
+            if (choiceCard != null && choiceCard.Targets.Count > 0)
+            {
+                var choices = Element("card-target-panel");
+                choices.Add(Text("选择：" + choiceCard.Definition.Name, "card-target-title"));
+                var options = new ScrollView(ScrollViewMode.Vertical); options.AddToClassList("card-target-options"); choices.Add(options);
+                var choiceIndex = 0;
+                foreach (var option in choiceCard.Targets)
+                {
+                    var target = option;
+                    var cardId = choiceCard.InstanceId;
+                    options.Add(Button("card-target-" + choiceIndex++, target.Name + (string.IsNullOrWhiteSpace(target.Detail) ? "" : "\n" + target.Detail),
+                        "card-target-choice", () => { selectedCard = 0; Send(BattleCommand.Play(cardId, target.Id)); }, playing && target.Enabled));
+                }
+                root.Add(choices);
+                choices.schedule.Execute(() => choices.Q<Button>(className: "card-target-choice")?.Focus());
+            }
+            var supportChoice = view.Supports.FirstOrDefault(support => support.Definition.Id == selectedSupport);
+            if (supportChoice != null && supportChoice.Targets.Count > 0)
+            {
+                var choices = Element("card-target-panel");
+                choices.Add(Text("船员支援：" + supportChoice.Definition.Name, "card-target-title"));
+                var options = new ScrollView(ScrollViewMode.Vertical); options.AddToClassList("card-target-options"); choices.Add(options);
+                var choiceIndex = 0;
+                foreach (var option in supportChoice.Targets)
+                {
+                    var target = option; var supportId = supportChoice.Definition.Id;
+                    options.Add(Button("support-target-" + choiceIndex++, target.Name + (string.IsNullOrWhiteSpace(target.Detail) ? "" : "\n" + target.Detail),
+                        "card-target-choice", () => { selectedSupport = null; Send(BattleCommand.Support(supportId, target.Id)); }, playing && target.Enabled));
+                }
+                root.Add(choices);
+            }
             var piles = Element("piles");
             foreach (var (label, count) in new[] { ("抽牌堆", view.DrawCount), ("弃牌", view.DiscardCount), ("消耗", view.ExhaustCount) })
             {
@@ -476,6 +545,21 @@ namespace UnsoundedSea.Runtime
                 root.Add(scrim);
             }
 
+            if (view.PendingChoice != null)
+            {
+                foreach (var child in root.Children().ToArray()) child.SetEnabled(false);
+                root.Add(PendingChoice(view.PendingChoice));
+                return;
+            }
+
+            var inspection = view.Hand.FirstOrDefault(card => card.InstanceId == inspectedCard);
+            if (inspection != null)
+            {
+                foreach (var child in root.Children().ToArray()) child.SetEnabled(false);
+                root.Add(IllustratedCard.Inspection(inspection.Definition, CloseInspection));
+                return;
+            }
+
             var handIds = view.Hand.Select(c => c.InstanceId).ToArray();
             previousHand = handIds;
             if (settingsOpen) return;
@@ -492,6 +576,29 @@ namespace UnsoundedSea.Runtime
                     target = concluded ? root.Q<Button>("restart") : root.Q<Button>("end-turn");
                 if (target != null && target.canGrabFocus) target.Focus();
             });
+
+        }
+        private VisualElement PendingChoice(PendingCardChoiceView choice)
+        {
+            var modal = Element("pending-choice"); modal.pickingMode = PickingMode.Position;
+            var sheet = Element("pending-choice-sheet"); sheet.pickingMode = PickingMode.Position;
+            sheet.Add(Text(choice.Prompt, "pending-choice-title"));
+            var options = new ScrollView(ScrollViewMode.Vertical); options.AddToClassList("pending-choice-options"); sheet.Add(options);
+            var index = 0;
+            foreach (var option in choice.Options)
+            {
+                var target = option;
+                options.Add(Button("pending-choice-" + index++, target.Name + (string.IsNullOrWhiteSpace(target.Detail) ? "" : "\n" + target.Detail),
+                    "card-target-choice", () => Send(BattleCommand.Reorder(target.Id))));
+            }
+            modal.Add(sheet);
+            modal.schedule.Execute(() => modal.Q<Button>(className: "card-target-choice")?.Focus());
+            return modal;
+        }
+
+        private void CloseInspection()
+        {
+            var card = inspectedCard; inspectedCard = 0; Refresh("card-" + card);
         }
     }
 }

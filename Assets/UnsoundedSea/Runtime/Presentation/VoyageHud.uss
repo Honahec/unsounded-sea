@@ -64,3 +64,35 @@
 .is-sailing .destination-panel { align-items: center; }
 .is-sailing .destination-panel .section-label, .is-sailing .destination-title, .is-sailing .destination-clue { display: none; }
 .is-sailing .destination-panel .bearing { -unity-text-align: middle-center; }
+
+/* Expedition facts stay at the edge; the sea remains the main composition. */
+.voyage-header { justify-content: space-between; }
+.voyage-status { text-shadow: 0 2px 5px #040a0c; }
+.expedition-progress { color: #eee4c9; font-size: 15px; letter-spacing: 1px; }
+.resource-strip { margin-top: 3px; color: #b9c9bd; font-size: 13px; }
+.node-choice-description { margin-top: 3px; color: #b9c4bb; font-size: 12px; }
+.route-theme { margin-top: 4px; color: #d2c39b; font-size: 13px; }
+.voyage-hud .node-choice, .voyage-hud .region-choice { margin-top: 7px; min-height: 48px; border-left-width: 2px; border-left-color: #9f8756; -unity-text-align: middle-left; }
+.voyage-hud .node-choice:hover, .voyage-hud .region-choice:hover { border-left-color: #ead59d; }
+.region-description { margin-top: 4px; color: #aebbb1; font-size: 12px; }
+.reward-open .voyage-navigation { left: 50%; right: auto; bottom: 46px; width: 850px; translate: -50% 0; }
+.reward-open .destination-panel { align-items: center; }
+.reward-copy { margin-bottom: 12px; color: #d6ceb7; -unity-text-align: middle-center; }
+.reward-cards { flex-direction: row; justify-content: center; }
+.voyage-hud .reward-card { width: 190px; height: 286px; margin: 0 9px; padding: 0; border-color: #7f6c47; background-color: #0f1d21; }
+.reward-card-face { width: 188px; height: 284px; -unity-background-scale-mode: scale-and-crop; }
+.act-complete .voyage-navigation { width: 420px; }
+.action-book { width: 940px; height: 760px; max-height: 90%; padding: 24px 28px; background-color: rgb(13, 29, 31); border-width: 1px; border-top-width: 3px; border-color: rgb(158, 135, 85); }
+.action-book-head { flex-direction: row; justify-content: space-between; align-items: center; }
+.collection-count { color: #e5d4aa; font-size: 17px; }
+.action-book-scroll { flex-grow: 1; margin-top: 10px; }
+.action-book-cards { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+.voyage-hud .action-book-card { width: 142px; height: 214px; margin: 7px; padding: 0; border-width: 2px; border-color: transparent; background-color: #0f1d21; }
+.voyage-hud .action-book-card.selected { border-color: #e5c67f; translate: 0 -4px; }
+.action-book-card-face { width: 138px; height: 210px; -unity-background-scale-mode: scale-and-crop; }
+.tool-count { margin-top: 10px; color: #d4c49a; font-size: 14px; letter-spacing: 1px; }
+.action-book-tools { flex-direction: row; }
+.voyage-hud .action-book-tool { margin: 6px 8px 0 0; min-width: 190px; border-left-width: 3px; -unity-text-align: middle-left; }
+.voyage-hud .action-book-tool.selected { border-left-color: #e5c67f; background-color: #31473e; color: #fff0c6; }
+.modal-actions { flex-direction: row; justify-content: flex-end; align-items: center; }
+.modal-actions .primary, .modal-actions .secondary { margin: 10px 0 0 12px; min-width: 150px; -unity-text-align: middle-center; }

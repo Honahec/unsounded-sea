@@ -1,0 +1,47 @@
+{
+  "motionProfile": "survey_rod_sighting",
+  "source": "InvertedSurveyHand_Source.glb",
+  "method": "Fitted anatomical landmarks + Blender bone heat; normalized strongest four influences",
+  "height": 2.0,
+  "bones": 20,
+  "animations": [
+    "Idle",
+    "Action",
+    "Hit",
+    "Death",
+    "RigValidation"
+  ],
+  "meshes": [
+    {
+      "mesh": "model",
+      "vertices": 22500,
+      "weightedVertices": 22500,
+      "boneInfluenceVertexCounts": {
+        "hips": 4910,
+        "spine": 3454,
+        "chest": 4390,
+        "neck": 3176,
+        "head": 2404,
+        "shoulder.L": 3650,
+        "upper_arm.L": 3765,
+        "forearm.L": 4998,
+        "hand.L": 2162,
+        "shoulder.R": 1551,
+        "upper_arm.R": 1372,
+        "forearm.R": 1620,
+        "hand.R": 2978,
+        "thigh.L": 4531,
+        "shin.L": 2902,
+        "foot.L": 1664,
+        "thigh.R": 6502,
+        "shin.R": 2372,
+        "foot.R": 1946
+      }
+    }
+  ],
+  "limitations": [
+    "No finger articulation or facial rig",
+    "Original props are fused geometry; attachment deformation requires visual review",
+    "Not certified for arbitrary retargeted animation"
+  ]
+}

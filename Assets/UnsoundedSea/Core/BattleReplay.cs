@@ -8,7 +8,7 @@ namespace UnsoundedSea.Core
     [Serializable]
     public sealed class BattleReplay
     {
-        public const int CurrentVersion = 2;
+        public const int CurrentVersion = 4;
         public int version;
         public string contentHash;
         public uint seed;
@@ -44,6 +44,7 @@ namespace UnsoundedSea.Core
                 {
                     writer.Write(CurrentVersion); writer.Write((int)boss); writer.Write(definition.Id); writer.Write(definition.Health);
                     writer.Write(definition.Sanity); writer.Write(definition.Actions); writer.Write(definition.DrawCount);
+                    writer.Write(definition.InitialHealth); writer.Write(definition.InitialSanity);
                     writer.Write((int)definition.Objective); writer.Write(definition.ObjectiveTarget);
                     writer.Write(definition.Deck.Count);
                     foreach (var card in definition.Deck)
@@ -67,6 +68,12 @@ namespace UnsoundedSea.Core
                     writer.Write(definition.Tools.Count);
                     foreach (var tool in definition.Tools)
                     { writer.Write(tool.Id); writer.Write(tool.Name); writer.Write((int)tool.Kind); writer.Write(tool.Uses); writer.Write(tool.SanityCost); }
+                    writer.Write(definition.Supports.Count);
+                    foreach (var support in definition.Supports)
+                    { writer.Write(support.Id); writer.Write(support.Name); writer.Write((int)support.Kind); }
+                    writer.Write(definition.Archive.Count);
+                    foreach (var evidence in definition.Archive)
+                    { writer.Write(evidence.Key); writer.Write(evidence.Text); writer.Write(evidence.Source); writer.Write((int)evidence.Level); }
                 }
                 using (var hash = SHA256.Create()) return BitConverter.ToString(hash.ComputeHash(stream.ToArray())).Replace("-", "");
             }

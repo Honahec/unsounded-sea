@@ -1,0 +1,47 @@
+{
+  "motionProfile": "long_finger_void_peek",
+  "source": "StarlessPeeker_Source.glb",
+  "method": "Fitted anatomical landmarks + Blender bone heat; normalized strongest four influences",
+  "height": 2.0,
+  "bones": 20,
+  "animations": [
+    "Idle",
+    "Action",
+    "Hit",
+    "Death",
+    "RigValidation"
+  ],
+  "meshes": [
+    {
+      "mesh": "model",
+      "vertices": 22500,
+      "weightedVertices": 22500,
+      "boneInfluenceVertexCounts": {
+        "hips": 5320,
+        "spine": 4960,
+        "chest": 3404,
+        "neck": 2865,
+        "head": 2116,
+        "shoulder.L": 2784,
+        "upper_arm.L": 3302,
+        "forearm.L": 3141,
+        "hand.L": 1472,
+        "shoulder.R": 2678,
+        "upper_arm.R": 2975,
+        "forearm.R": 3462,
+        "hand.R": 1513,
+        "thigh.L": 4305,
+        "shin.L": 2469,
+        "foot.L": 1238,
+        "thigh.R": 4367,
+        "shin.R": 2462,
+        "foot.R": 1255
+      }
+    }
+  ],
+  "limitations": [
+    "No finger articulation or facial rig",
+    "Original props are fused geometry; attachment deformation requires visual review",
+    "Not certified for arbitrary retargeted animation"
+  ]
+}

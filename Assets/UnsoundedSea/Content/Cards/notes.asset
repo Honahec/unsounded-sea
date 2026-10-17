@@ -14,12 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
   id: notes
   displayName: "\u89C2\u5BDF\u7B14\u8BB0"
-  description: "\u8BB0\u5F55\u5F53\u524D\u5F81\u5146\uFF0C\u62BD 1 \u5F20\u724C\u3002"
+  description: "\u8BB0\u5F55\u4E00\u540D\u654C\u4EBA\u7684\u5F53\u524D\u53EF\u89C1\u5F81\u5146\uFF0C\u62BD1\u5F20\u724C\uFF1B\u4E0D\u786E\u8BA4\u610F\u56FE\u3002\u6D88\u8017\u3002"
   actionCost: 0
   sanityCost: 0
-  exhaust: 0
+  exhaust: 1
   effects:
-  - effectId: observe
-    amount: 0
-  - effectId: draw
+  - effectId: c037
     amount: 1

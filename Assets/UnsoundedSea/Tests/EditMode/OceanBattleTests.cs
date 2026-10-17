@@ -49,10 +49,13 @@ namespace UnsoundedSea.Tests
         }
         [Test] public void CardTargetsOnlySelectedEnemy()
         {
-            var session = Scenario.CreateSession(20261016);
-            var card = session.View.Hand.First(x => x.Definition.Effects.Any(e => e.Id == "damage"));
+            var definition = Scenario.encounter.Build();
+            var session = new BattleSession(new BattleDefinition(definition.Id, new[] { CardCatalog.Get("revolver") },
+                definition.Enemies, definition.Tools), 20261016);
+            var card = session.View.Hand.First(x => x.Definition.Id == "revolver");
             var before = session.View; var target = before.Enemies[1];
-            Assert.That(session.Execute(BattleCommand.Play(card.InstanceId, target.Id)).Success, Is.True);
+            var targetOption = card.Targets.Single(x => x.Id.EndsWith(target.Id, System.StringComparison.Ordinal));
+            Assert.That(session.Execute(BattleCommand.Play(card.InstanceId, targetOption.Id)).Success, Is.True);
             Assert.That(session.View.Enemies[0].Health, Is.EqualTo(before.Enemies[0].Health));
             Assert.That(session.View.Enemies[1].Health, Is.LessThan(target.Health));
         }

@@ -28,3 +28,9 @@
 .fan-1.inspecting .card { rotate: -3deg; }
 .fan-2.inspecting .card { rotate: -7deg; }
 .fan-3.inspecting .card { rotate: -11deg; }
+
+.card-target-panel { position: absolute; left: 50%; top: 92px; width: 420px; max-height: 470px; translate: -50% 0; padding: 14px 18px; background-color: rgba(5,16,18,.96); border-width: 1px; border-color: #9e8755; border-top-left-radius: 22px; border-bottom-right-radius: 22px; }
+.card-target-title { color: #d7bd82; font-size: 18px; margin-bottom: 8px; -unity-text-align: middle-center; }
+.card-target-choice { min-height: 48px; margin: 4px 0; padding: 6px 10px; white-space: normal; color: #eee4c9; background-color: #19383c; border-width: 1px; border-color: rgba(158,135,85,.65); }
+.card-target-choice:hover, .card-target-choice:focus { border-width: 2px; border-color: #eee4c9; background-color: #254b48; }
+.chosen-card .card { translate: 0 -90px; border-width: 3px; border-color: #f6e8ac; }

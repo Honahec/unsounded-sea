@@ -9,12 +9,11 @@ namespace UnsoundedSea.Runtime
         public static void Apply(VisualElement face, CardSpec card)
         {
             var art = Resources.Load<Texture2D>("CardArt/" + card.Id);
-            if (art == null) return;
             face.Clear();
             face.style.paddingLeft = face.style.paddingRight = 0;
             face.style.paddingTop = face.style.paddingBottom = 0;
             face.style.overflow = Overflow.Hidden;
-            face.style.backgroundImage = new StyleBackground(art);
+            if (art != null) face.style.backgroundImage = new StyleBackground(art);
             face.style.backgroundColor = (Color)new Color32(15, 29, 33, 255);
             var cost = Label(card.Cost.ToString(), 23, new Color32(255, 238, 192, 255));
             cost.name = "illustrated-cost";
@@ -30,20 +29,32 @@ namespace UnsoundedSea.Runtime
             rules.style.position = Position.Absolute;
             rules.style.left = rules.style.right = 9;
             rules.style.bottom = 12;
-            rules.style.minHeight = Length.Percent(35);
+            rules.style.minHeight = Length.Percent(38);
             rules.style.paddingLeft = rules.style.paddingRight = 8;
             rules.style.paddingTop = rules.style.paddingBottom = 8;
             rules.style.backgroundColor = (Color)new Color32(5, 15, 19, 168);
             rules.style.borderTopLeftRadius = rules.style.borderTopRightRadius = 9;
             rules.style.borderBottomLeftRadius = rules.style.borderBottomRightRadius = 9;
-            rules.Add(Label(card.Name, 18, new Color32(246, 222, 171, 255)));
+            var title = Label(card.Name, 18, new Color32(246, 222, 171, 255));
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
+            rules.Add(title);
             var description = Label(card.Description, 14, new Color32(241, 239, 222, 255));
             description.name = "illustrated-description";
             description.style.marginTop = 5;
+            description.style.flexShrink = 1;
             rules.Add(description);
-            if (card.SanityCost > 0 || card.Exhaust)
-                rules.Add(Label((card.SanityCost > 0 ? $"支付 {card.SanityCost} 理智 " : "") + (card.Exhaust ? "· 消耗" : ""), 11, new Color32(235, 182, 153, 255)));
             face.Add(rules);
+        }
+        public static VisualElement Inspection(CardSpec card, System.Action close)
+        {
+            var overlay = new VisualElement { name = "card-inspection" };
+            overlay.AddToClassList("card-inspection");
+            var face = new VisualElement(); face.AddToClassList("card-inspection-face"); Apply(face, card); overlay.Add(face);
+            var dismiss = new Button(close) { name = "card-inspection-close", text = "返回" };
+            dismiss.AddToClassList("card-inspection-close"); overlay.Add(dismiss);
+            overlay.RegisterCallback<NavigationMoveEvent>(evt => { dismiss.Focus(); evt.StopPropagation(); });
+            overlay.schedule.Execute(dismiss.Focus);
+            return overlay;
         }
 
         static Label Label(string text, int size, Color color)

@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
   id: cover
   displayName: "\u5BFB\u627E\u63A9\u4F53"
-  description: "\u83B7\u5F97 10 \u683C\u6321\u3002"
+  description: "\u83B7\u5F9710\u683C\u6321\u3002"
   actionCost: 1
   sanityCost: 0
   exhaust: 0
   effects:
-  - effectId: block
+  - effectId: c019
     amount: 10

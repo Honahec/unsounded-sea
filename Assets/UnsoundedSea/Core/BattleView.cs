@@ -50,12 +50,29 @@ namespace UnsoundedSea.Core
         public int RemainingUses { get; }
         internal ToolView(ToolSpec definition, int uses) { Definition = definition; RemainingUses = uses; }
     }
+    public sealed class CrewSupportView
+    {
+        public CrewSupportSpec Definition { get; }
+        public bool Used { get; }
+        public bool Enabled { get; }
+        public string DisabledReason { get; }
+        public IReadOnlyList<EncounterTargetView> Targets { get; }
+        internal CrewSupportView(CrewSupportSpec definition, bool used, bool enabled, string reason, IReadOnlyList<EncounterTargetView> targets)
+        { Definition = definition; Used = used; Enabled = enabled; DisabledReason = reason ?? ""; Targets = targets; }
+    }
+    public sealed class PendingCardChoiceView
+    {
+        public string Prompt { get; }
+        public IReadOnlyList<EncounterTargetView> Options { get; }
+        internal PendingCardChoiceView(string prompt, IReadOnlyList<EncounterTargetView> options) { Prompt = prompt; Options = options; }
+    }
     public sealed class BattleView
     {
         public BossEncounterKind BossKind { get; internal set; }
         public int BossStage { get; internal set; }
         public string BossStatus { get; internal set; }
         public IReadOnlyList<EncounterTargetView> EncounterTargets { get; internal set; }
+        public PendingCardChoiceView PendingChoice { get; internal set; }
         public BattlePhase Phase { get; internal set; }
         public int Turn { get; internal set; }
         public int Health { get; internal set; }
@@ -63,6 +80,7 @@ namespace UnsoundedSea.Core
         public int Actions { get; internal set; }
         public int Block { get; internal set; }
         public int Ward { get; internal set; }
+        public int Watched { get; internal set; }
         public int DrawCount { get; internal set; }
         public int DiscardCount { get; internal set; }
         public int ExhaustCount { get; internal set; }
@@ -73,6 +91,7 @@ namespace UnsoundedSea.Core
         public IReadOnlyList<CardView> Hand { get; internal set; }
         public IReadOnlyList<EnemyView> Enemies { get; internal set; }
         public IReadOnlyList<ToolView> Tools { get; internal set; }
+        public IReadOnlyList<CrewSupportView> Supports { get; internal set; }
         public IReadOnlyList<Evidence> Evidence { get; internal set; }
         public IReadOnlyList<string> Log { get; internal set; }
     }
@@ -85,9 +104,12 @@ namespace UnsoundedSea.Core
         public int cardInstanceId;
         public string targetId;
         public string toolId;
-        public BattleCommand Copy() => new BattleCommand { kind = kind, cardInstanceId = cardInstanceId, targetId = targetId, toolId = toolId };
+        public string supportId;
+        public BattleCommand Copy() => new BattleCommand { kind = kind, cardInstanceId = cardInstanceId, targetId = targetId, toolId = toolId, supportId = supportId };
         public static BattleCommand Play(int card, string target = null) => new BattleCommand { kind = CommandKind.PlayCard, cardInstanceId = card, targetId = target };
         public static BattleCommand Investigate(string tool, string target) => new BattleCommand { kind = CommandKind.UseTool, toolId = tool, targetId = target };
+        public static BattleCommand Support(string support, string target = null) => new BattleCommand { kind = CommandKind.UseCrewSupport, supportId = support, targetId = target };
+        public static BattleCommand Reorder(string orderId) => new BattleCommand { kind = CommandKind.ReorderDeck, targetId = orderId };
         public static BattleCommand EndTurn() => new BattleCommand { kind = CommandKind.EndTurn };
         public static BattleCommand Task() => new BattleCommand { kind = CommandKind.AdvanceObjective };
     }

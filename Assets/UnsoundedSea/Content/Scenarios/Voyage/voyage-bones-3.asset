@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b48a067706354f09af18905325392b7, type: 3}
+  m_Name: voyage-bones-3
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.BattleScenario
+  encounter: {fileID: 11400000, guid: 5e196b15adc4e4866a2dc3e086b7668f, type: 2}
+  stagePrefab: {fileID: 2942664312781876802, guid: 7d180c95f763d4b17a90d78dfe0e4301, type: 3}
+  actorOverrides: []
+  rules: {fileID: 0}
+  chapter: "\u822A\u7A0B / \u6F6E\u9AA8\u6D77"
+  location: "\u9E26\u53F7\u8C03\u67E5\u8239 \xB7 \u5916\u6D77\u822A\u7EBF"
+  enemyHeading: "\u6F6E\u9AA8\u6D77 / \u7A7A\u8231\u6572\u51FB\u8005"
+  objectiveHint: "\u51FB\u9000\u767B\u8239\u8005\u3002\u516C\u5F00\u884C\u52A8\u53EF\u76F4\u63A5\u5E94\u5BF9\uFF1B\u5176\u4F59\u5F81\u5146\u53EF\u8C03\u67E5\u4F24\u5BB3\u7C7B\u578B\u3001\u52A8\u4F5C\u6216\u58F0\u6E90\u3002"
+  enemyStatus: 
+  introduction: "\u4E24\u540D\u76EE\u6807\u4ECE\u4E0D\u540C\u8237\u4FA7\u767B\u8239\uFF1B\u5B83\u4EEC\u7684\u884C\u52A8\u5206\u522B\u7ED3\u7B97\u3002"
+  objectiveHeading: "\u5B88\u4F4F\u7532\u677F\uFF0C\u51FB\u9000\u6240\u6709\u76EE\u6807\u3002"
+  taskLabel: 
+  victoryText: "\u7532\u677F\u6062\u590D\u5B89\u9759\uFF0C\u822A\u7EBF\u5F97\u4EE5\u7EE7\u7EED\u3002"
+  defeatText: "\u9E26\u53F7\u5931\u53BB\u63A7\u5236\uFF0C\u822A\u7A0B\u5728\u6B64\u4E2D\u65AD\u3002"

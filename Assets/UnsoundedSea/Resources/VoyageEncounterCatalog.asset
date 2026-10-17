@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf4b06a8206df4f4d8b30d96f4d963b2, type: 3}
+  m_Name: VoyageEncounterCatalog
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.VoyageEncounterCatalog
+  entries:
+  - id: voyage-fog-0
+    scenario: {fileID: 11400000, guid: 2bc25851d1e884700a2878b159c8a185, type: 2}
+  - id: voyage-fog-1
+    scenario: {fileID: 11400000, guid: 768f8a99dbd864f559c7cadbb5b8c6b1, type: 2}
+  - id: voyage-fog-2
+    scenario: {fileID: 11400000, guid: dd2d64d1a6967486ea7c268efa246f20, type: 2}
+  - id: voyage-fog-3
+    scenario: {fileID: 11400000, guid: cc5c6a9467e774295b47b87c27a31f19, type: 2}
+  - id: voyage-bones-0
+    scenario: {fileID: 11400000, guid: e5bdc18b34add474a9a5ad8dcba28046, type: 2}
+  - id: voyage-bones-1
+    scenario: {fileID: 11400000, guid: 15f8ec0c62efd485889c81c0504c8aa0, type: 2}
+  - id: voyage-bones-2
+    scenario: {fileID: 11400000, guid: 23c62baa762ab43ed928f137239a6d43, type: 2}
+  - id: voyage-bones-3
+    scenario: {fileID: 11400000, guid: c27d1e6c400f14f53b09cb1a38df103d, type: 2}
+  - id: voyage-inverted-0
+    scenario: {fileID: 11400000, guid: 68933e715d6f74ee49c3057d563ad523, type: 2}
+  - id: voyage-inverted-1
+    scenario: {fileID: 11400000, guid: 768f399821f09464388955703995d2d0, type: 2}
+  - id: voyage-inverted-2
+    scenario: {fileID: 11400000, guid: 5005a15ad09be4767b9cc34ee73fae07, type: 2}
+  - id: voyage-inverted-3
+    scenario: {fileID: 11400000, guid: dbe28f7f996844f47bcf34696ff3d8b5, type: 2}
+  - id: voyage-fleet-0
+    scenario: {fileID: 11400000, guid: 6d3700fc740814b49ae9887f3eed481b, type: 2}
+  - id: voyage-fleet-1
+    scenario: {fileID: 11400000, guid: dc7f4fadd428845cba498c6be3333ef9, type: 2}
+  - id: voyage-fleet-2
+    scenario: {fileID: 11400000, guid: 87f83b1e810bc4e3f8e6583fd663645a, type: 2}
+  - id: voyage-fleet-3
+    scenario: {fileID: 11400000, guid: 340fd16430fb04d96b73d67ed73dbe14, type: 2}
+  - id: voyage-abyss-0
+    scenario: {fileID: 11400000, guid: 1346b24a01e1c47cdac69a2ac23bf86c, type: 2}
+  - id: voyage-abyss-1
+    scenario: {fileID: 11400000, guid: ca0f39bdd118b41a0bd7daeff92be0df, type: 2}
+  - id: voyage-abyss-2
+    scenario: {fileID: 11400000, guid: 1624d568f802d469ca4b25b4c1da1624, type: 2}
+  - id: voyage-abyss-3
+    scenario: {fileID: 11400000, guid: 4603c5516dee44aecb92dcec24abe566, type: 2}
+  - id: fog-visitors
+    scenario: {fileID: 11400000, guid: 580c88669e831483ebd024807d14fe7d, type: 2}
+  - id: m02
+    scenario: {fileID: 11400000, guid: d0938344972594417be209b992572063, type: 2}
+  - id: m03
+    scenario: {fileID: 11400000, guid: 1cfc8d67ae20b4d94b17610c6ab64c9d, type: 2}
+  - id: m04
+    scenario: {fileID: 11400000, guid: a0076eb581f044437835295f90636150, type: 2}
+  - id: m05
+    scenario: {fileID: 11400000, guid: 15682be5e59794e138c591b1374bcf8f, type: 2}
+  tools:
+  - {fileID: 11400000, guid: d2943be9a66734ec2ae7bdaa9992577a, type: 2}
+  - {fileID: 11400000, guid: 1d7a30e50a223431b9ba28e4fc023447, type: 2}
+  - {fileID: 11400000, guid: c8b0e503a400f48208bbd95dd42c49b6, type: 2}

@@ -1,0 +1,281 @@
+{
+  "validator": "structural evidence only; visual validity is not assessed",
+  "results": [
+    {
+      "path": "ArtSource/Characters/RigTrials/FogRigger_Rigged.glb",
+      "valid": true,
+      "triangles": 45000,
+      "skins": [
+        {
+          "index": 0,
+          "bone_count": 20,
+          "bones": [
+            "root",
+            "hips",
+            "spine",
+            "chest",
+            "neck",
+            "head",
+            "shoulder.L",
+            "upper_arm.L",
+            "forearm.L",
+            "hand.L",
+            "shoulder.R",
+            "upper_arm.R",
+            "forearm.R",
+            "hand.R",
+            "thigh.L",
+            "shin.L",
+            "foot.L",
+            "thigh.R",
+            "shin.R",
+            "foot.R"
+          ],
+          "hierarchy": [
+            "FogRigger_Rig/root",
+            "FogRigger_Rig/root/hips",
+            "FogRigger_Rig/root/hips/spine",
+            "FogRigger_Rig/root/hips/spine/chest",
+            "FogRigger_Rig/root/hips/spine/chest/neck",
+            "FogRigger_Rig/root/hips/spine/chest/neck/head",
+            "FogRigger_Rig/root/hips/spine/chest/shoulder.L",
+            "FogRigger_Rig/root/hips/spine/chest/shoulder.L/upper_arm.L",
+            "FogRigger_Rig/root/hips/spine/chest/shoulder.L/upper_arm.L/forearm.L",
+            "FogRigger_Rig/root/hips/spine/chest/shoulder.L/upper_arm.L/forearm.L/hand.L",
+            "FogRigger_Rig/root/hips/spine/chest/shoulder.R",
+            "FogRigger_Rig/root/hips/spine/chest/shoulder.R/upper_arm.R",
+            "FogRigger_Rig/root/hips/spine/chest/shoulder.R/upper_arm.R/forearm.R",
+            "FogRigger_Rig/root/hips/spine/chest/shoulder.R/upper_arm.R/forearm.R/hand.R",
+            "FogRigger_Rig/root/hips/thigh.L",
+            "FogRigger_Rig/root/hips/thigh.L/shin.L",
+            "FogRigger_Rig/root/hips/thigh.L/shin.L/foot.L",
+            "FogRigger_Rig/root/hips/thigh.R",
+            "FogRigger_Rig/root/hips/thigh.R/shin.R",
+            "FogRigger_Rig/root/hips/thigh.R/shin.R/foot.R"
+          ]
+        }
+      ],
+      "materials": [
+        {
+          "index": 0,
+          "name": "model",
+          "alpha_mode": "OPAQUE",
+          "double_sided": true
+        }
+      ],
+      "images": [
+        {
+          "index": 0,
+          "name": "texture_normal_lowpoly",
+          "mime_type": "image/png",
+          "byte_length": 21832770
+        },
+        {
+          "index": 1,
+          "name": "texture_diffuse_lowpoly",
+          "mime_type": "image/png",
+          "byte_length": 18392026
+        },
+        {
+          "index": 2,
+          "name": "texture_metallic_lowpoly-texture_roughness_lowpoly",
+          "mime_type": "image/png",
+          "byte_length": 12394185
+        }
+      ],
+      "animations": [
+        {
+          "name": "RigValidation",
+          "duration": 8.000000316649675,
+          "channels": 60,
+          "key_time_min": 0.0416666679084301,
+          "key_time_max": 8.041666984558105
+        }
+      ],
+      "influenced_semantics": [
+        "left_lower_arm",
+        "left_lower_leg",
+        "left_upper_arm",
+        "left_upper_leg",
+        "right_lower_arm",
+        "right_lower_leg",
+        "right_upper_arm",
+        "right_upper_leg",
+        "torso"
+      ],
+      "animated_semantics": [
+        "left_lower_arm",
+        "left_lower_leg",
+        "left_upper_arm",
+        "left_upper_leg",
+        "right_lower_arm",
+        "right_lower_leg",
+        "right_upper_arm",
+        "right_upper_leg",
+        "torso"
+      ],
+      "moving_rotation_semantics": [
+        "left_lower_arm",
+        "left_lower_leg",
+        "left_upper_arm",
+        "left_upper_leg",
+        "right_lower_arm",
+        "right_lower_leg",
+        "right_upper_arm",
+        "right_upper_leg",
+        "torso"
+      ],
+      "nonconstant_rotation_nodes": [
+        "neck",
+        "forearm.L",
+        "upper_arm.L",
+        "forearm.R",
+        "upper_arm.R",
+        "chest",
+        "spine",
+        "shin.L",
+        "thigh.L",
+        "shin.R",
+        "thigh.R"
+      ]
+    },
+    {
+      "path": "ArtSource/Characters/RigTrials/BoneFluteAttendant_Rigged.glb",
+      "valid": true,
+      "triangles": 50000,
+      "skins": [
+        {
+          "index": 0,
+          "bone_count": 20,
+          "bones": [
+            "root",
+            "hips",
+            "spine",
+            "chest",
+            "neck",
+            "head",
+            "shoulder.L",
+            "upper_arm.L",
+            "forearm.L",
+            "hand.L",
+            "shoulder.R",
+            "upper_arm.R",
+            "forearm.R",
+            "hand.R",
+            "thigh.L",
+            "shin.L",
+            "foot.L",
+            "thigh.R",
+            "shin.R",
+            "foot.R"
+          ],
+          "hierarchy": [
+            "BoneFluteAttendant_Rig/root",
+            "BoneFluteAttendant_Rig/root/hips",
+            "BoneFluteAttendant_Rig/root/hips/spine",
+            "BoneFluteAttendant_Rig/root/hips/spine/chest",
+            "BoneFluteAttendant_Rig/root/hips/spine/chest/neck",
+            "BoneFluteAttendant_Rig/root/hips/spine/chest/neck/head",
+            "BoneFluteAttendant_Rig/root/hips/spine/chest/shoulder.L",
+            "BoneFluteAttendant_Rig/root/hips/spine/chest/shoulder.L/upper_arm.L",
+            "BoneFluteAttendant_Rig/root/hips/spine/chest/shoulder.L/upper_arm.L/forearm.L",
+            "BoneFluteAttendant_Rig/root/hips/spine/chest/shoulder.L/upper_arm.L/forearm.L/hand.L",
+            "BoneFluteAttendant_Rig/root/hips/spine/chest/shoulder.R",
+            "BoneFluteAttendant_Rig/root/hips/spine/chest/shoulder.R/upper_arm.R",
+            "BoneFluteAttendant_Rig/root/hips/spine/chest/shoulder.R/upper_arm.R/forearm.R",
+            "BoneFluteAttendant_Rig/root/hips/spine/chest/shoulder.R/upper_arm.R/forearm.R/hand.R",
+            "BoneFluteAttendant_Rig/root/hips/thigh.L",
+            "BoneFluteAttendant_Rig/root/hips/thigh.L/shin.L",
+            "BoneFluteAttendant_Rig/root/hips/thigh.L/shin.L/foot.L",
+            "BoneFluteAttendant_Rig/root/hips/thigh.R",
+            "BoneFluteAttendant_Rig/root/hips/thigh.R/shin.R",
+            "BoneFluteAttendant_Rig/root/hips/thigh.R/shin.R/foot.R"
+          ]
+        }
+      ],
+      "materials": [
+        {
+          "index": 0,
+          "name": "model",
+          "alpha_mode": "OPAQUE",
+          "double_sided": true
+        }
+      ],
+      "images": [
+        {
+          "index": 0,
+          "name": "texture_normal",
+          "mime_type": "image/png",
+          "byte_length": 14238782
+        },
+        {
+          "index": 1,
+          "name": "texture_diffuse",
+          "mime_type": "image/png",
+          "byte_length": 14478258
+        },
+        {
+          "index": 2,
+          "name": "texture_metallic-texture_roughness",
+          "mime_type": "image/png",
+          "byte_length": 10751199
+        }
+      ],
+      "animations": [
+        {
+          "name": "RigValidation",
+          "duration": 8.000000316649675,
+          "channels": 60,
+          "key_time_min": 0.0416666679084301,
+          "key_time_max": 8.041666984558105
+        }
+      ],
+      "influenced_semantics": [
+        "left_lower_arm",
+        "left_lower_leg",
+        "left_upper_arm",
+        "left_upper_leg",
+        "right_lower_arm",
+        "right_lower_leg",
+        "right_upper_arm",
+        "right_upper_leg",
+        "torso"
+      ],
+      "animated_semantics": [
+        "left_lower_arm",
+        "left_lower_leg",
+        "left_upper_arm",
+        "left_upper_leg",
+        "right_lower_arm",
+        "right_lower_leg",
+        "right_upper_arm",
+        "right_upper_leg",
+        "torso"
+      ],
+      "moving_rotation_semantics": [
+        "left_lower_arm",
+        "left_lower_leg",
+        "left_upper_arm",
+        "left_upper_leg",
+        "right_lower_arm",
+        "right_lower_leg",
+        "right_upper_arm",
+        "right_upper_leg",
+        "torso"
+      ],
+      "nonconstant_rotation_nodes": [
+        "neck",
+        "forearm.L",
+        "upper_arm.L",
+        "forearm.R",
+        "upper_arm.R",
+        "chest",
+        "spine",
+        "shin.L",
+        "thigh.L",
+        "shin.R",
+        "thigh.R"
+      ]
+    }
+  ]
+}

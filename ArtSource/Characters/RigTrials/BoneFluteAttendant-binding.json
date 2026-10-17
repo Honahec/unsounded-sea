@@ -1,0 +1,47 @@
+{
+  "motionProfile": "flute_chant",
+  "source": "BoneFluteAttendant_Source.glb",
+  "method": "Fitted anatomical landmarks + Blender bone heat; normalized strongest four influences",
+  "height": 1.95,
+  "bones": 20,
+  "animations": [
+    "Idle",
+    "Action",
+    "Hit",
+    "Death",
+    "RigValidation"
+  ],
+  "meshes": [
+    {
+      "mesh": "model",
+      "vertices": 24980,
+      "weightedVertices": 24980,
+      "boneInfluenceVertexCounts": {
+        "hips": 3898,
+        "spine": 6535,
+        "chest": 3025,
+        "neck": 2715,
+        "head": 1071,
+        "shoulder.L": 5697,
+        "upper_arm.L": 4455,
+        "forearm.L": 3912,
+        "hand.L": 1920,
+        "shoulder.R": 5712,
+        "upper_arm.R": 4537,
+        "forearm.R": 3111,
+        "hand.R": 1232,
+        "thigh.L": 6978,
+        "shin.L": 5416,
+        "foot.L": 950,
+        "thigh.R": 7046,
+        "shin.R": 5380,
+        "foot.R": 949
+      }
+    }
+  ],
+  "limitations": [
+    "No finger articulation or facial rig",
+    "Original props are fused geometry; attachment deformation requires visual review",
+    "Not certified for arbitrary retargeted animation"
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "motionProfile": "shrouded_witness_recoil",
+  "source": "LastTideWitness_Source.glb",
+  "method": "Fitted anatomical landmarks + Blender bone heat; normalized strongest four influences",
+  "height": 2.0,
+  "bones": 20,
+  "animations": [
+    "Idle",
+    "Action",
+    "Hit",
+    "Death",
+    "RigValidation"
+  ],
+  "meshes": [
+    {
+      "mesh": "model",
+      "vertices": 22492,
+      "weightedVertices": 22492,
+      "surfaceTransferredVertices": 45,
+      "maxTransferDistance": 0.01879490166902542,
+      "boneInfluenceVertexCounts": {
+        "hips": 699,
+        "spine": 2832,
+        "chest": 3999,
+        "neck": 4168,
+        "head": 2072,
+        "shoulder.L": 1779,
+        "upper_arm.L": 3841,
+        "forearm.L": 3306,
+        "hand.L": 1419,
+        "shoulder.R": 1759,
+        "upper_arm.R": 4223,
+        "forearm.R": 3325,
+        "hand.R": 1583,
+        "thigh.L": 4124,
+        "shin.L": 7208,
+        "foot.L": 4798,
+        "thigh.R": 4247,
+        "shin.R": 7455,
+        "foot.R": 4826
+      }
+    }
+  ],
+  "limitations": [
+    "No finger articulation or facial rig",
+    "Original props are fused geometry; attachment deformation requires visual review",
+    "Not certified for arbitrary retargeted animation"
+  ]
+}
