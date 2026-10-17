@@ -7,6 +7,45 @@ namespace UnsoundedSea.Tests
 {
     public sealed class VoyageTests
     {
+        [Test] public void RewardReplacementIsAtomicAndReplaysIntoTheNextDeck()
+        {
+            var s=VoyageSession.Create(17);MoveToLayer(s,4);
+            var reward=s.RewardCards.First().Id;var old=s.DeckIds[0];var deck=s.DeckIds.ToArray();var history=s.Export().History.Length;
+            Assert.That(s.ClaimReward(reward,"unknown"),Is.False);
+            Assert.That(s.ClaimReward(null,old),Is.False);
+            Assert.That(s.LearnedCardIds,Does.Not.Contain(reward));Assert.That(s.DeckIds,Is.EqualTo(deck));Assert.That(s.Export().History.Length,Is.EqualTo(history));
+            Assert.That(s.ClaimReward(reward,old),Is.True);
+            Assert.That(s.DeckIds.Count,Is.EqualTo(12));Assert.That(s.DeckIds,Does.Contain(reward));Assert.That(s.DeckIds,Does.Not.Contain(old));Assert.That(s.LearnedCardIds,Does.Contain(old));
+            Assert.That(s.NewRewardCardIds,Does.Not.Contain(reward));Assert.That(s.ClaimReward(reward,old),Is.False);
+            var restored=VoyageSession.Restore(s.Export());Assert.That(restored.DeckIds,Is.EqualTo(s.DeckIds));Assert.That(restored.LearnedCardIds,Is.EqualTo(s.LearnedCardIds));
+        }
+        [Test] public void OnlyUnpreparedNewRewardsAreMarkedAndAcknowledgementSurvivesRestore()
+        {
+            var s=VoyageSession.Create(18);MoveToLayer(s,4);var reward=s.RewardCards.First().Id;
+            Assert.That(s.ClaimReward(reward),Is.True);Assert.That(s.NewRewardCardIds,Does.Contain(reward));
+            Assert.That(VoyageSession.Restore(s.Export()).NewRewardCardIds,Does.Contain(reward));
+            MoveToLayer(s,5);Assert.That(s.SetDeck(s.DeckIds),Is.True);Assert.That(s.NewRewardCardIds,Is.Empty);
+            Assert.That(VoyageSession.Restore(s.Export()).NewRewardCardIds,Is.Empty);
+        }
+        [Test] public void DebriefStoresActualDamageSpentItemsAndOnlyArchivableEvidence()
+        {
+            var s=VoyageSession.Create(19);MoveToLayer(s,1);Assert.That(s.BeginEncounter(),Is.True);
+            var observed=new Evidence("seen","观察","提灯",KnowledgeLevel.Observed);
+            var verified=new Evidence("verified","来源已核验","复核证据",KnowledgeLevel.Verified,EvidenceScope.Encounter,"enemy","type","SoundSource",rule:"source-v1",fact:"bell");
+            Assert.That(s.ResolveEncounter(true,59,29,new[]{"i10"},evidence:new[]{observed,verified},healthDamage:11,sanityDamage:6),Is.True);
+            Assert.That(s.DebriefPending,Is.True);Assert.That(s.Debrief.HealthDamage,Is.EqualTo(11));Assert.That(s.Debrief.SanityDamage,Is.EqualTo(6));Assert.That(s.Debrief.SpentItems,Is.EqualTo(new[]{"i10"}));Assert.That(s.Debrief.ArchivedEvidence.Select(x=>x.Text),Is.EqualTo(new[]{verified.Text}));
+            var restored=VoyageSession.Restore(s.Export());Assert.That(restored.DebriefPending,Is.True);Assert.That(restored.Debrief.HealthDamage,Is.EqualTo(11));
+            Assert.That(restored.DismissDebrief(),Is.True);Assert.That(restored.DismissDebrief(),Is.False);Assert.That(VoyageSession.Restore(restored.Export()).DebriefPending,Is.False);
+        }
+        [Test] public void NodeServicesExcludeMutuallyExclusiveEventChoicesAndLoadout()
+        {
+            var s=VoyageSession.Create(20);
+            Assert.That(s.GetNodeServices().Any(x=>x.Id.StartsWith("buy:")),Is.True);
+            Assert.That(s.GetNodeServices().Any(VoyageSession.IsLoadoutChoice),Is.False);
+            MoveToLayer(s,2);Assert.That(s.EventTitle,Is.Not.Empty);
+            Assert.That(s.GetNodeChoices().Any(x=>x.Id=="voucher"),Is.True);Assert.That(s.GetNodeServices().Any(x=>x.Id=="voucher"),Is.False);
+            Assert.That(s.ChooseNode("voucher"),Is.True);Assert.That(s.GetNodeChoices(),Is.Empty);Assert.That(s.CanContinue,Is.True);
+        }
         [Test] public void SynergyRewardsAreReachableAndForbiddenRecoveryStartsWithSecondAct()
         {
             var first = new System.Collections.Generic.HashSet<string>();

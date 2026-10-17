@@ -34,6 +34,7 @@ namespace UnsoundedSea.Core
         private readonly IEncounterObjective objective;
         private BattlePhase phase;
         private int turn, health, sanity, actions, block, ward;
+        private int healthDamageTaken, sanityDamageTaken;
         private bool taskUsed, investigationUsed, sceneActionUsed, crewSupportUsed, directionalListeningBlocked, directionalListeningUsed;
         private int nextInstanceId, watched, nextHealthReduction, sceneFailureReduction, sceneDiscount;
         private readonly HashSet<int> retained = new HashSet<int>();
@@ -79,6 +80,7 @@ namespace UnsoundedSea.Core
                 {
                     ResolvedEnemyActions = resolvedEnemyActions.ToList().AsReadOnly(),
                     Phase = phase, Turn = turn, Health = health, Sanity = sanity, Actions = actions, Block = block, Ward = ward, Watched = watched,
+                    HealthDamageTaken = healthDamageTaken, SanityDamageTaken = sanityDamageTaken,
                     BossKind = bossKind, BossStage = boss?.Stage ?? 0, BossStatus = boss?.Status ?? "",
                     EncounterTargets = boss?.AllTargets ?? EmptyTargets,
                     PendingChoice = PendingChoiceView(),

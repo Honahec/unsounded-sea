@@ -100,8 +100,8 @@ namespace UnsoundedSea.Runtime
                     scroll.Add(Text(Session.RitualStatus, "body"));
                     break;
             }
-            var choices = Session.GetSupportChoices().Where(choice => SupportChoiceTab(choice.Id) == supportTab).ToArray();
-            if (choices.Length > 0) scroll.Add(Text("此处可用", "section-label"));
+            var choices = Session.GetSupportChoices().Where(choice => VoyageSession.IsLoadoutChoice(choice)&&SupportChoiceTab(choice.Id) == supportTab).ToArray();
+            if (choices.Length > 0) scroll.Add(Text("配装", "section-label"));
             foreach (var choice in choices)
             {
                 var selected = choice;
@@ -114,8 +114,6 @@ namespace UnsoundedSea.Runtime
                 if (!string.IsNullOrEmpty(note)) row.Add(Text(note, "node-choice-description"));
                 scroll.Add(row);
             }
-            if (choices.Length == 0 && supportTab > 0)
-                scroll.Add(Text("此处无可用操作", "muted"));
             sheet.Add(scroll);
             ScrollWheel.ForwardFrom(sheet, scroll);
             sheet.Add(Action("support-manifest-close", "返回航程 / Esc", "primary", () => { supportOpen = false; Refresh(); }));

@@ -19,6 +19,7 @@ namespace UnsoundedSea.Runtime
         private bool confirmingNewVoyage;
         private bool debugSelectionOpen;
         private bool collectionOpen;
+        private bool crewSelectionOpen;
         private string error;
 
         private void OnEnable()
@@ -32,7 +33,7 @@ namespace UnsoundedSea.Runtime
                 root.style.unityFontDefinition = FontDefinition.FromSDFFont(UiFont.Get(interfaceFont));
                 if (!root.styleSheets.Contains(menuStyle)) root.styleSheets.Add(menuStyle);
                 root.AddToClassList("game-menu");
-                Build("menu-start");
+                Build(VoyageRuntime.HasSavedVoyage?"menu-continue":"menu-start");
                 root.RegisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
             }
             catch (Exception exception) { root.Add(Text("菜单加载失败：" + exception.Message, "menu-error")); Debug.LogException(exception); }
@@ -45,6 +46,7 @@ namespace UnsoundedSea.Runtime
 
         private void OnKey(KeyDownEvent evt)
         {
+            if(crewSelectionOpen&&evt.keyCode==KeyCode.Escape){crewSelectionOpen=false;Build("menu-crew");evt.StopPropagation();return;}
             if (!debugSelectionOpen || evt.keyCode != KeyCode.Escape) return;
             debugSelectionOpen = false;
             Build("menu-debug");
@@ -109,10 +111,10 @@ namespace UnsoundedSea.Runtime
             }
             else
             {
-                entries.Add(Entry("menu-start", "启航", StartGame, canStart));
-                entries.Add(Entry("menu-crew", CardDeckPreparation.CrewId == "medic" ? "开局船员：林岚 · 医师" : "开局船员：祝遥 · 听音员", ToggleCrew));
                 if (VoyageRuntime.HasSavedVoyage)
                     entries.Add(Entry("menu-continue", "继续航程", ContinueGame));
+                entries.Add(Entry("menu-start", "启航", StartGame, canStart));
+                entries.Add(Entry("menu-crew", CardDeckPreparation.CrewId == "medic" ? "开局船员：林岚 · 医师" : "开局船员：祝遥 · 听音员", ToggleCrew));
                 if (Debug.isDebugBuild)
                     entries.Add(Entry("menu-debug", "调试选关", () => { debugSelectionOpen = true; error = null; Build(null); }));
                 entries.Add(Entry("menu-collection", "卡牌图鉴", () => { collectionOpen = true; Build(null); }));
@@ -125,11 +127,25 @@ namespace UnsoundedSea.Runtime
             else if (!string.IsNullOrEmpty(VoyageRuntime.EncounterSaveError))
                 entries.Add(Text("遭遇结果尚未保存，请选择继续航程重试：" + VoyageRuntime.EncounterSaveError, "menu-error"));
             column.Add(entries);
-            column.SetEnabled(!settingsOpen && !debugSelectionOpen);
+            column.SetEnabled(!settingsOpen && !debugSelectionOpen && !crewSelectionOpen);
             root.Add(column);
 
 
-            if (debugSelectionOpen)
+            if(crewSelectionOpen)
+            {
+                var scrim=new VisualElement{name="crew-selection"};scrim.AddToClassList("crew-selection");
+                var sheet=new VisualElement();sheet.AddToClassList("crew-selection-sheet");sheet.Add(Text("选择随行船员","pending-choice-title"));
+                foreach(var id in new[]{"medic","listener"})
+                {
+                    var selected=id;var member=SupportCatalog.CrewMember(id);
+                    var button=new Button(()=>{CardDeckPreparation.CrewId=selected;crewSelectionOpen=false;Build("menu-crew");}){name="choose-crew-"+id};button.AddToClassList("crew-choice");
+                    button.Add(new SeaUiArt(id=="medic"?"heart":"ear"));button.Add(Text(member.Name,"crew-choice-name"));button.Add(Text(SupportCatalog.CrewDescription(member.Kind),"crew-choice-description"));sheet.Add(button);
+                }
+                var close=new Button(()=>{crewSelectionOpen=false;Build("menu-crew");}){name="crew-selection-close",text="返回"};close.AddToClassList("card-inspection-close");sheet.Add(close);scrim.Add(sheet);root.Add(scrim);
+                scrim.RegisterCallback<PointerDownEvent>(evt=>{if(evt.button==1){crewSelectionOpen=false;Build("menu-crew");evt.StopPropagation();}});
+                root.schedule.Execute(()=>root.Q<Button>("choose-crew-"+CardDeckPreparation.CrewId)?.Focus());
+            }
+            else if (debugSelectionOpen)
             {
                 root.Add(BuildDebugSelector());
                 root.schedule.Execute(() => root.Q<Button>("debug-level-0")?.Focus());
@@ -250,8 +266,7 @@ namespace UnsoundedSea.Runtime
 
         private void ToggleCrew()
         {
-            CardDeckPreparation.CrewId = CardDeckPreparation.CrewId == "medic" ? "listener" : "medic";
-            Build("menu-crew");
+            crewSelectionOpen=true;Build(null);
         }
 
         private void StartGame()

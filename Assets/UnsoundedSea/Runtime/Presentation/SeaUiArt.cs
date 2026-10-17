@@ -78,6 +78,15 @@ namespace UnsoundedSea.Runtime
             p.strokeColor = Brass; p.lineWidth = 1.8f * scale;
             switch (motif)
             {
+                case "switch-off":
+                case "switch-positive":
+                case "switch-reverse":
+                    p.lineWidth=4*scale;Ring(100,100,58);Ring(67,124,8);Ring(133,124,8);
+                    Line(35,124,59,124);Line(141,124,165,124);
+                    if(motif=="switch-off")Line(74,118,119,73);
+                    else if(motif=="switch-positive"){Line(75,124,125,124);Line(100,51,100,79);Line(86,65,114,65);}
+                    else {Line(75,124,125,124);Line(86,65,114,65);Line(82,92,118,112);Line(118,92,82,112);}
+                    break;
                 case "compass":
                     for (int i = 0; i < 8; i++)
                     {

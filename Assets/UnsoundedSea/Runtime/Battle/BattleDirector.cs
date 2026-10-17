@@ -83,7 +83,7 @@ namespace UnsoundedSea.Runtime
             }
             ViewRevision++;
             var after = View;
-            if (!VoyageRuntime.IsDebugSession && before.Phase != BattlePhase.Victory && after.Phase == BattlePhase.Victory)
+            if (!VoyageRuntime.IsDebugSession && !VoyageRuntime.IsValidationSession && before.Phase != BattlePhase.Victory && after.Phase == BattlePhase.Victory)
                 CardDeckPreparation.StoreVerified(after.Evidence);
             if (!after.Enemies.Any(x => x.Id == SelectedEnemy && x.Health > 0 && x.Targetable))
                 SelectedEnemy = after.Enemies.FirstOrDefault(x => x.Health > 0 && x.Targetable)?.Id;

@@ -13,7 +13,7 @@ namespace UnsoundedSea.Editor
     public static class FrameworkSetup
     {
         private const string Root = "Assets/UnsoundedSea";
-        public const string ScenePath = Root + "/Scenes/Battle.unity";
+
         private static void Folder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
@@ -57,98 +57,16 @@ namespace UnsoundedSea.Editor
             return CardCatalog.All.Count + " card assets synchronized.";
         }
 
-        [MenuItem("Unsounded Sea/Create or Open Battle Scene")]
-        public static string CreateOrOpen()
+        [MenuItem("Unsounded Sea/Open Main Menu")]
+        public static string OpenMainMenu()
         {
-            if (EditorApplication.isPlaying) throw new InvalidOperationException("Stop Play Mode before setup.");
-            for (var i = 0; i < SceneManager.sceneCount; i++)
-                if (SceneManager.GetSceneAt(i).isDirty) throw new InvalidOperationException("Save current scene edits before opening the battle scene.");
-            SyncCardCatalog();
-            var shot = Card("revolver");
-            var cover = Card("cover");
-            var calm = Card("steady");
-            var notes = Card("notes");
-            var reload = Card("reload");
-            var light = Card("light");
-            var contradiction = Card("contradiction");
-            var intuition = Card("intuition");
-            var interrupt = Card("tear");
-            var bandage = Card("bandage");
-            var lantern = Asset<ToolDefinition>(Root + "/Content/Tools", "lantern", t => { t.id = "lantern"; t.displayName = "防风提灯"; t.question = InvestigationKind.VisibleAction; });
-            var listener = Asset<ToolDefinition>(Root + "/Content/Tools", "listener", t => { t.id = "listener"; t.displayName = "定向听筒"; t.question = InvestigationKind.SoundSource; });
-            Asset<ToolDefinition>(Root + "/Content/Tools", "shell", t => { t.id = "shell"; t.displayName = "听潮贝壳"; t.question = InvestigationKind.DamageChannel; t.sanityCost = 3; });
-            var ordinary = Asset<EnemyDefinition>(Root + "/Content/Enemies", "smuggler", e =>
-            {
-                e.id = "smuggler"; e.displayName = "持刀走私者"; e.health = 24; e.candidateDescription = "挥刃 · 8 生命伤害";
-                e.intents = new[] { new IntentData { id = "slash", displayName = "挥刃", clue = "持刀前倾，准备突刺。", amount = 8, isPublic = true } };
-            });
-            var masked = Asset<EnemyDefinition>(Root + "/Content/Enemies", "prayer", e =>
-            {
-                e.id = "prayer"; e.displayName = "蒙面祷告者"; e.health = 30; e.candidateDescription = "挥刃：10 生命伤害 / 呼唤：6 理智冲击";
-                e.intents = new[]
-                {
-                    new IntentData { id = "slash", displayName = "挥刃", clue = "垂首；袖内金属声；断续低语。", amount = 10 },
-                    new IntentData { id = "call", displayName = "呼唤", clue = "垂首；袖内金属声；断续低语。", amount = 6, channel = DamageChannel.Sanity, soundSource = "袖内铜铃", interruptible = true }
-                };
-            });
-            var echo = Asset<EnemyDefinition>(Root + "/Content/Enemies", "echo", e =>
-            {
-                e.id = "echo"; e.displayName = "灯塔下的回声"; e.health = 999; e.candidateDescription = "沉重脚步：20 生命伤害 / 无风铃鸣：10 理智冲击；均公开且可打断";
-                e.intents = new[]
-                {
-                    new IntentData { id = "approach", displayName = "沉重脚步", clue = "潜水服缓慢靠近；脚步声清晰。", amount = 20, isPublic = true, interruptible = true },
-                    new IntentData { id = "bells", displayName = "无风铃鸣", clue = "声源异常；潜水服静止不动。", amount = 10, channel = DamageChannel.Sanity, isPublic = true, visibleAction = false, soundSource = "墙上的铜铃", interruptible = true }
-                };
-            });
-            var starter = CardCatalog.Starter.Select(spec =>
-                AssetDatabase.LoadAssetAtPath<CardDefinition>(Root + "/Content/Cards/" + spec.Id + ".asset")).ToArray();
-            var equipped = new[] { lantern, listener };
-            EncounterDefinition Encounter(string id, string title, EnemyDefinition enemy, ObjectiveKind objective, CardDefinition[] deck) =>
-                Asset<EncounterDefinition>(Root + "/Content/Encounters", id, e =>
-                { e.id = id; e.displayName = title; e.objective = objective; e.deck = deck; e.enemies = new[] { enemy }; e.equippedTools = equipped; });
-            var encounters = new[]
-            {
-                Encounter("ordinary", "01 / 公开意图", ordinary, ObjectiveKind.Defeat, starter),
-                Encounter("unknown", "02 / 有限调查", masked, ObjectiveKind.Defeat, starter),
-                Encounter("seal", "03 / 封门目标", echo, ObjectiveKind.Seal, starter),
-                Encounter("effects", "04 / 卡牌实验", masked, ObjectiveKind.Defeat, new[] { shot, cover, calm, notes, reload, light, contradiction, intuition, interrupt, bandage })
-            };
-            foreach (var encounter in encounters) new BattleSession(encounter.Build(), 1);
-            Asset<PanelSettings>(Root + "/Settings", "BattlePanel", p =>
-            { p.scaleMode = PanelScaleMode.ScaleWithScreenSize; p.referenceResolution = new Vector2Int(1440, 900); p.match = 0.5f; });
-            AssetDatabase.SaveAssets();
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath) == null)
-            {
-                Folder(Root + "/Scenes");
-                var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-                var cameraObject = new GameObject("Fixed Battle Camera");
-                var camera = cameraObject.AddComponent<Camera>(); camera.tag = "MainCamera";
-                camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = new Color(0.11f, 0.18f, 0.21f);
-                cameraObject.transform.position = new Vector3(0, 3, -8); cameraObject.transform.LookAt(Vector3.zero);
-                var host = new GameObject("Battle Composition Root");
-                // NewScene can unload assets; resolve persistent references after switching scenes.
-                host.AddComponent<UIDocument>().panelSettings = AssetDatabase.LoadAssetAtPath<PanelSettings>(Root + "/Settings/BattlePanel.asset");
-                var hud = host.AddComponent<BattleHud>();
-                var serialized = new SerializedObject(hud); var field = serialized.FindProperty("encounters");
-                field.arraySize = encounters.Length;
-                var ids = new[] { "ordinary", "unknown", "seal", "effects" };
-                for (var i = 0; i < ids.Length; i++) field.GetArrayElementAtIndex(i).objectReferenceValue =
-                    AssetDatabase.LoadAssetAtPath<EncounterDefinition>(Root + "/Content/Encounters/" + ids[i] + ".asset");
-                serialized.FindProperty("interfaceFont").objectReferenceValue =
-                    AssetDatabase.LoadAssetAtPath<UnityEngine.TextCore.Text.FontAsset>("Assets/Fonts/default_zh.asset");
-                serialized.FindProperty("interfaceStyle").objectReferenceValue =
-                    AssetDatabase.LoadAssetAtPath<StyleSheet>(Root + "/Runtime/Presentation/BattleHud.uss");
-                serialized.ApplyModifiedPropertiesWithoutUndo();
-                EditorSceneManager.SaveScene(scene, ScenePath);
-            }
-            else EditorSceneManager.OpenScene(ScenePath);
-            // Keep existing build scenes; insert the explicit framework entry point once.
-            if (!EditorBuildSettings.scenes.Any(x => x.path == ScenePath))
-                EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) }.Concat(EditorBuildSettings.scenes).ToArray();
-            AssetDatabase.SaveAssets();
-            return ScenePath;
+            if(EditorApplication.isPlaying)throw new InvalidOperationException("Stop Play Mode before opening a scene.");
+            for(var i=0;i<SceneManager.sceneCount;i++)
+                if(SceneManager.GetSceneAt(i).isDirty)throw new InvalidOperationException("Save current scene edits before opening the main menu.");
+            const string path=Root+"/Scenes/MainMenu.unity";
+            EditorSceneManager.OpenScene(path);
+            return path;
         }
-
         [MenuItem("Unsounded Sea/Validate All Encounters")]
         public static void ValidateContent()
         {

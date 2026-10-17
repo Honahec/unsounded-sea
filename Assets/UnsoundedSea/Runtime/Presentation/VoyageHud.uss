@@ -119,3 +119,25 @@
 .support-entry .node-choice-description { margin-top: 6px; font-size: 14px; }
 .voyage-hud .support-entry Button { align-self: flex-start; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 38px; border-width: 0; border-left-width: 2px; border-left-color: #a48b58; background-color: transparent; -unity-text-align: middle-left; }
 .support-manifest > .primary { flex-shrink: 0; align-self: flex-end; margin-top: 12px; }
+
+.voyage-header { height: auto; align-items: flex-start; }
+.voyage-status-badges { flex-direction: row; margin-top: 21px; }
+.voyage-sanity-track { position: relative; width: 240px; height: 4px; margin-top: 6px; background-color: #253d3c; }
+.voyage-sanity-fill { height: 4px; background-color: #80b5a5; }
+.voyage-utilities Button { flex-direction: row; align-items: center; }
+.node-options-scroll { max-height: 500px; min-height: 0; }
+.voyage-navigation { max-height: 78%; }
+.node-options-scroll > .unity-scroll-view__content-viewport { min-height: 0; }
+.voyage-hud .node-choice-title { white-space: normal; }
+.reward-open .voyage-navigation { max-width: 94%; max-height: 88%; }
+.reward-open .destination-panel > .primary, .reward-open .destination-panel > .secondary { min-width: 270px; white-space: nowrap; }
+.voyage-hud .reward-skip { margin-top: 12px; }
+.reward-replacement-sheet { width: 1040px; max-width: 94%; height: 720px; max-height: 90%; padding: 24px; background-color: #0f1f23; border-width: 1px; border-color: #9e8755; }
+.reward-replacement-sheet > .secondary { align-self: flex-end; width: 140px; flex-shrink: 0; }
+.debrief-sheet { width: 620px; max-width: 92%; max-height: 84%; padding: 28px; background-color: #0f1f23; border-width: 1px; border-color: #9e8755; }
+.debrief-scroll { min-height: 110px; max-height: 450px; flex-shrink: 1; }
+.region-intro-sheet { width: 680px; max-width: 92%; padding: 40px; align-items: center; background-color: rgba(8,19,22,.9); border-top-width: 1px; border-bottom-width: 1px; border-color: #9e8755; }
+.region-intro-title { font-size: 30px; letter-spacing: 6px; color: #d7bd82; margin: 12px 0 24px; }
+.region-intro-sheet > .primary, .region-intro-sheet > .secondary { min-width: 180px; white-space: nowrap; }
+.new-reward-card { border-color: #80b5a5; }
+.new-reward-badge { position: absolute; top: -14px; right: 0; padding: 2px 5px; background-color: #254b48; color: #eee4c9; font-size: 11px; }

@@ -126,7 +126,12 @@ namespace UnsoundedSea.Runtime
         private static VisualElement Box(string cls) { var v = new VisualElement { pickingMode = PickingMode.Ignore }; v.AddToClassList(cls); return v; }
         private static Label Text(string text, string cls) { var l = new Label(text) { pickingMode = PickingMode.Ignore }; l.AddToClassList(cls); return l; }
         private static Button Button(string name, string text, Action action, string cls = "sea-button")
-        { var b = new Button(action) { name = name, text = text }; b.AddToClassList(cls); return b; }
+        {
+            var b = new Button(action) { name = name, text = text }; b.AddToClassList(cls);
+            var slash=text.LastIndexOf(" / ",StringComparison.Ordinal);
+            if(slash>=0){var key=text.Substring(slash+3);b.text=text.Substring(0,slash);KeyBadge.Attach(b,key);b.tooltip=b.text+"（"+key+"）";}
+            return b;
+        }
         private static string CrewMotif(CrewSupportKind kind)
         {
             switch (kind)
@@ -215,7 +220,6 @@ namespace UnsoundedSea.Runtime
             var selected = v.Enemies.FirstOrDefault(x => x.Id == director.SelectedEnemy);
 
             var tools = new ScrollView(ScrollViewMode.Vertical); tools.AddToClassList("tools"); tools.style.maxHeight = new StyleLength(new Length(48, LengthUnit.Percent)); root.Add(tools);
-            if (selected != null) tools.Add(Text("聚焦 · " + selected.Name, "tool-focus"));
             foreach (var tool in v.Tools.Where(x=>(int)x.Definition.Kind<3))
             {
                 var t = tool; var cost = t.Definition.SanityCost > 0 ? $"{t.Definition.SanityCost}理智" : "无代价";
@@ -263,6 +267,7 @@ namespace UnsoundedSea.Runtime
             var vitals = Box("battle-vitals"); root.Add(vitals);
             Vital(vitals, "生命", waitingForImpact ? presentedHealth : v.Health, scenario.encounter.playerHealth, "health", waitingForImpact ? presentedBlock : v.Block, "格挡");
             Vital(vitals, "理智", waitingForImpact ? presentedSanity : v.Sanity, scenario.encounter.playerSanity, "sanity", waitingForImpact ? presentedWard : v.Ward, "防护");
+            if(v.Watched>0)UiRules.Status(vitals,"battle-watched","eye",v.Watched.ToString(),"被注视");
 
             var hand = new ScrollView(ScrollViewMode.Horizontal); hand.name = "hand"; hand.AddToClassList("hand");
             // Ignore the full built-in scroll shell, including the content/vertical-scroll wrapper.
@@ -365,6 +370,9 @@ namespace UnsoundedSea.Runtime
                     }
                     plate.Add(Text(status, "actor-status"));
                     plate.Add(new EnemyIntentDetails(enemy));
+                    if(enemy.Id==director.SelectedEnemy)
+                        foreach(var finding in v.Evidence.Where(x=>x.Scope==EvidenceScope.Turn&&x.SubjectId==enemy.Id&&x.Turn==v.Turn&&(x.Question==nameof(InvestigationKind.SoundSource)||x.Question==nameof(InvestigationKind.DamageChannel))))
+                            plate.Add(Text(finding.Text,"enemy-current-answer"));
                     plate.EnableInClassList("selected", a.EnemyId == director.SelectedEnemy); plate.SetEnabled(a.Alive && !director.Paused); root.Add(plate); nameplates.Add(plate);
                     var selectedCard = v.Hand.FirstOrDefault(c => c.InstanceId == selectedEncounterCard);
                     if (selectedCard == null) a.Select(a.EnemyId == director.SelectedEnemy);
@@ -515,20 +523,22 @@ namespace UnsoundedSea.Runtime
             if (director.Stage == null) return;
             var anchors = director.Stage.GetComponentsInChildren<BossTargetAnchor>();
             var selected = view.Hand.FirstOrDefault(c => c.InstanceId == selectedEncounterCard);
-            if (selected == null && (view.BossKind == BossEncounterKind.FlagBearer || view.BossKind == BossEncounterKind.Watcher)) return;
-            var targets = selected == null ? view.EncounterTargets : selected.Targets;
+            if (selected == null && view.BossKind == BossEncounterKind.Watcher) return;
+            var targets = selected == null || view.BossKind==BossEncounterKind.FlagBearer ? view.EncounterTargets : selected.Targets;
             VisualElement saltBoard = null;
+            VisualElement relayBoard=null;
             if (view.BossKind == BossEncounterKind.Surveyor)
             {
                 saltBoard = Box("salt-board");
                 root.Add(saltBoard);
             }
+            if(view.BossKind==BossEncounterKind.FlagBearer){relayBoard=Box("relay-board");root.Add(relayBoard);}
             var offsets = new Dictionary<string, int>();
             var targetIndex = 0;
             foreach (var target in targets)
             {
                 var id = target.Id;
-                var anchorId = id;
+                var anchorId = id.StartsWith("scene:",StringComparison.Ordinal)?id.Substring(6):id;
                 var pair = id.IndexOf('|');
                 if (pair >= 0)
                 {
@@ -541,30 +551,44 @@ namespace UnsoundedSea.Runtime
                     anchor = anchors.FirstOrDefault(a => a.targetId == anchorId.Substring(0, separator));
                 if (anchor == null) continue;
                 var cardId = selectedEncounterCard;
+                var legalTarget=selected?.Targets.FirstOrDefault(x=>x.Enabled&&(x.Id==id||x.Id=="scene:"+anchorId));
                 var button = Button("boss-target-" + id, target.Name + (string.IsNullOrEmpty(target.Detail) ? "" : "\n" + target.Detail), () =>
                 {
-                    var result = director.Submit(BattleCommand.Play(cardId, id));
+                    if(legalTarget==null)return;
+                    var result = director.Submit(BattleCommand.Play(cardId, legalTarget.Id));
                     if (result.Success) { selectedEncounterCard = 0; Render(); }
                 }, "boss-target");
-                button.tooltip = target.Name + "：" + target.Detail;
+                var publicState=view.EncounterTargets.FirstOrDefault(x=>x.Id==anchorId)??target;
+                button.tooltip = UiRules.Describe(target.Name + "：" + publicState.Detail+(legalTarget==null?"\n"+(selected==null?"先选择对应机关行动牌。":selected.DisabledReason==""?"该牌当前不可操作此目标。":selected.DisabledReason):""));
                 button.userData = target;
                 if (view.BossKind == BossEncounterKind.Watcher) button.text = target.Name;
                 button.EnableInClassList("target-ready", selected != null && target.Enabled);
-                ActionButton(button, active && selected != null && target.Enabled);
+                ActionButton(button, active && selected != null && selected.Enabled && legalTarget != null);
                 button.tabIndex = 100 + targetIndex++;
                 if (view.BossKind == BossEncounterKind.FlagBearer)
                 {
-                    button.text = target.Name;
-                    button.AddToClassList("mechanism-dial");
-                    var relay = id.Contains(":");
-                    var option = relay ? id.EndsWith(":off", StringComparison.Ordinal) ? 0 : id.EndsWith(":positive", StringComparison.Ordinal) ? 1 : 2 : id == "lock-I" ? 0 : id == "lock-II" ? 1 : 2;
-                    button.style.left = relay ? (id.StartsWith("R1", StringComparison.Ordinal) ? 50 : 190) : 70 + option * 110;
-                    button.style.top = relay ? 190 + option * 100 : 230;
-                    root.Add(button);
+                    var relay=anchorId.Contains(":");
+                    button.AddToClassList(relay?"mechanism-switch":"mechanism-lock");
+                    if(relay)
+                    {
+                        var relayId=anchorId.Split(':')[0];var column=relayBoard.Q(name:"relay-column-"+relayId);
+                        if(column==null){column=Box("relay-column");column.name="relay-column-"+relayId;column.Add(Text(relayId,"relay-heading"));relayBoard.Add(column);}
+                        button.text="";var motif=publicState.State==MechanismState.Off?"switch-off":publicState.State==MechanismState.Positive?"switch-positive":"switch-reverse";
+                        button.Add(new SeaUiArt(motif));button.EnableInClassList("current-polarity",publicState.IsCurrent);
+                        var state=publicState.State==MechanismState.Off?"○":publicState.State==MechanismState.Positive?"+":"−";
+                        button.Add(Text(state+(publicState.IsCurrent?" ✓":""),"switch-value"));column.Add(button);
+                    }
+                    else {button.text=anchorId=="lock-I"?"I":anchorId=="lock-II"?"II":"III";relayBoard.Add(button);}
                 }
                 else if (saltBoard != null)
                 {
                     button.AddToClassList("salt-cell");
+                    button.text="";
+                    button.AddToClassList("salt-"+publicState.State.ToString().ToLowerInvariant());
+                    var value=publicState.State==MechanismState.Open?"✓":publicState.State==MechanismState.Disabled?"×":publicState.MeasuredValue?.ToString()??"?";
+                    button.Add(Text(value,"salt-value"));
+                    if(publicState.IsSeal){var seal=new SeaUiArt("seal");seal.AddToClassList("salt-seal");button.Add(seal);}
+                    button.tooltip=anchorId+"："+(publicState.State==MechanismState.Open?"已开 · ":publicState.State==MechanismState.Measured?"已测 · ":publicState.State==MechanismState.Disabled?"已停用 · ":"未测 · ")+button.tooltip;
                     saltBoard.Add(button);
                 }
                 else
@@ -590,6 +614,7 @@ namespace UnsoundedSea.Runtime
             var track = Box("vital-track"); var fill = Box("vital-fill");
             fill.style.width = Length.Percent(max > 0 ? Mathf.Clamp01((float)value / max) * 100 : 0);
             track.Add(fill); el.Add(track);
+            if(cls=="sanity")UiRules.SanityTicks(track,max);
             var protection = Text(guard > 0 ? $"{guardName}  {guard}" : string.Empty, "vital-protection");
             protection.name = "battle-" + cls + "-guard"; el.Add(protection);
             parent.Add(el);

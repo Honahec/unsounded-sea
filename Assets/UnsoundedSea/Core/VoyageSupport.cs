@@ -66,6 +66,18 @@ namespace UnsoundedSea.Core
         private bool ClaimItemReward(string id){if(!RewardItems.Any(x=>x.Id==id)||!CanGain(id))return false;Gain(id);return true;}
         private void AddMarker(string id,string expiry)=>markers[id]=new VoyageMarker(id,Act+":"+CurrentFull.Id,expiry);
         private int HirePrice=>markers.ContainsKey("docking-voucher")?1:2;
+        public static bool IsLoadoutChoice(VoyageNodeChoice choice)
+            => choice.Id.StartsWith("equip:",StringComparison.Ordinal)||choice.Id.StartsWith("pack:",StringComparison.Ordinal)||choice.Id.StartsWith("unpack:",StringComparison.Ordinal);
+        private bool IsNodeResolutionChoice(VoyageNodeChoice choice)
+        {
+            if(phase!=VoyagePhase.Arrived||nodeResolved)return false;
+            if(choice.Id=="ritual:learn")return true;
+            var verb=choice.Id.Split(':')[0];
+            return CurrentFull.Kind==RunNodeKind.Event&&(verb=="rescue"||verb=="voucher"||verb=="specimen"||verb=="repair-boat"||verb=="crew"||verb=="risk")
+                ||CurrentFull.Kind==RunNodeKind.Archive&&(verb=="survey"||verb=="archive"||verb=="specimen");
+        }
+        public IReadOnlyList<VoyageNodeChoice> GetNodeServices()
+            => GetSupportChoices().Where(x=>!IsNodeResolutionChoice(x)&&!IsLoadoutChoice(x)).ToArray();
         public IReadOnlyList<VoyageNodeChoice> GetSupportChoices()
         {
             var result=new List<VoyageNodeChoice>();

@@ -120,3 +120,22 @@
 .end-turn:active SeaUiArt { scale: 0.94; rotate: 6deg; }
 .sea-card { transition-duration: .2s; transition-timing-function: ease-out-cubic; }
 .ocean-ui.reduced-motion .end-turn SeaUiArt, .ocean-ui.reduced-motion .sea-card { transition-duration: 0s; }
+
+.enemy-current-answer { font-size: 12px; color: #80b5a5; margin-top: 3px; white-space: normal; }
+.sea-top .sea-button { flex-direction: row; align-items: center; }
+.sanity .vital-track { margin-bottom: 18px; }
+.battle-vitals .status-badge { margin-top: 4px; }
+.relay-board { position: absolute; left: 28px; top: 175px; width: 252px; flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
+.relay-column { width: 120px; margin-right: 6px; align-items: center; }
+.relay-heading { font-size: 13px; color: #d7bd82; margin-bottom: 5px; }
+.boss-target.mechanism-switch { position: relative; width: 104px; height: 80px; max-width: 104px; padding: 3px; margin-bottom: 6px; border-radius: 8px; }
+.mechanism-switch SeaUiArt { width: 62px; height: 56px; align-self: center; }
+.switch-value { font-size: 12px; color: #eee4c9; -unity-text-align: middle-center; }
+.mechanism-switch.current-polarity { border-width: 2px; border-color: #80b5a5; background-color: #254b48; }
+.boss-target.mechanism-lock { position: relative; width: 68px; min-width: 68px; height: 44px; margin: 6px; font-size: 18px; }
+.salt-value { font-size: 22px; -unity-text-align: middle-center; color: #eee4c9; }
+.salt-seal { position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; }
+.salt-measured { border-color: #d7bd82; }
+.salt-open { border-color: #80b5a5; background-color: #254b48; }
+.salt-disabled { border-color: #ac7566; }
+.boss-target:focus, .actor-label:focus { border-width: 2px; border-color: #eee4c9; }

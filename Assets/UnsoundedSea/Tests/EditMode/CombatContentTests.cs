@@ -58,7 +58,7 @@ namespace UnsoundedSea.Tests
             Play(s, "E02-02", "choir-b"); s.Execute(BattleCommand.EndTurn());
             Play(s, "E02-02", "choir-c");
             Assert.That(s.View.ObjectiveTarget, Is.EqualTo(42)); Assert.That(s.View.ObjectiveProgress, Is.Zero);
-            Assert.That(s.View.BossStatus, Does.Contain("42/42")); s.Execute(BattleCommand.EndTurn());
+            Assert.That(s.View.Enemies[0].Health, Is.EqualTo(42));Assert.That(s.View.Enemies[0].MaxHealth,Is.EqualTo(42)); s.Execute(BattleCommand.EndTurn());
             Assert.That(s.View.Enemies[0].Intent, Does.Contain("9 点生命"));
             var hp = s.View.Health; s.Execute(BattleCommand.EndTurn());
             Assert.That(hp - s.View.Health, Is.EqualTo(12), "Main attack 9 plus living servant 3.");
