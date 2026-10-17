@@ -256,8 +256,8 @@ namespace UnsoundedSea.Runtime
             else if (hitElapsed < 0.54f) hitLoad = Mathf.Lerp(1, 0.96f, Smooth((hitElapsed - 0.32f) / 0.22f));
             else hitLoad = 0.96f * (1 - Smooth((hitElapsed - 0.54f) / 1.26f));
             hitPivot = body.localPosition;
-            hitTranslation = Vector3.down * (0.006f * hitLoad);
-            hitRotation = Quaternion.Euler(-0.55f * hitLoad, 0, -0.12f * hitLoad);
+            hitTranslation = Vector3.down * (0.009f * hitLoad);
+            hitRotation = Quaternion.Euler(-0.8f * hitLoad, 0, -0.18f * hitLoad);
             TransformHitPart(body, false);
             TransformHitPart(crown, false);
             if (tentacles != null) foreach (var part in tentacles) TransformHitPart(part, false);

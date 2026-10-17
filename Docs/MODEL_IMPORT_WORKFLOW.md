@@ -40,15 +40,9 @@ Deemos Agent 是可选生产工具，不是每件资产的必经步骤。高模�
 3. 等附件上传完成再提交，确认 Agent 可读取网格和贴图，且聊天中出现对应模型预览。
 4. 在同一聊天完成修订并下载结果。若掉线，先检查原任务状态，避免重复创建任务。
 
-### 沉钟之母：BANG 分件与刚性战斗动画样例（2026-10-17）
+### 沉钟之母：分件与动画样例
 
-Deemos 的 BANG 适合把单体 Boss 拆成可独立控制的部件，但不是自动绑定器。原始整块网格的自动权重在大幅动作下出现拉伸，因此当前运行时采用“BANG 分件 → Blender 低模与 pivot → Unity 刚性部件动画”，保留旧 Generic Rig 资产作为回溯样例，不再作为默认 Prefab。
-
-1. 使用原始 Hyper3D 生成记录 `020d73c8-7721-581f-ae65-3f8fd8c93d1d`，通过 BANG 任务 `a69dfe2b-089e-4ca1-9987-0d36ec94312c` 将沉钟之母拆为 12 个网格，其中 6 个作为触手部件，保留 BANG 输出材质。
-2. 在 `arch` 运行 [BellMotherBangBuild.py](../Tools/BellMotherBangBuild.py)：建立身体、冠部和 6 个触手 pivot，保留部件层级，按 0.08 比例减面。实际三角面从 1,500,000 降至 119,992，输出 `BellMother_BANG_LOD0.glb` 和 manifest；源 GLB 不覆盖。
-3. 在 Unity 通过 [BellMotherBangSetup.cs](../Tools/BellMotherBangSetup.cs) 导入 GLB、归一化至 32 m，生成 `BellMother.prefab`，并把 `bell-mother.asset` 指向它。Prefab 不含 `SkinnedMeshRenderer`，由 [BellMotherRigidMotion.cs](../Assets/UnsoundedSea/Runtime/Battle/BellMotherRigidMotion.cs) 驱动身体、冠部和触手的局部刚性运动。
-4. `BattleActorView` 只接收规则结算结果：攻击直接进入短前摇、冲击和恢复；命中、死亡使用同一部件 presenter。没有骨骼的旧模型仍走兼容的简化反馈。
-5. 验收顺序：BANG 预览 → Blender 低模预览 → Unity 部件/三角面检查 → Play Mode 实际触发攻击并截图 → EditMode 规则回归。当前样例已通过 3 项 BellMother 动画测试和 6 项 SeaBoss 测试；最终平台纹理压缩、LOD1/2 和目标硬件性能仍需单独验收。
+当前采用 BANG 分件 → Blender 低模与支点 → Unity 刚性部件动画，未使用柔性骨骼蒙皮。整网格骨骼试验的取舍、当前生产步骤、根部约束与重量感设计，以及后续骨骼链方案，统一见[沉钟之母动画设计](BELL_MOTHER_ANIMATION_DESIGN.md)。规格以 [BANG manifest](../ArtSource/Bosses/BellMother_BANG-manifest.json) 为准，测试范围见[验证记录](FRAMEWORK_VALIDATION.md#沉钟之母-bang-分件与刚性动作流程)。
 
 ### 下载后的最低检查
 

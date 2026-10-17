@@ -178,7 +178,7 @@ namespace UnsoundedSea.Tests
                     float angle = Quaternion.Angle(idle.body.localRotation, motion.body.localRotation);
                     maximum = Mathf.Max(maximum, angle);
                     if (frame <= 2) Assert.That(angle, Is.LessThan(0.05f), "No first-frame pose jump");
-                    Assert.That(angle, Is.LessThan(0.7f), "A giant must not whip back several degrees");
+                    Assert.That(angle, Is.LessThan(1f), "A giant must not whip back several degrees");
                     Assert.That(motion.body.localPosition.y, Is.LessThanOrEqualTo(idle.body.localPosition.y + 0.00001f));
                     for (int i = 0; i < motion.tentacles.Length; i++)
                         Assert.That(Vector3.Distance(
@@ -188,7 +188,7 @@ namespace UnsoundedSea.Tests
                         idle.body.InverseTransformPoint(idle.crown.position)), Is.LessThan(0.001f));
                     if (frame == 80) Assert.That(angle, Is.GreaterThan(0.3f), "Recovery must retain weight beyond the old 0.3 second recoil");
                 }
-                Assert.That(maximum, Is.GreaterThan(0.45f));
+                Assert.That(maximum, Is.GreaterThan(0.7f));
                 Assert.That(motion.ActiveAction, Is.EqualTo("Idle"));
                 Assert.That(Quaternion.Angle(idle.body.localRotation, motion.body.localRotation), Is.LessThan(0.01f));
             }
