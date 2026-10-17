@@ -59,6 +59,8 @@ namespace UnsoundedSea.Core
             result.Register("conditional-damage", new Handler(true, (c, n) => c.Damage(c.IntentConfirmed ? n : 5)));
             result.Register("interrupt", new Handler(true, (c, n) => c.Interrupt()));
             result.Register("objective", new Handler(false, (c, n) => c.AdvanceObjective(n)));
+            // Catalog cards are executed transactionally by BattleSession; registration keeps definition validation strict.
+            for (var i = 1; i <= 90; i++) result.Register("c" + i.ToString("000"), new Handler(false, (c, n) => { }));
             return result;
         }
     }

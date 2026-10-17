@@ -25,7 +25,7 @@ namespace UnsoundedSea.Runtime
         public void Restart()
         {
             scenario.ValidatePresentation();
-            session = scenario.CreateSession(seed);
+            session = scenario.CreateSession(seed, usePreparedDeck: true);
             SelectedEnemy = View.Enemies.FirstOrDefault(x => x.Health > 0 && x.Targetable)?.Id;
             feedbackUntil = 0; wasBusy = false; Paused = false; Notice = scenario.introduction;
             if (Stage != null) { Stage.gameObject.SetActive(false); Destroy(Stage.gameObject); }
@@ -50,6 +50,8 @@ namespace UnsoundedSea.Runtime
             var result = session.Execute(command);
             if (!result.Success) { Notice = result.Error; Changed?.Invoke(); return result; }
             var after = View;
+            if (before.Phase != BattlePhase.Victory && after.Phase == BattlePhase.Victory)
+                CardDeckPreparation.StoreVerified(after.Evidence);
             if (!after.Enemies.Any(x => x.Id == SelectedEnemy && x.Health > 0 && x.Targetable))
                 SelectedEnemy = after.Enemies.FirstOrDefault(x => x.Health > 0 && x.Targetable)?.Id;
             Notice = after.Log.LastOrDefault(x => !x.Contains("阶段：")) ?? "";

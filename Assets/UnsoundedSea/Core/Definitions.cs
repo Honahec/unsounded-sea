@@ -9,7 +9,8 @@ namespace UnsoundedSea.Core
     public enum InvestigationKind { VisibleAction, SoundSource, DamageChannel }
     public enum KnowledgeLevel { Unknown, Rumored, Observed, Verified }
     public enum ObjectiveKind { Defeat, Seal, Survive }
-    public enum CommandKind { PlayCard, UseTool, AdvanceObjective, EndTurn }
+    public enum CommandKind { PlayCard, UseTool, UseCrewSupport, ReorderDeck, AdvanceObjective, EndTurn }
+    public enum CrewSupportKind { Medic, Listener }
 
     internal static class Require
     {
@@ -97,6 +98,15 @@ namespace UnsoundedSea.Core
         { Id = Require.Id(id); Name = Require.Id(name); Kind = Require.Defined(kind); Uses = Require.Positive(uses); SanityCost = Require.NonNegative(sanityCost); }
     }
 
+    public sealed class CrewSupportSpec
+    {
+        public string Id { get; }
+        public string Name { get; }
+        public CrewSupportKind Kind { get; }
+        public CrewSupportSpec(string id, string name, CrewSupportKind kind)
+        { Id = Require.Id(id); Name = Require.Id(name); Kind = Require.Defined(kind); }
+    }
+
     public sealed class BattleDefinition
     {
         public string Id { get; }
@@ -109,11 +119,16 @@ namespace UnsoundedSea.Core
         public IReadOnlyList<CardSpec> Deck { get; }
         public IReadOnlyList<EnemySpec> Enemies { get; }
         public IReadOnlyList<ToolSpec> Tools { get; }
+        public IReadOnlyList<CrewSupportSpec> Supports { get; }
+        public IReadOnlyList<Evidence> Archive { get; }
         public BattleDefinition(string id, IEnumerable<CardSpec> deck, IEnumerable<EnemySpec> enemies,
             IEnumerable<ToolSpec> tools, ObjectiveKind objective = ObjectiveKind.Defeat, int objectiveTarget = 4,
-            int health = 60, int sanity = 30, int actions = 3, int drawCount = 5)
+            int health = 60, int sanity = 30, int actions = 3, int drawCount = 5,
+            IEnumerable<CrewSupportSpec> supports = null, IEnumerable<Evidence> archive = null)
         {
             Id = Require.Id(id); Deck = Require.Copy(deck); Enemies = Require.Copy(enemies); Tools = Require.Copy(tools);
+            Supports = Require.Copy(supports ?? Array.Empty<CrewSupportSpec>());
+            Archive = Require.Copy(archive ?? Array.Empty<Evidence>());
             Health = Require.Positive(health); Sanity = Require.Positive(sanity); Actions = Require.Positive(actions);
             DrawCount = Require.Positive(drawCount); Objective = objective; ObjectiveTarget = Require.Positive(objectiveTarget);
             if (!Enum.IsDefined(typeof(ObjectiveKind), objective)) throw new ArgumentException("Unknown objective.");
@@ -122,6 +137,8 @@ namespace UnsoundedSea.Core
                 throw new ArgumentException("Equip at most two unique tools.");
             if (Enemies.Select(x => x.Id).Distinct().Count() != Enemies.Count)
                 throw new ArgumentException("Enemy instance IDs must be unique.");
+            if (Supports.Select(x => x.Id).Distinct().Count() != Supports.Count)
+                throw new ArgumentException("Crew support IDs must be unique.");
         }
     }
 }

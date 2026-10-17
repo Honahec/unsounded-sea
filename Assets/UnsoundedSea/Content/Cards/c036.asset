@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dfcb1b8040ce4eca9f15db5edd8332d, type: 3}
+  m_Name: c036
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
+  id: c036
+  displayName: "\u6700\u540E\u4E00\u5C42\u6CB9\u5E03"
+  description: "\u83B7\u5F978\u683C\u6321\uFF1B\u672C\u56DE\u5408\u4E0B\u4E00\u6B21\u573A\u666F\u64CD\u4F5C\u5931\u8D25\u9020\u6210\u7684\u751F\u547D\u4F24\u5BB3\u518D\u51CF\u5C114\u3002\u6D88\u8017\u3002"
+  actionCost: 1
+  sanityCost: 0
+  exhaust: 1
+  effects:
+  - effectId: c036
+    amount: 8

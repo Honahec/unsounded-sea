@@ -23,18 +23,38 @@ namespace UnsoundedSea.Editor
         private static T Asset<T>(string folder, string name, Action<T> initialize) where T : ScriptableObject
         {
             Folder(folder); var path = folder + "/" + name + ".asset";
-            var existing = AssetDatabase.LoadAssetAtPath<T>(path); if (existing != null) return existing;
-            var asset = ScriptableObject.CreateInstance<T>(); initialize(asset); AssetDatabase.CreateAsset(asset, path); return asset;
+            var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (asset == null) { asset = ScriptableObject.CreateInstance<T>(); AssetDatabase.CreateAsset(asset, path); }
+            initialize(asset); EditorUtility.SetDirty(asset); return asset;
         }
-        private static CardDefinition Card(string id, string title, string description, int cost, string effect, int amount, string second = null, int secondAmount = 0, int sanityCost = 0, bool exhaust = false)
+        private static CardDefinition Card(string id) =>
+            AssetDatabase.LoadAssetAtPath<CardDefinition>(Root + "/Content/Cards/" + id + ".asset");
+
+        [MenuItem("Unsounded Sea/Content/Synchronize Card Catalog")]
+        public static string SyncCardCatalog()
         {
-            return Asset<CardDefinition>(Root + "/Content/Cards", id, card =>
+            var folder = Root + "/Content/Cards";
+            Folder(folder);
+            foreach (var spec in CardCatalog.All)
             {
-                card.id = id; card.displayName = title; card.description = description; card.actionCost = cost;
-                card.sanityCost = sanityCost; card.exhaust = exhaust;
-                card.effects = second == null ? new[] { new CardEffectData { effectId = effect, amount = amount } } :
-                    new[] { new CardEffectData { effectId = effect, amount = amount }, new CardEffectData { effectId = second, amount = secondAmount } };
-            });
+                var path = folder + "/" + spec.Id + ".asset";
+                var card = AssetDatabase.LoadAssetAtPath<CardDefinition>(path);
+                if (card == null)
+                {
+                    card = ScriptableObject.CreateInstance<CardDefinition>();
+                    AssetDatabase.CreateAsset(card, path);
+                }
+                card.id = spec.Id;
+                card.displayName = spec.Name;
+                card.description = spec.Description;
+                card.actionCost = spec.Cost;
+                card.sanityCost = spec.SanityCost;
+                card.exhaust = spec.Exhaust;
+                card.effects = spec.Effects.Select(effect => new CardEffectData { effectId = effect.Id, amount = effect.Amount }).ToArray();
+                EditorUtility.SetDirty(card);
+                AssetDatabase.SaveAssetIfDirty(card);
+            }
+            return CardCatalog.All.Count + " card assets synchronized.";
         }
 
         [MenuItem("Unsounded Sea/Create or Open Battle Scene")]
@@ -43,16 +63,17 @@ namespace UnsoundedSea.Editor
             if (EditorApplication.isPlaying) throw new InvalidOperationException("Stop Play Mode before setup.");
             for (var i = 0; i < SceneManager.sceneCount; i++)
                 if (SceneManager.GetSceneAt(i).isDirty) throw new InvalidOperationException("Save current scene edits before opening the battle scene.");
-            var shot = Card("revolver", "左轮射击", "对目标造成 6 伤害。", 1, "damage", 6);
-            var cover = Card("cover", "寻找掩体", "获得 10 格挡。", 1, "block", 10);
-            var calm = Card("steady", "稳住心神", "获得 6 理智防护；不抵消主动支付。", 1, "ward", 6);
-            var notes = Card("notes", "观察笔记", "记录当前征兆，抽 1 张牌。", 0, "observe", 0, "draw", 1);
-            var reload = Card("reload", "快速装填", "抽 2 张牌。", 1, "draw", 2);
-            var light = Card("light", "临时照明", "揭示可见动作；若已知意图则抽 1 张。", 1, "investigate", 0);
-            var contradiction = Card("contradiction", "记录矛盾", "意图已确认：11 伤害；\n否则造成 5 伤害。", 1, "conditional-damage", 11);
-            var intuition = Card("intuition", "直觉防护", "获得 7 格挡。\n获得 3 理智防护。", 1, "block", 7, "ward", 3);
-            var interrupt = Card("tear", "撕毁符纸", "造成 4 伤害，打断可中断施术。", 1, "damage", 4, "interrupt", 0);
-            var bandage = Card("bandage", "应急包扎", "恢复 4 生命；使用后消耗。", 1, "heal", 4, exhaust: true);
+            SyncCardCatalog();
+            var shot = Card("revolver");
+            var cover = Card("cover");
+            var calm = Card("steady");
+            var notes = Card("notes");
+            var reload = Card("reload");
+            var light = Card("light");
+            var contradiction = Card("contradiction");
+            var intuition = Card("intuition");
+            var interrupt = Card("tear");
+            var bandage = Card("bandage");
             var lantern = Asset<ToolDefinition>(Root + "/Content/Tools", "lantern", t => { t.id = "lantern"; t.displayName = "防风提灯"; t.question = InvestigationKind.VisibleAction; });
             var listener = Asset<ToolDefinition>(Root + "/Content/Tools", "listener", t => { t.id = "listener"; t.displayName = "定向听筒"; t.question = InvestigationKind.SoundSource; });
             Asset<ToolDefinition>(Root + "/Content/Tools", "shell", t => { t.id = "shell"; t.displayName = "听潮贝壳"; t.question = InvestigationKind.DamageChannel; t.sanityCost = 3; });
@@ -79,7 +100,12 @@ namespace UnsoundedSea.Editor
                     new IntentData { id = "bells", displayName = "无风铃鸣", clue = "声源异常；潜水服静止不动。", amount = 4, channel = DamageChannel.Sanity, visibleAction = false, soundSource = "墙上的铜铃" }
                 };
             });
-            var starter = new[] { shot, shot, shot, shot, cover, cover, cover, cover, calm, notes };
+            var starterNumbers = new[] { 1, 2, 12, 19, 20, 21, 22, 37, 39, 41, 55, 71 };
+            var starter = starterNumbers.Select(number =>
+            {
+                var spec = CardCatalog.All.Single(card => CardCatalog.Number(card.Id) == number);
+                return AssetDatabase.LoadAssetAtPath<CardDefinition>(Root + "/Content/Cards/" + spec.Id + ".asset");
+            }).ToArray();
             var equipped = new[] { lantern, listener };
             EncounterDefinition Encounter(string id, string title, EnemyDefinition enemy, ObjectiveKind objective, CardDefinition[] deck) =>
                 Asset<EncounterDefinition>(Root + "/Content/Encounters", id, e =>

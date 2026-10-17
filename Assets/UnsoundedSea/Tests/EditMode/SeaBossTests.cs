@@ -71,11 +71,11 @@ namespace UnsoundedSea.Tests
                     for(int i=0;i<3;i++)
                     {
                         var v=s.View;var enemy=v.Enemies[0];Assert.That(enemy.IntentConfirmed,Is.True);
-                        var effect=enemy.Intent.Contains("理智")?"ward":"block";
-                        var card=v.Hand.Where(x=>x.Definition.Cost<=v.Actions).OrderByDescending(x=>x.Definition.Effects.Where(e=>e.Id==effect).Sum(e=>e.Amount))
-                            .FirstOrDefault(x=>x.Definition.Effects.Any(e=>e.Id==effect));
+                        var protection = enemy.Intent.Contains("理智") ? "steady" : "cover";
+                        var card = v.Hand.Where(x => x.Enabled && (x.Definition.Id == protection || x.Definition.Id == "intuition"))
+                            .OrderByDescending(x => x.Definition.Id == protection).FirstOrDefault();
                         if(card==null)break;
-                        Assert.That(s.Execute(BattleCommand.Play(card.InstanceId,enemy.Id)).Success,Is.True);
+                        Assert.That(s.Execute(BattleCommand.Play(card.InstanceId)).Success,Is.True);
                     }
                     Assert.That(s.Execute(BattleCommand.EndTurn()).Success,Is.True);
                 }

@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
   id: reload
   displayName: "\u5FEB\u901F\u88C5\u586B"
-  description: "\u62BD 2 \u5F20\u724C\u3002"
+  description: "\u4ECE\u5F03\u724C\u5806\u9009\u62E9\u4E00\u5F20\u6B66\u88C5\u724C\u56DE\u624B\uFF1B\u6CA1\u6709\u5408\u6CD5\u76EE\u6807\u65F6\u62BD1\u5F20\u724C\u3002"
   actionCost: 1
   sanityCost: 0
   exhaust: 0
   effects:
-  - effectId: draw
-    amount: 2
+  - effectId: c038
+    amount: 1

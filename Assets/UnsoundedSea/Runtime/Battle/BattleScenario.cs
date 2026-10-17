@@ -23,10 +23,11 @@ namespace UnsoundedSea.Runtime
         [TextArea] public string victoryText;
         [TextArea] public string defeatText;
 
-        public BattleSession CreateSession(uint seed)
+        public BattleSession CreateSession(uint seed, bool usePreparedDeck = false)
         {
             if (encounter == null) throw new InvalidOperationException($"{name}: encounter is missing.");
             var definition = encounter.Build();
+            if (usePreparedDeck) definition = CardDeckPreparation.Apply(definition);
             return new BattleSession(definition, seed, rules == null ? null : rules.CreateEffects(),
                 rules == null ? null : rules.CreateObjective(definition),
                 rules is BossRuleModule boss ? boss.bossKind : BossEncounterKind.None);

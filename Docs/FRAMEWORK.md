@@ -91,7 +91,7 @@ UnsoundedSea.Tests.EditMode       NUnit 行为测试，引用 Core / Runtime
 - `Definitions.cs`：不可变战斗规格。构造时复制集合；Unity 资产只负责创作静态数据。
 - `BattleSession`：命令入口、回合状态机及规则协调；所有玩家操作调用 `Execute`。
 - `BattleView`：只读快照，UI 不持有可变规则状态。敌人的真实行动只存在于 Session 私有状态中。
-- `EffectRegistry` / `ICardEffectHandler`：按稳定字符串 ID 注册卡牌效果。
+- `CardCatalog` / `BattleCardRules`：90 张正式目录卡的规格、合法目标、费用与效果；`EffectRegistry` / `ICardEffectHandler` 保留通用效果和自定义遭遇扩展入口。
 - `KnowledgeState`：证据带来源和可信级别，低级别记录不能覆盖已验证信息。
 - `IEncounterObjective`：击退、封门、存活目标；可注入其他目标实现。
 - `RunMap`：有向无环节点图，区分进入与完成节点，阻止跳点、回访、悬空连接和不可达节点。
@@ -109,17 +109,21 @@ UnsoundedSea.Tests.EditMode       NUnit 行为测试，引用 Core / Runtime
 7. 本回合意图确认在下回合失效；历史证据保留，键中包含目标和回合。日志只记录当时玩家可知信息，真实行动直到调查允许或实际结算时才显示。
 8. 格挡仅减生命伤害，理智防护仅减被动冲击。主动支付绕过防护，并要求支付后至少剩 1 理智。耗尽生命或理智立即失败。
 9. 封门任务独立于手牌，每回合最多一次、消耗 1 行动。击杀不自动完成封门/存活目标。存活目标在敌方结算后计数，资源耗尽优先失败。
-10. 普通卡牌 `exhaust` 表示每张实例每场只能使用一次；「应急包扎」当前使用这一规则，同名多副本会分别计次。若设计改为同名牌共享次数，需要增加按卡牌 ID 的战斗限制器。
+10. `exhaust` 按实例计数；消耗牌本场不再洗回。C085 另有本回合同名限一次规则。保留按实例结算，到回合边界清除指定，不能让已打出的牌在后来洗回时继续保留。
 
 ## 新增内容
 
 ### 新卡牌
 
-Project 右键 **Create → Unsounded Sea → Card**。填写唯一 `id`、名称、完整规则说明、行动/理智费用和效果列表，再把资产加入遭遇的 `deck`。同一资产可重复引用形成多副本；不同资产不能共用一个卡牌 ID。
+完整目录以 `Core/CardCatalog.cs` 为数据主出处，C001–C090 为稳定目录／效果号，既有十个内容 ID 保持不变。修改目录后通过 Unity CLI `run_script --file Tools/CardCatalogSetup.cs --entry CardCatalogSetup.Build` 同步 90 份 `Content/Cards/*.asset`、配置插画导入并校验；不会重建场景或替换既有 GUID。目录之外的遭遇卡仍可通过 **Create → Unsounded Sea → Card** 创建，使用通用效果或自定义处理器。
 
-两张插画样张「记录矛盾」「直觉防护」通过 `IllustratedCard` 同时接入主线与旧战斗 HUD。`Resources/CardArt/<稳定卡牌ID>.png` 是覆盖整张卡面的连续生图背景，费用、牌名、规则文字均读取 `CardSpec` 由 UI Toolkit 绘制；下半部中央叠加不透明度约 66% 的局部深色阴影，左右留 9、底部留 12 个界面像素，不设横向分隔线，插画在文字后方与四周保持连续。正文为象牙色、牌名为旧金色。无插画的其他牌保持原展示。美术使用统一海洋哥特、旧黄铜暖光与冷蓝阴影，不把文字烘焙入图；当前只有这两张生成插画，非90卡完成。
+标题菜单的「整理行动簿」可逐页浏览全部 90 张、查看完整卡面、选择恰好 12 张不同卡牌和一名初始支援船员；保存与取消分离。`CardDeckPreparation` 只在游戏入口应用：主线 `BattleDirector` 调用 `CreateSession(..., usePreparedDeck: true)`，旧 `BattleHud` 显式应用；`EncounterDefinition.Build()` 保持纯内容构建，不读取玩家偏好。初始牌不是重复攻击／防御模板。已验证战斗证据在胜利后归档，后续只注入对应敌人的档案；这不等于航程生命、理智、奖励和五海域系统已全部接通。
 
-已注册效果：
+90 张 `Resources/CardArt/<稳定卡牌ID>.png` 均为独立生图背景，统一海洋哥特、旧黄铜暖光与冷蓝阴影。`IllustratedCard` 在主线、旧战斗 HUD 和行动簿复用：整幅插画铺满卡面，左上行动费用、牌名和完整规则均由 UI Toolkit 绘制；下半部中央叠加约 66% 不透明度的局部深色阴影，左右留 9、底部留 12 个界面像素，无横向分割，象牙色正文与旧金色牌名覆盖其上。额外代价和消耗只在规则正文写一次，不烘焙进图。模型、提示词、来源与文件哈希集中在 [插画 manifest](../ArtSource/Cards/manifest.json)。
+
+选目标统一使用 `CardView.Targets` 的稳定 ID；零选择牌传 `null`，失效选项在付款前拒绝。C054 先支付并打出，再通过 `BattleView.PendingChoice` 公开最多三张牌的完整排列；期间阻止其他命令，必须用 `BattleCommand.Reorder` 完成，零行动仍可选择，不能取消退款。两条命令均进入回放。C063 与 Boss 常驻继电器共享调整次数，C044 共享开格额度；其他场景的替代收益不绕过当前场景已有机制的次数或证据门槛。
+
+通用扩展效果（目录卡另外注册 `c001`–`c090`，具体结算见 `BattleCardRules`）：
 
 | ID | 参数与含义 |
 | --- | --- |

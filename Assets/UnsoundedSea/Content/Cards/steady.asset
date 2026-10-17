@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
   id: steady
   displayName: "\u7A33\u4F4F\u5FC3\u795E"
-  description: "\u83B7\u5F97 6 \u7406\u667A\u9632\u62A4\uFF1B\u4E0D\u62B5\u6D88\u4E3B\u52A8\u652F\u4ED8\u3002"
+  description: "\u83B7\u5F976\u7406\u667A\u9632\u62A4\uFF1B\u4E0D\u62B5\u9500\u4E3B\u52A8\u652F\u4ED8\u3002"
   actionCost: 1
   sanityCost: 0
   exhaust: 0
   effects:
-  - effectId: ward
+  - effectId: c020
     amount: 6

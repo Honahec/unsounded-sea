@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
   id: light
   displayName: "\u4E34\u65F6\u7167\u660E"
-  description: "\u63ED\u793A\u53EF\u89C1\u52A8\u4F5C\uFF1B\u82E5\u5DF2\u77E5\u610F\u56FE\u5219\u62BD 1 \u5F20\u3002"
+  description: "\u786E\u8BA4\u4E00\u540D\u53EF\u89C2\u5BDF\u654C\u4EBA\u7684\u672C\u56DE\u5408\u52A8\u4F5C\uFF1B\u82E5\u5DF2\u786E\u8BA4\uFF0C\u62BD1\u5F20\u724C\uFF1B\u672A\u77E5\u4E14\u4E0D\u53EF\u89C2\u5BDF\u65F6\u4E0D\u80FD\u4F7F\u7528\u3002"
   actionCost: 1
   sanityCost: 0
   exhaust: 0
   effects:
-  - effectId: investigate
-    amount: 0
+  - effectId: c039
+    amount: 1
