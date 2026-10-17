@@ -109,6 +109,11 @@ namespace UnsoundedSea.Core
         private static readonly Dictionary<string, int> numbers = BuildNumbers();
 
         public static IReadOnlyList<CardSpec> All => cards;
+        public static IReadOnlyList<CardSpec> Starter { get; } = Array.AsReadOnly(new[]
+        {
+            Get("revolver"), Get("contradiction"), Get("c012"), Get("cover"), Get("steady"), Get("intuition"),
+            Get("bandage"), Get("notes"), Get("light"), Get("c041"), Get("tear"), Get("c071")
+        });
 
         public static CardSpec Get(string id)
         {

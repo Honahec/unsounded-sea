@@ -54,7 +54,7 @@
 .end-turn { align-self: center; width: 88px; height: 88px; min-height: 88px; flex-shrink: 0; margin: 0; padding: 0; border-radius: 44px; border-width: 2px; border-color: #cbb27b; background-color: rgba(112,79,38,.94); }
 .end-turn:hover { background-color: #816035; border-color: #eee4c9; }
 .end-title { margin-top: 10px; font-size: 17px; color: #eee4c9; -unity-text-align: middle-center; }
-.battle-notice { position: absolute; bottom: 300px; left: 30%; right: 30%; padding: 5px 10px; -unity-text-align: middle-center; background-color: rgba(8,19,22,.72); }
+.battle-subtitle { position: absolute; bottom: 310px; left: 25%; right: 25%; padding: 8px 14px; font-size: 18px; white-space: normal; -unity-text-align: middle-center; color: #eee4c9; text-shadow: 0 2px 4px #000; background-color: rgba(8,19,22,.78); }
 .actor-label { position: absolute; width: 285px; min-height: 48px; padding: 3px 8px; border-width: 0; background-color: transparent; color: #eee4c9; align-items: flex-start; }
 .actor-name, .actor-status { -unity-text-align: middle-left; text-shadow: 0 1px 3px #000; }.actor-name { font-size: 18px; }.actor-status { font-size: 13px; color: #80b5a5; }
 .actor-health { width: 164px; height: 4px; margin-top: 5px; background-color: rgba(8,19,22,.7); }.actor-health-fill { height: 4px; background-color: #9b5d50; }

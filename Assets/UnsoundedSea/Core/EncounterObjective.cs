@@ -6,6 +6,7 @@ namespace UnsoundedSea.Core
         int Progress { get; }
         int Target { get; }
         bool AllowsTaskAction { get; }
+        int ActionCost { get; }
         void Advance(int amount);
         void OnTurnResolved();
         bool IsComplete(bool allEnemiesDefeated);
@@ -13,10 +14,12 @@ namespace UnsoundedSea.Core
 
     public sealed class EncounterObjective : IEncounterObjective
     {
+        public const int SealActionCost = 3;
         private readonly ObjectiveKind kind;
         public int Progress { get; private set; }
         public int Target { get; }
         public bool AllowsTaskAction => kind == ObjectiveKind.Seal;
+        public int ActionCost => AllowsTaskAction ? SealActionCost : 0;
         public string Description => kind == ObjectiveKind.Defeat ? "击退所有敌人" :
             kind == ObjectiveKind.Seal ? $"封门 {Progress}/{Target}" : $"等待撤离 {Progress}/{Target} 回合";
         public EncounterObjective(ObjectiveKind kind, int target) { this.kind = Require.Defined(kind); Target = Require.Positive(target); }

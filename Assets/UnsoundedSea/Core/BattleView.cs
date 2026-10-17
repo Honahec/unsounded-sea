@@ -7,17 +7,18 @@ namespace UnsoundedSea.Core
         public int InstanceId { get; }
         public CardSpec Definition { get; }
         public bool IsEncounter { get; }
+        public int ActionCost { get; internal set; }
         public bool Enabled { get; internal set; }
         public string DisabledReason { get; internal set; }
         public IReadOnlyList<EncounterTargetView> Targets { get; internal set; }
         public CardView(int instanceId, CardSpec definition, bool isEncounter = false)
         {
-            InstanceId = instanceId; Definition = definition; IsEncounter = isEncounter; Enabled = true;
+            InstanceId = instanceId; Definition = definition; IsEncounter = isEncounter; Enabled = true; ActionCost = definition.Cost;
             DisabledReason = ""; Targets = new List<EncounterTargetView>().AsReadOnly();
         }
         internal CardView Snapshot()
         {
-            var copy = new CardView(InstanceId, Definition, IsEncounter) { Enabled = Enabled, DisabledReason = DisabledReason };
+            var copy = new CardView(InstanceId, Definition, IsEncounter) { Enabled = Enabled, DisabledReason = DisabledReason, ActionCost = ActionCost };
             copy.Targets = new List<EncounterTargetView>(Targets).AsReadOnly();
             return copy;
         }

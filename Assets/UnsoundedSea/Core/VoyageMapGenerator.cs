@@ -77,8 +77,12 @@ namespace UnsoundedSea.Core
 
     public static class VoyageMapGenerator
     {
-        public const int Version = 5;
+        public const int Version = 6;
         public const int Layers = 11;
+        private static readonly string[] RegionalBosses =
+        {
+            "fog-visitors", "drowned-bell", "m02", "m03", "m04", "storm-gauntlet", "hollow-beacon"
+        };
         private static readonly RunNodeKind[] Schedule = { RunNodeKind.Supply, RunNodeKind.Battle, RunNodeKind.Event, RunNodeKind.Battle,
             RunNodeKind.Reward, RunNodeKind.Supply, RunNodeKind.Battle, RunNodeKind.Archive, RunNodeKind.Battle, RunNodeKind.Supply, RunNodeKind.Boss };
         private static readonly (string Name,string Clue,string Description)[] Texts =
@@ -117,7 +121,7 @@ namespace UnsoundedSea.Core
                     else if (layer == Layers - 1)
                     {
                         name = "无声灯船"; clue = "终点信号始终熄灭"; description = "决定本海域命运的事物正在前方。";
-                        encounter = BossEncounter(act, regionId);
+                        encounter = BossEncounter(seed, act, regionId);
                     }
                     else
                     {
@@ -170,7 +174,7 @@ namespace UnsoundedSea.Core
                 var index = ParseIndex(stop.Id);
                 var expectedEncounter = stop.Kind == RunNodeKind.Battle
                     ? "voyage-" + data.RegionId + "-" + EncounterVariant(data.Seed, data.Act, data.RegionId, stop.Layer, index)
-                    : stop.Kind == RunNodeKind.Boss ? BossEncounter(data.Act, data.RegionId) : "";
+                    : stop.Kind == RunNodeKind.Boss ? BossEncounter(data.Seed, data.Act, data.RegionId) : "";
                 if (stop.EncounterId != expectedEncounter ||
                     stop.BattleSeed != VoyageSeeds.Derive(data.Seed, "battle", stop.Id + ":" + data.RegionId))
                     throw Invalid("Invalid deterministic content.");
@@ -230,7 +234,16 @@ namespace UnsoundedSea.Core
         private static float SlotX(int count, int index) => count == 1 ? 50f : count == 2 ? 38f + 24f * index : 34f + 16f * index;
         private static int ParseIndex(string id) => int.Parse(id.Substring(id.LastIndexOf('n') + 1));
         private static void ValidateActRegion(int act,string region) { var valid=act==1&&region=="fog"||act==2&&(region=="bones"||region=="inverted"||region=="fleet")||act==3&&region=="abyss"; if(!valid) throw new ArgumentException("Invalid act region."); }
-        private static string BossEncounter(int act,string region) => act==1?"fog-visitors":act==3?"m05":region=="bones"?"m02":region=="inverted"?"m03":"m04";
+        public static string BossEncounter(uint seed, int act, string region)
+        {
+            ValidateActRegion(act, region);
+            if (act == 3) return "m05";
+            var first = (int)(VoyageSeeds.Derive(seed, "boss", "act-1") % (uint)RegionalBosses.Length);
+            if (act == 1) return RegionalBosses[first];
+            var second = (int)(VoyageSeeds.Derive(seed, "boss", "act-2") % (uint)(RegionalBosses.Length - 1));
+            if (second >= first) second++;
+            return RegionalBosses[second];
+        }
         private static string Id(int act,int layer,int index)=>"a"+act+"l"+layer+"n"+index;
         private static bool Finite(float x)=>!float.IsNaN(x)&&!float.IsInfinity(x);
         private static bool ValidText(string x,int max)=>!string.IsNullOrWhiteSpace(x)&&x.Length<=max;

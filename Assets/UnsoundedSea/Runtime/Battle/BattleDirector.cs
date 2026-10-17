@@ -15,10 +15,12 @@ namespace UnsoundedSea.Runtime
         public bool Paused { get; private set; }
         public bool Busy => Time.unscaledTime < feedbackUntil;
         public string Notice { get; private set; }
+        public bool NoticeIsError { get; private set; }
         public event Action Changed;
         public event Action<BattleView, BattleView, BattleCommand> Resolved;
         private BattleSession session;
         private float feedbackUntil;
+        private float noticeUntil;
         private bool wasBusy;
         public BattleReplay CaptureReplay() => session == null ? null : BattleReplay.Capture(session);
 
@@ -30,7 +32,7 @@ namespace UnsoundedSea.Runtime
                 voyage: VoyageRuntime.OwnsEncounter(this) && !VoyageRuntime.IsDebugSession ? VoyageRuntime.Session : null,
                 replay: VoyageRuntime.OwnsEncounter(this) ? VoyageRuntime.PendingReplay : null);
             SelectedEnemy = View.Enemies.FirstOrDefault(x => x.Health > 0 && x.Targetable)?.Id;
-            feedbackUntil = 0; wasBusy = false; Paused = false; Notice = scenario.introduction;
+            feedbackUntil = 0; wasBusy = false; Paused = false; Notice = scenario.introduction; NoticeIsError = false;
             if (Stage != null) { Stage.gameObject.SetActive(false); Destroy(Stage.gameObject); }
             Stage = Instantiate(scenario.stagePrefab);
             Stage.Bind(this);
@@ -38,7 +40,21 @@ namespace UnsoundedSea.Runtime
         }
         private void Update()
         {
-            if (wasBusy && !Busy) { wasBusy = false; Changed?.Invoke(); }
+            if (NoticeIsError && Time.unscaledTime >= noticeUntil)
+            {
+                NoticeIsError = false; Notice = ""; Changed?.Invoke();
+            }
+            if (wasBusy && !Busy)
+            {
+                wasBusy = false;
+                if (View.Phase == BattlePhase.Victory && VoyageRuntime.OwnsEncounter(this))
+                {
+                    VoyageRuntime.ReturnToVoyage();
+                    if (!string.IsNullOrEmpty(VoyageRuntime.EncounterSaveError)) Changed?.Invoke();
+                    return;
+                }
+                Changed?.Invoke();
+            }
         }
         public void Select(string id)
         {
@@ -51,13 +67,18 @@ namespace UnsoundedSea.Runtime
             if (session == null || Paused || Busy) return new CommandResult(false, "请等待当前动作结束。");
             var before = View;
             var result = session.Execute(command);
-            if (!result.Success) { Notice = result.Error; Changed?.Invoke(); return result; }
+            if (!result.Success)
+            {
+                Notice = result.Error; NoticeIsError = true; noticeUntil = Time.unscaledTime + 2.5f;
+                Changed?.Invoke(); return result;
+            }
             var after = View;
             if (!VoyageRuntime.IsDebugSession && before.Phase != BattlePhase.Victory && after.Phase == BattlePhase.Victory)
                 CardDeckPreparation.StoreVerified(after.Evidence);
             if (!after.Enemies.Any(x => x.Id == SelectedEnemy && x.Health > 0 && x.Targetable))
                 SelectedEnemy = after.Enemies.FirstOrDefault(x => x.Health > 0 && x.Targetable)?.Id;
             Notice = after.Log.LastOrDefault(x => !x.Contains("阶段：")) ?? "";
+            NoticeIsError = false;
             feedbackUntil = Time.unscaledTime + (GameSettings.ReducedMotion || !Stage.placeholderCombatMotion ? 0.12f : command.kind == CommandKind.EndTurn ? 1.05f : 0.4f);
             wasBusy = true;
             Resolved?.Invoke(before, after, command);

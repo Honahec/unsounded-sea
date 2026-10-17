@@ -122,6 +122,9 @@ namespace UnsoundedSea.Editor
                 }
             }
 
+            ConfigureEcho();
+            AddAdditionalBosses(entries, deck, tools);
+
             AddExisting(entries, "fog-visitors", Root + "/Content/Scenarios/FogVisitors.asset", "雾海");
             AddExisting(entries, "m02", Root + "/Content/Scenarios/M02.asset", "潮骨海");
             AddExisting(entries, "m03", Root + "/Content/Scenarios/M03.asset", "倒悬海");
@@ -199,15 +202,107 @@ namespace UnsoundedSea.Editor
                 isPublic = isPublic, interruptible = interruptible, visibleAction = visibleAction, soundSource = soundSource
             };
 
-        private static CardDefinition[] StarterDeck()
+        private static CardDefinition[] StarterDeck() =>
+            CardCatalog.Starter.Select(spec => Load<CardDefinition>($"{Root}/Content/Cards/{spec.Id}.asset")).ToArray();
+
+        private static void ConfigureEcho()
         {
-            var numbers = new[] { 1, 2, 12, 19, 20, 21, 22, 37, 39, 41, 55, 71 };
-            return numbers.Select(number =>
+            var echo = Load<EnemyDefinition>(Root + "/Content/Enemies/echo.asset");
+            if (echo.intents == null || echo.intents.Length != 2)
+                throw new InvalidOperationException("Echo requires its two established intent slots.");
+            echo.candidateDescription = "沉重脚步：20 生命伤害 / 无风铃鸣：10 理智冲击；均在本回合明确预告且可打断";
+            echo.intents[0].amount = 20;
+            echo.intents[1].amount = 10;
+            foreach (var intent in echo.intents)
             {
-                var spec = CardCatalog.All.Single(card => CardCatalog.Number(card.Id) == number);
-                return Load<CardDefinition>($"{Root}/Content/Cards/{spec.Id}.asset");
-            }).ToArray();
+                intent.isPublic = true;
+                intent.interruptible = true;
+            }
+            EditorUtility.SetDirty(echo);
+            AssetDatabase.SaveAssetIfDirty(echo);
+            var scenario = Load<BattleScenario>(Root + "/Content/Scenarios/FogVisitors.asset");
+            scenario.objectiveHint = "绘制封线基础消耗3行动、每回合一次；合法场景折扣照常生效。20生命或10理智威胁均明确预告且可打断。";
+            scenario.introduction = "在回声的公开重压下完成四段封线；连续三次同通道威胁会耗尽满资源，必须按预告安排防护或打断。";
+            EditorUtility.SetDirty(scenario);
+            AssetDatabase.SaveAssetIfDirty(scenario);
         }
+
+        private static void AddAdditionalBosses(ICollection<(string id, BattleScenario scenario, string group, bool isBoss)> entries,
+            CardDefinition[] deck, ToolDefinition[] tools)
+        {
+            var bellScenario = Load<BattleScenario>(Root + "/Content/Scenarios/DrownedBell.asset");
+            var fogScenario = Load<BattleScenario>(Root + "/Content/Scenarios/FogVisitors.asset");
+            var bellVisual = Load<EnemyDefinition>(Root + "/Content/Enemies/bell-mother.asset").presentationPrefab;
+            var echoVisual = Load<EnemyDefinition>(Root + "/Content/Enemies/echo.asset").presentationPrefab;
+
+            var stormEnemy = BossEnemy("storm-gauntlet", "黑潮压舱者", 72, bellVisual,
+                I("breaker", "压舱巨浪", "黑潮脊线越过船艏，撞击方向已经锁定。", 18, true, true),
+                S("undertow", "舱底回声", "压舱舱门向内鼓起，九次敲击清晰可数。", 9, true, true));
+            var stormEncounter = BossEncounter("storm-gauntlet", "黑潮压舱战", ObjectiveKind.Survive, 5, stormEnemy, deck, tools);
+            var stormRules = Asset<SurvivalRuleModule>(Root + "/Content/Scenarios", "StormGauntletRules",
+                value => value.objectiveDescription = "在公开重压下撑过五轮，驶出黑潮");
+            var storm = BossScenario("StormGauntlet", stormEncounter, bellScenario.stagePrefab, stormRules,
+                "区域 Boss / 黑潮压舱者", "公开的18生命冲击或9理智冲击均可打断；撑过五轮。",
+                "每轮先读预告，再决定防护、打断或抢攻。", "第五轮潮头越过船尾，鸦号仍然浮在海面。");
+            entries.Add(("storm-gauntlet", storm, "区域 Boss", true));
+
+            var beaconEnemy = BossEnemy("hollow-beacon", "空心航标", 48, echoVisual,
+                I("ram", "航标撞舷", "锈蚀浮筒侧倾，撞角正对船腰。", 10, true, true),
+                S("call", "空腔呼名", "航标空腔吸入海风，即将喊出船员姓名。", 5, true, true));
+            var beaconEncounter = BossEncounter("hollow-beacon", "空心航标", ObjectiveKind.Defeat, 1, beaconEnemy, deck, tools);
+            var beacon = BossScenario("HollowBeacon", beaconEncounter, fogScenario.stagePrefab, null,
+                "区域 Boss / 空心航标", "本体48生命；公开的10生命攻击或5理智冲击均可打断。",
+                "它没有护持或无敌阶段：在承压与打断之间分配行动，直接击破本体。", "航标外壳裂开，里面只有倒灌的海水。");
+            entries.Add(("hollow-beacon", beacon, "区域 Boss", true));
+        }
+
+        private static EnemyDefinition BossEnemy(string id, string name, int health, GameObject visual, params IntentData[] intents) =>
+            Asset<EnemyDefinition>(EnemyFolder, id, value =>
+            {
+                value.id = id;
+                value.displayName = name;
+                value.health = health;
+                value.candidateDescription = string.Join(" / ", intents.Select(x => $"{x.displayName}：{x.amount} {(x.channel == DamageChannel.Sanity ? "理智冲击" : "生命伤害")}（公开、可打断）"));
+                value.intents = intents;
+                value.presentationPrefab = visual;
+            });
+
+        private static EncounterDefinition BossEncounter(string id, string name, ObjectiveKind objective, int target,
+            EnemyDefinition enemy, CardDefinition[] deck, ToolDefinition[] tools) =>
+            Asset<EncounterDefinition>(EncounterFolder, id, value =>
+            {
+                value.id = id;
+                value.displayName = name;
+                value.objective = objective;
+                value.objectiveTarget = target;
+                value.playerHealth = 60;
+                value.playerSanity = 30;
+                value.actionsPerTurn = 3;
+                value.drawPerTurn = 5;
+                value.deck = deck;
+                value.enemies = new[] { enemy };
+                value.equippedTools = tools;
+            });
+
+        private static BattleScenario BossScenario(string assetName, EncounterDefinition encounter, BattleStage stage,
+            BattleRuleModule rules, string heading, string hint, string introduction, string victory) =>
+            Asset<BattleScenario>(Root + "/Content/Scenarios", assetName, value =>
+            {
+                value.encounter = encounter;
+                value.stagePrefab = stage;
+                value.actorOverrides = Array.Empty<GameObject>();
+                value.rules = rules;
+                value.chapter = "区域 Boss";
+                value.location = "鸦号调查船 · 禁航水域";
+                value.enemyHeading = heading;
+                value.objectiveHint = hint;
+                value.enemyStatus = string.Empty;
+                value.introduction = introduction;
+                value.objectiveHeading = encounter.objective == ObjectiveKind.Survive ? "保持船体与神志，撑过重压。" : "击破可受伤的本体。";
+                value.taskLabel = string.Empty;
+                value.victoryText = victory;
+                value.defeatText = "鸦号在公开威胁下失去控制，航程中断。";
+            });
 
         private static void AddExisting(ICollection<(string id, BattleScenario scenario, string group, bool isBoss)> entries,
             string id, string path, string group)

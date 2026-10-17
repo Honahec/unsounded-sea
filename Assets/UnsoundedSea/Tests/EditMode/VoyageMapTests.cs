@@ -18,13 +18,29 @@ namespace UnsoundedSea.Tests
                 var paths=new Stack<Tuple<string,int>>();paths.Push(Tuple.Create(plan.StartId,1));var count=0;
                 while(paths.Count>0){var item=paths.Pop();if(item.Item1==plan.GoalId){Assert.That(item.Item2,Is.EqualTo(11));count++;continue;}foreach(var next in byId[item.Item1].Next)paths.Push(Tuple.Create(next,item.Item2+1));}
                 Assert.That(count,Is.GreaterThan(1));
-                Assert.That(byId[plan.GoalId].EncounterId,Is.EqualTo(act==1?"fog-visitors":act==3?"m05":region=="bones"?"m02":region=="inverted"?"m03":"m04"));
+                Assert.That(byId[plan.GoalId].EncounterId,Is.EqualTo(VoyageMapGenerator.BossEncounter(seed,act,region)));
                 Assert.That(plan.Stops.Where(x=>x.Kind==RunNodeKind.Battle).All(x=>x.EncounterId.StartsWith("voyage-"+region+"-",StringComparison.Ordinal)),Is.True);
                 var battles=plan.Stops.Where(x=>x.Kind==RunNodeKind.Battle).GroupBy(x=>x.Layer).Select(x=>x.First().EncounterId).ToArray();
                 Assert.That(battles,Has.Length.EqualTo(4)); Assert.That(battles,Is.Unique);
                 Assert.That(plan.Stops.Count(x=>x.Kind==RunNodeKind.Reward),Is.EqualTo(plan.Stops.Count(x=>x.Layer==4)));
                 Assert.That(plan.Stops.Count(x=>x.Kind==RunNodeKind.Boss),Is.EqualTo(1));
             }
+        }
+
+        [Test]
+        public void FirstTwoActsShareSevenBossesWithoutRepeatingAndFinaleIsFixed()
+        {
+            var seen=new HashSet<string>();
+            for(uint seed=0;seed<256;seed++)
+            {
+                var first=VoyageMapGenerator.BossEncounter(seed,1,"fog");
+                var second=VoyageMapGenerator.BossEncounter(seed,2,"bones");
+                Assert.That(second,Is.Not.EqualTo(first));
+                Assert.That(VoyageMapGenerator.BossEncounter(seed,2,"fleet"),Is.EqualTo(second),"Region choice must not bind the boss.");
+                Assert.That(VoyageMapGenerator.BossEncounter(seed,3,"abyss"),Is.EqualTo("m05"));
+                seen.Add(first);seen.Add(second);
+            }
+            Assert.That(seen,Is.EquivalentTo(new[]{"fog-visitors","drowned-bell","m02","m03","m04","storm-gauntlet","hollow-beacon"}));
         }
 
         [Test]

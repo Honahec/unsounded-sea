@@ -39,6 +39,7 @@ namespace UnsoundedSea.Core
         {
             foreach (var card in hand.Where(x => !x.IsEncounter))
             {
+                card.ActionCost = card.Definition.Cost;
                 var targets = BuildCardTargets(card).ToList();
                 card.Targets = targets.AsReadOnly();
                 var reason = CardAvailability(card, targets);
@@ -47,7 +48,8 @@ namespace UnsoundedSea.Core
             }
             foreach (var card in hand.Where(x => x.IsEncounter && x.Definition.Id == SealCardId))
             {
-                var cost = Math.Max(0, card.Definition.Cost - sceneDiscount);
+                var cost = Math.Max(0, objective.ActionCost - sceneDiscount);
+                card.ActionCost = cost;
                 card.Targets = EmptyTargets;
                 card.Enabled = phase == BattlePhase.PlayerTurn && objective.AllowsTaskAction && !taskUsed && actions >= cost;
                 card.DisabledReason = card.Enabled ? "" : "任务行动不可用（每回合一次，行动不足）。";

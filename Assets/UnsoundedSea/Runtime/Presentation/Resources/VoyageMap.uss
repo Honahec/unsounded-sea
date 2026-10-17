@@ -16,7 +16,10 @@
 .map-title { color: rgb(232, 214, 169); font-size: 18px; letter-spacing: 4px; }
 .map-note { color: rgb(111, 170, 153); font-size: 11px; letter-spacing: 1px; }
 .map-empty { flex-grow: 1; color: rgb(165, 174, 149); font-size: 15px; letter-spacing: 2px; -unity-text-align: middle-center; }
-.nautical-chart { flex-grow: 1; margin: 5px 0 3px; overflow: hidden; background-color: rgba(10, 36, 38, 0.76); }
+.map-chart-scroll { flex-grow: 1; min-height: 0; margin: 5px 0 3px; }
+.map-chart-scroll .unity-scroll-view__content-viewport { background-color: rgba(10, 36, 38, 0.76); }
+.map-chart-scroll .unity-scroll-view__vertical-scroller { width: 18px; }
+.nautical-chart { height: 1280px; flex-shrink: 0; overflow: hidden; background-color: rgba(10, 36, 38, 0.76); }
 .voyage-map-panel .chart-node { position: absolute; width: 112px; height: 58px; padding: 0; translate: -50% -50%; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0); border-width: 0; }
 .voyage-map-panel .chart-node:disabled { opacity: 1; }
 .voyage-map-panel .chart-node:hover, .voyage-map-panel .chart-node:focus { background-color: rgba(20, 54, 51, 0.82); border-width: 1px; border-color: rgb(185, 151, 89); }

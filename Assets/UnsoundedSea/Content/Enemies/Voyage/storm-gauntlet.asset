@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 704da23baf0814ad2a86fad0cc4954f8, type: 3}
+  m_Name: storm-gauntlet
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
+  id: storm-gauntlet
+  displayName: "\u9ED1\u6F6E\u538B\u8231\u8005"
+  health: 72
+  candidateDescription: "\u538B\u8231\u5DE8\u6D6A\uFF1A18 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\u3001\u53EF\u6253\u65AD\uFF09 / \u8231\u5E95\u56DE\u58F0\uFF1A9 \u7406\u667A\u51B2\u51FB\uFF08\u516C\u5F00\u3001\u53EF\u6253\u65AD\uFF09"
+  intents:
+  - id: breaker
+    displayName: "\u538B\u8231\u5DE8\u6D6A"
+    clue: "\u9ED1\u6F6E\u810A\u7EBF\u8D8A\u8FC7\u8239\u824F\uFF0C\u649E\u51FB\u65B9\u5411\u5DF2\u7ECF\u9501\u5B9A\u3002"
+    channel: 0
+    amount: 18
+    isPublic: 1
+    visibleAction: 1
+    interruptible: 1
+    soundSource: "\u76EE\u6807\u672C\u4F53"
+  - id: undertow
+    displayName: "\u8231\u5E95\u56DE\u58F0"
+    clue: "\u538B\u8231\u8231\u95E8\u5411\u5185\u9F13\u8D77\uFF0C\u4E5D\u6B21\u6572\u51FB\u6E05\u6670\u53EF\u6570\u3002"
+    channel: 1
+    amount: 9
+    isPublic: 1
+    visibleAction: 1
+    interruptible: 1
+    soundSource: "\u76EE\u6807\u672C\u4F53"
+  presentationPrefab: {fileID: 8984778701387373944, guid: 9c9862915f8e04bdaa8d34fda746e400, type: 3}

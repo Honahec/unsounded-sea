@@ -17,7 +17,7 @@ namespace UnsoundedSea.Runtime
             var title = new Label("行动簿"); title.AddToClassList("battle-action-book-title"); sheet.Add(title);
 
             var voyage = voyageEncounter && !VoyageRuntime.IsDebugSession ? VoyageRuntime.Session : null;
-            IEnumerable<string> equippedIds = voyage != null ? voyage.DeckIds : CardDeckPreparation.Prepared.Select(card => card.Id);
+            IEnumerable<string> equippedIds = voyage != null ? voyage.DeckIds : CardCatalog.Starter.Select(card => card.Id);
             var equipped = new HashSet<string>(equippedIds, StringComparer.Ordinal);
             IEnumerable<string> ids = voyage != null ? voyage.LearnedCardIds : equipped;
             var body = new VisualElement(); body.AddToClassList("battle-action-book-body"); sheet.Add(body);

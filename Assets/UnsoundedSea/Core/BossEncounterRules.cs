@@ -320,6 +320,7 @@ namespace UnsoundedSea.Core
             {
                 foreach (var card in s.hand.Where(x => x.IsEncounter))
                 {
+                    card.ActionCost = Math.Max(0, card.Definition.Cost - s.sceneDiscount);
                     var reason = ValidateAvailability(card.Definition.Id); card.Enabled = reason == null; card.DisabledReason = reason ?? "";
                     card.Targets = card.Definition.Id == "E02-01" ? EmptyTargets : targets
                         .Where(x => card.Definition.Id == "E04-01" ? x.Id.Contains(":") : card.Definition.Id == "E04-02" ? x.Id.StartsWith("lock-", StringComparison.Ordinal) : card.Definition.Id == "E05-02" ? x.Id.Contains("|") : card.Definition.Id == "E05-01" || card.Definition.Id == "E05-03" ? x.Id == "winch" : true)

@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 704da23baf0814ad2a86fad0cc4954f8, type: 3}
+  m_Name: hollow-beacon
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
+  id: hollow-beacon
+  displayName: "\u7A7A\u5FC3\u822A\u6807"
+  health: 48
+  candidateDescription: "\u822A\u6807\u649E\u8237\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\u3001\u53EF\u6253\u65AD\uFF09 / \u7A7A\u8154\u547C\u540D\uFF1A5 \u7406\u667A\u51B2\u51FB\uFF08\u516C\u5F00\u3001\u53EF\u6253\u65AD\uFF09"
+  intents:
+  - id: ram
+    displayName: "\u822A\u6807\u649E\u8237"
+    clue: "\u9508\u8680\u6D6E\u7B52\u4FA7\u503E\uFF0C\u649E\u89D2\u6B63\u5BF9\u8239\u8170\u3002"
+    channel: 0
+    amount: 10
+    isPublic: 1
+    visibleAction: 1
+    interruptible: 1
+    soundSource: "\u76EE\u6807\u672C\u4F53"
+  - id: call
+    displayName: "\u7A7A\u8154\u547C\u540D"
+    clue: "\u822A\u6807\u7A7A\u8154\u5438\u5165\u6D77\u98CE\uFF0C\u5373\u5C06\u558A\u51FA\u8239\u5458\u59D3\u540D\u3002"
+    channel: 1
+    amount: 5
+    isPublic: 1
+    visibleAction: 1
+    interruptible: 1
+    soundSource: "\u76EE\u6807\u672C\u4F53"
+  presentationPrefab: {fileID: 6536484850760832164, guid: d6e078df63125453e87419a8e7f51e6d, type: 3}

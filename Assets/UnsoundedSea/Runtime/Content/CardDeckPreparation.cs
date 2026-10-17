@@ -8,17 +8,9 @@ namespace UnsoundedSea.Runtime
 {
     public static class CardDeckPreparation
     {
-        public const int DeckSize = 12;
-        private const string Preference = "unsounded-sea.prepared-deck";
         private const string ArchivePreference = "unsounded-sea.verified-archive";
         private const string CrewPreference = "unsounded-sea.prepared-crew";
         public static string CrewId => PlayerPrefs.GetString(CrewPreference, "medic");
-        public static void SaveCrew(string id)
-        {
-            if (id != "medic" && id != "listener") throw new ArgumentException("Unknown initial crew.", nameof(id));
-            PlayerPrefs.SetString(CrewPreference, id); PlayerPrefs.Save();
-        }
-        private static readonly int[] StarterNumbers = { 1, 2, 12, 19, 20, 21, 22, 37, 39, 41, 55, 71 };
         [Serializable] private sealed class ArchiveData { public ArchiveEntry[] entries = Array.Empty<ArchiveEntry>(); }
         [Serializable] private sealed class ArchiveEntry { public string key; public string text; public string source; }
 
@@ -45,27 +37,10 @@ namespace UnsoundedSea.Runtime
             catch (Exception) { return Array.Empty<Evidence>(); }
         }
 
-        public static IReadOnlyList<CardSpec> Prepared
-        {
-            get
-            {
-                var ids = PlayerPrefs.GetString(Preference, "").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                var selected = ids.Select(TryGet).Where(card => card != null).GroupBy(card => card.Id).Select(group => group.First()).ToList();
-                return selected.Count == DeckSize ? selected : CardCatalog.All.Where(card => StarterNumbers.Contains(CardCatalog.Number(card.Id))).ToList();
-            }
-        }
-
-        public static void Save(IEnumerable<string> ids)
-        {
-            var selected = ids.Distinct().Select(CardCatalog.Get).ToArray();
-            if (selected.Length != DeckSize) throw new InvalidOperationException($"行动簿必须恰好编入 {DeckSize} 张不同卡牌。");
-            PlayerPrefs.SetString(Preference, string.Join(",", selected.Select(card => card.Id)));
-            PlayerPrefs.Save();
-        }
 
         public static BattleDefinition Apply(BattleDefinition source, VoyageSession voyage = null)
         {
-            var deck = voyage == null ? Prepared : voyage.DeckIds.Select(CardCatalog.Get).ToArray();
+            var deck = voyage == null ? CardCatalog.Starter : voyage.DeckIds.Select(CardCatalog.Get).ToArray();
             var supports = (voyage?.CrewId ?? CrewId) == "listener"
                 ? new[] { new CrewSupportSpec("listener", "听测员", CrewSupportKind.Listener) }
                 : new[] { new CrewSupportSpec("medic", "医护员", CrewSupportKind.Medic) };
@@ -81,10 +56,5 @@ namespace UnsoundedSea.Runtime
                 voyage?.Health ?? source.InitialHealth, voyage?.Sanity ?? source.InitialSanity);
         }
 
-        private static CardSpec TryGet(string id)
-        {
-            try { return CardCatalog.Get(id); }
-            catch (Exception) { return null; }
-        }
     }
 }

@@ -172,7 +172,7 @@ namespace UnsoundedSea.Runtime
                 }, "tool");
                 button.Add(new SeaUiArt(crew.Definition.Kind == CrewSupportKind.Medic ? "heart" : "ear"));
                 button.Add(Text(crew.Definition.Name, "tool-name"));
-                button.Add(Text(crew.Used ? "本场已用" : "1行动", "tool-meta"));
+                button.Add(Text(crew.Used ? "本场已用" : $"{crew.Definition.Cost}行动", "tool-meta"));
                 button.tooltip = crew.Enabled ? "船员支援 · 每回合最多一次，每人每场一次" : crew.DisabledReason;
                 button.SetEnabled(active && crew.Enabled); tools.Add(button);
             }
@@ -215,7 +215,10 @@ namespace UnsoundedSea.Runtime
                 var c = card; var def = c.Definition;
                 var b = Button("card-" + c.InstanceId, "", () =>
                 {
-                    if (!c.Enabled || !c.IsEncounter && (def.Cost > v.Actions || def.SanityCost >= v.Sanity)) { inspectedCard = c.InstanceId; Render(); return; }
+                    if (!c.Enabled || !c.IsEncounter && (def.Cost > v.Actions || def.SanityCost >= v.Sanity))
+                    {
+                        director.Submit(BattleCommand.Play(c.InstanceId)); return;
+                    }
                     selectedSupport = null;
                     var automaticTarget = EnemyCardSelection.AutomaticTarget(c, v);
                     if (c.Targets.Count == 0 || automaticTarget != null) { selectedEncounterCard = 0; director.Submit(BattleCommand.Play(c.InstanceId, automaticTarget)); }
@@ -244,9 +247,9 @@ namespace UnsoundedSea.Runtime
                 }
                 var face = Box("sea-card"); face.pickingMode = PickingMode.Position;
                 IllustratedCard.Apply(face, def);
+                if (c.IsEncounter) face.Q<Label>("illustrated-cost").text = c.ActionCost.ToString();
                 face.Add(Text("D 详情", "card-detail-hint"));
-                if (!c.Enabled) face.Add(Text(c.DisabledReason, "fine-print"));
-                b.Add(face); b.tooltip = def.Name + "：" + def.Description + (!c.Enabled ? "\n" + c.DisabledReason : "") + "\n右键或聚焦后按 D 查看大图";
+                b.Add(face); b.tooltip = def.Name + "：" + def.Description;
                 b.EnableInClassList("card-disabled", !c.Enabled || !c.IsEncounter && (def.Cost > v.Actions || def.SanityCost >= v.Sanity));
                 b.SetEnabled(active); fan.Add(b);
             }
@@ -257,8 +260,8 @@ namespace UnsoundedSea.Runtime
             end.tooltip = "结束回合";
             end.SetEnabled(active); controls.Add(end);
             controls.Add(Text("结束回合", "end-title"));
-            if (!string.IsNullOrWhiteSpace(director.Notice) && director.Notice != scenario.introduction)
-                root.Add(Text(director.Notice, "battle-notice"));
+            if (director.NoticeIsError)
+                root.Add(Text(director.Notice, "battle-subtitle"));
             if (!string.IsNullOrEmpty(playedCardFeedback))
             {
                 var feedback = Text("已打出 · " + playedCardFeedback, "card-play-feedback");
@@ -315,7 +318,8 @@ namespace UnsoundedSea.Runtime
             else if (director.Paused || v.Phase == BattlePhase.Victory || v.Phase == BattlePhase.Defeat)
             {
                 foreach (var child in root.Children().ToArray()) child.SetEnabled(false);
-                Modal(v);
+                if (v.Phase != BattlePhase.Victory || !VoyageRuntime.OwnsEncounter(director) || !string.IsNullOrEmpty(VoyageRuntime.EncounterSaveError))
+                    Modal(v);
             }
             if (v.PendingChoice != null)
             {
@@ -512,6 +516,14 @@ namespace UnsoundedSea.Runtime
         {
             overlay = Box("ocean-modal"); overlay.pickingMode = PickingMode.Position; root.Add(overlay);
             var sheet = Box("ocean-sheet"); overlay.Add(sheet);
+            if (view.Phase == BattlePhase.Victory && VoyageRuntime.OwnsEncounter(director))
+            {
+                sheet.Add(Text("保存失败", "modal-title"));
+                sheet.Add(Text(VoyageRuntime.EncounterSaveError, "modal-copy"));
+                sheet.Add(Button("battle-save-retry", "重试保存", () => { VoyageRuntime.ReturnToVoyage(); Render(); }));
+                sheet.schedule.Execute(() => sheet.Q<Button>("battle-save-retry")?.Focus());
+                return;
+            }
             if (showSettings) { sheet.Add(new SettingsPanel(() => { showSettings = false; Render(); })); return; }
             bool end = view.Phase == BattlePhase.Victory || view.Phase == BattlePhase.Defeat;
             if (!end && !journalOpen)

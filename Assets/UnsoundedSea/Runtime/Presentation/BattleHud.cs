@@ -24,6 +24,7 @@ namespace UnsoundedSea.Runtime
         private VisualElement root;
         private string selectedEnemy;
         private string message;
+        private float messageUntil;
         private int encounterIndex;
         private bool journalOpen;
         private bool menuOpen;
@@ -58,7 +59,14 @@ namespace UnsoundedSea.Runtime
             }
             catch (Exception exception) { root.Add(Text("界面加载失败：" + exception.Message, "error")); Debug.LogException(exception); }
         }
-        private void Update() { RenderedFrames++; }
+        private void Update()
+        {
+            RenderedFrames++;
+            if (!string.IsNullOrEmpty(message) && Time.unscaledTime >= messageUntil)
+            {
+                message = ""; Refresh();
+            }
+        }
         private void OnDisable()
         {
             chartOpen = false; chartWasMenuOpen = false; chartWasJournalOpen = false; bookOpen = false;
@@ -163,6 +171,7 @@ namespace UnsoundedSea.Runtime
                 CardDeckPreparation.StoreVerified(after.Evidence);
             if (result.Success && playedName != null) playedCardFeedback = playedName;
             message = result.Success ? "" : result.Error;
+            messageUntil = Time.unscaledTime + 2.5f;
             Refresh();
             return result;
         }
@@ -363,7 +372,7 @@ namespace UnsoundedSea.Runtime
                 button.EnableInClassList("spent", crew.Used);
                 button.Add(new SeaUiArt(crew.Definition.Kind == CrewSupportKind.Medic ? "heart" : "ear"));
                 button.Add(Text(crew.Definition.Name, "tool-name"));
-                button.Add(Text(crew.Used ? "本场已用" : "1 行动 · 船员支援", crew.Used ? "tool-spent" : "tool-uses"));
+                button.Add(Text(crew.Used ? "本场已用" : $"{crew.Definition.Cost}行动", crew.Used ? "tool-spent" : "tool-uses"));
                 button.tooltip = crew.Enabled ? "每回合最多一次，每名船员每场一次。" : crew.DisabledReason;
                 tools.Add(button);
             }
@@ -446,7 +455,7 @@ namespace UnsoundedSea.Runtime
                 var shortSanity = !card.IsEncounter && view.Sanity <= data.SanityCost;
                 var button = Button("card-" + id, "", "card-anchor", () =>
                 {
-                    if (!card.Enabled || shortAction || shortSanity) { inspectedCard = id; Refresh(); return; }
+                    if (!card.Enabled || shortAction || shortSanity) { Send(BattleCommand.Play(id)); return; }
                     selectedSupport = null;
                     var automaticTarget = EnemyCardSelection.AutomaticTarget(card, view);
                     if (card.Targets.Count == 0 || automaticTarget != null) { selectedCard = 0; Send(BattleCommand.Play(id, automaticTarget)); }
@@ -468,11 +477,11 @@ namespace UnsoundedSea.Runtime
                     else { inspectedCard = id; Refresh(); }
                     evt.StopPropagation();
                 });
-                button.tooltip = data.Name + "：" + data.Description + (!card.Enabled ? "\n" + card.DisabledReason : "") + "\n右键或聚焦后按 D 查看大图";
+                button.tooltip = data.Name + "：" + data.Description;
                 var face = Element("card"); face.pickingMode = PickingMode.Position;
                 IllustratedCard.Apply(face, data);
+                if (card.IsEncounter) face.Q<Label>("illustrated-cost").text = card.ActionCost.ToString();
                 face.Add(Text("D 详情", "card-detail-hint"));
-                if (!card.Enabled) face.Add(Text(card.DisabledReason, "card-blocked"));
                 button.Add(face); fan.Add(button);
             }
             root.Add(hand);
@@ -539,12 +548,11 @@ namespace UnsoundedSea.Runtime
             controls.Add(Text("结束回合", "end-title"));
             root.Add(controls);
 
-            var latest = PlayerLog(view).Select(entry => entry.text).LastOrDefault() ?? "";
-            var notice = Text(string.IsNullOrEmpty(message) ? latest : "无法执行 · " + message, "notice");
-            notice.name = "battle-message";
-            notice.EnableInClassList("error", !string.IsNullOrEmpty(message));
-            notice.EnableInClassList("hidden", notice.text.Length == 0);
-            root.Add(notice);
+            if (!string.IsNullOrEmpty(message))
+            {
+                var notice = Text(message, "battle-subtitle");
+                notice.name = "battle-message"; root.Add(notice);
+            }
 
             if (concluded)
             {

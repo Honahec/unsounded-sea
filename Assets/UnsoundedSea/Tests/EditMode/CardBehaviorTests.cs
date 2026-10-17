@@ -47,15 +47,32 @@ namespace UnsoundedSea.Tests
             Assert.That(session.View.Enemies.All(x => x.Health == 96), Is.True);
         }
 
-        [Test] public void CrewSupportCostsActionAndIsOncePerEncounter()
+        [Test] public void CrewSupportUsesItsOwnCostAndRemainsOncePerEncounter()
         {
             var medic = new CrewSupportSpec("medic", "医务员", CrewSupportKind.Medic);
-            var session = new BattleSession(Definition(CardCatalog.Get("cover"), supports: new[] { medic }), 1);
-            Assert.That(session.Execute(BattleCommand.Support("medic")).Success, Is.True);
-            Assert.That(session.View.Actions, Is.EqualTo(2));
-            Assert.That(session.Execute(BattleCommand.Support("medic")).Success, Is.False);
-            session.Execute(BattleCommand.EndTurn());
-            Assert.That(session.View.Supports.Single().Enabled, Is.False);
+            var listener = new CrewSupportSpec("listener", "听测员", CrewSupportKind.Listener);
+            var medicSession = new BattleSession(Definition(CardCatalog.Get("cover"), health: 10, supports: new[] { medic }), 1);
+            Assert.That(medic.Cost, Is.EqualTo(1));
+            Assert.That(medicSession.Execute(BattleCommand.EndTurn()).Success, Is.True);
+            Assert.That(medicSession.View.Health, Is.EqualTo(4));
+            Assert.That(medicSession.Execute(BattleCommand.Support("medic")).Success, Is.True);
+            Assert.That(medicSession.View.Health, Is.EqualTo(6));
+            Assert.That(medicSession.Execute(BattleCommand.Support("medic")).Success, Is.False);
+            Assert.That(medicSession.View.Supports.Single().Enabled, Is.False);
+
+            var listenerSession = new BattleSession(Definition(CardCatalog.Get("cover"), supports: new[] { listener }), 1);
+            Assert.That(listener.Cost, Is.EqualTo(2));
+            Assert.That(listenerSession.Execute(BattleCommand.Support("listener", "enemy")).Success, Is.True);
+            Assert.That(listenerSession.View.Actions, Is.EqualTo(1));
+            var insufficient = new BattleSession(Definition(CardCatalog.Get("cover"), supports: new[] { listener }), 1);
+            Assert.That(insufficient.Execute(BattleCommand.Play(Card(insufficient).InstanceId)).Success, Is.True);
+            Assert.That(insufficient.Execute(BattleCommand.Play(Card(insufficient).InstanceId)).Success, Is.True);
+            Assert.That(insufficient.View.Actions, Is.EqualTo(1));
+            Assert.That(insufficient.View.Supports.Single().Enabled, Is.False);
+            Assert.That(insufficient.View.Supports.Single().DisabledReason, Does.Contain("行动点不足"));
+            Assert.That(insufficient.Execute(BattleCommand.Support("listener", "enemy")).Success, Is.False);
+            Assert.That(insufficient.View.Actions, Is.EqualTo(1));
+            Assert.That(insufficient.View.Supports.Single().Used, Is.False);
         }
 
         [Test] public void ArchiveFallbackUsesOnlySuppliedEvidence()
@@ -209,12 +226,12 @@ namespace UnsoundedSea.Tests
         {
             var source = Definition(CardCatalog.Get("c087"));
             var session = new BattleSession(new BattleDefinition("task", source.Deck, source.Enemies, source.Tools,
-                ObjectiveKind.Seal, 4), 1);
+                ObjectiveKind.Seal, 4, actions: 7), 1);
             var seal = session.View.Hand.Single(x => x.IsEncounter);
             Assert.That(session.Execute(BattleCommand.Play(seal.InstanceId)).Success, Is.True);
             var card = Card(session);
             Assert.That(session.Execute(BattleCommand.Play(card.InstanceId, card.Targets.Single().Id)).Success, Is.True);
-            Assert.That(session.View.Actions, Is.EqualTo(1));
+            Assert.That(session.View.Actions, Is.EqualTo(3));
             Assert.That(session.View.ObjectiveProgress, Is.EqualTo(1));
             Assert.That(session.Execute(BattleCommand.Play(seal.InstanceId)).Success, Is.True);
             Assert.That(session.View.Actions, Is.Zero);

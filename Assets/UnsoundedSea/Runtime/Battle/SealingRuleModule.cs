@@ -14,6 +14,7 @@ namespace UnsoundedSea.Runtime
             public int Progress { get; private set; }
             public int Target { get; }
             public bool AllowsTaskAction => true;
+            public int ActionCost => EncounterObjective.SealActionCost;
             public SealingObjective(string text, int target) { Description = text; Target = target; }
             public void Advance(int amount) { Progress = System.Math.Min(Target, Progress + amount); }
             public void OnTurnResolved() { }

@@ -24,10 +24,9 @@ namespace UnsoundedSea.Core
 
     public sealed class VoyageSession
     {
-        public const int CheckpointVersion=5;
+        public const int CheckpointVersion=6;
         public const int ActLength=11;
         private const int InitialToolUses=2, MaxHistory=512;
-        private static readonly string[] StarterDeck={"revolver","contradiction","c012","cover","steady","intuition","bandage","notes","light","c041","tear","c071"};
         private static readonly string[] InitialTools={"lantern","listener","shell"};
         private static readonly int[] CommonRewards = { 3, 5, 7, 9, 14, 18, 23, 24, 27, 28, 29, 31, 33, 35, 38, 40, 45, 49, 50, 51, 53, 54 };
         private static readonly Dictionary<string, int[]> RegionRewards = new Dictionary<string, int[]>
@@ -43,7 +42,7 @@ namespace UnsoundedSea.Core
         private readonly List<string> visited=new List<string>(), log=new List<string>(), knowledge=new List<string>();
         private readonly List<VoyageActionData> history=new List<VoyageActionData>();
         private readonly HashSet<string> knownStopIds=new HashSet<string>(StringComparer.Ordinal), knownRouteKeys=new HashSet<string>(StringComparer.Ordinal);
-        private readonly List<string> deck=new List<string>(StarterDeck), learned=new List<string>(StarterDeck);
+        private readonly List<string> deck=new List<string>(CardCatalog.Starter.Select(card=>card.Id)), learned=new List<string>(CardCatalog.Starter.Select(card=>card.Id));
         private readonly List<string> tools=new List<string>{"lantern","listener"}, learnedTools=new List<string>(InitialTools);
         private VoyageStop selected; private VoyagePhase phase; private int elapsedHours; private bool nodeResolved; private bool initialPreparation=true;
         private string nextRegion;
@@ -273,10 +272,14 @@ namespace UnsoundedSea.Core
         }
         private string RegionBriefing(bool boss)
         {
-            var text=RegionId=="fog"?"灰雾访客的封线目标不要求击倒显现体：每回合可支付1行动刻一段封线，累计4段获胜。":
-                RegionId=="bones"?"唱序约束可逐条公开；按正确顺序关闭三只唱诗匣后本体才会失去护持。":
-                RegionId=="inverted"?"测读盐格只公开相邻八格危险数；激活四枚安全封栓即可完成调查。":
-                RegionId=="fleet"?"先将双继电器校正为公开极性，再依序释放三段闸锁，最后击退执旗者。":
+            var encounter=byId[plan.GoalId].EncounterId;
+            var text=encounter=="fog-visitors"?"漂灯回声无法靠击倒终止：绘制封线基础消耗3行动，每回合一次；现有场景折扣仍可降低费用，累计4段撤离。":
+                encounter=="drowned-bell"?"沉钟在敌方结算时推进撤离；巨浪造成21生命伤害，钟鸣造成11理智冲击且可打断，撑过五轮。":
+                encounter=="m02"?"唱序约束可逐条公开；按正确顺序关闭三只唱诗匣后本体才会失去护持。":
+                encounter=="m03"?"测读盐格只公开相邻八格危险数；激活四枚安全封栓即可完成调查。":
+                encounter=="m04"?"先将双继电器校正为公开极性，再依序释放三段闸锁，最后击退执旗者。":
+                encounter=="storm-gauntlet"?"黑潮每回合公开18点生命冲击或9点理智冲击，均可用对应防护或打断反制；撑过五轮即可脱离。":
+                encounter=="hollow-beacon"?"空心航标本体有48生命；公开的10点生命攻击或5点理智冲击均可打断，击破本体获胜。":
                 "先建立撤离绳，再牵引守卫并关闭五座锚点，最后收绞两次归航绳。";
             return (boss?"区域威胁简报：":"海况结论：")+text;
         }

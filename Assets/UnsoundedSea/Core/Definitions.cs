@@ -103,8 +103,12 @@ namespace UnsoundedSea.Core
         public string Id { get; }
         public string Name { get; }
         public CrewSupportKind Kind { get; }
+        public int Cost { get; }
         public CrewSupportSpec(string id, string name, CrewSupportKind kind)
-        { Id = Require.Id(id); Name = Require.Id(name); Kind = Require.Defined(kind); }
+        {
+            Id = Require.Id(id); Name = Require.Id(name); Kind = Require.Defined(kind);
+            Cost = kind == CrewSupportKind.Listener ? 2 : 1;
+        }
     }
 
     public sealed class BattleDefinition

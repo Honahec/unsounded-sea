@@ -8,7 +8,7 @@ namespace UnsoundedSea.Core
     [Serializable]
     public sealed class BattleReplay
     {
-        public const int CurrentVersion = 4;
+        public const int CurrentVersion = 5;
         public int version;
         public string contentHash;
         public uint seed;
@@ -70,7 +70,7 @@ namespace UnsoundedSea.Core
                     { writer.Write(tool.Id); writer.Write(tool.Name); writer.Write((int)tool.Kind); writer.Write(tool.Uses); writer.Write(tool.SanityCost); }
                     writer.Write(definition.Supports.Count);
                     foreach (var support in definition.Supports)
-                    { writer.Write(support.Id); writer.Write(support.Name); writer.Write((int)support.Kind); }
+                    { writer.Write(support.Id); writer.Write(support.Name); writer.Write((int)support.Kind); writer.Write(support.Cost); }
                     writer.Write(definition.Archive.Count);
                     foreach (var evidence in definition.Archive)
                     { writer.Write(evidence.Key); writer.Write(evidence.Text); writer.Write(evidence.Source); writer.Write((int)evidence.Level); }

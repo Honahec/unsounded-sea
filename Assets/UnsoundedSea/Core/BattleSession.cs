@@ -15,7 +15,7 @@ namespace UnsoundedSea.Core
             public bool Interrupted;
         }
         private const string SealCardId = "E01-01";
-        private static readonly CardSpec SealCard = new CardSpec(SealCardId, "绘制封线", "推进封门 1 段。每回合一次。", 1, new[] { new EffectSpec("objective", 1) });
+        private static readonly CardSpec SealCard = new CardSpec(SealCardId, "绘制封线", "消耗3行动推进封线1段。每回合一次；合法场景折扣照常生效。", EncounterObjective.SealActionCost, new[] { new EffectSpec("objective", 1) });
         private readonly BattleDefinition definition;
         private readonly EffectRegistry effects;
         private readonly DeterministicRandom deckRandom;
@@ -78,7 +78,7 @@ namespace UnsoundedSea.Core
                     PendingChoice = PendingChoiceView(),
                     DrawCount = draw.Count, DiscardCount = discard.Count, ExhaustCount = exhaust.Count,
                     Objective = boss?.Objective ?? objective.Description, ObjectiveProgress = boss?.Progress ?? objective.Progress,
-                    ObjectiveTarget = boss?.Target ?? objective.Target, CanAdvanceObjective = boss == null && phase == BattlePhase.PlayerTurn && objective.AllowsTaskAction && !taskUsed && actions >= Math.Max(0, 1 - sceneDiscount),
+                    ObjectiveTarget = boss?.Target ?? objective.Target, CanAdvanceObjective = boss == null && phase == BattlePhase.PlayerTurn && objective.AllowsTaskAction && !taskUsed && actions >= Math.Max(0, objective.ActionCost - sceneDiscount),
                     Hand = hand.Select(x => x.Snapshot()).ToList().AsReadOnly(),
                     Enemies = enemies.Select(BossEnemyView).ToList().AsReadOnly(),
                     Tools = definition.Tools.Select(t => new ToolView(t, toolUses[t.Id])).ToList().AsReadOnly(),
@@ -141,12 +141,12 @@ namespace UnsoundedSea.Core
                 case CommandKind.UseCrewSupport:
                     var support = definition.Supports.FirstOrDefault(x => x.Id == command.supportId);
                     if (support == null || usedSupports.Contains(support.Id)) return Reject("该船员本场不可再支援。");
-                    if (crewSupportUsed || actions < 1) return Reject("每回合至多一次船员支援，需要 1 行动。");
+                    if (crewSupportUsed || actions < support.Cost) return Reject($"每回合至多一次船员支援，需要 {support.Cost} 行动。");
                     if (support.Kind == CrewSupportKind.Listener && (!IsLiving(command.targetId) || !CanInvestigate(command.targetId, InvestigationKind.SoundSource)))
                         return Reject("请选择有新声源信息的存活目标。");
-                    actions--; crewSupportUsed = true; usedSupports.Add(support.Id);
-                    Record($"{support.Name}提供支援；支付 1 行动。");
-                    if (support.Kind == CrewSupportKind.Medic) Heal(3);
+                    actions -= support.Cost; crewSupportUsed = true; usedSupports.Add(support.Id);
+                    Record($"{support.Name}提供支援；支付 {support.Cost} 行动。");
+                    if (support.Kind == CrewSupportKind.Medic) Heal(2);
                     else Investigate(command.targetId, InvestigationKind.SoundSource, support.Name);
                     break;
                 case CommandKind.ReorderDeck:
@@ -171,7 +171,7 @@ namespace UnsoundedSea.Core
 
         private CommandResult ExecuteObjectiveAction()
         {
-            var taskCost = Math.Max(0, 1 - sceneDiscount);
+            var taskCost = Math.Max(0, objective.ActionCost - sceneDiscount);
             if (!objective.AllowsTaskAction || taskUsed || actions < taskCost)
                 return Reject("任务行动不可用（每回合一次，行动不足）。");
             actions -= taskCost; sceneDiscount = 0; taskUsed = true; sceneActionUsed = true;
@@ -288,7 +288,7 @@ namespace UnsoundedSea.Core
                     .Select(x => new EncounterTargetView(x.Definition.Id, x.Definition.Name, "获取当前声源证据", true)).ToList()
                 : new List<EncounterTargetView>();
             var used = usedSupports.Contains(support.Id);
-            var reason = used ? "本场已使用。" : crewSupportUsed ? "本回合已使用船员支援。" : actions < 1 ? "行动点不足。" :
+            var reason = used ? "本场已使用。" : crewSupportUsed ? "本回合已使用船员支援。" : actions < support.Cost ? "行动点不足。" :
                 support.Kind == CrewSupportKind.Listener && targets.Count == 0 ? "没有新的声源目标。" : "";
             return new CrewSupportView(support, used, phase == BattlePhase.PlayerTurn && reason == "", reason, targets.AsReadOnly());
         }
