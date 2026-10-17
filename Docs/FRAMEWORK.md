@@ -69,7 +69,7 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 - **换角色**：修改 Enemy 的 `presentationPrefab`，或在 Scenario 的 `actorOverrides` 按敌人槽位覆写。模型约定脚底 y=0、正面 +Z、真实米制；锚点决定位置和朝向。同种敌人可以重复引用，规则实例 ID 为 `id:槽位`。出生前校验相机、船体、锚点和模型引用。
 - **换遭遇**：Scenario 指向另一个 Encounter；牌组、资源、敌人意图和工具仍属于规则数据。UI 按快照更新，不依赖两只敌人的名字。新增敌人需增加相应舞台锚点并检查名牌排布。
 - **特殊战入口**：派生 `BattleRuleModule`，为每次会话创建新的 `EffectRegistry` / `IEncounterObjective`。`SealingRuleModule` 用于雾海封线；`SurvivalRuleModule` 用于海面撤离，按已结算轮数计数。两者均不靠敌人全部死亡判胜。模块资产只存配置，不能共享可变进度。需要新命令、敌人阶段策略或即时玩法时仍需扩展 Core 与测试；当前入口不等于这些玩法已实现。
-- **甲板骨骼动作**：`DeckActorMotion` 兼容保留集的两种骨名，缓存绑定姿态并按角色空间轴叠加脊柱／胸／颈／肩臂旋转；不使用海怪 Animator 状态名，不移动脚部和骨盆。七种动作家族、可调曲线与幅度见[机制文档](ASSET_MECHANICS_DESIGN.md#甲板敌人的战斗动作设计与当前实现)。`BattleView.ResolvedEnemyActions` 只包含上个成功 EndTurn 已执行的敌人行动（ID、通道、原始量），普通敌人和 Boss 召唤物按此播放；不解析日志、不读取新回合隐藏意图。`BattleDirector.Busy` 等待攻击／受击时钟结束，暂停时保持锁。巨兽驱动和规则随机数不变。
+- **甲板骨骼动作**：`DeckActorMotion` 兼容保留集的两种骨名，缓存绑定姿态并按角色空间轴叠加脊柱／胸／颈／肩臂旋转；不使用海怪 Animator 状态名，不移动脚部和骨盆。七种动作家族、可调曲线与幅度见[机制文档](ASSET_MECHANICS_DESIGN.md#甲板敌人的战斗动作设计与当前实现)。`BattleView.ResolvedEnemyActions` 只包含上个成功 EndTurn 已执行的敌人行动（ID、通道、原始量），普通敌人和 Boss 召唤物按此播放；不解析日志、不读取新回合隐藏意图。`BattleDirector.Busy` 等待攻击／受击时钟结束，暂停时保持锁。海面巨兽同样消费该记录；表现不推进规则随机数。
 - **动画资产接入**：`DeckAnimationSetup.Apply` 经 Editor API 更新 25 个 CuratedRigs Prefab、祷告者／空潜水服及敌人引用，不重建场景；要求退出 Play 并保存场景。会重新应用默认家族参数，并从 `Art/Models/DeckRigs` 重建 Prayer／Echo，手调前检查差异。原始绑定和模型来源见[模型流程](MODEL_IMPORT_WORKFLOW.md)。祷告者额外用 `PrayerSkirtMotion` 驱动八组裙摆骨骼，以强妖风表达攻击。甲板 `BattleStage` 使用缓入缓出的交战摇晃包络；海面战继续使用水面采样。蒙皮模型在出生时 BakeMesh 测量名牌／碰撞范围，运动包围盒不充当选取范围。
 - **反馈事件**：Director 的 `Resolved(before, after, command)` 通知舞台，`Changed` 通知 UI；短暂反馈期间拒绝连点，规则仍同步确定性结算。暂停冻结舞台运动与环境声；减少动效关闭船体横移/倾斜、镜头震动和角色摆动，但保留随慢速水面的升沉与防淹没镜头升高。
 
@@ -110,7 +110,23 @@ M02–M05、雾海来客、沉钟、黑潮压舱者与空心航标均由主菜�
 - `BattleView.EncounterTargets` 只含公开机关状态；盐格危险位置不直接暴露。`EnemyView.Targetable` 区分可攻击单位和规则本体。召唤槽位休眠时隐藏模型，入场时恢复；M05 公开召唤顺序、下一次召唤与余响。
 - `BossTargetAnchor` 连接场景机关与 HUD。M03 使用可读的 4×4 盐格盘；M04 只在选牌后展示对应极性／闸锁目标；M05 选定守卫后显示其航标。没有绕过遭遇牌的额外机关操作栏。
 
-四个舞台复制共享 `DrownedBellStage`，直接继承沉钟的远景相机、Uber 水面、调查船与同相位随浪运动。四个本体均使用独立海面锚点与巨型世界尺度，调查船保持原尺寸作为对照；M04 不再作为船上小型人形 Boss，只有召唤物和机关留在甲板。名牌偏离主体轮廓，甲板单位的目标条分开排列，唱诗匣标签扩大间距，避免远景缩小后失去可操作性。`Tools/BossExpansionSetup.cs` 的 `ImportModels` 导入 `BossBangBuild.py` 生成的 BANG 运行时分件并归一化，仅替换表现 Prefab；`Build` 重建四场配置、舞台、场景与构建列表，不应用于单纯模型替换。运行前退出 Play 并保存场景编辑。不会重建共享水面或航海场景。当前召唤单位复用现有角色模型，机关为可操作的基础几何道具；尺度记录与动画、性能状态见 [模型流程](MODEL_IMPORT_WORKFLOW.md)。
+四个舞台复用 `DrownedBellStage` 的 Uber 水面、调查船与同相位随浪运动，采用各自构图。四个本体使用独立海面锚点与巨型世界尺度，调查船保持原尺寸；只有召唤物和机关留在甲板。`Tools/BossExpansionSetup.cs` 的 `Build` 会重建遭遇配置、舞台和场景，不应用于模型替换或动画调参；`ImportModels` 识别已有 `GiantBossMotion` 后保留表现 Prefab。当前机关仍是基础几何道具，召唤物复用甲板骨骼角色。
+
+### M02–M05 巨兽骨骼表现
+
+`GiantBossRig.py` 将 BANG 部件绑定到真实骨骼，`GiantBossSetup.Build` 配置表现 Prefab 与现有四个舞台；原始 PBR 图片不改。制作和导入顺序见[模型流程](MODEL_IMPORT_WORKFLOW.md#m02m05bang-分件后的解剖绑定)，不同于沉钟之母的刚性 pivot 实现。
+
+| Boss | 绑定与动作重点 | 战斗反馈 |
+| --- | --- | --- |
+| 骸潮领唱者 | 身体／头颈／声囊，左右鳍与尾端；侧身朝船，先抬首蓄势，再压首，鳍尾滞后回稳 | 骨潮释放大浪；召唤只产生声囊雾流 |
+| 倒悬司衡者 | 主体与双拱保持硬质轮廓，下方悬摆和垂饰缓慢拖动 | 拂潮下压带动海浪；理智仪式发出朝船行进的雾流 |
+| 无灯执旗者 | 肩甲与头部小幅跟随，握持区域随旗杆，旗布三级骨链 | 压杆释放浪，旗布稍后摆动；受击只有低幅壳体回沉 |
+| 无星守望者 | 外框独立，头部微动，左右帷幕短链展开 | 准备期不攻击；召唤与余响释放雾流，不伪造物理海浪；撤离表现不是杀死本体 |
+
+`BattleActorView.Update` 同一时钟驱动 `GiantBossMotion`，先同步暂停再更新。待机相位持续推进；攻击在约前 46% 蓄势，57% 达到主要释放姿态，余下时间低位停留并回稳；滞后链单独延迟。受击约 0.28 秒承压、1.9 秒回稳，叠加当前姿态，连续受击不清零；不移动整个 Actor 根节点，不使用弹簧缩放表现重量。减少动效同步缩小旋转、平移和囊体起伏。
+
+`ResolvedEnemyActions` 决定是否播放及物理／仪式／召唤类型，不能直接读取下一回合意图。M03／M05 不可直接攻击的本体，只在公开目标推进时作低幅反馈。物理攻击按已校准的动作释放时刻投影到当前海面，通过 `SurfaceReleased` 调用 `BattleWater.EmitImpact`，波传播和船体采样复用既有机制；这是导演化释放点，并非沉钟触手的真实触水检测或流体模拟。`GiantBossEffects` 提供局部盐雾、蓄势雾和朝船行进的仪式脉冲；使用独立 `GiantMist` 材质的低强度自发光保持暗处可读，守望者从胸前释放；不结算伤害。巨兽攻击与退场期间 `BattleDirector.Busy` 阻止命令抢断，暂停同时冻结骨骼、粒子与水体。
+
 
 
 ## 层级与依赖

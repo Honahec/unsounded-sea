@@ -13,6 +13,7 @@
 | 规则、UI、存档、内容配置和代码修复 | [框架指南](Docs/FRAMEWORK.md) → 相关代码；涉及验收时再读 [验证记录](Docs/FRAMEWORK_VALIDATION.md) |
 | 模型生成、减面、Unity 导入、模型归档或 LFS | [模型全流程](Docs/MODEL_IMPORT_WORKFLOW.md) → 机制文档中对应资产要求 → 相关 manifest/脚本 |
 | 沉钟之母分件、支点/骨骼取舍、攻击与受击动画 | [动画设计](Docs/BELL_MOTHER_ANIMATION_DESIGN.md) → `BellMotherRigidMotion` / `BellMotherBangSetup`；复用模型不必重跑生成流程 |
+| M02–M05 巨兽分件绑定、动画与特效 | [模型流程](Docs/MODEL_IMPORT_WORKFLOW.md#m02m05bang-分件后的解剖绑定) → [骨骼表现](Docs/FRAMEWORK.md#m02m05-巨兽骨骼表现) → `GiantBossRig.py` / `GiantBossSetup.cs`；仅改动作不重跑生成或全场景重建 |
 | 确定使用 Deemos Agent | 在模型流程基础上，再读 [网页操作说明](DEEMOS_AGENT.md) |
 | 文档整理 | 阅读本次涉及的文档和链接目标，检查职责重叠、过时状态与断链 |
 
