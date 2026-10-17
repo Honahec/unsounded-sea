@@ -84,6 +84,58 @@ public static class UiExperienceQA
     }
     static async Task DebugNode(RunNodeKind kind)
     {VoyageRuntime.StartDebugNode("fog",kind);await Task.Delay(650);await Wait(()=>Root.Q<Button>("voyage-support-manifest")!=null,"node "+kind);}
+    public static async Task<object> SupportReadability()
+    {
+        Check(EditorApplication.isPlaying,"Enter Play first.");
+        var viewType=typeof(Editor).Assembly.GetType("UnityEditor.GameView");var gameView=EditorWindow.GetWindow(viewType);
+        var originalSize=(int)viewType.GetProperty("selectedSizeIndex",All).GetValue(gameView);
+        var background=Application.runInBackground;Application.runInBackground=true;
+        var save=Path.Combine(Application.persistentDataPath,"voyage.json");var before=File.Exists(save)?File.ReadAllBytes(save):null;
+        var errors=new List<string>();Application.LogCallback capture=(message,stack,type)=>{if(type==LogType.Error||type==LogType.Exception||type==LogType.Assert)errors.Add(message);};
+        Application.logMessageReceived+=capture;
+        VoyageRuntime.BeginValidation(Path.GetFullPath(Path.Combine(Dir,"support-readability-save")));
+        try
+        {
+            VoyageRuntime.StartNew(7);await Load(VoyageRuntime.VoyageScene);
+            while(Root.Q<Button>("voyage-flow-continue")!=null)Click("voyage-flow-continue");
+            void CheckEntry()
+            {
+                Check(Root.Q<Button>("open-action-book")==null&&Root.Q<Button>("arrival-action-book")==null,"Duplicate preparation entry remains.");
+                Check(Root.Query<Button>(name:"voyage-action-book").ToList().Count==1,"Missing unique action book entry.");
+                var title=Root.Q<Label>("node-services-title");Check(title!=null&&title.resolvedStyle.fontSize>=20,"Services title is too small.");
+            }
+            await Task.Delay(250);CheckEntry();
+            var checkpoint=JsonConvert.SerializeObject(VoyageRuntime.Session.Export());
+            Click("voyage-action-book");await Task.Delay(200);Check(Root.Q<Button>("action-book-close")!=null,"Action book did not open.");Click("action-book-close");
+            Click("voyage-support-manifest");await Task.Delay(250);
+            for(int tab=0;tab<5;tab++)
+            {
+                Click("support-tab-"+tab);await Task.Delay(250);
+                var art=Root.Q<VisualElement>("support-illustration");var scroll=Root.Q<ScrollView>("support-scroll");
+                Check(art.resolvedStyle.opacity<=.061f,"Illustration is too strong.");Check(scroll.resolvedStyle.backgroundColor.a>=.95f,"Reading surface is transparent.");
+                Check(Root.Q(className:"support-illustration-veil").resolvedStyle.backgroundColor.a>=.88f,"Header illustration is not shaded.");
+                await Capture("support-readable-"+tab);
+                var sheet=Root.Q<VisualElement>("support-manifest");
+                Check(sheet.worldBound.xMin>=0&&sheet.worldBound.xMax<=Root.worldBound.xMax+1,"Support panel clipped horizontally.");
+                Check(Root.Q<Button>("support-manifest-close").worldBound.yMax<=sheet.worldBound.yMax+1,"Close button clipped.");
+            }
+            Click("support-manifest-close");await Task.Delay(200);
+            Check(JsonConvert.SerializeObject(VoyageRuntime.Session.Export())==checkpoint,"Reading UI changed the voyage.");
+            await DebugNode(RunNodeKind.Supply);CheckEntry();
+            Click("voyage-action-book");await Task.Delay(150);Click("action-book-close");await Task.Delay(200);
+            await Capture("voyage-services-readable");
+            var after=File.Exists(save)?File.ReadAllBytes(save):null;
+            Check(before==null?after==null:after!=null&&before.SequenceEqual(after),"Formal save changed.");Check(errors.Count==0,string.Join("; ",errors));
+            var report=new{success=true,pages=6,aspectRatios=3,captures=Captures.Count,runtimeErrors=errors.Count,formalSaveUnchanged=true};
+            File.WriteAllText(Path.Combine(Dir,"support-readability-result.json"),JsonConvert.SerializeObject(report,Formatting.Indented));
+            await Load(VoyageRuntime.MainMenuScene);return report;
+        }
+        finally
+        {
+            VoyageRuntime.EndValidation();Application.runInBackground=background;Application.logMessageReceived-=capture;
+            viewType.GetProperty("selectedSizeIndex",All).SetValue(gameView,originalSize);gameView.Repaint();
+        }
+    }
     public static string StartLayouts(){Directory.CreateDirectory(Dir);_ = RunLayouts();return "running; see Logs/UiExperience/status.json";}
     public static string StartInteractions(){_ = RunInteractions();return "running; see Logs/UiExperience/status.json";}
     static async Task RunInteractions()
@@ -133,7 +185,7 @@ public static class UiExperienceQA
             foreach(var item in new[]{("fog-visitors","fog"),("m02","bones"),("m03","inverted"),("m04","fleet"),("m05","abyss")})
             {await DebugBattle(item.Item1,item.Item2,true);await Capture(item.Item1);}
             foreach(var kind in new[]{RunNodeKind.Supply,RunNodeKind.Event,RunNodeKind.Archive}){await DebugNode(kind);await Capture(kind.ToString().ToLowerInvariant()+"-node");}
-            await DebugNode(RunNodeKind.Supply);Click("arrival-action-book");await Capture("action-book");Click("action-book-close");
+            await DebugNode(RunNodeKind.Supply);Click("voyage-action-book");await Capture("action-book");Click("action-book-close");
             Click("voyage-menu");await Capture("pause-menu");Click("pause-resume");
             File.WriteAllText(Path.Combine(Dir,"layout-captures.json"),JsonConvert.SerializeObject(Captures,Formatting.Indented));
             Status("layouts-complete");
