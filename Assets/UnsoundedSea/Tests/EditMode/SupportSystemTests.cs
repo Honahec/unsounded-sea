@@ -72,7 +72,7 @@ namespace UnsoundedSea.Tests
             var crew=new[]{SupportCatalog.CrewMember("medic"),SupportCatalog.CrewMember("cook"),new CrewSupportSpec("engineer","轮机长",CrewSupportKind.Engineer,true)};
             var s=new BattleSession(Definition(new[]{"c093","c014"},crew:crew),0);
             Assert.That(s.Execute(BattleCommand.Support("engineer")).Success,Is.False);
-            Run(s,BattleCommand.Support("medic"));Assert.That(s.View.Health,Is.EqualTo(42));
+            Run(s,BattleCommand.Support("medic"));Assert.That(s.View.Health,Is.EqualTo(43));Assert.That(s.View.Block,Is.EqualTo(3));
             Assert.That(s.Execute(BattleCommand.Support("cook")).Success,Is.False);
             Play(s,"c093");Assert.That(s.View.PendingChoice,Is.Not.Null);Assert.That(s.Execute(BattleCommand.EndTurn()).Success,Is.False);
             Run(s,BattleCommand.Reorder(s.View.PendingChoice.Options.First(x=>x.Id.StartsWith("hand:")).Id));
@@ -157,6 +157,23 @@ namespace UnsoundedSea.Tests
             var s=new BattleSession(Definition(new[]{"c042","c041","c048"}),0);Play(s,"c042","enemy:enemy:1");Play(s,"c041","enemy:enemy:1");
             Run(s,BattleCommand.EndTurn());Assert.That(s.View.Hand.Single(x=>x.Definition.Id=="c048").Targets,Is.Empty);
             Play(s,"c041","enemy:enemy:1");Assert.That(s.View.Hand.Single(x=>x.Definition.Id=="c048").Targets.Count,Is.EqualTo(1));
+        }
+        [Test] public void ListenerDrawsOneAndCartographerObservationIsNotACardQuestion()
+        {
+            var listener=new BattleSession(Definition(new[]{"cover","cover"},crew:new[]{SupportCatalog.CrewMember("listener")},draw:1),0);
+            var before=listener.View.Hand.Count;Run(listener,BattleCommand.Support("listener","enemy:1"));
+            Assert.That(listener.View.Hand.Count,Is.EqualTo(before+1));Assert.That(listener.View.Evidence.Any(x=>x.Key.EndsWith("/sound")),Is.True);
+
+            var cartographer=new BattleSession(Definition(new[]{"c041","c092"},crew:new[]{SupportCatalog.CrewMember("cartographer")}),0);
+            Run(cartographer,BattleCommand.Support("cartographer","enemy:1"));
+            Assert.That(cartographer.View.Enemies[0].IntentConfirmed,Is.False);
+            Play(cartographer,"c041","enemy:enemy:1");Play(cartographer,"c092","enemy:enemy:1");
+            Assert.That(cartographer.View.Enemies[0].Health,Is.EqualTo(116),"Crew observation must not count as a card question.");
+            var damage=new BattleSession(Definition(new[]{"contradiction"},crew:new[]{SupportCatalog.CrewMember("cartographer")}),0);
+            Run(damage,BattleCommand.Support("cartographer","enemy:1"));
+            Run(damage,BattleCommand.Investigate("lantern","enemy:1"));
+            Play(damage,"contradiction","enemy:enemy:1");
+            Assert.That(damage.View.Enemies[0].Health,Is.EqualTo(111),"Crew connection must not count as an investigation-card answer.");
         }
         [Test] public void ReplayFingerprintIncludesEquipmentAndTypedProvenance()
         {

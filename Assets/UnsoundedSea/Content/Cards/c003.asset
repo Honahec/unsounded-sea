@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: c003
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
   id: c003
-  displayName: "\u7EDD\u5883\u4E00\u51FB"
+  displayName: "\u5B64\u6CE8\u4E00\u51FB"
   description: "\u5BF9\u4E00\u540D\u654C\u4EBA\u9020\u621015\u4F24\u5BB3\uFF1B\u82E5\u672C\u56DE\u5408\u672A\u4F7F\u7528\u8C03\u67E5\u6548\u679C\uFF0C\u83B7\u5F975\u683C\u6321\u3002"
   actionCost: 2
   sanityCost: 0

@@ -2,6 +2,15 @@
 
 2026-10-17 更新。各节分别记录环境和验证范围；历史通过不代表后续改动通过。旧 HUD 的逐轮记录保留在 Git 历史，不重复维护。
 
+## 方案一规则交付与验收移交
+
+2026-10-17，macOS，既有 Unity 6000.6.5f1 与 .NET 10。按用户最新指示，只做可运行检查，完整 EditMode、平衡目标和 UI 验收交方案二。
+
+- 当前 Core 源码已独立编译并实际执行：五张攻击牌相关分支、C088 无召唤物禁用、第 4 回合蓄势与减伤、20 个种子的真实航程选路、领奖替换、险航两次奖励及检查点重放通过。此项不是 Unity 全量测试结果。
+- 通过既有 Editor 的 `run_script` 编译当前 `VoyageCampaignSetup` 后调用 `SyncCombatBalance`，同步 25 个普通遭遇、随行体、普通次目标、海域名与雾海来客进度显示配置；未调用 `Setup()`、未重建场景，96 卡通过 Editor API 同步。
+- `Editor/Tools/BalanceSimulation.cs` 提供 `Main / FocusedPrices / SelfCheck`。主入口覆盖三牌组、25 普通＋8 Boss、种子 0–99，输出 `Logs/Balance/`；本次未跑完整模拟，**没有新的胜率、损失或价格达标结论**。C076／C085 保留 2／4 理智。
+- 共享工作区的方案二 UI 已引用尚未落地的 `VoyageRuntime.BattleSummary / DismissBattleSummary`，Unity 整体编译被该接线阻塞；用户明确由方案二补齐。方案一没有改动这些 UI 文件、`.uss`、构建场景列表或正式存档，也不把该工作区状态称为完整 Player 可运行证明。
+
 ## M05、主菜单模型与分幕 Boss 池
 
 2026-10-18，macOS / Unity 6000.6.5f1。随机召唤与递增伤害规则修改后，完整 EditMode **241 通过／0 失败**；重编译 **0 错误／0 警告**。随后构图调整经下述实机检查。

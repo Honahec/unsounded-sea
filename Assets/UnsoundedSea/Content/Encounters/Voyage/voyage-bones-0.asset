@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: voyage-bones-0
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EncounterDefinition
   id: voyage-bones-0
-  displayName: "\u6F6E\u9AA8\u6D77 / \u6F6E\u9AA8\u62FE\u8352\u8005"
+  displayName: "\u5C38\u9AB8\u4E4B\u6D77 / \u6F6E\u9AA8\u62FE\u8352\u8005"
   objective: 0
   objectiveTarget: 1
   playerHealth: 60

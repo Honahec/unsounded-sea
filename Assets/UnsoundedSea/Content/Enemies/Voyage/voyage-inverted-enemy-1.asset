@@ -15,24 +15,33 @@ MonoBehaviour:
   id: voyage-inverted-enemy-1
   displayName: "\u53CD\u5199\u9886\u822A\u5458"
   health: 32
-  candidateDescription: "\u9006\u56FE\u8BEF\u5BFC\uFF1A4 \u7406\u667A\u51B2\u51FB / \u5377\u56FE\u62BD\u51FB\uFF1A8 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
-  intentPolicy: 1
+  candidateDescription: "\u5377\u56FE\u62BD\u51FB\uFF1A12 \u751F\u547D\u4F24\u5BB3 / \u84C4\u52BF\u89C2\u5BDF / \u9006\u56FE\u8BEF\u5BFC\uFF1A5 \u7406\u667A\u51B2\u51FB"
+  intentPolicy: 0
   intents:
+  - id: edge
+    displayName: "\u5377\u56FE\u62BD\u51FB"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
+    channel: 0
+    amount: 12
+    isPublic: 0
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
   - id: chart
     displayName: "\u9006\u56FE\u8BEF\u5BFC"
-    clue: "\u7A7A\u767D\u6D77\u56FE\u88AB\u5012\u4E3E\uFF0C\u6307\u5317\u5668\u6301\u7EED\u522E\u64E6\u7EB8\u9762\u3002"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 1
-    amount: 4
+    amount: 5
     isPublic: 0
     visibleAction: 1
     interruptible: 1
     soundSource: "\u6307\u5317\u5668"
-  - id: edge
-    displayName: "\u5377\u56FE\u62BD\u51FB"
-    clue: "\u5377\u8FB9\u6D77\u56FE\u5408\u62E2\u6210\u68CD\u72B6\u3002"
+  - id: charge
+    displayName: "\u84C4\u52BF\u89C2\u5BDF"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 0
-    amount: 8
-    isPublic: 1
+    amount: 0
+    isPublic: 0
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"

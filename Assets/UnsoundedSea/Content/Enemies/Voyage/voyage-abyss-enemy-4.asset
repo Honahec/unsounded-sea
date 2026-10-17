@@ -15,25 +15,25 @@ MonoBehaviour:
   id: voyage-abyss-enemy-4
   displayName: "\u8237\u5916\u7D22\u540D\u8005"
   health: 34
-  candidateDescription: "\u8237\u5916\u7D22\u540D\uFF1A5 \u7406\u667A\u51B2\u51FB / \u957F\u81C2\u652B\u53D6\uFF1A12 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
-  intentPolicy: 1
+  candidateDescription: "\u957F\u81C2\u652B\u53D6\uFF1A12 \u751F\u547D\u4F24\u5BB3 / \u8237\u5916\u7D22\u540D\uFF1A5 \u7406\u667A\u51B2\u51FB"
+  intentPolicy: 0
   intents:
+  - id: reach
+    displayName: "\u957F\u81C2\u652B\u53D6"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
+    channel: 0
+    amount: 12
+    isPublic: 0
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
   - id: ask
     displayName: "\u8237\u5916\u7D22\u540D"
-    clue: "\u4F4E\u5782\u8863\u9886\u91CC\u4F20\u6765\u95EE\u53E5\uFF0C\u957F\u81C2\u4ECD\u642D\u5728\u8EAB\u524D\u3002"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 1
     amount: 5
     isPublic: 0
     visibleAction: 1
     interruptible: 1
     soundSource: "\u8863\u9886\u5185"
-  - id: reach
-    displayName: "\u957F\u81C2\u652B\u53D6"
-    clue: "\u53CC\u81C2\u79BB\u5F00\u8EAB\u4FA7\uFF0C\u957F\u6307\u8D34\u8FD1\u7532\u677F\u3002"
-    channel: 0
-    amount: 12
-    isPublic: 1
-    visibleAction: 1
-    interruptible: 0
-    soundSource: "\u76EE\u6807\u672C\u4F53"
   presentationPrefab: {fileID: 8641249306517917196, guid: d86b1547aba124065b3b1be5f213616b, type: 3}

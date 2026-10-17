@@ -80,7 +80,7 @@ namespace UnsoundedSea.Tests
         [Test]
         public void EventsSupplyAndRewardsAreFiniteAndCannotBeSkippedOrReplayed()
         {
-            var s=VoyageSession.Create(2); MoveToLayer(s,2);
+            var s=VoyageSession.Create(2); MoveToLayer(s,2,RunNodeKind.Event);
             Assert.That(s.Phase,Is.EqualTo(VoyagePhase.Arrived));Assert.That(s.Continue(),Is.False);
             var id=s.GetNodeChoices().First(x=>x.Enabled).Id;Assert.That(s.ChooseNode(id),Is.True);Assert.That(s.ChooseNode(id),Is.False);Assert.That(s.Continue(),Is.True);
             MoveToLayer(s,4);Assert.That(s.Phase,Is.EqualTo(VoyagePhase.Reward));Assert.That(s.Continue(),Is.False);
@@ -128,7 +128,7 @@ namespace UnsoundedSea.Tests
         [Test]
         public void CheckpointAcrossActTransitionReproducesCampaignExactly()
         {
-            var s=VoyageSession.Create(99);var damaged=true;CompleteAct(s,ref damaged);Assert.That(s.ChooseNextAct("fleet"),Is.True);Assert.That(s.ClaimReward(null),Is.True);MoveToLayer(s,2);Assert.That(s.ChooseNode("leave"),Is.True);
+            var s=VoyageSession.Create(99);var damaged=true;CompleteAct(s,ref damaged);Assert.That(s.ChooseNextAct("fleet"),Is.True);Assert.That(s.ClaimReward(null),Is.True);MoveToLayer(s,2,RunNodeKind.Event);Assert.That(s.ChooseNode("leave"),Is.True);
             var restored=VoyageSession.Restore(s.Export());Assert.That(restored.Act,Is.EqualTo(2));Assert.That(restored.RegionId,Is.EqualTo("fleet"));Assert.That(restored.Current.Id,Is.EqualTo(s.Current.Id));
             Assert.That(restored.Health,Is.EqualTo(s.Health));Assert.That(restored.Sanity,Is.EqualTo(s.Sanity));Assert.That(restored.Supplies,Is.EqualTo(s.Supplies));Assert.That(restored.LearnedCardIds,Is.EqualTo(s.LearnedCardIds));Assert.That(restored.Phase,Is.EqualTo(s.Phase));
         }
@@ -188,7 +188,7 @@ namespace UnsoundedSea.Tests
         [Test]
         public void ArchiveKnowledgeHasTruthfulEffectAndSurvivesRestore()
         {
-            var routes=VoyageSession.Create(121);MoveToLayer(routes,7);
+            var routes=VoyageSession.Create(121);MoveToLayer(routes,7,RunNodeKind.Archive);
             var expected=routes.Export().Map.Stops.Single(x=>x.Id==routes.Current.Id).Next;
             Assert.That(routes.ChooseNode("routes"),Is.True);
             Assert.That(routes.Current.Next,Is.EquivalentTo(expected));
@@ -197,7 +197,7 @@ namespace UnsoundedSea.Tests
             Assert.That(restored.Knowledge,Is.EqualTo(routes.Knowledge));
             Assert.That(restored.KnownRoutes.Select(Key),Is.EqualTo(routes.KnownRoutes.Select(Key)));
 
-            var briefing=VoyageSession.Create(122);MoveToLayer(briefing,7);
+            var briefing=VoyageSession.Create(122);MoveToLayer(briefing,7,RunNodeKind.Archive);
             Assert.That(briefing.ChooseNode("briefing"),Is.True);
             Assert.That(briefing.ChooseNode("routes"),Is.False);
             Assert.That(VoyageSession.Restore(briefing.Export()).Knowledge,Is.EqualTo(briefing.Knowledge));
@@ -294,11 +294,20 @@ namespace UnsoundedSea.Tests
                 else Assert.Fail("Unexpected phase "+s.Phase);
             }
         }
-        private static void MoveToLayer(VoyageSession s,int layer)
+        private static void MoveToLayer(VoyageSession s,int layer,RunNodeKind? desired=null)
         {
-            while(s.Current.Layer<layer){if(s.Phase==VoyagePhase.ChoosingRoute)Sail(s);else if(s.Phase==VoyagePhase.Arrived){if(s.Current.Kind==RunNodeKind.Battle){s.BeginEncounter();s.ResolveEncounter(true,s.Health,s.Sanity);}else{var c=s.GetNodeChoices().First(x=>x.Enabled);s.ChooseNode(c.Id);s.Continue();}}else if(s.Phase==VoyagePhase.Reward)s.ClaimReward(null);}
+            while(s.Current.Layer<layer)
+            {
+                if(s.Phase==VoyagePhase.ChoosingRoute)
+                {
+                    var next=desired.HasValue&&s.Current.Layer==layer-1?s.Choices.First(x=>x.Kind==desired.Value):s.Choices[0];
+                    Sail(s,next.Id);
+                }
+                else if(s.Phase==VoyagePhase.Arrived){if(s.Current.Kind==RunNodeKind.Battle){s.BeginEncounter();s.ResolveEncounter(true,s.Health,s.Sanity);}else{var c=s.GetNodeChoices().First(x=>x.Enabled);s.ChooseNode(c.Id);s.Continue();}}
+                else if(s.Phase==VoyagePhase.Reward)s.ClaimReward(null);
+            }
         }
-        private static void Sail(VoyageSession s){Assert.That(s.Select(s.Choices[0].Id),Is.True);Assert.That(s.SetSail(),Is.True);Assert.That(s.Arrive(),Is.True);}
+        private static void Sail(VoyageSession s,string id=null){Assert.That(s.Select(id??s.Choices[0].Id),Is.True);Assert.That(s.SetSail(),Is.True);Assert.That(s.Arrive(),Is.True);}
         private static string Key(VoyageRoute r)=>r.FromId+">"+r.ToId;
     }
 }

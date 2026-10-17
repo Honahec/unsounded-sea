@@ -15,23 +15,23 @@ MonoBehaviour:
   id: voyage-fleet-enemy-4
   displayName: "\u9508\u94FE\u62BC\u8FD0\u8005"
   health: 30
-  candidateDescription: "\u77ED\u94FE\u7EDE\u51FB\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u94C1\u6263\u9707\u54CD\uFF1A4 \u7406\u667A\u51B2\u51FB"
-  intentPolicy: 1
+  candidateDescription: "\u77ED\u94FE\u7EDE\u51FB\uFF1A12 \u751F\u547D\u4F24\u5BB3 / \u94C1\u6263\u9707\u54CD\uFF1A5 \u7406\u667A\u51B2\u51FB"
+  intentPolicy: 0
   intents:
   - id: chain
     displayName: "\u77ED\u94FE\u7EDE\u51FB"
-    clue: "\u4E24\u81C2\u9508\u94FE\u540C\u65F6\u6536\u7D27\uFF0C\u94FE\u5C3E\u6CA1\u6709\u62D6\u5730\u3002"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 0
-    amount: 10
-    isPublic: 1
+    amount: 12
+    isPublic: 0
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
   - id: buckle
     displayName: "\u94C1\u6263\u9707\u54CD"
-    clue: "\u8170\u95F4\u5927\u94C1\u6263\u53CD\u590D\u649E\u51FB\uFF0C\u53CC\u81C2\u6CA1\u6709\u6325\u52A8\u3002"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 1
-    amount: 4
+    amount: 5
     isPublic: 0
     visibleAction: 1
     interruptible: 1

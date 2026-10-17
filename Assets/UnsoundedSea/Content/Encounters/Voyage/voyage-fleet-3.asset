@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: voyage-fleet-3
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EncounterDefinition
   id: voyage-fleet-3
-  displayName: "\u65E0\u65D7\u8230\u7FA4 / \u5F03\u8230\u533B\u5B98"
-  objective: 0
-  objectiveTarget: 1
+  displayName: "\u65E0\u706F\u88C2\u6D77 / \u5F03\u8230\u533B\u5B98"
+  objective: 1
+  objectiveTarget: 3
   playerHealth: 60
   playerSanity: 30
   actionsPerTurn: 3

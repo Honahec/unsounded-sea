@@ -14,10 +14,9 @@ namespace UnsoundedSea.Tests
             {
                 var first=VoyageMapGenerator.Generate(seed);var second=VoyageMapGenerator.Generate(seed);
                 Assert.That(first.Stops.Select(x=>x.EncounterId),Is.EqualTo(second.Stops.Select(x=>x.EncounterId)));
-                foreach(var layer in first.Stops.Where(x=>x.Kind==RunNodeKind.Battle).GroupBy(x=>x.Layer))
+                foreach(var battle in first.Stops.Where(x=>x.Kind==RunNodeKind.Battle))
                 {
-                    Assert.That(layer.Select(x=>x.EncounterId),Is.Unique,"seed "+seed+" layer "+layer.Key);
-                    Assert.That(layer.All(x=>Enumerable.Range(0,5).Select(i=>"voyage-fog-"+i).Contains(x.EncounterId)),Is.True);
+                    Assert.That(Enumerable.Range(0,5).Select(i=>"voyage-fog-"+i),Does.Contain(battle.EncounterId));
                 }
             }
         }

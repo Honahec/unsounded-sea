@@ -15,7 +15,7 @@ MonoBehaviour:
   id: voyage-bones-enemy-3
   displayName: "\u7A7A\u8231\u6572\u51FB\u8005"
   health: 32
-  candidateDescription: "\u7A7A\u7BB1\u4E09\u6572\uFF1A4 \u7406\u667A\u51B2\u51FB / \u95E8\u677F\u63A8\u51FB\uFF1A9 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  candidateDescription: "\u95E8\u677F\u63A8\u51FB\uFF1A9 \u751F\u547D\u4F24\u5BB3 / \u7A7A\u7BB1\u4E09\u6572\uFF1A4 \u7406\u667A\u51B2\u51FB"
   intentPolicy: 1
   intents:
   - id: knock
@@ -23,7 +23,7 @@ MonoBehaviour:
     clue: "\u77ED\u69CC\u60AC\u5728\u80F8\u524D\u7A7A\u7BB1\u4E0A\u65B9\u3002"
     channel: 1
     amount: 4
-    isPublic: 0
+    isPublic: 1
     visibleAction: 1
     interruptible: 1
     soundSource: "\u80F8\u524D\u6728\u7BB1"

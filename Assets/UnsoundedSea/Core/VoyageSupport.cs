@@ -41,13 +41,15 @@ namespace UnsoundedSea.Core
         private static string CrewRegion(string id)=>id=="medic"||id=="listener"||id=="cook"?"fog":id=="archivist"||id=="decoder"?"bones":id=="cartographer"?"inverted":id=="engineer"||id=="gunsmith"?"fleet":"abyss";
         private string RecruitCandidate=>RecruitCandidateAt(CurrentFull);
         private string RecruitCandidateAt(VoyageStop stop)=>SupportCatalog.Crew.Where(x=>!crewIds.Contains(x.Id)).OrderBy(x=>VoyageSeeds.Derive(Seed,"rescue",Act+":"+stop.Id+":"+x.Id)).Select(x=>x.Id).FirstOrDefault();
-        private IEnumerable<string> RegionItems()
+        private IEnumerable<string> RegionItems(bool forReward=false)
         {
-            var common=new[]{"i10","i11","i12","i13","i17","i18","i19","i20","i22","i23"};
-            return common.Concat(RegionId=="fog"?new[]{"i14"}:RegionId=="inverted"?new[]{"i06","i16","i24"}:RegionId=="fleet"?new[]{"i08","i15"}:RegionId=="abyss"?new[]{"i07","i09","i15","i21","i25"}:new[]{"i15"});
+            var region=forReward?nextRegion??RegionId:RegionId;
+            var boss=forReward&&nextRegion!=null?VoyageMapGenerator.BossEncounter(Seed,Act+1,nextRegion):byId[plan.GoalId].EncounterId;
+            return SupportCatalog.Items.Where(item=>item.Id.StartsWith("i",StringComparison.Ordinal)&&
+                (item.Id=="i14"?boss=="fog-visitors"||region=="inverted"||region=="fleet":item.Id=="i16"?boss=="m03":item.Id=="i25"?region=="bones"||region=="abyss":item.BossIds.Count==0||item.BossIds.Any(id=>string.Equals(id,boss,StringComparison.OrdinalIgnoreCase)))).Select(item=>item.Id);
         }
         public IReadOnlyList<ItemSpec> ShopItems => AtSupply?ShopStock(CurrentFull):Array.Empty<ItemSpec>();
-        public IReadOnlyList<ItemSpec> RewardItems => phase==VoyagePhase.Reward&&(CurrentFull.Kind==RunNodeKind.Reward||CurrentFull.Kind==RunNodeKind.Boss)?RegionItems().Where(id=>SupportCatalog.Item(id).Kind==ItemKind.Equipment&&!ownedEquipment.Contains(id)).OrderBy(id=>VoyageSeeds.Derive(Seed,"equipment-reward",Act+":"+CurrentFull.Id+":"+id)).Take(1).Select(SupportCatalog.Item).ToArray():Array.Empty<ItemSpec>();
+        public IReadOnlyList<ItemSpec> RewardItems => phase==VoyagePhase.Reward&&(CurrentFull.Kind==RunNodeKind.Reward||CurrentFull.Kind==RunNodeKind.Boss)?RegionItems(forReward:true).Where(id=>SupportCatalog.Item(id).Kind==ItemKind.Equipment&&!ownedEquipment.Contains(id)).OrderBy(id=>VoyageSeeds.Derive(Seed,"equipment-reward",Act+":"+CurrentFull.Id+":"+id)).Take(1).Select(SupportCatalog.Item).ToArray():Array.Empty<ItemSpec>();
         private bool CanGain(string id,string replace=null)
         {
             var item=SupportCatalog.Item(id);
@@ -76,9 +78,18 @@ namespace UnsoundedSea.Core
             return CurrentFull.Kind==RunNodeKind.Event&&(verb=="rescue"||verb=="voucher"||verb=="specimen"||verb=="repair-boat"||verb=="crew"||verb=="risk")
                 ||CurrentFull.Kind==RunNodeKind.Archive&&(verb=="survey"||verb=="archive"||verb=="specimen");
         }
+        public IReadOnlyList<VoyageNodeChoice> GetSupportChoices()=>GetCombinedChoices().Where(x=>!IsNodeService(x.Id)).ToArray();
         public IReadOnlyList<VoyageNodeChoice> GetNodeServices()
-            => GetSupportChoices().Where(x=>!IsNodeResolutionChoice(x)&&!IsLoadoutChoice(x)).ToArray();
-        public IReadOnlyList<VoyageNodeChoice> GetSupportChoices()
+        {
+            var services=GetCombinedChoices().Where(x=>IsNodeService(x.Id)||IsPreparationService(x.Id));
+            if(nodeResolved&&!initialPreparation)services=escortedCrew==null?Enumerable.Empty<VoyageNodeChoice>():services.Where(x=>x.Id=="accept"||x.Id.StartsWith("accept@",StringComparison.Ordinal)||x.Id=="escort-decline");
+            return services.ToArray();
+        }
+        private static bool IsNodeService(string id)=>id.StartsWith("buy:",StringComparison.Ordinal)||id.StartsWith("hire:",StringComparison.Ordinal)||
+            id.StartsWith("treat:",StringComparison.Ordinal)||id.StartsWith("gunsmith:",StringComparison.Ordinal)||id=="accept"||
+            id.StartsWith("accept@",StringComparison.Ordinal)||id=="escort-decline"||id=="gaze:hide"||id=="gaze:keep";
+        private static bool IsPreparationService(string id)=>id.StartsWith("starter:",StringComparison.Ordinal)||id.StartsWith("trust:",StringComparison.Ordinal)||id=="tea"||id=="navigate"||id=="ritual:prepare";
+        private IReadOnlyList<VoyageNodeChoice> GetCombinedChoices()
         {
             var result=new List<VoyageNodeChoice>();
             void Add(string id,string title,string detail,bool enabled=true)=>result.Add(new VoyageNodeChoice(id,title,detail,enabled));
@@ -109,7 +120,7 @@ namespace UnsoundedSea.Core
                     var replacements=crewIds.Count>=4?crewIds.Cast<string>():new string[]{null};
                     foreach(var old in replacements)Add("hire:"+crew.Id+(old==null?"":"@"+old),"接驳 · "+crew.Name+(old==null?"":"（替换"+SupportCatalog.CrewMember(old).Name+"）"),$"{HirePrice}补给；"+SupportCatalog.CrewDescription(crew.Kind),Supplies>=HirePrice);
                 }
-                if(inventory.Contains("i12")&&ServiceAvailable("tea"))Add("tea","饮用干燥药茶","消耗1份，恢复5理智，每节点一次。",Sanity<30);
+                if(inventory.Contains("i12")&&ServiceAvailable("tea"))Add("tea","饮用干燥药茶","消耗1份，恢复5理智，每节点一次。",Sanity<GameBalance.MaxSanity);
                 foreach(var id in crewIds.Where(injuredCrew.Contains))Add("treat:"+id,"治疗 · "+SupportCatalog.CrewMember(id).Name,"2补给；恢复支援与航程职责。",Supplies>=2);
                 if(ActiveCrew("gunsmith")&&ServiceAvailable("gunsmith")){Add("gunsmith:item","修械补给","获得1份备用弹匣，与恢复工具二选一。",CanGain("i13"));Add("gunsmith:chart","修复海图","恢复1次，不超过2次。",ChartUses<2);Add("gunsmith:lookout","修复望远镜","恢复1次，不超过2次。",LookoutUses<2);}
                 foreach(var id in crewIds.Where(x=>trustedCrew.Contains(x)&&!injuredCrew.Contains(x)&&!supportServices.Contains("trust:"+x)))Add("trust:"+id,"个人交谈 · "+SupportCatalog.CrewMember(id).Name,"信任奖励：学习一张相关未学方案；每人每航程一次。",TrustedCard(id)!=null);
@@ -117,9 +128,9 @@ namespace UnsoundedSea.Core
             if(phase==VoyagePhase.Arrived&&!nodeResolved&&CurrentFull.Kind==RunNodeKind.Archive)
             {
                 Add("survey","核验航标","不领取补给；揭示全部后续路线，获得已测航标（下一场战斗后过期）。");
-                Add("archive:supply","整理物资记录","获得1补给；与核验航标、档案选项互斥。",Supplies<8);
+                Add("archive:supply","整理物资记录","获得1补给；与核验航标、档案选项互斥。",Supplies<GameBalance.MaxSupplies);
                 if(ActiveCrew("archivist"))Add("archive:card","档案员交叉索引","额外候选：学习复核证据；仍只选一项。",!learned.Contains("c048"));
-                if(markers.ContainsKey("sealed-specimen")){Add("specimen:supply","交付标本 · 补给","消耗标本，获得1补给。",Supplies<8);Add("specimen:archive","交付标本 · 来源索引","消耗标本，将已有稳定来源档案加入现场索引；没有已验证来源时不可选。",runArchive.Any(x=>x.Rule=="source-v1"));Add("specimen:hint","交付标本 · 处置建议","消耗标本，记录相关已学牌提示，不自动编入牌组。");}
+                if(markers.ContainsKey("sealed-specimen")){Add("specimen:supply","交付标本 · 补给","消耗标本，获得1补给。",Supplies<GameBalance.MaxSupplies);Add("specimen:archive","交付标本 · 来源索引","消耗标本，将已有稳定来源档案加入现场索引；没有已验证来源时不可选。",runArchive.Any(x=>x.Rule=="source-v1"));Add("specimen:hint","交付标本 · 处置建议","消耗标本，记录相关已学牌提示，不自动编入牌组。");}
             }
             if(phase==VoyagePhase.Arrived&&!nodeResolved&&CurrentFull.Kind==RunNodeKind.Event)
             {
@@ -129,10 +140,10 @@ namespace UnsoundedSea.Core
                 Add("voucher","接引遇险接驳船","获得接驳凭证；下次成功招聘少付1补给，幕末过期。");
                 Add("specimen","封存漂浮标本","花1补给，获得封存标本；可在档案节点交付。",Supplies>0&&!markers.ContainsKey("sealed-specimen"));
                 Add("repair-boat","修复漂流维修船","支付1补给（轮机长首次免付），获得绝缘钳；放弃其他事件收益。",!learnedTools.Contains("i08")&&(Supplies>0||ActiveCrew("engineer")&&!repairDiscountUsed));
-                if(ActiveCrew("listener"))Add("crew:listen","比对录音","免费核对信号，恢复4理智并记录来源。",Sanity<30);
+                if(ActiveCrew("listener"))Add("crew:listen","比对录音","免费核对信号，恢复4理智并记录来源。",Sanity<GameBalance.MaxSanity);
                 if(ActiveCrew("decoder"))Add("crew:decode","核对值班序列","获得本幕实际威胁简报并揭示后续航路。");
-                if(Watched>0)Add("risk:watch","回应异常信号","获得1补给、被注视+1（最高3）；自愿选择。",Supplies<8);
-                foreach(var id in crewIds.Where(x=>!injuredCrew.Contains(x)))Add("risk:"+id,"冒险取回漂箱 · "+SupportCatalog.CrewMember(id).Name,"确定获得2补给；该船员受伤，支援和航程职责暂停，休整需2补给治疗。",Supplies<=6);
+                if(Watched>0)Add("risk:watch","回应异常信号","获得1补给、被注视+1（最高3）；自愿选择。",Supplies<GameBalance.MaxSupplies);
+                foreach(var id in crewIds.Where(x=>!injuredCrew.Contains(x)))Add("risk:"+id,"冒险取回漂箱 · "+SupportCatalog.CrewMember(id).Name,"确定获得2补给；该船员受伤，支援和航程职责暂停，休整需2补给治疗。",Supplies<=GameBalance.MaxSupplies-2);
             }
             if(escortedCrew!=null&&phase==VoyagePhase.Arrived&&(CurrentFull.Kind==RunNodeKind.Supply||CurrentFull.Kind==RunNodeKind.Event))
             {
@@ -146,7 +157,7 @@ namespace UnsoundedSea.Core
         {
             if(action!=null&&action.StartsWith("ritual:",StringComparison.Ordinal))return replacement==null&&ManageRitual(action);
             if(replacement!=null)action+="@"+replacement;
-            var choice=GetSupportChoices().FirstOrDefault(x=>x.Id==action&&x.Enabled);if(choice==null)return false;
+            var choice=GetCombinedChoices().FirstOrDefault(x=>x.Id==action&&x.Enabled);if(choice==null)return false;
             var pair=action.Split('@');var main=pair[0];var old=pair.Length>1?pair[1]:null;var parts=main.Split(':');var verb=parts[0];var id=parts.Length>1?parts[1]:null;
             switch(verb)
             {
@@ -157,7 +168,7 @@ namespace UnsoundedSea.Core
                 case "navigate":navigatorUsed=true;RevealAllRoutes(CurrentFull);break;
                 case "buy":SpendSupplies(SupportCatalog.Item(id).Kind==ItemKind.Consumable?1:2);Gain(id,old);SpendService("shop");break;
                 case "hire":SpendSupplies(HirePrice);markers.Remove("docking-voucher");if(old!=null)crewIds.Remove(old);crewIds.Add(id);SpendService("hire");break;
-                case "tea":inventory.Remove("i12");Sanity=Math.Min(30,Sanity+5);SpendService("tea");break;
+                case "tea":inventory.Remove("i12");Sanity=Math.Min(GameBalance.MaxSanity,Sanity+5);SpendService("tea");break;
                 case "treat":SpendSupplies(2);injuredCrew.Remove(id);break;
                 case "gunsmith":if(id=="item")Gain("i13");else if(id=="chart")ChartUses++;else LookoutUses++;SpendService("gunsmith");break;
                 case "trust":learned.Add(TrustedCard(id));supportServices.Add("trust:"+id);break;
@@ -169,7 +180,7 @@ namespace UnsoundedSea.Core
                 case "rescue":if(!ActiveCrew("diver"))SpendSupplies(1);escortedCrew=id;nodeResolved=true;break;
                 case "voucher":AddMarker("docking-voucher","本幕结束或下次成功招聘");nodeResolved=true;break;
                 case "repair-boat":if(ActiveCrew("engineer")&&!repairDiscountUsed)repairDiscountUsed=true;else SpendSupplies(1);learnedTools.Add("i08");nodeResolved=true;break;
-                case "crew":if(id=="listen"){Sanity=Math.Min(30,Sanity+4);AddKnowledge("比对录音：重复信号来自自动发报机，未确认其后的实体。");}else{AddKnowledge(RegionBriefing(true));RevealAllRoutes(CurrentFull);}nodeResolved=true;break;
+                case "crew":if(id=="listen"){Sanity=Math.Min(GameBalance.MaxSanity,Sanity+4);AddKnowledge("比对录音：重复信号来自自动发报机，未确认其后的实体。");}else{AddKnowledge(RegionBriefing(true));RevealAllRoutes(CurrentFull);}nodeResolved=true;break;
                 case "gaze":if(id=="hide"){SpendSupplies(1);Watched=2;}SpendService("return-gaze");break;
                 case "risk":if(id=="watch"){Supplies++;Watched=Math.Min(3,Watched+1);}else{Supplies+=2;injuredCrew.Add(id);}nodeResolved=true;break;
                 case "accept":if(old!=null)crewIds.Remove(old);crewIds.Add(escortedCrew);escortedCrew=null;break;

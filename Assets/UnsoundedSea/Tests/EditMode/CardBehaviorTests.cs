@@ -56,7 +56,8 @@ namespace UnsoundedSea.Tests
             Assert.That(medicSession.Execute(BattleCommand.EndTurn()).Success, Is.True);
             Assert.That(medicSession.View.Health, Is.EqualTo(4));
             Assert.That(medicSession.Execute(BattleCommand.Support("medic")).Success, Is.True);
-            Assert.That(medicSession.View.Health, Is.EqualTo(6));
+            Assert.That(medicSession.View.Health, Is.EqualTo(7));
+            Assert.That(medicSession.View.Block, Is.EqualTo(3));
             Assert.That(medicSession.Execute(BattleCommand.Support("medic")).Success, Is.False);
             Assert.That(medicSession.View.Supports.Single().Enabled, Is.False);
 

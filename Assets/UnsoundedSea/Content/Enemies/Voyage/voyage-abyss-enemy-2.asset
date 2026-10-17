@@ -15,25 +15,25 @@ MonoBehaviour:
   id: voyage-abyss-enemy-2
   displayName: "\u7184\u706F\u53F8\u949F"
   health: 40
-  candidateDescription: "\u7F69\u949F\u95F7\u9E23\uFF1A5 \u7406\u667A\u51B2\u51FB / \u65E0\u7130\u706F\u51FB\uFF1A11 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
-  intentPolicy: 1
+  candidateDescription: "\u65E0\u7130\u706F\u51FB\uFF1A12 \u751F\u547D\u4F24\u5BB3 / \u7F69\u949F\u95F7\u9E23\uFF1A5 \u7406\u667A\u51B2\u51FB"
+  intentPolicy: 0
   intents:
+  - id: lantern
+    displayName: "\u65E0\u7130\u706F\u51FB"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
+    channel: 0
+    amount: 12
+    isPublic: 0
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
   - id: bell
     displayName: "\u7F69\u949F\u95F7\u9E23"
-    clue: "\u5934\u90E8\u94DC\u949F\u7F69\u8F7B\u98A4\uFF0C\u65E0\u7130\u63D0\u706F\u4FDD\u6301\u4E0D\u52A8\u3002"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 1
     amount: 5
     isPublic: 0
     visibleAction: 1
     interruptible: 1
     soundSource: "\u5934\u90E8\u949F\u7F69"
-  - id: lantern
-    displayName: "\u65E0\u7130\u706F\u51FB"
-    clue: "\u63D0\u706F\u5411\u540E\u8361\u8D77\uFF0C\u949F\u7F69\u505C\u6B62\u9707\u52A8\u3002"
-    channel: 0
-    amount: 11
-    isPublic: 1
-    visibleAction: 1
-    interruptible: 0
-    soundSource: "\u76EE\u6807\u672C\u4F53"
   presentationPrefab: {fileID: 2189748200026722271, guid: 331c74e808b3a4d32b53cd45f660326a, type: 3}

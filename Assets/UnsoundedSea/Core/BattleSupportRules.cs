@@ -35,6 +35,19 @@ namespace UnsoundedSea.Core
             if(knowledge.Entries.Any(x=>x.Key==key&&x.Level==KnowledgeLevel.Verified))return null;
             return new Evidence(key,"声源与记录核验一致，来源联系已验证","复核证据",KnowledgeLevel.Verified,EvidenceScope.Encounter,b.SubjectId,b.SubjectType,"Source",definition.Id,turn,"source-v1",b.Fact,new[]{a.Key,b.Key});
         }
+        private bool RecordOrdinaryConnection(string enemyId, string source, bool cardQuestion)
+        {
+            if (knowledge.Entries.Any(e => e.Key == enemyId + "/connection")) return false;
+            knowledge.Record(new Evidence(enemyId + "/connection", "可见痕迹与该目标发声位置存在连接", source,
+                KnowledgeLevel.Observed, EvidenceScope.Encounter, enemyId, SubjectType(enemyId), "Connection", definition.Id, turn));
+            if (cardQuestion)
+            {
+                newCardAnswers.Add(enemyId);
+                if (!cardQuestions.TryGetValue(enemyId, out var kinds)) cardQuestions[enemyId] = kinds = new HashSet<InvestigationKind>();
+                kinds.Add(InvestigationKind.Connection);
+            }
+            return true;
+        }
         private int cardsDrawn, currentPaidActions;
         private bool Equipped(string id) => definition.Loadout.Equipment.Contains(id);
         private void InvestigationRefund() { if(turnFlags.Add("investigation-refund")){actions++;Record("调查接力：返还1行动；三种接力牌每回合共享一次。");} }
@@ -86,8 +99,11 @@ namespace UnsoundedSea.Core
                 var uses=consumable?definition.Loadout.Consumables.Count(x=>x==id)-spentConsumables.Count(x=>x==id):toolUses[id];
                 var targets=SupplyTargets(id).Where(x=>x.Enabled).ToList();
                 var enabled=phase==BattlePhase.PlayerTurn&&uses>0&&actions>=item.Cost&&(!SupplyRequiresTarget(id)||targets.Count>0)&&
-                    (id!="i10"||health<definition.Health)&&(id!="i14"||boss==null&&definition.Objective==ObjectiveKind.Seal&&objective.Progress<objective.Target);
-                yield return new SupplyActionView(id,item.Name,item.Description+" · "+item.Cost+"行动",uses,consumable,enabled,targets);
+                    (id!="i10"||health<definition.Health)&&
+                    (id!="i14"||!spentConsumables.Contains("i14")&&CanAdvanceOrdinaryObjective(ObjectiveKind.Seal));
+                var description=item.Description+" · "+item.Cost+"行动";
+                if(id=="i14"&&!enabled)description+=" · "+(spentConsumables.Contains("i14")?"本场已使用":!CanAdvanceOrdinaryObjective(ObjectiveKind.Seal)?"当前没有可推进的普通封线":actions<item.Cost?"行动不足":"当前不能使用");
+                yield return new SupplyActionView(id,item.Name,description,uses,consumable,enabled,targets);
             }
         }
         private string UseSupply(string id,string target,bool consumable)
@@ -107,7 +123,7 @@ namespace UnsoundedSea.Core
                 case "i10":Heal(8);break;
                 case "i11":AddWard(6);break;
                 case "i13":MoveDiscardToHand(target,IsArmed);break;
-                case "i14":AdvanceObjective(1);MarkSceneAction();break;
+                case "i14":AdvanceOrdinaryProgress(1);break;
                 case "i15":boss.BindThreat(target,null);break;
                 case "i16":boss.OpenProvenSafe(target,false);break;
             }
@@ -117,7 +133,7 @@ namespace UnsoundedSea.Core
         {
             if(support.Kind==CrewSupportKind.Listener)return LivingSubjects.Where(x=>CanInvestigate(x.Definition.Id,InvestigationKind.SoundSource)&&!directionalListeningBlocked).Select(x=>Option(x.Definition.Id,x.Definition.Name,"新声源"));
             if(support.Kind==CrewSupportKind.Gunsmith)return discard.Where(x=>x.Definition.Cost==1&&!IsForbidden(x.Definition)).Select(DiscardOption);
-            if(support.Kind==CrewSupportKind.Cartographer)return boss?.ConnectionTargets()??EmptyTargets;
+            if(support.Kind==CrewSupportKind.Cartographer)return boss?.ConnectionTargets()??LivingSubjects.Where(x=>x.ActualIntent?.VisibleAction==true&&!knowledge.Entries.Any(e=>e.Key==x.Definition.Id+"/connection")).Select(x=>Option(x.Definition.Id,x.Definition.Name,"检查可见痕迹与发声位置连接"));
             return EmptyTargets;
         }
         private CrewSupportView BuildSupportView(CrewSupportSpec support)
@@ -135,15 +151,15 @@ namespace UnsoundedSea.Core
             actions-=support.Cost;currentPaidActions=support.Cost;crewSupportUsed=true;usedSupports.Add(support.Id);
             switch(support.Kind)
             {
-                case CrewSupportKind.Medic:Heal(2);break;
-                case CrewSupportKind.Listener:Investigate(target,InvestigationKind.SoundSource,support.Name);break;
+                case CrewSupportKind.Medic:Heal(3);AddBlock(3);break;
+                case CrewSupportKind.Listener:Investigate(target,InvestigationKind.SoundSource,support.Name);Draw(1);break;
                 case CrewSupportKind.Engineer:AddBlock(11);break;
                 case CrewSupportKind.Archivist:Draw(2);break;
                 case CrewSupportKind.Navigator:AddBlock(5);sceneDiscount=Math.Max(sceneDiscount,1);break;
                 case CrewSupportKind.Gunsmith:MoveDiscardToHand(target,x=>x.Cost==1&&!IsForbidden(x));break;
                 case CrewSupportKind.Diver:AddBlock(6);turnFlags.Add("diver-ward");break;
                 case CrewSupportKind.Cook:AddWard(7);break;
-                case CrewSupportKind.Cartographer:boss.InspectConnection(target);break;
+                case CrewSupportKind.Cartographer:if(boss!=null)boss.InspectConnection(target);else RecordOrdinaryConnection(target,support.Name,false);break;
                 case CrewSupportKind.Decoder:AddWard(boss?.RevealNextConstraint()==true?4:7);break;
             }
             Record(support.Name+"支援；支付"+support.Cost+"行动。");return null;

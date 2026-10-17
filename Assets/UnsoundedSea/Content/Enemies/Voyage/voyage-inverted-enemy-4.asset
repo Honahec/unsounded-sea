@@ -15,12 +15,12 @@ MonoBehaviour:
   id: voyage-inverted-enemy-4
   displayName: "\u9519\u4F4D\u503C\u66F4\u4EBA"
   health: 28
-  candidateDescription: "\u65E7\u8896\u64D2\u62FF\uFF1A8 \u751F\u547D\u4F24\u5BB3 / \u65B0\u8896\u51FB\u6253\uFF1A10 \u751F\u547D\u4F24\u5BB3"
-  intentPolicy: 1
+  candidateDescription: "\u65E7\u8896\u64D2\u62FF\uFF1A8 \u751F\u547D\u4F24\u5BB3 / \u65B0\u8896\u51FB\u6253\uFF1A5 \u7406\u667A\u51B2\u51FB"
+  intentPolicy: 0
   intents:
   - id: old-watch
     displayName: "\u65E7\u8896\u64D2\u62FF"
-    clue: "\u892A\u8272\u65E7\u8896\u62AC\u8D77\uFF0C\u53E6\u4E00\u4FA7\u4ECD\u5782\u843D\u3002"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 0
     amount: 8
     isPublic: 0
@@ -29,9 +29,9 @@ MonoBehaviour:
     soundSource: "\u76EE\u6807\u672C\u4F53"
   - id: new-watch
     displayName: "\u65B0\u8896\u51FB\u6253"
-    clue: "\u8F83\u65B0\u7684\u8896\u53E3\u540E\u64A4\u84C4\u529B\uFF0C\u65E7\u8896\u8D34\u4F4F\u80F8\u524D\u3002"
-    channel: 0
-    amount: 10
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
+    channel: 1
+    amount: 5
     isPublic: 0
     visibleAction: 1
     interruptible: 0

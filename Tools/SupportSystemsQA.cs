@@ -39,13 +39,12 @@ public static class SupportSystemsQA
         {wheel.target=sheet;sheet.SendEvent(wheel);}
         Check(materialScroll.scrollOffset.y>0,"Wheel over manifest padding did not scroll its content.");
         materialScroll.scrollOffset=Vector2.zero;
-        var choice=VoyageRuntime.Session.GetSupportChoices().First(x=>x.Id.StartsWith("buy:")&&x.Enabled&&SupportCatalog.Item(x.Id.Substring(4)).Kind==ItemKind.Consumable);
-        var before=VoyageRuntime.Session.Supplies;Click("support-"+choice.Id);Check(VoyageRuntime.Session.Supplies==before-1,"Purchase did not charge exactly once.");
+        Click("support-manifest-close"); await Task.Delay(100);
+        var choice=VoyageRuntime.Session.GetNodeServices().First(x=>x.Id.StartsWith("buy:")&&x.Enabled&&SupportCatalog.Item(x.Id.Substring(4)).Kind==ItemKind.Consumable);
+        var before=VoyageRuntime.Session.Supplies;Click("node-service-"+choice.Id);Check(VoyageRuntime.Session.Supplies==before-1,"Purchase did not charge exactly once.");
         Check(!VoyageRuntime.Session.ManageSupport(choice.Id),"Repeated purchase accepted.");
-        Click("support-tab-2");
-        var hire=VoyageRuntime.Session.GetSupportChoices().First(x=>x.Id.StartsWith("hire:")&&x.Enabled);
-        Click("support-"+hire.Id);Check(VoyageRuntime.Session.CrewIds.Count==2&&VoyageRuntime.Session.Supplies==0,"Hiring resources/roster mismatch.");
-        var scroll=Root.Q(className:"action-book").Q<ScrollView>();scroll.scrollOffset=Vector2.zero;
+        var hire=VoyageRuntime.Session.GetNodeServices().First(x=>x.Id.StartsWith("hire:")&&x.Enabled);
+        Click("node-service-"+hire.Id);Check(VoyageRuntime.Session.CrewIds.Count==2&&VoyageRuntime.Session.Supplies==0,"Hiring resources/roster mismatch.");
         Check(saved==SaveContents(),"Debug UI changed saved voyage.");
         return new { inventory=VoyageRuntime.Session.Inventory.Count,crew=VoyageRuntime.Session.CrewIds,supplies=VoyageRuntime.Session.Supplies,saveUnchanged=true };
     }

@@ -52,20 +52,61 @@ namespace UnsoundedSea.Tests
             Assert.That(tool.Targets.Single().Enabled, Is.False);
         }
 
-        [Test] public void VoyageEnemiesHaveTwoInvestigableCyclicIntents()
+        [Test] public void VoyageEnemiesCarryTheirSyncedStylePolicyAndInformationBoundary()
         {
             var paths = AssetDatabase.FindAssets("t:EnemyDefinition", new[] { "Assets/UnsoundedSea/Content/Enemies/Voyage" })
                 .Select(AssetDatabase.GUIDToAssetPath)
                 .Where(path => path.Contains("voyage-") && path.Contains("-enemy-"))
                 .ToArray();
-            Assert.That(paths, Has.Length.EqualTo(25), "Run Unsounded Sea/Content/Setup Voyage Campaign.");
+            Assert.That(paths, Has.Length.EqualTo(25), "Run SyncCombatBalance.");
             foreach (var path in paths)
             {
                 var enemy = AssetDatabase.LoadAssetAtPath<EnemyDefinition>(path);
-                Assert.That(enemy.intentPolicy, Is.EqualTo(IntentPolicy.Cycle), path);
-                Assert.That(enemy.intents, Has.Length.GreaterThanOrEqualTo(2), path);
-                Assert.That(enemy.intents.Any(intent => !intent.isPublic && intent.visibleAction), Is.True, path);
+                var encounterId = enemy.id.Replace("-enemy-", "-");
+                if (encounterId.StartsWith("voyage-fog-", StringComparison.Ordinal))
+                {
+                    Assert.That(enemy.intentPolicy, Is.EqualTo(IntentPolicy.Cycle), path);
+                    continue;
+                }
+                var style = EnemyBehavior.StyleForEncounter(encounterId);
+                Assert.That(enemy.intentPolicy, Is.EqualTo(style == EnemyStyle.Rhythm ? IntentPolicy.Cycle : IntentPolicy.Random), path);
+                Assert.That(enemy.intents, Has.Length.InRange(2, 3), path);
+                if (style == EnemyStyle.Rhythm)
+                {
+                    Assert.That(enemy.intents.All(intent => intent.isPublic && intent.amount > 0), Is.True, path);
+                }
+                else
+                {
+                    Assert.That(enemy.intents.Where(intent => intent.amount > 0).Select(intent => intent.channel),
+                        Is.EquivalentTo(new[] { DamageChannel.Health, DamageChannel.Sanity }), path);
+                    Assert.That(enemy.intents.Select(intent => intent.clue).Distinct(), Has.Count.EqualTo(1), path);
+                    Assert.That(enemy.candidateDescription.IndexOf("生命伤害", StringComparison.Ordinal),
+                        Is.LessThan(enemy.candidateDescription.IndexOf("理智冲击", StringComparison.Ordinal)), path);
+                    Assert.That(enemy.candidateDescription, Does.Not.Contain("公开"), path);
+                }
             }
+        }
+        [Test] public void SecondaryEncounterAssetsAndFogDisplayContractAreSynchronized()
+        {
+            foreach (var pair in new[]
+            {
+                ("bones", ObjectiveKind.Survive), ("abyss", ObjectiveKind.Survive),
+                ("inverted", ObjectiveKind.Seal), ("fleet", ObjectiveKind.Seal)
+            })
+            {
+                var path = $"Assets/UnsoundedSea/Content/Encounters/Voyage/voyage-{pair.Item1}-3.asset";
+                var encounter = AssetDatabase.LoadAssetAtPath<EncounterDefinition>(path);
+                Assert.That(encounter.objective, Is.EqualTo(pair.Item2), path);
+                Assert.That(encounter.objectiveTarget, Is.EqualTo(3), path);
+                Assert.That(encounter.displayName, Does.StartWith(pair.Item1 == "bones" ? "尸骸之海" :
+                    pair.Item1 == "inverted" ? "倒悬潮庭" : pair.Item1 == "fleet" ? "无灯裂海" : "无星深渊"), path);
+            }
+            var fog = AssetDatabase.LoadAssetAtPath<BattleScenario>("Assets/UnsoundedSea/Content/Scenarios/FogVisitors.asset");
+            Assert.That(fog.enemyStatus, Is.Not.Empty, "The HUD uses this status plus objective progress instead of displaying placeholder 999 health.");
+            var definition = fog.encounter.Build();
+            var view = new BattleSession(definition, 1, fog.rules?.CreateEffects(), fog.rules?.CreateObjective(definition)).View;
+            Assert.That(view.ObjectiveProgress, Is.Zero);
+            Assert.That(view.ObjectiveTarget, Is.EqualTo(4));
         }
         [Test] public void EchoAlternatesAnUninterruptibleAndInterruptibleThreat()
         {

@@ -15,25 +15,25 @@ MonoBehaviour:
   id: voyage-bones-enemy-2
   displayName: "\u76D0\u9AD3\u53F8\u796D"
   health: 30
-  candidateDescription: "\u9AD3\u76CF\u7977\u58F0\uFF1A5 \u7406\u667A\u51B2\u51FB\uFF08\u516C\u5F00\uFF09 / \u76D0\u9AA8\u5212\u523A\uFF1A9 \u751F\u547D\u4F24\u5BB3"
-  intentPolicy: 1
+  candidateDescription: "\u76D0\u9AA8\u5212\u523A\uFF1A12 \u751F\u547D\u4F24\u5BB3 / \u9AD3\u76CF\u7977\u58F0\uFF1A5 \u7406\u667A\u51B2\u51FB"
+  intentPolicy: 0
   intents:
-  - id: cup
-    displayName: "\u9AD3\u76CF\u7977\u58F0"
-    clue: "\u53CC\u624B\u6258\u9AD8\u9AD3\u76CF\uFF0C\u80F8\u524D\u9AA8\u677F\u8F7B\u54CD\u3002"
-    channel: 1
-    amount: 5
-    isPublic: 1
-    visibleAction: 1
-    interruptible: 1
-    soundSource: "\u9AD3\u76CF"
   - id: shard
     displayName: "\u76D0\u9AA8\u5212\u523A"
-    clue: "\u9AD3\u76CF\u538B\u56DE\u80F8\u524D\uFF0C\u53F3\u624B\u62BD\u51FA\u4E00\u679A\u76D0\u9AA8\u5C16\u7247\u3002"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 0
-    amount: 9
+    amount: 12
     isPublic: 0
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
+  - id: cup
+    displayName: "\u9AD3\u76CF\u7977\u58F0"
+    clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
+    channel: 1
+    amount: 5
+    isPublic: 0
+    visibleAction: 1
+    interruptible: 1
+    soundSource: "\u9AD3\u76CF"
   presentationPrefab: {fileID: 2264293776661885800, guid: 79a0c7b27b5f54193811867316f40d3b, type: 3}

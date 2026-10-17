@@ -15,7 +15,7 @@ MonoBehaviour:
   id: voyage-fog-enemy-1
   displayName: "\u5931\u5411\u6C34\u624B"
   health: 28
-  candidateDescription: "\u9519\u8EAB\u5272\u523A\uFF1A9 \u751F\u547D\u4F24\u5BB3 / \u8FA8\u8BA4\u8237\u5411\uFF1A0 \u751F\u547D\u4F24\u5BB3"
+  candidateDescription: "\u9519\u8EAB\u5272\u523A\uFF1A9 \u751F\u547D\u4F24\u5BB3 / \u8FA8\u8BA4\u8237\u5411"
   intentPolicy: 1
   intents:
   - id: knife

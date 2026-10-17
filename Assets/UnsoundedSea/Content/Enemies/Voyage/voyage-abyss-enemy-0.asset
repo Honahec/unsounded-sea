@@ -15,7 +15,7 @@ MonoBehaviour:
   id: voyage-abyss-enemy-0
   displayName: "\u65E0\u661F\u7AA5\u89C6\u8005"
   health: 40
-  candidateDescription: "\u7A7A\u9762\u6CE8\u89C6\uFF1A5 \u7406\u667A\u51B2\u51FB\uFF08\u516C\u5F00\uFF09 / \u76F2\u624B\u652B\u53D6\uFF1A11 \u751F\u547D\u4F24\u5BB3"
+  candidateDescription: "\u76F2\u624B\u652B\u53D6\uFF1A11 \u751F\u547D\u4F24\u5BB3 / \u7A7A\u9762\u6CE8\u89C6\uFF1A5 \u7406\u667A\u51B2\u51FB"
   intentPolicy: 1
   intents:
   - id: hollow
@@ -32,7 +32,7 @@ MonoBehaviour:
     clue: "\u51F9\u9677\u9762\u90E8\u504F\u5F00\uFF0C\u5782\u843D\u7684\u624B\u6307\u8D34\u7740\u7532\u677F\u4F38\u957F\u3002"
     channel: 0
     amount: 11
-    isPublic: 0
+    isPublic: 1
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"

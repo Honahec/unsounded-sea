@@ -13,6 +13,8 @@ namespace UnsoundedSea.Core
             public IntentSpec ActualIntent;
             public bool Confirmed;
             public bool Interrupted;
+            public int CycleOffset;
+            public int HealthThreatReduction, SanityThreatReduction;
         }
         private const string SealCardId = "E01-01";
         private static readonly CardSpec SealCard = new CardSpec(SealCardId, "绘制封线", "消耗3行动推进封线1段。每回合一次；合法场景折扣照常生效。", EncounterObjective.SealActionCost, new[] { new EffectSpec("objective", 1) });
@@ -55,12 +57,16 @@ namespace UnsoundedSea.Core
             this.definition = definition ?? throw new ArgumentNullException(nameof(definition));
             this.effects = (effects ?? EffectRegistry.CreateDefault()).Snapshot();
             foreach (var effect in definition.Deck.SelectMany(x => x.Effects)) this.effects.Get(effect.Id);
-            this.objective = objective ?? new EncounterObjective(definition.Objective, definition.ObjectiveTarget);
+            var secondary = EnemyBehavior.IsSecondaryObjective(definition.Id);
+            var objectiveKind = secondary ? EnemyBehavior.SecondaryObjectiveKind(definition.Id) : definition.Objective;
+            this.objective = objective ?? new EncounterObjective(objectiveKind, secondary ? 3 : definition.ObjectiveTarget, secondary);
             Seed = seed; deckRandom = new DeterministicRandom(seed); intentRandom = new DeterministicRandom(seed ^ 0x9E3779B9u);
             bossKind = Require.Defined(boss);
             health = definition.InitialHealth; sanity = definition.InitialSanity;
             watched=definition.Loadout.Watched;beaconAvailable=definition.Loadout.SurveyedBeacon;echoRitualAvailable=definition.Loadout.EchoRitual;
             enemies = definition.Enemies.Select(x => new EnemyState { Definition = x, Health = x.Health }).ToList();
+            if (EnemyBehavior.StyleForEncounter(definition.Id) == EnemyStyle.Rhythm)
+                foreach (var enemy in enemies) enemy.CycleOffset = intentRandom.Next(enemy.Definition.Intents.Count);
             toolUses = definition.Tools.ToDictionary(x => x.Id, x => x.Uses, StringComparer.Ordinal);
             for (var i = 0; i < definition.Deck.Count; i++) draw.Add(new CardView(i + 1, definition.Deck[i]));
             nextInstanceId = definition.Deck.Count + 100;
@@ -88,7 +94,7 @@ namespace UnsoundedSea.Core
                     Objective = boss?.Objective ?? objective.Description, ObjectiveProgress = boss?.Progress ?? objective.Progress,
                     ObjectiveTarget = boss?.Target ?? objective.Target, CanAdvanceObjective = boss == null && phase == BattlePhase.PlayerTurn && objective.AllowsTaskAction && !taskUsed && actions >= Math.Max(0, objective.ActionCost - sceneDiscount),
                     Hand = hand.Select(x => x.Snapshot()).ToList().AsReadOnly(),
-                    Enemies = enemies.Select(BossEnemyView).ToList().AsReadOnly(),
+                    Enemies = enemies.Select(BuildEnemyView).ToList().AsReadOnly(),
                     Tools = definition.Tools.Select(BuildToolView).ToList().AsReadOnly(),
                     Supports = definition.Supports.Select(BuildSupportView).ToList().AsReadOnly(),
                     SupplyActions=SupplyViews().ToList().AsReadOnly(),SpentConsumables=spentConsumables.ToList().AsReadOnly(),Equipment=definition.Loadout.Equipment,SurveyedBeacon=beaconAvailable,
@@ -195,13 +201,45 @@ namespace UnsoundedSea.Core
         }
 
         private static CommandResult Reject(string reason) => new CommandResult(false, reason);
-        private static string Describe(IntentSpec intent) => $"{intent.Name} · {intent.Amount} 点{(intent.Channel == DamageChannel.Health ? "生命伤害" : "理智冲击")}{(intent.Interruptible ? " · 可打断" : "")}";
+        private static string Describe(IntentSpec intent, int surge = 0) => $"{intent.Name} · {intent.Amount + surge} 点{(intent.Channel == DamageChannel.Health ? "生命伤害" : "理智冲击")}{(intent.Interruptible ? " · 可打断" : "")}";
+        private int CurrentThreatAmount(EnemyState enemy) =>
+            Math.Max(0, enemy.ActualIntent.Amount +
+                EnemyBehavior.DamageBonus(turn, definition.Id, enemy.ActualIntent.Amount) -
+                (enemy.ActualIntent.Channel == DamageChannel.Health ? enemy.HealthThreatReduction : enemy.SanityThreatReduction));
+        private string DescribeCurrent(EnemyState enemy) =>
+            Describe(enemy.ActualIntent, CurrentThreatAmount(enemy) - enemy.ActualIntent.Amount);
         private void SetPhase(BattlePhase value) { phase = value; Record($"阶段：{value}"); }
         private void Record(string message) => log.Add($"[{turn}] {message}");
         private EnemyState Find(string id) => enemies.FirstOrDefault(x => x.Definition.Id == id);
         private bool IsLiving(string id) => Find(id)?.Health > 0;
         private bool IsTargetable(string id) => IsLiving(id) && (boss == null || boss.IsTargetable(id));
         internal bool IsConfirmed(string id) => Find(id)?.Confirmed == true;
+        internal ObjectiveKind ObjectiveKind => objective is EncounterObjective encounter ? encounter.Kind : definition.Objective;
+        internal bool HasSecondaryObjective => EnemyBehavior.IsSecondaryObjective(definition.Id);
+        internal int ObjectiveProgress => objective.Progress;
+        internal int ObjectiveTarget => objective.Target;
+        internal bool AdvanceOrdinaryObjective(int amount)
+        {
+            if (!HasSecondaryObjective) return false;
+            var before = objective.Progress;
+            AdvanceObjective(amount);
+            CheckOutcome();
+            return objective.Progress != before;
+        }
+
+        private EnemyView BuildEnemyView(EnemyState enemy)
+        {
+            if (boss != null) return BossEnemyView(enemy);
+            var surge = EnemyBehavior.Surge(turn, definition.Id);
+            var style = EnemyBehavior.StyleForEncounter(definition.Id);
+            if (style == EnemyStyle.None) style = EnemyBehavior.StyleForEnemy(enemy.Definition.Id, enemy.Definition.IntentPolicy);
+            var hiddenIntent = enemy.Health == 0 ? "" : enemy.Interrupted ? "已打断" :
+                !enemy.Confirmed ? EnemyBehavior.Candidates(enemy.Definition, surge, definition.Id, enemy.HealthThreatReduction, enemy.SanityThreatReduction) :
+                CurrentThreatAmount(enemy) == 0 ? "" : DescribeCurrent(enemy);
+            return new EnemyView(enemy.Definition.Id, enemy.Definition.Name, enemy.Health, enemy.Definition.Health,
+                enemy.Health == 0 ? "已击退" : enemy.ActualIntent.Clue, hiddenIntent, enemy.Confirmed, true, surge, style);
+        }
+
 
         private void BeginTurn()
         {
@@ -214,11 +252,17 @@ namespace UnsoundedSea.Core
             foreach (var enemy in enemies.Where(x => x.Health > 0))
             {
                 if (boss != null) continue;
-                var intentIndex = enemy.Definition.IntentPolicy == IntentPolicy.Cycle
-                    ? (turn - 1) % enemy.Definition.Intents.Count
-                    : intentRandom.Next(enemy.Definition.Intents.Count);
+                var style = EnemyBehavior.StyleForEncounter(definition.Id);
+                var intentIndex = style == EnemyStyle.Rhythm
+                    ? (turn - 1 + enemy.CycleOffset) % enemy.Definition.Intents.Count
+                    : style == EnemyStyle.Hidden
+                        ? intentRandom.Next(enemy.Definition.Intents.Count)
+                        : enemy.Definition.IntentPolicy == IntentPolicy.Cycle
+                            ? (turn - 1) % enemy.Definition.Intents.Count
+                            : intentRandom.Next(enemy.Definition.Intents.Count);
                 enemy.ActualIntent = enemy.Definition.Intents[intentIndex];
-                enemy.Confirmed = enemy.ActualIntent.IsPublic || enemy.Definition.Intents.Count == 1; enemy.Interrupted = false;
+                enemy.Confirmed = style == EnemyStyle.Rhythm || enemy.ActualIntent.IsPublic || enemy.Definition.Intents.Count == 1;
+                enemy.Interrupted = false; enemy.HealthThreatReduction = enemy.SanityThreatReduction = 0;
                 Record($"{enemy.Definition.Name}：{enemy.ActualIntent.Clue}");
             }
             SetPhase(BattlePhase.IntentLocked); SetPhase(BattlePhase.PlayerTurn);
@@ -241,7 +285,9 @@ namespace UnsoundedSea.Core
             else foreach (var enemy in enemies.Where(x => x.Health > 0))
             {
                 if (enemy.Interrupted) { Record($"{enemy.Definition.Name}的行动已被打断。"); continue; }
-                ApplyEnemyThreat(enemy, enemy.ActualIntent.Channel, enemy.ActualIntent.Amount, Describe(enemy.ActualIntent));
+                var amount = CurrentThreatAmount(enemy);
+                ApplyEnemyThreat(enemy, enemy.ActualIntent.Channel, amount,
+                    Describe(enemy.ActualIntent, amount - enemy.ActualIntent.Amount));
                 if (health == 0 || sanity == 0) { CheckOutcome(); return; }
             }
             retained.Clear();
@@ -339,7 +385,10 @@ namespace UnsoundedSea.Core
             string information;
             switch (kind)
             {
-                case InvestigationKind.VisibleAction: enemy.Confirmed = true; information = Describe(enemy.ActualIntent); break;
+                case InvestigationKind.VisibleAction:
+                    enemy.Confirmed = true;
+                    information = DescribeCurrent(enemy);
+                    break;
                 case InvestigationKind.SoundSource: information = $"声源：{enemy.ActualIntent.SoundSource}（仅确认来源，不确认完整意图）"; break;
                 case InvestigationKind.DamageChannel: information = $"主要威胁：{(enemy.ActualIntent.Channel == DamageChannel.Health ? "肉体" : "理智")}"; break;
                 default: throw new ArgumentOutOfRangeException(nameof(kind));
