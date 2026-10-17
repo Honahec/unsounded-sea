@@ -48,10 +48,10 @@
 
 2026-10-17，覆盖 25 个航程普通敌人及 Prayer／Echo，共 27 个甲板角色 Prefab；Boss 战复用这些 Prefab 的召唤单位同样生效，巨兽本体沿用原动作。
 
-- 最终重编译 0 错误／0 警告；`UnsoundedSea.Tests` EditMode **126 通过／0 失败／0 跳过**。新增 7 项检查覆盖全部甲板配置、27 个实际蒙皮的变形／足部固定／回收、旋转缩放父节点、连续受击、暂停与减少动效，以及已结算动作记录的打断、致死、零伤害和回放一致性。
+- 初次接入时 `UnsoundedSea.Tests` EditMode 126 项通过；合并 `origin/main` 的内容扩展后，完整回归为 **210 通过／0 失败／0 跳过**。合并新增的五海域双敌随行单位原先仍引用静态 Prefab，已通过 Editor API 改为与对应单体敌人相同的 CuratedRigs 引用，生命和意图不变。7 项动画检查覆盖全部甲板配置、27 个实际蒙皮的变形／足部固定／回收、旋转缩放父节点、连续受击、暂停与减少动效，以及已结算动作记录的打断、致死、零伤害和回放一致性。
 - `DeckAnimationQA.Gallery` 分三页检查全部角色的 idle、前摇、攻击与受击。逐姿态调用 Unity `BakeMesh` 捕获实际蒙皮结果，避免同帧手动渲染复用旧骨骼矩阵；这些是确定性姿态采样，不是帧率测量。[代表动作](ArtReferences/deck-combat-poses.jpg)；曲线与角色分组见[机制设计](ASSET_MECHANICS_DESIGN.md#甲板敌人的战斗动作设计与当前实现)。
 - Prayer 使用 8 组双节裙摆骨骼，攻击时上段／下摆最大摆角为 16°／34°。101 个攻击采样检查下摆变形介于 0.12–0.65 m，靴子与上身没有被裙摆权重带动；逐帧预览检查风力抬升、波动及回收。来源、骨骼与权重记录维护在 [DeckRigs manifest](../ArtSource/Characters/DeckRigs-manifest.json)。
-- `DeckAnimationQA.Live` 在 `OceanBattle` 真实玩家循环和结束回合按钮上通过：帧计数推进 391，船体战斗晃动包络峰值约 0.792，裙摆风力峰值约 0.997。重复提交没有推进第二回合；暂停冻结角色时钟、船体、水体与反射，恢复后动作结束解除 Busy；减少动效时船体稳定且回合正常解锁。测试后恢复原动效偏好。
+- `DeckAnimationQA.Live` 在 `OceanBattle` 真实玩家循环和结束回合按钮上通过：帧计数推进 391，船体战斗晃动包络峰值约 0.792，裙摆风力峰值约 0.997。重复提交没有推进第二回合；暂停冻结角色时钟、船体、水体与反射，恢复后动作结束解除 Busy；减少动效时船体稳定且回合正常解锁。测试后恢复原动效偏好。合并内容扩展后再次通过真实按钮、防连点、暂停、减少动效与海面反射检查（帧计数推进 697）；另逐一加载五海域双敌场景，确认每个随行单位 idle 推进、两名敌人均有已结算攻击、结束后解除 Busy。连续五场脚本曾超过 30 秒预算，不计通过；拆为单场检查后五场全部通过，最终 Console 0 错误／0 警告。
 - 普通战改用航海／Boss 共用的海面网格和 Uber 水体，独立 `DeckOcean` 材质使用 0.18／0.09 m 波幅、半分辨率反射及雾海天空；测试确认波峰与甲板锚点保持净空，实际截图检查水面、反射、远景和甲板构图：[普通战海面](ArtReferences/deck-ocean.jpg)。
 
 复现入口为 `Tools/DeckAnimationQA.cs`（在 `OceanBattle` Play Mode 调用 `Gallery`／`Live`）、`DeckAnimationSetup.Apply` 和 `Tools/DeckOceanSetup.cs`。完整临时结果在忽略的 `Logs/DeckAnimation/`。裙摆使用定向骨骼动画，不是布料模拟；未验收独立 Player 或目标设备性能。
