@@ -94,8 +94,9 @@
 .enemy-clue-lines { font-size: 13px; color: #eee4c9; white-space: normal; -unity-text-align: middle-left; }
 .enemy-intent-row { flex-direction: row; align-items: center; padding: 3px 0; }
 .enemy-intent-icon { width: 22px; height: 22px; margin-right: 5px; flex-shrink: 0; }
-.enemy-intent-action { width: 76px; flex-shrink: 0; font-size: 14px; color: #d7bd82; -unity-text-align: upper-left; }
-.enemy-intent-effect { flex-grow: 1; flex-shrink: 1; font-size: 14px; color: #eee4c9; white-space: normal; -unity-text-align: upper-left; }
+.enemy-intent-action { min-width: 64px; flex-shrink: 1; margin-right: 8px; font-size: 14px; color: #d7bd82; -unity-text-align: middle-left; }
+.enemy-intent-effect { flex-shrink: 0; font-size: 18px; color: #eee4c9; white-space: nowrap; -unity-text-align: middle-left; }
+.enemy-intent-tag { margin-left: 8px; padding: 1px 6px; flex-shrink: 0; font-size: 11px; color: #d7bd82; border-width: 1px; border-radius: 3px; border-color: rgba(215,189,130,.55); white-space: nowrap; }
 .enemy-intent-row.confirmed .enemy-intent-effect { color: #a7dbca; }
 .battle-action-book-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 5% 8%; align-items: center; background-color: rgba(1,8,13,.96); color: #eee4c9; }
 .battle-action-book-sheet { width: 1100px; max-width: 100%; flex-grow: 1; min-height: 0; padding: 22px 28px; background-color: rgba(8,19,22,.96); border-width: 1px; border-color: #9e8755; }
@@ -137,12 +138,11 @@
 .collection-detail > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container { align-items: stretch; }
 .card-inspection { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(1,8,13,.88); }
 .card-inspection-face { width: 340px; height: 510px; border-width: 2px; border-color: #d7bd82; border-radius: 14px; }
-.card-inspection-face #illustrated-rules { min-height: 42%; }
-.card-inspection-face #illustrated-description { font-size: 17px; }
+.card-inspection-face .illustrated-rules { min-height: 42%; }
+.card-inspection-face .illustrated-description { max-height: none; font-size: 17px; }
 .card-inspection-close { width: 150px; min-height: 42px; margin-top: 12px; border-width: 1px; border-color: #d7bd82; background-color: #19383c; color: #eee4c9; }
 .card-inspection-close:focus { border-width: 2px; border-color: #eee4c9; }
 .card-target-options { flex-grow: 1; min-height: 0; }
-.card-detail-hint { position: absolute; right: 7px; top: 9px; padding: 2px 5px; font-size: 10px; color: #ebe0be; background-color: rgba(5,15,19,.75); }
 .pending-choice { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(1,8,13,.92); }
 .pending-choice-sheet { width: 560px; max-height: 76%; padding: 24px 30px; background-color: #0f1f23; border-width: 2px; border-color: #d7bd82; border-top-left-radius: 28px; border-bottom-right-radius: 28px; }
 .pending-choice-title { margin-bottom: 14px; color: #fff0c9; font-size: 22px; -unity-text-align: middle-center; }
@@ -155,3 +155,36 @@
 }
 .game-menu Button:active, .voyage-hud Button:active { scale: 0.98; }
 .reduced-motion Button { transition-duration: 0s; }
+
+/* Shortcut keycaps sit beside a button's name instead of "名称 / M" text. */
+.has-key { flex-direction: row; align-items: center; justify-content: center; }
+.key-title { -unity-text-align: middle-center; white-space: nowrap; }
+.key-badge { min-width: 20px; height: 20px; margin-left: 8px; padding: 0 5px; flex-shrink: 0; font-size: 11px; color: #d7bd82; -unity-text-align: middle-center; white-space: nowrap; border-width: 1px; border-bottom-width: 2px; border-radius: 4px; border-color: rgba(215,189,130,.6); background-color: rgba(4,12,14,.7); }
+.has-key:hover .key-badge, .has-key:focus .key-badge { color: #fff0c9; border-color: #eee4c9; }
+
+/* Opening crew: two portrait-style cards chosen after 启航. */
+.crew-picker { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(3,9,11,.78); }
+.crew-picker-title { margin-bottom: 26px; font-size: 30px; color: #eee4c9; letter-spacing: 8px; -unity-text-align: middle-center; text-shadow: 0 2px 6px #081316; }
+.crew-picker-row { flex-direction: row; justify-content: center; }
+.game-menu .crew-card { width: 260px; height: 340px; margin: 0 18px; padding: 26px 22px; flex-direction: column; align-items: center; justify-content: flex-start; border-width: 1px; border-radius: 4px 26px 4px 26px; border-color: rgba(158,135,85,.55); background-color: rgba(8,19,22,.92); }
+.game-menu .crew-card SeaUiArt { width: 92px; height: 92px; margin-bottom: 16px; }
+.game-menu .crew-card:hover, .game-menu .crew-card:focus { border-width: 2px; border-color: #e5c67f; background-color: rgba(30,53,52,.95); translate: 0 -6px; }
+.game-menu .crew-card.selected { border-color: #c6ad71; }
+.crew-card-name { font-size: 26px; color: #eee4c9; letter-spacing: 4px; -unity-text-align: middle-center; }
+.crew-card-role { margin-top: 4px; font-size: 14px; color: #d7bd82; letter-spacing: 3px; -unity-text-align: middle-center; }
+.crew-card-copy { margin-top: 18px; font-size: 14px; color: #b9c9bd; -unity-text-align: upper-center; white-space: normal; }
+.game-menu .crew-back { margin-top: 28px; min-width: 140px; min-height: 42px; padding: 0 16px; font-size: 17px; color: #a9b6ad; border-bottom-width: 1px; border-color: rgba(158,135,85,.45); }
+.game-menu .crew-back:hover, .game-menu .crew-back:focus { color: #eee4c9; border-color: #e4cc92; }
+
+/* Full-art cards keep their upper third unobstructed; the lower text sits on a local inset wash. */
+.illustrated-card { padding: 0; overflow: hidden; background-color: #0f1d21; -unity-background-scale-mode: scale-and-crop; }
+.illustrated-cost { position: absolute; left: 7px; top: 7px; width: 36px; height: 36px; margin: 0; padding: 0; border-radius: 18px; background-color: rgba(15,29,33,.96); color: #ffeec0; font-size: 23px; white-space: nowrap; -unity-text-align: middle-center; }
+.illustrated-rules { position: absolute; left: 9px; right: 9px; top: 34%; bottom: 12px; min-height: 0; padding: 6px; overflow: hidden; border-radius: 9px; background-color: rgba(5,15,19,.66); }
+.illustrated-title { flex-shrink: 0; margin: 0; color: #f6deab; font-size: 16px; -unity-font-style: bold; white-space: normal; }
+.illustrated-description { flex-grow: 1; flex-shrink: 1; max-height: 74px; margin: 3px 0 0; overflow: hidden; color: #f1efde; font-size: 12px; white-space: normal; }
+.boss-applicability { flex-shrink: 0; align-self: flex-start; margin-top: 3px; padding: 1px 5px; border-width: 1px; border-radius: 3px; border-color: rgba(215,189,130,.6); color: #d7bd82; background-color: rgba(5,15,19,.72); font-size: 11px; white-space: nowrap; }
+.card-anchor.inspecting .illustrated-rules { top: 34%; }
+.card-anchor.inspecting .illustrated-description { max-height: none; font-size: 12px; }
+
+.sanity-threshold { position: absolute; top: -2px; bottom: -2px; width: 2px; translate: -1px 0; background-color: #d7bd82; }
+.sanity-threshold-label { position: absolute; left: 50%; top: -19px; translate: -50% 0; color: #eee4c9; font-size: 11px; white-space: nowrap; text-shadow: 0 1px 3px #081316; }

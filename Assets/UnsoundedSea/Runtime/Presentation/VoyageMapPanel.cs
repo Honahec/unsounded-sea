@@ -96,7 +96,13 @@ namespace UnsoundedSea.Runtime
                 var glyph = new ChartNodeGlyph(stop.Kind) { pickingMode = PickingMode.Ignore }; glyph.AddToClassList("node-glyph"); node.Add(glyph);
                 var title = new Label(stop.Name) { pickingMode = PickingMode.Ignore }; title.AddToClassList("node-name");
                 title.AddToClassList(stop.Y > 78 ? "label-below" : "label-above"); node.Add(title);
-                node.tooltip = $"{StateName(state)} · {KindName(stop.Kind)} · {stop.Name}\n{stop.Clue}\n{VoyageHud.PreviewRoute(session, stop)}";
+                if (stop.Perilous)
+                {
+                    var perilous = new Label("险") { name = "perilous-" + id, pickingMode = PickingMode.Ignore };
+                    perilous.AddToClassList("node-perilous");
+                    node.Add(perilous);
+                }
+                node.tooltip = $"{StateName(state)} · {KindName(stop.Kind)} · {stop.Name}{(stop.Perilous ? "\n双敌 · 两次收获" : "")}\n{stop.Clue}\n{VoyageHud.PreviewRoute(session, stop)}";
                 Add(node);
             }
 

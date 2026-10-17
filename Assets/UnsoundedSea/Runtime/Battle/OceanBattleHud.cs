@@ -35,6 +35,7 @@ namespace UnsoundedSea.Runtime
         private string playedCardFeedback;
         private BossEncounterKind presentedBoss;
         private readonly List<(Button button, Transform anchor, Vector2 offset)> encounterLabels = new List<(Button, Transform, Vector2)>();
+        private readonly Dictionary<string, int> presentedSurge = new Dictionary<string, int>();
         public int RenderedFrames { get; private set; }
         private void OnEnable()
         {
@@ -209,13 +210,10 @@ namespace UnsoundedSea.Runtime
                 }
             }); root.Add(surface);
             var top = Box("sea-top"); root.Add(top);
-            top.Add(Button("battle-chart-toggle", "海图 / M", ToggleChart));
-            top.Add(Button("battle-action-book", "行动簿 / B", ToggleActionBook));
-
-            var selected = v.Enemies.FirstOrDefault(x => x.Id == director.SelectedEnemy);
+            top.Add(KeyBadge.Attach(Button("battle-chart-toggle", "海图", ToggleChart), "M"));
+            top.Add(KeyBadge.Attach(Button("battle-action-book", "行动簿", ToggleActionBook), "B"));
 
             var tools = new ScrollView(ScrollViewMode.Vertical); tools.AddToClassList("tools"); tools.style.maxHeight = new StyleLength(new Length(48, LengthUnit.Percent)); root.Add(tools);
-            if (selected != null) tools.Add(Text("聚焦 · " + selected.Name, "tool-focus"));
             foreach (var tool in v.Tools.Where(x=>(int)x.Definition.Kind<3))
             {
                 var t = tool; var cost = t.Definition.SanityCost > 0 ? $"{t.Definition.SanityCost}理智" : "无代价";
@@ -244,14 +242,17 @@ namespace UnsoundedSea.Runtime
             tools.Add(BattleSupplyPanel.Build(v,command=>director.Submit(command),active,ActionButton));
             var objective = Box("battle-objective"); root.Add(objective);
             objective.pickingMode = PickingMode.Position;
-            objective.Add(Text(v.BossKind != BossEncounterKind.None ? "进度" : scenario.encounter.objective == ObjectiveKind.Seal ? "封线" : scenario.encounter.objective == ObjectiveKind.Survive ? "撤离" : "压制", "objective-label"));
+            var objectiveTitle = scenario.encounter.objective == ObjectiveKind.Seal ? "封线" :
+                scenario.encounter.objective == ObjectiveKind.Survive ? "撤离" : "压制";
+            objective.Add(Text(objectiveTitle, "objective-label"));
             objective.Add(Text($"{v.ObjectiveProgress} / {v.ObjectiveTarget}", "objective-count"));
             objective.tooltip = scenario.objectiveHeading + "：" + v.Objective;
 
             var controls = Box("turn-controls"); root.Add(controls);
             if (v.BossKind != BossEncounterKind.None)
             {
-                root.Add(Text(v.BossStatus, "boss-status"));
+                var uniqueStatus = BossStatusWithoutProgress(v.BossStatus, v.ObjectiveProgress, v.ObjectiveTarget);
+                if (!string.IsNullOrWhiteSpace(uniqueStatus)) root.Add(Text(uniqueStatus, "boss-status"));
                 RenderEncounterTargets(v, active);
             }
             controls.Add(Text($"第 {v.Turn} 回合", "turn-number"));
@@ -263,6 +264,14 @@ namespace UnsoundedSea.Runtime
             var vitals = Box("battle-vitals"); root.Add(vitals);
             Vital(vitals, "生命", waitingForImpact ? presentedHealth : v.Health, scenario.encounter.playerHealth, "health", waitingForImpact ? presentedBlock : v.Block, "格挡");
             Vital(vitals, "理智", waitingForImpact ? presentedSanity : v.Sanity, scenario.encounter.playerSanity, "sanity", waitingForImpact ? presentedWard : v.Ward, "防护");
+            if (v.Watched > 0)
+            {
+                var watched = Box("watched");
+                watched.tooltip = $"被注视 {v.Watched}：异常存在已锁定航迹";
+                watched.Add(new SeaUiArt("eye"));
+                watched.Add(Text(v.Watched.ToString(), "watched-value"));
+                vitals.Add(watched);
+            }
 
             var hand = new ScrollView(ScrollViewMode.Horizontal); hand.name = "hand"; hand.AddToClassList("hand");
             // Ignore the full built-in scroll shell, including the content/vertical-scroll wrapper.
@@ -270,9 +279,24 @@ namespace UnsoundedSea.Runtime
             hand.pickingMode = PickingMode.Ignore;
             hand.Query<VisualElement>().ForEach(element => element.pickingMode = PickingMode.Ignore);
             hand.horizontalScrollerVisibility = ScrollerVisibility.Hidden; hand.verticalScrollerVisibility = ScrollerVisibility.Hidden; root.Add(hand);
-            var fan = Box("fan-track"); fan.style.width = Mathf.Max(620, 180 + Mathf.Max(0, v.Hand.Count - 1) * 110); hand.Add(fan);
+            var fan = Box("fan-track"); hand.Add(fan);
+            var spacing = HandSpacing(handWidth, v.Hand.Count);
+            fan.style.width = HandWidth(spacing, v.Hand.Count);
             if (handWidth > 0) fan.style.marginLeft = Mathf.Max(0, (handWidth - fan.style.width.value.value) * .5f);
-            hand.RegisterCallback<GeometryChangedEvent>(_ => fan.style.marginLeft = Mathf.Max(0, (hand.contentViewport.resolvedStyle.width - fan.resolvedStyle.width) * .5f));
+            // Squeeze the fan instead of clipping cards when the panel is narrow (4:3, small windows).
+            hand.RegisterCallback<GeometryChangedEvent>(_ =>
+            {
+                var width = hand.contentViewport.resolvedStyle.width;
+                var fitted = HandSpacing(width, fan.childCount);
+                if (!Mathf.Approximately(fitted, spacing))
+                {
+                    spacing = fitted;
+                    var index = 0;
+                    foreach (var card in fan.Children()) card.style.left = index++ * spacing;
+                    fan.style.width = HandWidth(spacing, fan.childCount);
+                }
+                fan.style.marginLeft = Mathf.Max(0, (width - HandWidth(spacing, fan.childCount)) * .5f);
+            });
             var cardPresentation = new HandCardPresentation(hand);
             var animateDraw = !director.Paused && !chartOpen && v.PendingChoice == null && !GameSettings.ReducedMotion;
             var cardIndex = 0;
@@ -304,7 +328,7 @@ namespace UnsoundedSea.Runtime
                     else { inspectedCard = c.InstanceId; Render(); }
                     evt.StopPropagation();
                 });
-                b.tabIndex = cardIndex + 1; b.style.left = cardIndex * 110;
+                b.tabIndex = cardIndex + 1; b.style.left = cardIndex * spacing;
                 b.AddToClassList("fan-" + Mathf.Clamp(cardIndex++ - (v.Hand.Count - 1) / 2, -3, 3));
                 cardPresentation.Add(b);
                 if (animateDraw && !previousHand.Contains(c.InstanceId))
@@ -315,14 +339,21 @@ namespace UnsoundedSea.Runtime
                 var face = Box("sea-card"); face.pickingMode = PickingMode.Position;
                 IllustratedCard.Apply(face, def);
                 if (c.IsEncounter) face.Q<Label>("illustrated-cost").text = c.ActionCost.ToString();
-                face.Add(Text("D 详情", "card-detail-hint"));
-                b.Add(face); b.tooltip = def.Name + "：" + def.Description;
+                b.Add(face);
+                if (v.Hand.Count > 6)
+                {
+                    var summary = Text(CardCatalog.FaceDescription(def), "compact-card-effect");
+                    summary.tooltip = CardCatalog.FaceDescription(def);
+                    b.Add(summary);
+                }
+                b.tooltip = def.Name + "：" + def.Description;
                 b.EnableInClassList("card-disabled", !c.Enabled || !c.IsEncounter && (def.Cost > v.Actions || def.SanityCost >= v.Sanity));
                 ActionButton(b, active); fan.Add(b);
             }
             previousHand = v.Hand.Select(card => card.InstanceId).ToArray();
-            var piles = Text($"牌库 {v.DrawCount}  ·  弃牌 {v.DiscardCount}  ·  消耗 {v.ExhaustCount}", "battle-piles");
-            piles.name = "battle-piles"; root.Add(piles);
+            var piles = Box("battle-piles"); piles.name = "battle-piles";
+            PileCount(piles, "牌库", v.DrawCount); PileCount(piles, "弃牌", v.DiscardCount); PileCount(piles, "消耗", v.ExhaustCount);
+            controls.Insert(0, piles);
             RenderCardChoices(v, active);
             RenderSupportChoices(v, active);
             var end = Button("battle-end-turn", "", () => director.Submit(BattleCommand.EndTurn()), "end-turn");
@@ -357,13 +388,30 @@ namespace UnsoundedSea.Runtime
                     }
                     // LateUpdate positions labels after layout; changing position inside a
                     // GeometryChangedEvent can recursively invalidate the same layout pass.
-                    plate.Add(Text(enemy.Name, "actor-name"));
+                    var heading = Box("actor-heading");
+                    heading.Add(Text(enemy.Name, "actor-name"));
+                    heading.Add(EnemyBadge(enemy.Style));
+                    if (enemy.Surge > 0) heading.Add(Text($"蓄势 {enemy.Surge}", "enemy-badge surge-badge"));
+                    if (presentedSurge.TryGetValue(enemy.Id, out var oldSurge) && oldSurge != enemy.Surge)
+                    {
+                        var delta = Text(enemy.Surge > oldSurge ? $"蓄势 +{enemy.Surge - oldSurge}" : $"蓄势 {enemy.Surge - oldSurge}", "surge-feedback");
+                        heading.Add(delta);
+                        delta.schedule.Execute(delta.RemoveFromHierarchy).StartingIn(900);
+                    }
+                    presentedSurge[enemy.Id] = enemy.Surge;
+                    plate.Add(heading);
                     if (!hideHealth)
                     {
                         var hp = Box("actor-health"); var fill = Box("actor-health-fill");
                         fill.style.width = Length.Percent(enemy.MaxHealth > 0 ? 100f * enemy.Health / enemy.MaxHealth : 0); hp.Add(fill); plate.Add(hp);
                     }
-                    plate.Add(Text(status, "actor-status"));
+                    if (hideHealth && v.BossKind != BossEncounterKind.None)
+                    {
+                        var shield = new SeaUiArt("shield"); shield.AddToClassList("actor-immune");
+                        plate.Add(shield); plate.tooltip = status;
+                    }
+                    else plate.Add(Text(status, "actor-status"));
+                    AddCurrentTurnEvidence(plate, v, enemy);
                     plate.Add(new EnemyIntentDetails(enemy));
                     plate.EnableInClassList("selected", a.EnemyId == director.SelectedEnemy); plate.SetEnabled(a.Alive && !director.Paused); root.Add(plate); nameplates.Add(plate);
                     var selectedCard = v.Hand.FirstOrDefault(c => c.InstanceId == selectedEncounterCard);
@@ -506,7 +554,7 @@ namespace UnsoundedSea.Runtime
                 button.tooltip = target.Detail;
                 options.Add(button);
             }
-            panel.Add(Button("card-target-cancel", "取消选择 · Esc", () => { selectedEncounterCard = 0; Render(); }, "card-target-cancel"));
+            panel.Add(KeyBadge.Attach(Button("card-target-cancel", "取消", () => { selectedEncounterCard = 0; Render(); }, "card-target-cancel"), "Esc"));
             root.Add(panel);
         }
 
@@ -541,7 +589,7 @@ namespace UnsoundedSea.Runtime
                     anchor = anchors.FirstOrDefault(a => a.targetId == anchorId.Substring(0, separator));
                 if (anchor == null) continue;
                 var cardId = selectedEncounterCard;
-                var button = Button("boss-target-" + id, target.Name + (string.IsNullOrEmpty(target.Detail) ? "" : "\n" + target.Detail), () =>
+                var button = Button("boss-target-" + id, "", () =>
                 {
                     var result = director.Submit(BattleCommand.Play(cardId, id));
                     if (result.Success) { selectedEncounterCard = 0; Render(); }
@@ -554,17 +602,28 @@ namespace UnsoundedSea.Runtime
                 button.tabIndex = 100 + targetIndex++;
                 if (view.BossKind == BossEncounterKind.FlagBearer)
                 {
-                    button.text = target.Name;
                     button.AddToClassList("mechanism-dial");
                     var relay = id.Contains(":");
-                    var option = relay ? id.EndsWith(":off", StringComparison.Ordinal) ? 0 : id.EndsWith(":positive", StringComparison.Ordinal) ? 1 : 2 : id == "lock-I" ? 0 : id == "lock-II" ? 1 : 2;
-                    button.style.left = relay ? (id.StartsWith("R1", StringComparison.Ordinal) ? 50 : 190) : 70 + option * 110;
-                    button.style.top = relay ? 190 + option * 100 : 230;
+                    var state = relay ? id.Substring(id.IndexOf(':') + 1) : "";
+                    if (relay)
+                    {
+                        button.AddToClassList(id.StartsWith("R1", StringComparison.Ordinal) ? "relay-one" : "relay-two");
+                        button.AddToClassList("relay-" + state);
+                        button.Add(Text(state == "off" ? "○" : state == "positive" ? "+" : "↶", "relay-symbol"));
+                        button.tooltip = target.Name + "：切换至" + (state == "off" ? "断电" : state == "positive" ? "正接" : "反接") + "。" + target.Detail;
+                    }
+                    else
+                    {
+                        button.AddToClassList("relay-lock");
+                        button.AddToClassList("relay-" + id.ToLowerInvariant());
+                        button.Add(Text(id.EndsWith("I", StringComparison.Ordinal) ? "Ⅰ" : id.EndsWith("II", StringComparison.Ordinal) ? "Ⅱ" : "Ⅲ", "relay-symbol"));
+                    }
+                    button.EnableInClassList("relay-current", target.Detail.Contains("当前极性"));
                     root.Add(button);
                 }
                 else if (saltBoard != null)
                 {
-                    button.AddToClassList("salt-cell");
+                    DecorateSaltCell(button, target);
                     saltBoard.Add(button);
                 }
                 else
@@ -575,13 +634,66 @@ namespace UnsoundedSea.Runtime
                     encounterLabels.Add((button, anchor.transform, offset));
                 }
             }
-            if (selected != null)
+        }
+
+        private const float CardWidth = 180, CardStep = 110, HandPadding = 30;
+        private static float HandSpacing(float width, int count) =>
+            count < 2 || float.IsNaN(width) || width <= 0 ? CardStep : Mathf.Clamp((width - HandPadding - CardWidth) / (count - 1), 52, CardStep);
+        private static float HandWidth(float spacing, int count) => CardWidth + Mathf.Max(0, count - 1) * spacing;
+        private static void PileCount(VisualElement parent, string title, int count)
+        {
+            var pile = Box("pile-count"); pile.tooltip = title;
+            pile.Add(Text(title, "pile-name")); pile.Add(Text(count.ToString(), "pile-value"));
+            parent.Add(pile);
+        }
+        private static VisualElement EnemyBadge(EnemyStyle style)
+        {
+            var text = style == EnemyStyle.Rhythm ? "节奏" : style == EnemyStyle.Boss ? "首领" : "隐匿";
+            return Text(text, "enemy-badge");
+        }
+
+        private static void AddCurrentTurnEvidence(VisualElement plate, BattleView view, EnemyView enemy)
+        {
+            foreach (var evidence in view.Evidence.Where(entry => entry.Scope == EvidenceScope.Turn &&
+                entry.Turn == view.Turn && entry.SubjectId == enemy.Id &&
+                (entry.Question == InvestigationKind.SoundSource.ToString() || entry.Question == InvestigationKind.DamageChannel.ToString())))
             {
-                var prompt = Text(selected.Definition.Name + (selected.Targets.Any(t => t.Id.Contains("|")) ? " · 选择守卫与航标" : " · 选择目标") + " · Esc 取消", "boss-target-prompt");
-                root.Add(prompt);
+                var motif = evidence.Question == InvestigationKind.SoundSource.ToString() ? "ear" :
+                    evidence.Text.Contains("理智") ? "eye" : "heart";
+                var row = Box("actor-evidence");
+                row.Add(new SeaUiArt(motif));
+                row.Add(Text(evidence.Question == InvestigationKind.SoundSource.ToString() ? "声源 " + evidence.Fact :
+                    evidence.Text.Replace("主要威胁：", ""), "actor-evidence-text"));
+                row.tooltip = evidence.Text;
+                plate.Add(row);
             }
         }
 
+        private static string BossStatusWithoutProgress(string status, int progress, int target)
+        {
+            if (string.IsNullOrWhiteSpace(status)) return "";
+            var exact = new[] { $"封匣 {progress}/{target}", $"封栓 {progress}/{target}", $"闸锁 {progress}/{target}",
+                $"已击退 {progress}/{target}" };
+            foreach (var value in exact)
+                status = status.Replace(" · " + value, "").Replace(value + " · ", "").Replace(value + "\n", "").Replace(value, "");
+            return status.Trim(' ', '·', '\n');
+        }
+
+        private static void DecorateSaltCell(Button button, EncounterTargetView target)
+        {
+            button.AddToClassList("salt-cell");
+            var lines = target.Detail.Split('\n');
+            var state = lines[0];
+            var sealedCell = lines.Skip(1).Any(line => line == "封栓");
+            button.AddToClassList(state == "?" ? "salt-unknown" : state.StartsWith("测 ", StringComparison.Ordinal) ? "salt-measured" : "salt-open");
+            if (state == "?") button.Add(Text("◇", "salt-symbol"));
+            else if (state.StartsWith("测 ", StringComparison.Ordinal)) button.Add(Text(state.Substring(2), "salt-number"));
+            else if (state == "危险已停用") button.Add(Text("×", "salt-danger"));
+            else button.Add(Text(state, "salt-number"));
+            if (sealedCell) button.Add(Text("◆", "salt-seal"));
+            button.tooltip = target.Name + "：" + (state == "?" ? "未测" : state.StartsWith("测 ", StringComparison.Ordinal) ? "已测，数值 " + state.Substring(2) :
+                state == "危险已停用" ? "已开，危险已停用" : "已开，邻近危险 " + state) + (sealedCell ? "；封栓" : "");
+        }
         private static void Vital(VisualElement parent, string title, int value, int max, string cls, int guard, string guardName)
         {
             var el = Box("vital"); el.AddToClassList(cls);
@@ -589,7 +701,14 @@ namespace UnsoundedSea.Runtime
             var number = Text($"{value} / {max}", "vital-value"); number.name = "battle-" + cls; row.Add(number); el.Add(row);
             var track = Box("vital-track"); var fill = Box("vital-fill");
             fill.style.width = Length.Percent(max > 0 ? Mathf.Clamp01((float)value / max) * 100 : 0);
-            track.Add(fill); el.Add(track);
+            track.Add(fill);
+            if (cls == "sanity")
+            {
+                SanityGauge.AddMarks(track, max);
+                el.tooltip = SanityGauge.RuleTooltip;
+                row.Add(Text(SanityGauge.State(value), "sanity-state"));
+            }
+            el.Add(track);
             var protection = Text(guard > 0 ? $"{guardName}  {guard}" : string.Empty, "vital-protection");
             protection.name = "battle-" + cls + "-guard"; el.Add(protection);
             parent.Add(el);
@@ -620,12 +739,12 @@ namespace UnsoundedSea.Runtime
             {
                 sheet.AddToClassList("pause");
                 sheet.Add(Text("暂停", "pause-overline"));
-                sheet.Add(Button("battle-resume", "继续 / Esc", () => director.SetPaused(false), "pause-option"));
+                sheet.Add(KeyBadge.Attach(Button("battle-resume", "继续", () => director.SetPaused(false), "pause-option"), "Esc"));
             }
             else
             {
                 sheet.Add(Text(end ? (view.Phase == BattlePhase.Victory ? "胜利" : "失败") : "航海日志", "modal-title"));
-                sheet.Add(Text($"牌库 {view.DrawCount}  ·  弃牌 {view.DiscardCount}  ·  消耗 {view.ExhaustCount}", "pile-summary"));
+                if (!end) sheet.Add(Text($"牌库 {view.DrawCount}  ·  弃牌 {view.DiscardCount}  ·  消耗 {view.ExhaustCount}", "pile-summary"));
                 if (journalOpen)
                 {
                     var log = new ScrollView(); log.AddToClassList("journal");
@@ -634,7 +753,7 @@ namespace UnsoundedSea.Runtime
                     sheet.Add(log);
                     ScrollWheel.ForwardFrom(sheet, log);
                 }
-                if (!end) sheet.Add(Button("battle-resume", "返回 / J", () => { journalOpen = false; director.SetPaused(false); }));
+                if (!end) sheet.Add(KeyBadge.Attach(Button("battle-resume", "返回", () => { journalOpen = false; director.SetPaused(false); }), "J"));
             }
             if (!VoyageRuntime.OwnsEncounter(director))
                 sheet.Add(Button("battle-retry", "重新开始", () => { chartOpen = false; chartWasPaused = false; showSettings = false; journalOpen = false; director.Restart(); }, "pause-option"));
@@ -659,15 +778,34 @@ namespace UnsoundedSea.Runtime
         private void PositionLabels()
         {
             if (director.Stage == null || root.panel == null) return;
+            var placed = new List<Rect>();
             foreach (var label in encounterLabels)
             {
                 if (label.anchor == null) continue;
                 var position = director.Stage.battleCamera.WorldToViewportPoint(label.anchor.position);
-                label.button.style.left = position.x * root.resolvedStyle.width - label.button.resolvedStyle.width * .5f + label.offset.x;
-                label.button.style.top = (1 - position.y) * root.resolvedStyle.height - label.button.resolvedStyle.height * .5f + label.offset.y;
+                // Keep anchored labels on screen at any aspect ratio.
+                var w = label.button.resolvedStyle.width; var h = label.button.resolvedStyle.height;
+                if (float.IsNaN(w) || float.IsNaN(h)) continue;
+                var rect = new Rect(
+                    Mathf.Clamp(position.x * root.resolvedStyle.width - w * .5f + label.offset.x, 12, Mathf.Max(12, root.resolvedStyle.width - w - 12)),
+                    Mathf.Clamp((1 - position.y) * root.resolvedStyle.height - h * .5f + label.offset.y, 12, Mathf.Max(12, root.resolvedStyle.height - h - 12)), w, h);
+                // Clamping can stack neighbours at the screen edge; slide them apart sideways.
+                for (var guard = 0; guard < placed.Count && placed.Any(other => other.Overlaps(rect)); guard++)
+                {
+                    rect.x = placed.Where(other => other.Overlaps(rect)).Max(other => other.xMax) + 6;
+                    if (rect.xMax > root.resolvedStyle.width - 12)
+                    {
+                        rect.x = Mathf.Max(12, root.resolvedStyle.width - rect.width - 12);
+                        rect.y = Mathf.Clamp(placed.Where(other => other.Overlaps(rect)).Max(other => other.yMax) + 6, 12, Mathf.Max(12, root.resolvedStyle.height - rect.height - 12));
+                    }
+                }
+                label.button.style.left = rect.x;
+                label.button.style.top = rect.y;
                 label.button.style.display = position.z > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             }
-            var summonTop = presentedBoss == BossEncounterKind.Surveyor || presentedBoss == BossEncounterKind.FlagBearer ? 520f : 170f;
+            // The salt board and relay dials own the left column, so their summons stack on the right.
+            var summonsRight = presentedBoss == BossEncounterKind.Surveyor || presentedBoss == BossEncounterKind.FlagBearer;
+            var summonTop = summonsRight ? 110f : 170f;
             for (var i = 0; i < nameplates.Count; i++)
             {
                 var actor = director.Stage.Actors[i];
@@ -695,7 +833,7 @@ namespace UnsoundedSea.Runtime
                 }
                 else if (presentedBoss != BossEncounterKind.None)
                 {
-                    plate.style.left = 32;
+                    plate.style.left = summonsRight ? Mathf.Max(18, root.resolvedStyle.width - width - 32) : 32;
                     plate.style.top = summonTop;
                     if (actor.Alive) summonTop += height + (enemyChoices.Any(c => c.actor == actor) ? 62 : 12);
                 }

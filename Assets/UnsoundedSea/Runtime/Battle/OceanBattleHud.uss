@@ -15,14 +15,16 @@
 .intel-text { margin-top: 3px; color: #80b5a5; font-size: 14px; -unity-text-align: middle-center; }
 .tools { position: absolute; left: 36px; bottom: 192px; width: 260px; }
 .tool-focus { margin-bottom: 7px; color: #d7bd82; font-size: 12px; letter-spacing: 1px; }
-.tool { min-height: 42px; margin: 0 0 8px; padding: 9px 12px; border-radius: 2px; border-width: 1px; border-color: rgba(158,135,85,.35); background-color: rgba(8,19,22,.82); color: #eee4c9; flex-direction: row; align-items: center; justify-content: space-between; }
+.tool SeaUiArt { width: 26px; height: 26px; margin-right: 8px; flex-shrink: 0; }
+.tool-name { flex-grow: 1; flex-shrink: 1; }
+.tool { min-height: 42px; margin: 0 0 8px; padding: 9px 12px; border-radius: 2px 14px 2px 2px; border-width: 1px; border-left-width: 3px; border-color: rgba(158,135,85,.35); border-left-color: #9e8755; background-color: rgba(8,19,22,.82); color: #eee4c9; flex-direction: row; align-items: center; justify-content: space-between; }
 .tool:hover { background-color: #263b36; border-color: #b3a482; }
 .tool-name { font-size: 16px; }
 .tool-meta { font-size: 13px; color: #c6b58e; margin-left: 10px; }
 .battle-objective { position: absolute; left: 36px; top: 28px; flex-direction: row; align-items: center; padding: 0 0 8px; border-bottom-width: 1px; border-bottom-color: rgba(158,135,85,.5); }
 .objective-label { font-size: 18px; color: #eee4c9; margin-right: 18px; text-shadow: 0 2px 5px #040a0c; }
 .objective-count { font-size: 20px; color: #d7bd82; text-shadow: 0 2px 5px #040a0c; }
-.turn-controls { position: absolute; right: 28px; bottom: 28px; width: 128px; }
+.turn-controls { position: absolute; right: 28px; bottom: 28px; width: 168px; }
 .turn-number { font-size: 13px; color: #a9b6ad; -unity-text-align: middle-right; text-shadow: 0 2px 5px #040a0c; }
 .action-budget { flex-direction: row; justify-content: space-between; align-items: center; min-height: 42px; margin-bottom: 10px; }
 .action-label { font-size: 15px; color: #c6b58e; }
@@ -36,10 +38,10 @@
 .vital-fill { height: 3px; background-color: #ac7566; }
 .sanity .vital-fill { background-color: #80b5a5; }
 .vital-protection { min-height: 21px; padding-top: 4px; font-size: 13px; color: #b6c9b7; text-shadow: 0 2px 5px #040a0c; }
-.hand { position: absolute; left: 345px; right: 170px; bottom: -140px; height: 440px; }
+.hand { position: absolute; left: 310px; right: 310px; bottom: -140px; height: 440px; }
 .hand .unity-scroll-view__content-viewport { overflow: hidden; }
 .hand .unity-scroll-view__content-container { min-width: 100%; height: 434px; padding: 0 15px; }
-.fan-track { position: relative; height: 426px; min-width: 620px; }
+.fan-track { position: relative; height: 426px; }
 .card-anchor { position: absolute; bottom: 8px; width: 180px; height: 245px; padding: 0; border-width: 0; background-color: rgba(0,0,0,0); transform-origin: 50% 100%; }
 .sea-card { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 10px 13px; border-radius: 9px 9px 3px 3px; border-width: 1px; border-bottom-width: 3px; border-color: #9e8755; background-color: #d8cbaa; color: #172526; transform-origin: 50% 100%; transition-property: translate, scale, rotate, background-color, opacity; transition-duration: .14s; -unity-text-align: upper-left; }
 .card-anchor.inspecting .sea-card { translate: 0 -150px; scale: 1.1; rotate: 0deg; background-color: #eee4c9; }
@@ -62,14 +64,17 @@
 .actor-label { position: absolute; width: 285px; min-height: 48px; padding: 3px 8px; border-width: 0; background-color: transparent; color: #eee4c9; align-items: flex-start; }
 .actor-name, .actor-status { -unity-text-align: middle-left; text-shadow: 0 1px 3px #000; }.actor-name { font-size: 18px; }.actor-status { font-size: 13px; color: #80b5a5; }
 .actor-health { width: 164px; height: 4px; margin-top: 5px; background-color: rgba(8,19,22,.7); }.actor-health-fill { height: 4px; background-color: #9b5d50; }
+.actor-immune { width: 22px; height: 22px; margin-top: 4px; }
 .actor-label.selected { border-left-width: 2px; border-left-color: #d7bd82; }
 .boss-status { position: absolute; left: 26px; top: 70px; max-width: 360px; color: #eee4c9; font-size: 16px; text-shadow: 0 1px 3px #000; }
 .boss-target { position: absolute; min-width: 44px; min-height: 40px; max-width: 170px; padding: 3px 7px; margin: 0; border-width: 1px; border-radius: 12px 3px; border-color: rgba(158,135,85,.65); color: #eee4c9; background-color: rgba(8,19,22,.83); font-size: 13px; -unity-text-align: middle-center; white-space: normal; }
 .boss-target:disabled { opacity: 1; color: #c4c7b5; background-color: rgba(8,19,22,.65); }
 .boss-target.target-ready { border-color: #d7bd82; border-width: 2px; color: #fff0c9; }
 .boss-target:hover, .boss-target:focus { border-color: #eee4c9; background-color: #254b48; }
-.boss-target-prompt { position: absolute; left: 30%; right: 30%; top: 18px; -unity-text-align: middle-center; color: #d7bd82; text-shadow: 0 1px 3px #000; }
-.salt-board { position: absolute; left: 32px; top: 180px; width: 320px; flex-direction: row; flex-wrap: wrap; padding: 10px; background-color: rgba(8,19,22,.9); border-width: 2px; border-color: #8f7951; border-radius: 24px 5px; }
+.boss-target-prompt { position: absolute; left: 25%; right: 25%; top: 22px; flex-direction: row; justify-content: center; align-items: center; }
+.boss-target-prompt-text { color: #d7bd82; font-size: 17px; text-shadow: 0 1px 3px #000; }
+.boss-target-prompt .key-badge { margin-left: 10px; }
+.salt-board { position: absolute; left: 32px; top: 140px; width: 332px; flex-direction: row; flex-wrap: wrap; padding: 10px; background-color: rgba(8,19,22,.9); border-width: 2px; border-color: #8f7951; border-radius: 24px 5px; }
 .boss-target.salt-cell { position: relative; width: 68px; height: 68px; min-width: 68px; margin: 3px; padding: 2px; font-size: 15px; border-radius: 3px; }
 .boss-target.mechanism-dial { width: 90px; height: 90px; min-width: 90px; border-radius: 45px; border-width: 2px; border-color: #b59b62; font-size: 17px; background-color: rgba(12,31,32,.94); }
 .encounter-card .sea-card { border-color: #80b5a5; border-top-width: 3px; }
@@ -112,7 +117,10 @@
 /* The dragged face lives above the hand's clipping viewport; the original keeps its slot. */
 .card-anchor.drag-source .sea-card { opacity: 0; }
 .card-flight { position: absolute; width: 180px; height: 245px; border-width: 2px; border-color: #e6c684; border-radius: 9px; transform-origin: 50% 50%; }
-.battle-piles { position: absolute; right: 182px; bottom: 26px; width: 195px; padding: 5px 8px; font-size: 12px; color: #c6b58e; background-color: rgba(5,16,20,.8); -unity-text-align: middle-center; }
+.battle-piles { flex-direction: row; justify-content: space-between; margin-bottom: 10px; }
+.pile-count { width: 52px; height: 52px; align-items: center; justify-content: center; border-width: 1px; border-radius: 4px 12px 4px 12px; border-color: rgba(158,135,85,.55); background-color: rgba(5,16,20,.8); }
+.pile-name { font-size: 11px; color: #a9b6ad; -unity-text-align: middle-center; }
+.pile-value { font-size: 19px; color: #eee4c9; -unity-text-align: middle-center; }
 .combat-float { position: absolute; width: 140px; font-size: 25px; -unity-font-style: bold; -unity-text-align: middle-center; text-shadow: 0 2px 4px #000; }
 .combat-banner { position: absolute; left: 35%; right: 35%; top: 22%; padding: 14px; font-size: 25px; color: #eee4c9; -unity-text-align: middle-center; background-color: rgba(6,17,21,.78); border-top-width: 1px; border-bottom-width: 1px; border-color: rgba(230,198,132,.5); }
 .actor-label.drop-hover, .boss-target.drop-hover, .card-target-choice.drop-hover { background-color: rgba(45,90,79,.85); border-color: #b4e9d8; }
@@ -120,3 +128,42 @@
 .end-turn:active SeaUiArt { scale: 0.94; rotate: 6deg; }
 .sea-card { transition-duration: .2s; transition-timing-function: ease-out-cubic; }
 .ocean-ui.reduced-motion .end-turn SeaUiArt, .ocean-ui.reduced-motion .sea-card { transition-duration: 0s; }
+
+.sanity-state { margin-left: 8px; color: #80b5a5; font-size: 12px; }
+.watched { min-height: 40px; flex-direction: row; align-items: center; color: #80b5a5; }
+.watched SeaUiArt { width: 24px; height: 24px; margin-right: 7px; }
+.watched-value { font-size: 18px; color: #eee4c9; }
+
+.actor-heading { min-height: 26px; flex-direction: row; align-items: center; }
+.actor-heading .actor-name { flex-shrink: 1; }
+.enemy-badge { min-height: 20px; margin-left: 7px; padding: 2px 6px; border-width: 1px; border-color: rgba(128,181,165,.65); border-radius: 9px; color: #80b5a5; font-size: 12px; white-space: nowrap; }
+.surge-badge { border-color: #ac7566; color: #f2bc9d; }
+.surge-feedback { margin-left: 6px; color: #f2bc9d; font-size: 12px; white-space: nowrap; transition-property: opacity; transition-duration: .18s; }
+.reduced-motion .surge-feedback { transition-duration: 0s; }
+.actor-evidence { min-height: 24px; flex-direction: row; align-items: center; }
+.actor-evidence SeaUiArt { width: 20px; height: 20px; margin-right: 5px; }
+.actor-evidence-text { max-width: 244px; color: #d7bd82; font-size: 12px; white-space: nowrap; overflow: hidden; }
+
+.compact-card-effect { position: absolute; left: 8px; right: 8px; top: 108px; height: 24px; padding: 3px 7px; color: #eee4c9; background-color: rgba(5,16,18,.88); font-size: 12px; white-space: nowrap; overflow: hidden; -unity-text-overflow-position: end; }
+.card-anchor.inspecting .compact-card-effect, .card-anchor.chosen-card .compact-card-effect { display: none; }
+
+.boss-target.salt-cell { align-items: center; justify-content: center; }
+.salt-symbol { color: #a9b6ad; font-size: 25px; }
+.salt-number { color: #80b5a5; font-size: 24px; }
+.salt-danger { color: #f2bc9d; font-size: 27px; }
+.salt-seal { position: absolute; right: 5px; bottom: 3px; color: #d7bd82; font-size: 14px; }
+.salt-measured { border-style: dashed; border-color: #80b5a5; }
+.salt-open { background-color: rgba(25,56,60,.94); }
+
+.boss-target.mechanism-dial { position: absolute; align-items: center; justify-content: center; }
+.relay-symbol { color: #eee4c9; font-size: 28px; }
+.relay-one { left: 50px; }
+.relay-two { left: 190px; }
+.relay-off { top: 190px; }
+.relay-positive { top: 290px; }
+.relay-reverse { top: 390px; }
+.relay-current { border-width: 3px; border-color: #80b5a5; background-color: #254b48; }
+.relay-lock { top: 230px; }
+.relay-lock-i { left: 70px; }
+.relay-lock-ii { left: 180px; }
+.relay-lock-iii { left: 290px; }

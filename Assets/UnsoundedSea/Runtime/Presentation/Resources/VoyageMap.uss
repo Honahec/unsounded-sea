@@ -27,6 +27,7 @@
 .node-name { position: absolute; left: -24px; right: -24px; padding: 3px 5px; color: rgb(222, 216, 188); background-color: rgba(7, 24, 27, 0.88); font-size: 16px; -unity-text-align: middle-center; }
 .node-name.label-above { bottom: 49px; }
 .node-name.label-below { top: 49px; }
+.node-perilous { position: absolute; right: 2px; top: 2px; min-width: 22px; height: 22px; padding: 0 4px; border-width: 1px; border-radius: 11px; border-color: rgb(242, 188, 157); background-color: rgb(77, 42, 39); color: rgb(255, 226, 203); font-size: 11px; white-space: nowrap; -unity-text-align: middle-center; }
 .chart-node.current .node-glyph { border-width: 2px; border-color: rgb(113, 188, 165); background-color: rgb(20, 61, 58); }
 .chart-node.available .node-glyph { border-width: 2px; border-color: rgb(224, 194, 121); }
 .chart-node.selected .node-glyph { border-width: 3px; border-color: rgb(232, 214, 169); background-color: rgb(111, 75, 34); }

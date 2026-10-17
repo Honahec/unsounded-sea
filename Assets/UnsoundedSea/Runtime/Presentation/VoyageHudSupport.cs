@@ -60,17 +60,17 @@ namespace UnsoundedSea.Runtime
                     foreach (var group in Session.Inventory.GroupBy(id => id))
                     {
                         var item = SupportCatalog.Item(group.Key);
-                        SupportEntry(scroll, item.Name + " ×" + group.Count() + " · 带入 " + Session.CarriedItems.Count(id => id == group.Key), item.Description, true);
+                        SupportEntry(scroll, item.Name + " ×" + group.Count() + " · 带入 " + Session.CarriedItems.Count(id => id == group.Key), item.Description, true, item);
                     }
                     foreach (var id in Session.OwnedEquipment)
                     {
                         var item = SupportCatalog.Item(id);
-                        SupportEntry(scroll, item.Name + (Session.Equipment.Contains(id) ? " · 已装备" : " · 未装备"), item.Description, true);
+                        SupportEntry(scroll, item.Name + (Session.Equipment.Contains(id) ? " · 已装备" : " · 未装备"), item.Description, true, item);
                     }
                     foreach (var id in Session.LearnedToolIds)
                     {
                         var item = SupportCatalog.Item(id);
-                        SupportEntry(scroll, item.Name + (Session.ToolIds.Contains(id) ? " · 已装备" : " · 未装备"), item.Description, true);
+                        SupportEntry(scroll, item.Name + (Session.ToolIds.Contains(id) ? " · 已装备" : " · 未装备"), item.Description, true, item);
                     }
                     SupportEntry(scroll, "旧海图 ×" + Session.ChartUses + " · 测绘望远镜 ×" + Session.LookoutUses, "选路时使用；没有新航路不扣次数，每幕恢复。");
                     scroll.Add(Action("support-tools", Session.CanEditDeck ? "调整调查工具" : "查看调查工具", "secondary", () => { supportOpen = false; deckOpen = true; Refresh(); }));
@@ -100,8 +100,10 @@ namespace UnsoundedSea.Runtime
                     scroll.Add(Text(Session.RitualStatus, "body"));
                     break;
             }
-            var choices = Session.GetSupportChoices().Where(choice => SupportChoiceTab(choice.Id) == supportTab).ToArray();
-            if (choices.Length > 0) scroll.Add(Text("此处可用", "section-label"));
+            var choices = Session.GetSupportChoices()
+                .Where(choice => SupportChoiceTab(choice.Id) == supportTab && IsManifestAction(choice.Id))
+                .ToArray();
+            if (choices.Length > 0) scroll.Add(Text("配装", "section-label"));
             foreach (var choice in choices)
             {
                 var selected = choice;
@@ -109,13 +111,17 @@ namespace UnsoundedSea.Runtime
                 row.tooltip = choice.Description;
                 var button = Action("support-" + choice.Id, choice.Title, "secondary", () => Change(() => Session.ManageSupport(selected.Id), selected.Title), choice.Enabled);
                 button.tooltip = choice.Description;
+                var item = ChoiceItem(choice.Id);
+                if (item != null)
+                {
+                    var applicability = BossApplicability.ItemLabel(item);
+                    if (!string.IsNullOrEmpty(applicability)) UiKeywords.Attach(button, applicability);
+                }
                 row.Add(button);
                 var note = supportTab == 1 ? MaterialChoiceNote(choice) : choice.Description;
                 if (!string.IsNullOrEmpty(note)) row.Add(Text(note, "node-choice-description"));
                 scroll.Add(row);
             }
-            if (choices.Length == 0 && supportTab > 0)
-                scroll.Add(Text("此处无可用操作", "muted"));
             sheet.Add(scroll);
             ScrollWheel.ForwardFrom(sheet, scroll);
             sheet.Add(Action("support-manifest-close", "返回航程 / Esc", "primary", () => { supportOpen = false; Refresh(); }));
@@ -135,12 +141,14 @@ namespace UnsoundedSea.Runtime
             return (enemies.Length > 1 ? "双敌接舷" : "单敌接舷") + " · " + danger + "\n" + preview;
         }
 
-        private static void SupportEntry(VisualElement parent, string title, string detail, bool tooltipOnly = false)
+        private static void SupportEntry(VisualElement parent, string title, string detail, bool tooltipOnly = false, ItemSpec item = null)
         {
             var entry = Element("support-entry");
-            var heading = Text(title, "node-choice-title");
+            var applicability = item == null ? "" : BossApplicability.ItemLabel(item);
+            var heading = Text(string.IsNullOrEmpty(applicability) ? title : title + " · " + applicability, "node-choice-title");
             heading.pickingMode = PickingMode.Position;
             heading.tooltip = detail;
+            if (!string.IsNullOrEmpty(applicability)) UiKeywords.Attach(heading, applicability);
             entry.Add(heading);
             if (!tooltipOnly) entry.Add(Text(detail, "node-choice-description"));
             parent.Add(entry);
@@ -188,6 +196,19 @@ namespace UnsoundedSea.Runtime
                 case "buy": case "tea": case "gunsmith": case "repair-boat": return 1;
                 default: return 0;
             }
+        }
+
+        private static bool IsManifestAction(string id)
+        {
+            var verb = id.Split(':')[0].Split('@')[0];
+            return verb == "starter" || verb == "equip" || verb == "pack" || verb == "unpack";
+        }
+
+        private static ItemSpec ChoiceItem(string id)
+        {
+            var parts = id.Split('@')[0].Split(':');
+            if (parts.Length < 2) return null;
+            return SupportCatalog.Items.FirstOrDefault(item => item.Id == parts[1]);
         }
 
         private static string MarkerName(string id) => id == "surveyed-beacon" ? "已测航标" : id == "docking-voucher" ? "接驳凭证" : id == "sealed-specimen" ? "封存标本" : id;

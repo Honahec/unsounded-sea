@@ -17,6 +17,7 @@ namespace UnsoundedSea.Runtime
         private VisualElement root;
         private bool settingsOpen;
         private bool confirmingNewVoyage;
+        private bool choosingCrew;
         private bool debugSelectionOpen;
         private bool collectionOpen;
         private string error;
@@ -32,7 +33,7 @@ namespace UnsoundedSea.Runtime
                 root.style.unityFontDefinition = FontDefinition.FromSDFFont(UiFont.Get(interfaceFont));
                 if (!root.styleSheets.Contains(menuStyle)) root.styleSheets.Add(menuStyle);
                 root.AddToClassList("game-menu");
-                Build("menu-start");
+                Build(VoyageRuntime.HasSavedVoyage ? "menu-continue" : "menu-start");
                 root.RegisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
             }
             catch (Exception exception) { root.Add(Text("菜单加载失败：" + exception.Message, "menu-error")); Debug.LogException(exception); }
@@ -45,9 +46,14 @@ namespace UnsoundedSea.Runtime
 
         private void OnKey(KeyDownEvent evt)
         {
-            if (!debugSelectionOpen || evt.keyCode != KeyCode.Escape) return;
-            debugSelectionOpen = false;
-            Build("menu-debug");
+            if (evt.keyCode != KeyCode.Escape) return;
+            if (choosingCrew) { choosingCrew = false; Build("menu-start"); }
+            else if (choosingCrew)
+            {
+                // The crew picker owns focus while open.
+            }
+            else if (debugSelectionOpen) { debugSelectionOpen = false; Build("menu-debug"); }
+            else return;
             evt.StopPropagation();
         }
 
@@ -96,7 +102,7 @@ namespace UnsoundedSea.Runtime
             if (confirmingNewVoyage)
             {
                 entries.Add(Text("覆盖现有航程？此操作无法撤销。", "menu-error"));
-                entries.Add(Entry("menu-confirm-new", "开始新航程", StartConfirmed, canStart));
+                entries.Add(Entry("menu-confirm-new", "开始新航程", ChooseCrew, canStart));
                 entries.Add(Entry("menu-cancel-new", "返回", () => { confirmingNewVoyage = false; error = null; Build("menu-start"); }));
             }
             else if (debugSelectionOpen)
@@ -109,10 +115,9 @@ namespace UnsoundedSea.Runtime
             }
             else
             {
-                entries.Add(Entry("menu-start", "启航", StartGame, canStart));
-                entries.Add(Entry("menu-crew", CardDeckPreparation.CrewId == "medic" ? "开局船员：林岚 · 医师" : "开局船员：祝遥 · 听音员", ToggleCrew));
                 if (VoyageRuntime.HasSavedVoyage)
                     entries.Add(Entry("menu-continue", "继续航程", ContinueGame));
+                entries.Add(Entry("menu-start", VoyageRuntime.HasSavedVoyage ? "新航程" : "启航", StartGame, canStart));
                 if (Debug.isDebugBuild)
                     entries.Add(Entry("menu-debug", "调试选关", () => { debugSelectionOpen = true; error = null; Build(null); }));
                 entries.Add(Entry("menu-collection", "卡牌图鉴", () => { collectionOpen = true; Build(null); }));
@@ -129,7 +134,13 @@ namespace UnsoundedSea.Runtime
             root.Add(column);
 
 
-            if (debugSelectionOpen)
+            if (choosingCrew)
+            {
+                column.SetEnabled(false);
+                root.Add(BuildCrewPicker());
+                root.schedule.Execute(() => root.Q<Button>("crew-" + CardDeckPreparation.CrewId)?.Focus());
+            }
+            else if (debugSelectionOpen)
             {
                 root.Add(BuildDebugSelector());
                 root.schedule.Execute(() => root.Q<Button>("debug-level-0")?.Focus());
@@ -248,10 +259,40 @@ namespace UnsoundedSea.Runtime
             return "abyss";
         }
 
-        private void ToggleCrew()
+        private VisualElement BuildCrewPicker()
         {
-            CardDeckPreparation.CrewId = CardDeckPreparation.CrewId == "medic" ? "listener" : "medic";
-            Build("menu-crew");
+            var panel = new VisualElement { name = "crew-picker" };
+            panel.AddToClassList("crew-picker");
+            panel.Add(Text("选择开局船员", "crew-picker-title"));
+            var row = new VisualElement { pickingMode = PickingMode.Ignore };
+            row.AddToClassList("crew-picker-row");
+            foreach (var id in new[] { "medic", "listener" })
+            {
+                var crew = SupportCatalog.CrewMember(id);
+                var crewId = id;
+                var card = new Button(() => { CardDeckPreparation.CrewId = crewId; choosingCrew = false; StartConfirmed(); }) { name = "crew-" + id };
+                card.AddToClassList("crew-card");
+                card.EnableInClassList("selected", CardDeckPreparation.CrewId == id);
+                card.Add(new SeaUiArt(crew.Kind == CrewSupportKind.Medic ? "heart" : "ear"));
+                var names = crew.Name.Split(new[] { " · " }, StringSplitOptions.None);
+                card.Add(Text(names[0], "crew-card-name"));
+                if (names.Length > 1) card.Add(Text(names[1], "crew-card-role"));
+                card.Add(Text(SupportCatalog.CrewDescription(crew.Kind), "crew-card-copy"));
+                row.Add(card);
+            }
+            panel.Add(row);
+            var back = new Button(() => { choosingCrew = false; Build("menu-start"); }) { name = "crew-back", text = "返回" };
+            back.AddToClassList("crew-back");
+            panel.Add(KeyBadge.Attach(back, "Esc"));
+            return panel;
+        }
+
+        private void ChooseCrew()
+        {
+            confirmingNewVoyage = false;
+            choosingCrew = true;
+            error = null;
+            Build(null);
         }
 
         private void StartGame()
@@ -263,7 +304,7 @@ namespace UnsoundedSea.Runtime
                 Build("menu-confirm-new");
                 return;
             }
-            StartConfirmed();
+            ChooseCrew();
         }
         private void StartConfirmed()
         {

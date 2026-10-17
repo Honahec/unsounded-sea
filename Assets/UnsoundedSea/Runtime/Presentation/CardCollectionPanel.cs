@@ -48,7 +48,9 @@ namespace UnsoundedSea.Runtime
             foreach (var current in CardCatalog.All.Skip(page * 9).Take(9))
             {
                 var card = current;
-                var button = new Button(() => Inspect(card)) { name = "collection-" + card.Id, tooltip = card.Name + "：" + card.Description };
+                var applicability = BossApplicability.CardLabel(card);
+                var button = new Button(() => Inspect(card)) { name = "collection-" + card.Id, tooltip = card.Name + "：" + card.Description + (string.IsNullOrEmpty(applicability) ? "" : "\n" + applicability) };
+                UiKeywords.Attach(button, card.Description);
                 button.AddToClassList("collection-card");
                 var face = new VisualElement(); face.AddToClassList("collection-card-face"); IllustratedCard.Apply(face, card); button.Add(face); list.Add(button);
             }
