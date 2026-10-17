@@ -93,7 +93,9 @@
 .ocean-sheet .pause-option, .sea-top .sea-button { white-space: nowrap; }
 .battle-chart-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 24px; background-color: rgba(1,8,13,.96); }
 .battle-chart-overlay VoyageMapPanel { flex-grow: 1; }
-.battle-chart-close { position: absolute; right: 38px; bottom: 30px; min-width: 128px; min-height: 40px; padding: 8px 14px; border-width: 1px; border-color: #d7bd82; background-color: #19383c; color: #eee4c9; }
+.battle-chart-close { position: absolute; left: -20px; top: -20px; width: 40px; height: 40px; min-width: 40px; margin: 0; padding: 0 0 3px 0; border-width: 2px; border-radius: 20px; border-color: #d7bd82; background-color: #19383c; color: #eee4c9; font-size: 26px; -unity-text-align: middle-center; }
+.battle-chart-close:hover, .battle-chart-close:focus { border-color: #eee4c9; background-color: #254b48; color: #fff0c9; }
+.battle-chart-overlay .map-heading { padding-left: 28px; }
 .ocean-ui.reduced-motion Button, .reduced-motion .card, .reduced-motion .sea-card { transition-duration: 0s; }.ocean-ui.reduced-motion .card-anchor.inspecting .sea-card { translate: 0 -150px; }.ocean-ui.reduced-motion .card-anchor.card-entering .sea-card { translate: 0 0; opacity: 1; }
 
 /* Keep the resting hit area stable while straightening the inspected face. */
@@ -173,3 +175,5 @@
 .relay-lock-iii { left: 290px; }
 .boss-target:focus, .actor-label:focus { border-width: 2px; border-color: #eee4c9; }
 .sea-top .sea-button { flex-direction: row; align-items: center; }
+/* In battle the chart floats with margins so its corner × stays fully on screen. */
+.battle-chart-overlay .voyage-map-panel { left: 12%; right: 12%; top: 56px; bottom: 40px; }

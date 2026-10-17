@@ -750,8 +750,12 @@ namespace UnsoundedSea.Runtime
         private void ChartOverlay()
         {
             overlay = Box("battle-chart-overlay"); overlay.pickingMode = PickingMode.Position;
-            overlay.Add(new VoyageMapPanel(VoyageRuntime.Session, null, false));
-            overlay.Add(Button("battle-chart-close", "返回战斗", CloseChart, "battle-chart-close"));
+            var map = new VoyageMapPanel(VoyageRuntime.Session, null, false);
+            overlay.Add(map);
+            // A corner × on the chart itself never covers map nodes the way a floating button did.
+            var close = Button("battle-chart-close", "×", CloseChart, "battle-chart-close");
+            close.tooltip = "返回战斗（Esc / M）";
+            map.Add(close);
             root.Add(overlay);
             overlay.schedule.Execute(() => root.Q<Button>("battle-chart-close")?.Focus());
         }
