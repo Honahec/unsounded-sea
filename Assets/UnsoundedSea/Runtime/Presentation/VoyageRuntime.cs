@@ -109,6 +109,7 @@ namespace UnsoundedSea.Runtime
 
         private static void ResetEncounterState()
         {
+            if (unsavedOutcome) Checkpoint();
             SceneManager.sceneLoaded -= ConfigureEncounter;
             SceneManager.sceneUnloaded -= ReleaseEncounter;
             if (encounterDirector != null) encounterDirector.Resolved -= RecordEncounterCommand;

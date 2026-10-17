@@ -113,6 +113,68 @@ namespace UnsoundedSea.Tests
         }
 
         [Test]
+        public void SupplyServicesDependOnlyOnResourcesNotGeneratedNodeSuffix()
+        {
+            var s=VoyageSession.Create(2);MoveToLayer(s,1);
+            Assert.That(s.BeginEncounter(),Is.True);Assert.That(s.ResolveEncounter(true,40,20),Is.True);Assert.That(s.ClaimReward(null),Is.True);
+            MoveToLayer(s,5);
+            Assert.That(s.GetNodeChoices().Single(x=>x.Id=="repair").Enabled,Is.True);
+            Assert.That(s.GetNodeChoices().Single(x=>x.Id=="calm").Enabled,Is.True);
+        }
+
+        [Test]
+        public void KnownRouteChoicesAreDisabledButLegacyCheckpointStillRestores()
+        {
+            var s=VoyageSession.Create(121);MoveToLayer(s,6);
+            Assert.That(s.BeginEncounter(),Is.True);Assert.That(s.ResolveEncounter(true,s.Health,s.Sanity),Is.True);Assert.That(s.ClaimReward(null),Is.True);
+            Assert.That(s.Select(s.Choices[0].Id),Is.True);Assert.That(s.ScoutAhead(),Is.True);Assert.That(s.SetSail(),Is.True);Assert.That(s.Arrive(),Is.True);
+            var routes=s.GetNodeChoices().Single(x=>x.Id=="routes");
+            Assert.That(routes.Enabled,Is.False);Assert.That(routes.Description,Does.Contain("没有新航路"));Assert.That(s.ChooseNode("routes"),Is.False);
+
+            var legacy=s.Export();
+            legacy.History=legacy.History.Concat(new[]{new VoyageActionData{Kind=VoyageActionKind.ChooseNode,Value="routes"}}).ToArray();
+            var restored=VoyageSession.Restore(legacy);
+            Assert.That(restored.Continue(),Is.True);
+        }
+
+        [Test]
+        public void MarkCannotConsumeAnEventWhenThereIsNoRouteToReveal()
+        {
+            var s=Enumerable.Range(0,100).Select(seed=>VoyageSession.CreateDebug((uint)seed,"fog",RunNodeKind.Event))
+                .First(x=>x.GetNodeChoices().Any(choice=>choice.Id=="mark"));
+            var mark=s.GetNodeChoices().Single(x=>x.Id=="mark");
+            Assert.That(mark.Enabled,Is.False);Assert.That(mark.Description,Does.Contain("没有新水流"));Assert.That(s.ChooseNode("mark"),Is.False);
+            Assert.That(s.ChooseNode("leave"),Is.True);
+        }
+
+        [Test]
+        public void SavingUnchangedPreparationDoesNotGrowCheckpointHistory()
+        {
+            var s=VoyageSession.Create(5);var before=s.Export().History.Length;
+            for(var i=0;i<600;i++){Assert.That(s.SetDeck(s.DeckIds),Is.True);Assert.That(s.SetTools(s.ToolIds),Is.True);}
+            Assert.That(s.Export().History,Has.Length.EqualTo(before));
+            var restored=VoyageSession.Restore(s.Export());
+            Assert.That(restored.DeckIds,Is.EqualTo(s.DeckIds));Assert.That(restored.ToolIds,Is.EqualTo(s.ToolIds));
+        }
+
+        [Test]
+        public void RepeatedPreparationEditsAndRoutePreviewsRestoreFinalChoices()
+        {
+            var s=VoyageSession.Create(5);
+            for(var i=0;i<600;i++)
+            {
+                s.SetTools(i%2==0?new[]{"lantern"}:new[]{"listener"});
+                s.SetDeck(s.DeckIds.Reverse());s.Select(s.Choices[i%2].Id);
+            }
+            var restored=VoyageSession.Restore(s.Export());
+            Assert.That(restored.DeckIds,Is.EqualTo(s.DeckIds));
+            Assert.That(restored.ToolIds,Is.EqualTo(new[]{"listener"}));
+            Assert.That(restored.Selected.Id,Is.EqualTo(s.Choices[1].Id));
+            Assert.That(restored.SetSail(),Is.True);Assert.That(restored.Arrive(),Is.True);
+            Assert.That(VoyageSession.Restore(restored.Export()).Current.Id,Is.EqualTo(s.Choices[1].Id));
+        }
+
+        [Test]
         public void DebugNodesAreIndependentPlayableAndCannotBeSaved()
         {
             var archive=VoyageSession.CreateDebug(3,"fleet",RunNodeKind.Archive);

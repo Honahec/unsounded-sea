@@ -33,6 +33,7 @@ namespace UnsoundedSea.Runtime
         private int inspectedCard;
         private string selectedSupport;
         private int[] previousHand = Array.Empty<int>();
+        private string playedCardFeedback;
         private readonly HashSet<string> revealed = new HashSet<string>();
         public BattleView CurrentView => session?.View;
         public int RenderedFrames { get; private set; }
@@ -145,14 +146,37 @@ namespace UnsoundedSea.Runtime
         public CommandResult Send(BattleCommand command)
         {
             var before = session.View;
+            var playedName = command.kind == CommandKind.PlayCard
+                ? before.Hand.FirstOrDefault(card => card.InstanceId == command.cardInstanceId)?.Definition.Name
+                : null;
             var result = session.Execute(command);
             var after = session.View;
             if (result.Success && before.Phase != BattlePhase.Victory && after.Phase == BattlePhase.Victory)
                 CardDeckPreparation.StoreVerified(after.Evidence);
+            if (result.Success && playedName != null) playedCardFeedback = playedName;
             message = result.Success ? "" : result.Error;
             Refresh();
             return result;
         }
+        private CommandResult PlaySelectedCard(int cardId, string targetId)
+        {
+            var selected = selectedCard;
+            selectedCard = 0;
+            var result = Send(BattleCommand.Play(cardId, targetId));
+            if (!result.Success) { selectedCard = selected; Refresh(); }
+            return result;
+        }
+
+        private bool TryPlaySelectedTarget(string enemyId)
+        {
+            var card = session.View.Hand.FirstOrDefault(item => item.InstanceId == selectedCard);
+            if (card == null) return false;
+            var target = card.Targets.FirstOrDefault(item => item.Enabled &&
+                (item.Id == enemyId || item.Id == "enemy:" + enemyId));
+            if (target != null) PlaySelectedCard(card.InstanceId, target.Id);
+            return target != null;
+        }
+
 
         private static VisualElement Element(string className)
         {
@@ -230,6 +254,7 @@ namespace UnsoundedSea.Runtime
         {
             if (root == null || session == null) return;
             var view = session.View;
+            if (!view.Hand.Any(card => card.InstanceId == selectedCard && card.Targets.Count > 0)) selectedCard = 0;
             var focused = focusOverride ?? (root.panel?.focusController.focusedElement as VisualElement)?.name;
             var handOffset = root.Q<ScrollView>("hand")?.scrollOffset ?? Vector2.zero;
             var focusIndex = -1;
@@ -240,7 +265,7 @@ namespace UnsoundedSea.Runtime
             if (view.Enemies.All(e => e.Id != selectedEnemy || e.Health == 0))
                 selectedEnemy = (view.Enemies.FirstOrDefault(e => e.Health > 0) ?? view.Enemies[0]).Id;
             root.Clear();
-            root.focusable = view.PendingChoice == null && inspectedCard == 0;
+            root.focusable = view.PendingChoice == null && inspectedCard == 0 && !chartOpen && !menuOpen && !concluded;
             root.EnableInClassList("concluded", concluded);
             root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion);
 
@@ -274,7 +299,7 @@ namespace UnsoundedSea.Runtime
             {
                 var id = enemy.Id;
                 var alive = enemy.Health > 0;
-                var target = Button("enemy-" + id, "", "target", () => { selectedEnemy = id; Refresh(); }, alive && !concluded);
+                var target = Button("enemy-" + id, "", "target", () => { if (!TryPlaySelectedTarget(id)) { selectedEnemy = id; Refresh(); } }, alive && !concluded);
                 var isSelected = selectedEnemy == id;
                 target.EnableInClassList("selected", isSelected);
                 target.EnableInClassList("defeated", !alive);
@@ -401,6 +426,7 @@ namespace UnsoundedSea.Runtime
             hand.Add(fan);
             hand.RegisterCallback<GeometryChangedEvent>(_ => fan.style.marginLeft = Mathf.Max(0, (hand.contentViewport.resolvedStyle.width - fan.resolvedStyle.width) * .5f));
             var cardPresentation = new HandCardPresentation(hand);
+            var animateDraw = playing && previousHand.Length > 0 && !GameSettings.ReducedMotion;
             var cardIndex = 0;
             foreach (var card in view.Hand)
             {
@@ -417,9 +443,19 @@ namespace UnsoundedSea.Runtime
                 button.tabIndex = cardIndex + 1; button.style.left = cardIndex * 110;
                 button.AddToClassList("fan-" + Mathf.Clamp(cardIndex++ - (view.Hand.Count - 1) / 2, -3, 3));
                 cardPresentation.Add(button);
+                if (animateDraw && !previousHand.Contains(id))
+                {
+                    button.AddToClassList("card-entering");
+                    button.schedule.Execute(() => button.RemoveFromClassList("card-entering")).StartingIn(16);
+                }
                 button.EnableInClassList("unaffordable", playing && (shortAction || shortSanity || !card.Enabled));
                 button.EnableInClassList("chosen-card", selectedCard == id);
-                button.RegisterCallback<ContextClickEvent>(evt => { inspectedCard = id; Refresh(); evt.StopPropagation(); });
+                button.RegisterCallback<ContextClickEvent>(evt =>
+                {
+                    if (selectedCard == id) { selectedCard = 0; Refresh(); }
+                    else { inspectedCard = id; Refresh(); }
+                    evt.StopPropagation();
+                });
                 button.tooltip = data.Name + "：" + data.Description + (!card.Enabled ? "\n" + card.DisabledReason : "") + "\n右键或聚焦后按 D 查看大图";
                 var face = Element("card"); face.pickingMode = PickingMode.Position;
                 IllustratedCard.Apply(face, data);
@@ -428,6 +464,14 @@ namespace UnsoundedSea.Runtime
                 button.Add(face); fan.Add(button);
             }
             root.Add(hand);
+            if (!string.IsNullOrEmpty(playedCardFeedback))
+            {
+                var feedback = Text("已打出 · " + playedCardFeedback, "card-play-feedback");
+                root.Add(feedback);
+                playedCardFeedback = null;
+                if (!GameSettings.ReducedMotion)
+                    feedback.schedule.Execute(() => feedback.AddToClassList("departing")).StartingIn(16);
+            }
             var choiceCard = view.Hand.FirstOrDefault(card => card.InstanceId == selectedCard);
             if (choiceCard != null && choiceCard.Targets.Count > 0)
             {
@@ -440,8 +484,9 @@ namespace UnsoundedSea.Runtime
                     var target = option;
                     var cardId = choiceCard.InstanceId;
                     options.Add(Button("card-target-" + choiceIndex++, target.Name + (string.IsNullOrWhiteSpace(target.Detail) ? "" : "\n" + target.Detail),
-                        "card-target-choice", () => { selectedCard = 0; Send(BattleCommand.Play(cardId, target.Id)); }, playing && target.Enabled));
+                        "card-target-choice", () => PlaySelectedCard(cardId, target.Id), playing && target.Enabled));
                 }
+                choices.Add(Button("card-target-cancel", "取消选择 · Esc", "card-target-cancel", () => { selectedCard = 0; Refresh(); }));
                 root.Add(choices);
                 choices.schedule.Execute(() => choices.Q<Button>(className: "card-target-choice")?.Focus());
             }
@@ -456,7 +501,12 @@ namespace UnsoundedSea.Runtime
                 {
                     var target = option; var supportId = supportChoice.Definition.Id;
                     options.Add(Button("support-target-" + choiceIndex++, target.Name + (string.IsNullOrWhiteSpace(target.Detail) ? "" : "\n" + target.Detail),
-                        "card-target-choice", () => { selectedSupport = null; Send(BattleCommand.Support(supportId, target.Id)); }, playing && target.Enabled));
+                        "card-target-choice", () =>
+                        {
+                            selectedSupport = null;
+                            var result = Send(BattleCommand.Support(supportId, target.Id));
+                            if (!result.Success) { selectedSupport = supportId; Refresh(); }
+                        }, playing && target.Enabled));
                 }
                 root.Add(choices);
             }
@@ -524,6 +574,7 @@ namespace UnsoundedSea.Runtime
 
             if (menuOpen)
             {
+                foreach (var child in root.Children().ToArray()) child.SetEnabled(false);
                 var scrim = new VisualElement { name = "pause-scrim" };
                 scrim.AddToClassList("pause-scrim");
                 if (settingsOpen)

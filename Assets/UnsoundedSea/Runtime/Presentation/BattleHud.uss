@@ -34,3 +34,11 @@
 .card-target-choice { min-height: 48px; margin: 4px 0; padding: 6px 10px; white-space: normal; color: #eee4c9; background-color: #19383c; border-width: 1px; border-color: rgba(158,135,85,.65); }
 .card-target-choice:hover, .card-target-choice:focus { border-width: 2px; border-color: #eee4c9; background-color: #254b48; }
 .chosen-card .card { translate: 0 -90px; border-width: 3px; border-color: #f6e8ac; }
+.battle-hud .card { transition-property: translate, scale, rotate, background-color, opacity; }
+.battle-hud .card-anchor.card-entering .card { translate: 0 42px; opacity: 0; }
+.battle-hud.reduced-motion .card-anchor.card-entering .card { translate: 0 0; opacity: 1; }
+.battle-hud .card-target-cancel { min-height: 34px; margin-top: 7px; color: #c6b58e; }
+.battle-hud .card-target-cancel:hover, .battle-hud .card-target-cancel:focus { color: #eee4c9; }
+.battle-hud .card-play-feedback { position: absolute; left: 50%; bottom: 282px; translate: -50% 0; padding: 6px 14px; color: #fff0c9; background-color: rgba(8,19,22,.9); border-bottom-width: 1px; border-bottom-color: #d7bd82; opacity: 1; transition-property: translate, opacity; transition-duration: .16s; }
+.battle-hud .card-play-feedback.departing { translate: -50% -18px; opacity: 0; }
+.battle-hud.reduced-motion .card-play-feedback { transition-duration: 0s; }

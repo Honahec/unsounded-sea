@@ -43,8 +43,9 @@
 .hand .unity-scroll-view__content-container { min-width: 100%; height: 434px; padding: 0 15px; }
 .fan-track { position: relative; height: 426px; min-width: 620px; }
 .card-anchor { position: absolute; bottom: 8px; width: 180px; height: 245px; padding: 0; border-width: 0; background-color: rgba(0,0,0,0); transform-origin: 50% 100%; }
-.sea-card { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 10px 13px; border-radius: 9px 9px 3px 3px; border-width: 1px; border-bottom-width: 3px; border-color: #9e8755; background-color: #d8cbaa; color: #172526; transform-origin: 50% 100%; transition-property: translate, scale, rotate, background-color; transition-duration: .14s; -unity-text-align: upper-left; }
+.sea-card { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 10px 13px; border-radius: 9px 9px 3px 3px; border-width: 1px; border-bottom-width: 3px; border-color: #9e8755; background-color: #d8cbaa; color: #172526; transform-origin: 50% 100%; transition-property: translate, scale, rotate, background-color, opacity; transition-duration: .14s; -unity-text-align: upper-left; }
 .card-anchor.inspecting .sea-card { translate: 0 -150px; scale: 1.1; rotate: 0deg; background-color: #eee4c9; }
+.card-anchor.card-entering .sea-card { translate: 0 42px; opacity: 0; }
 .fan--3 { rotate: -11deg; translate: 0 15px; }.fan--2 { rotate: -7deg; translate: 0 7px; }.fan--1 { rotate: -3deg; translate: 0 2px; }.fan-1 { rotate: 3deg; translate: 0 2px; }.fan-2 { rotate: 7deg; translate: 0 7px; }.fan-3 { rotate: 11deg; translate: 0 15px; }
 
 .card-head { flex-direction: row; justify-content: space-between; align-items: center; }
@@ -80,7 +81,7 @@
 .battle-chart-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 24px; background-color: rgba(1,8,13,.96); }
 .battle-chart-overlay VoyageMapPanel { flex-grow: 1; }
 .battle-chart-close { position: absolute; right: 38px; bottom: 30px; min-width: 128px; min-height: 40px; padding: 8px 14px; border-width: 1px; border-color: #d7bd82; background-color: #19383c; color: #eee4c9; }
-.ocean-ui.reduced-motion Button, .reduced-motion .card, .reduced-motion .sea-card { transition-duration: 0s; }.ocean-ui.reduced-motion .card-anchor.inspecting .sea-card { translate: 0 -150px; }
+.ocean-ui.reduced-motion Button, .reduced-motion .card, .reduced-motion .sea-card { transition-duration: 0s; }.ocean-ui.reduced-motion .card-anchor.inspecting .sea-card { translate: 0 -150px; }.ocean-ui.reduced-motion .card-anchor.card-entering .sea-card { translate: 0 0; opacity: 1; }
 
 /* Keep the resting hit area stable while straightening the inspected face. */
 .fan--3.inspecting .sea-card { rotate: 11deg; }
@@ -89,10 +90,15 @@
 .fan-1.inspecting .sea-card { rotate: -3deg; }
 .fan-2.inspecting .sea-card { rotate: -7deg; }
 .fan-3.inspecting .sea-card { rotate: -11deg; }
-.card-target-panel { position: absolute; left: 50%; top: 90px; width: 420px; max-height: 470px; translate: -50% 0; padding: 14px 18px; background-color: rgba(5,16,18,.95); border-width: 1px; border-color: #9e8755; border-top-left-radius: 22px; border-bottom-right-radius: 22px; }
+.card-target-panel { position: absolute; right: 32px; top: 118px; width: 310px; max-height: 430px; padding: 14px 18px; background-color: rgba(5,16,18,.95); border-width: 1px; border-color: #9e8755; border-top-left-radius: 22px; border-bottom-right-radius: 22px; }
 .card-target-title { color: #d7bd82; font-size: 18px; margin-bottom: 8px; -unity-text-align: middle-center; }
 .card-target-choice { min-height: 48px; margin: 4px 0; padding: 6px 10px; white-space: normal; color: #eee4c9; background-color: #19383c; border-width: 1px; border-color: rgba(158,135,85,.65); }
 .card-target-choice.target-ready:hover, .card-target-choice.target-ready:focus { border-width: 2px; border-color: #eee4c9; background-color: #254b48; }
+.card-target-cancel { min-height: 34px; margin-top: 7px; color: #c6b58e; background-color: rgba(0,0,0,0); border-width: 0; }
+.card-target-cancel:hover, .card-target-cancel:focus { color: #eee4c9; }
 .card-disabled .sea-card { opacity: .72; border-color: #8b6258; }
+.card-play-feedback { position: absolute; left: 50%; bottom: 282px; translate: -50% 0; padding: 6px 14px; color: #fff0c9; background-color: rgba(8,19,22,.9); border-bottom-width: 1px; border-bottom-color: #d7bd82; opacity: 1; transition-property: translate, opacity; transition-duration: .16s; }
+.card-play-feedback.departing { translate: -50% -18px; opacity: 0; }
+.ocean-ui.reduced-motion .card-play-feedback { transition-duration: 0s; }
 
 .pile-summary { color: #c6b58e; font-size: 14px; margin-bottom: 14px; }

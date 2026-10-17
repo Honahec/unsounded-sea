@@ -47,7 +47,7 @@ namespace UnsoundedSea.Core
         private readonly List<string> tools=new List<string>{"lantern","listener"}, learnedTools=new List<string>(InitialTools);
         private VoyageStop selected; private VoyagePhase phase; private int elapsedHours; private bool nodeResolved; private bool initialPreparation=true;
         private string nextRegion;
-        private bool debug;
+        private bool debug, restoring;
         private VoyageSession(VoyagePlan first,string crew)
         {
             if(crew!="medic"&&crew!="listener") throw new ArgumentException("Unknown initial crew.",nameof(crew));
@@ -142,8 +142,10 @@ namespace UnsoundedSea.Core
             switch(CurrentFull.Kind)
             {
                 case RunNodeKind.Event:return EventChoices();
-                case RunNodeKind.Archive:return new[]{new VoyageNodeChoice("routes","抄录航路","揭示此处全部后续航路，并把海况结论写入日志"),new VoyageNodeChoice("briefing","研读威胁简报","记录本海域区域威胁的真实机制线索"),new VoyageNodeChoice("seal","封存记录","恢复5理智",Sanity<30)};
-                case RunNodeKind.Supply:return new[]{new VoyageNodeChoice("rest","休整","恢复12生命与5理智",Health<60||Sanity<30),new VoyageNodeChoice("repair","深度治疗","消耗1补给，恢复24生命",Supplies>0&&Health<60&&!CurrentFull.Id.EndsWith("n1",StringComparison.Ordinal)),new VoyageNodeChoice("calm","长期安抚","消耗1补给，恢复11理智",Supplies>0&&Sanity<30&&!CurrentFull.Id.EndsWith("n0",StringComparison.Ordinal)),new VoyageNodeChoice("depart","不作整备","继续航行")};
+                case RunNodeKind.Archive:
+                    var routesAvailable=HasUnknownRoutes(CurrentFull);
+                    return new[]{new VoyageNodeChoice("routes","抄录航路",routesAvailable?"揭示此处全部后续航路，并把海况结论写入日志":"所有后续航路已经记录，没有新航路可抄录",routesAvailable||restoring),new VoyageNodeChoice("briefing","研读威胁简报","记录本海域区域威胁的真实机制线索"),new VoyageNodeChoice("seal","封存记录",Sanity<30?"恢复5理智":"理智已满，无需封存记录",Sanity<30)};
+                case RunNodeKind.Supply:return new[]{new VoyageNodeChoice("rest","休整",Health<60||Sanity<30?"恢复12生命与5理智":"生命与理智均已恢复至上限",Health<60||Sanity<30),new VoyageNodeChoice("repair","深度治疗",Supplies==0?"补给不足；需要1补给":Health>=60?"生命已满，无需深度治疗":"消耗1补给，恢复24生命",Supplies>0&&Health<60),new VoyageNodeChoice("calm","长期安抚",Supplies==0?"补给不足；需要1补给":Sanity>=30?"理智已满，无需长期安抚":"消耗1补给，恢复11理智",Supplies>0&&Sanity<30),new VoyageNodeChoice("depart","不作整备","继续航行")};
                 default:return Array.Empty<VoyageNodeChoice>();
             }
         }
@@ -153,7 +155,9 @@ namespace UnsoundedSea.Core
             {
                 case 0:return new[]{new VoyageNodeChoice("salvage","登船拆取","获得2补给，失去5生命",Health>5&&Supplies<=6),new VoyageNodeChoice("observe","绕船观测","恢复3理智",Sanity<30),new VoyageNodeChoice("leave","保持航向","无资源变化")};
                 case 1:return new[]{new VoyageNodeChoice("tow","拖回浮箱","获得1补给，耗时2小时",Supplies<8),new VoyageNodeChoice("listen","核对求救频率","恢复4理智",Sanity<30),new VoyageNodeChoice("leave","切断信号","无资源变化")};
-                default:return new[]{new VoyageNodeChoice("dive","下潜检查锚链","获得2补给，失去3理智",Sanity>3&&Supplies<=6),new VoyageNodeChoice("mark","标记危险水流","揭示此处全部后续航路"),new VoyageNodeChoice("leave","避开逆流","无资源变化")};
+                default:
+                    var routesAvailable=HasUnknownRoutes(CurrentFull);
+                    return new[]{new VoyageNodeChoice("dive","下潜检查锚链","获得2补给，失去3理智",Sanity>3&&Supplies<=6),new VoyageNodeChoice("mark","标记危险水流",routesAvailable?"揭示此处全部后续航路":"所有后续航路已经记录，没有新水流可标记",routesAvailable||restoring),new VoyageNodeChoice("leave","避开逆流","无资源变化")};
             }
         }
         public bool ChooseNode(string id)
@@ -198,12 +202,12 @@ namespace UnsoundedSea.Core
         public bool SetDeck(IEnumerable<string> ids)
         {
             var values=ids?.ToArray(); if(!CanEditDeck||values==null||values.Length!=12||values.Distinct(StringComparer.Ordinal).Count()!=12||values.Any(x=>!learned.Contains(x)))return false;
-            deck.Clear();deck.AddRange(values);Record(VoyageActionKind.SetDeck,values:values);return true;
+            if(deck.SequenceEqual(values,StringComparer.Ordinal))return true;deck.Clear();deck.AddRange(values);Record(VoyageActionKind.SetDeck,values:values);return true;
         }
         public bool SetTools(IEnumerable<string> ids)
         {
             var values=ids?.ToArray();if(!CanEditDeck||values==null||values.Length>2||values.Distinct(StringComparer.Ordinal).Count()!=values.Length||values.Any(x=>!learnedTools.Contains(x)))return false;
-            tools.Clear();tools.AddRange(values);Record(VoyageActionKind.SetTools,values:values);return true;
+            if(tools.SequenceEqual(values,StringComparer.Ordinal))return true;tools.Clear();tools.AddRange(values);Record(VoyageActionKind.SetTools,values:values);return true;
         }
         public bool ChooseNextAct(string region)
         {
@@ -221,7 +225,7 @@ namespace UnsoundedSea.Core
         public static VoyageSession Restore(VoyageCheckpoint checkpoint)
         {
             if(checkpoint==null)throw new ArgumentNullException(nameof(checkpoint));if(checkpoint.Version!=CheckpointVersion||checkpoint.Map==null||checkpoint.History==null||checkpoint.History.Length>MaxHistory)throw new ArgumentException("Invalid voyage checkpoint.",nameof(checkpoint));
-            var session=new VoyageSession(VoyageMapGenerator.Restore(checkpoint.Map),checkpoint.CrewId);foreach(var action in checkpoint.History)session.Replay(action);return session;
+            var session=new VoyageSession(VoyageMapGenerator.Restore(checkpoint.Map),checkpoint.CrewId);session.restoring=true;try{foreach(var action in checkpoint.History)session.Replay(action);}finally{session.restoring=false;}return session;
         }
         private void Replay(VoyageActionData action)
         {
@@ -288,7 +292,17 @@ namespace UnsoundedSea.Core
         private bool IsKnownRouteFromCurrent(string id)=>knownRouteKeys.Contains(RouteKey(CurrentFull.Id,id));
         private static string RouteKey(string a,string b)=>a+"\n"+b; private static bool IsEncounter(VoyageStop s)=>s.Kind==RunNodeKind.Battle||s.Kind==RunNodeKind.Boss;
         private void Record(VoyageActionKind kind,string stopId=null,bool victory=false,int health=0,int sanity=0,string value=null,string[] values=null)
-        {if(kind==VoyageActionKind.Select&&history.Count>0&&history[history.Count-1].Kind==VoyageActionKind.Select){history[history.Count-1].StopId=stopId;return;}history.Add(new VoyageActionData{Kind=kind,StopId=stopId,Victory=victory,Health=health,Sanity=sanity,Value=value,Values=values?.ToArray()});}
+        {
+            if(kind==VoyageActionKind.Select||kind==VoyageActionKind.SetDeck||kind==VoyageActionKind.SetTools)
+                for(var i=history.Count-1;i>=0;i--)
+                {
+                    var previous=history[i];
+                    if(previous.Kind!=VoyageActionKind.Select&&previous.Kind!=VoyageActionKind.SetDeck&&previous.Kind!=VoyageActionKind.SetTools)break;
+                    if(previous.Kind!=kind)continue;
+                    previous.StopId=stopId;previous.Values=values?.ToArray();return;
+                }
+            history.Add(new VoyageActionData{Kind=kind,StopId=stopId,Victory=victory,Health=health,Sanity=sanity,Value=value,Values=values?.ToArray()});
+        }
         private static VoyageActionData CopyAction(VoyageActionData a)=>new VoyageActionData{Kind=a.Kind,StopId=a.StopId,Victory=a.Victory,Health=a.Health,Sanity=a.Sanity,Value=a.Value,Values=a.Values?.ToArray()};
         private static VoyageMapData CloneMap(VoyageMapData data)=>VoyageMapGenerator.Restore(data).Export();
     }

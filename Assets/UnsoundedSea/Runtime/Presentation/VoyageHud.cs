@@ -327,20 +327,21 @@ namespace UnsoundedSea.Runtime
         }
         private void BuildRewards(VisualElement panel, VoyageSession session, bool saved)
         {
-            panel.Add(Text("从调查所得中选择一张加入远征行动库。", "reward-copy"));
+            panel.Add(Text("选择一张加入行动库；下次整备时编入牌组，不会自动替换现有行动。", "reward-copy"));
             var cards = Element("reward-cards");
             foreach (var reward in session.RewardCards)
             {
                 var card = reward;
                 var button = Action("reward-" + card.Id, string.Empty, "reward-card",
-                    () => Change(() => Session.ClaimReward(card.Id), $"已习得「{card.Name}」。"), saved);
+                    () => Change(() => Session.ClaimReward(card.Id), $"已习得「{card.Name}」；可在整备点编入牌组。"), saved);
                 var face = Element("reward-card-face"); IllustratedCard.Apply(face, card); button.Add(face);
                 button.tooltip = card.Name + "：" + card.Description; cards.Add(button);
             }
             panel.Add(cards);
             panel.Add(Action("reward-action-book", "查看行动簿", "secondary", () => { deckOpen = true; Refresh(); }));
-            panel.Add(Action("reward-supplies", "放弃卡牌 · 获得 1 补给", "secondary",
-                () => Change(() => Session.ClaimReward(null), "已将所得换为补给。"), saved));
+            var suppliesFull = session.Supplies >= 8;
+            panel.Add(Action("reward-supplies", suppliesFull ? "跳过奖励 · 补给已满" : "放弃卡牌 · 获得 1 补给", "secondary",
+                () => Change(() => Session.ClaimReward(null), suppliesFull ? "已跳过奖励；补给已满，没有额外收益。" : "已将所得换为 1 补给。"), saved));
         }
 
         private void BuildActChoice(VisualElement panel, VoyageSession session, bool saved)
