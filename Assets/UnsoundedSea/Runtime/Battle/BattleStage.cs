@@ -52,6 +52,7 @@ namespace UnsoundedSea.Runtime
                 var actor = new GameObject(view.Enemies[i].Name).AddComponent<BattleActorView>();
                 actor.transform.SetParent(actorAnchors[i], false);
                 actor.Bind(owner, view.Enemies[i].Id, owner.scenario.ActorPrefab(i), selectionMaterial);
+                actor.ConfigureMotion(placeholderCombatMotion);
                 if (view.BossKind != BossEncounterKind.None)
                 {
                     actor.Feedback(false, false, view.Enemies[i].Health > 0);
@@ -69,8 +70,8 @@ namespace UnsoundedSea.Runtime
             {
                 if (after.BossKind != BossEncounterKind.None)
                     actors[i].gameObject.SetActive(after.Enemies[i].Health > 0);
-                actors[i].Feedback(placeholderCombatMotion && after.Enemies[i].Health < before.Enemies[i].Health,
-                    placeholderCombatMotion && command.kind == CommandKind.EndTurn && before.Enemies[i].Health > 0, after.Enemies[i].Health > 0);
+                actors[i].Feedback(after.Enemies[i].Health < before.Enemies[i].Health,
+                    command.kind == CommandKind.EndTurn && before.Enemies[i].Health > 0, after.Enemies[i].Health > 0);
             }
             if (after.Health < before.Health || after.Sanity < before.Sanity)
             {

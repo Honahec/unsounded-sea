@@ -40,6 +40,16 @@ Deemos Agent 是可选生产工具，不是每件资产的必经步骤。高模�
 3. 等附件上传完成再提交，确认 Agent 可读取网格和贴图，且聊天中出现对应模型预览。
 4. 在同一聊天完成修订并下载结果。若掉线，先检查原任务状态，避免重复创建任务。
 
+### 沉钟之母：绑定骨骼与战斗动画样例（2026-10-17）
+
+Deemos 当前可见的 Agent 快捷动作是部位拆分与材质调整；没有可验收的骨骼、权重或动画导出入口。Rodin 的 T/A pose 只帮助生成姿态，不能代替绑定。因此本例采用“Deemos 造型 → Blender 5.2.2 自定义 Generic Rig → Unity Animator”的可回溯路线，未把 Agent 的文字报告当作动画交付。
+
+1. 在 `arch` 的 `/home/honahec/Projects/unsounded-sea` 检查源 `BellMother_LOD0.glb`，确认单网格、151,658 顶点、无 Armature/Action；保留源文件不改。
+2. 运行 [BellMotherRig.py](../Tools/BellMotherRig.py)：按身体、冠部、下部六条触手建立 30 根骨骼，按空间区域生成权重，制作 `Idle / Telegraph / Attack_A / Recover / Hit / Death` 六组动作，并在起止/中间帧检查有限变形。
+3. 导出 `ArtSource/Bosses/BellMother_Rigged.blend`、LFS 下的 `Assets/UnsoundedSea/Art/Models/BellMother_Rigged.fbx/.glb` 与 manifest。重新导入 Blender 后，FBX/GLB 都能读到 30 根骨骼和 6 个 Action；`git lfs fsck` 通过。
+4. 在 Unity 通过 [BellMotherAnimationSetup.cs](../Tools/BellMotherAnimationSetup.cs) 设置 Generic ModelImporter、创建 `BellMother.controller`，生成 32 m 的 `BellMother.prefab`，并将 `bell-mother.asset` 指向它。`BattleActorView` 只接收规则结算结果，按 `Telegraph → Attack_A → Recover`、`Hit`、`Death` 播放；规则层不读取 Animator。无骨骼模型仍走旧的简化反馈。
+5. 验收顺序：Blender 动作截图 → Unity Prefab 骨骼/动作检查 → Play Mode 触发一次攻击并截图 → EditMode 规则回归。当前样例已完成前四项，正式发布前仍需目标设备性能和最终美术权重验收。
+
 ### 下载后的最低检查
 
 检查 GLB 声明长度与文件长度、SHA-256、网格/primitive、索引拓扑与实际三角面、顶点、材质槽、UV/法线、图片尺寸和通道，以及 skins/animations。只有 TRIANGLES 拓扑才能直接按索引数 ÷ 3 计面；其它拓扑需转换统计。外部纹理/缓冲依赖也必须归档，不能只下载壳文件。
@@ -160,7 +170,7 @@ git lfs fsck
 | --- | --- | --- | --- |
 | Prayer | 500,000 → 60,000 | Unity 材质、1.8 m、脚底、Prefab 引用、正面 Play 画面 | 袖内刀/铃分件、动画、全视角与目标设备验收 |
 | Echo | 800,000 → 90,000 | Unity 材质、2.1 m、脚底、Prefab 引用、战斗场景 | 更明显的空壳塌陷、独立铜铃、动画、全视角与目标设备验收 |
-| BellMother | 1,500,000 → 109,998 | Agent 制作、32 m、独立海面锚点、浸没与运行画面 | 触手骨骼动画、主体贴图平台压缩、LOD1/2 |
+| BellMother | 1,500,000 → 109,998 | Agent 制作、32 m、独立海面锚点、30 骨骼、6 动作、Unity 战斗反馈 | 主体贴图平台压缩、LOD1/2、最终权重与性能验收 |
 | SurveyVessel | 800,000 → 80,000 | Agent 参考制作、保留 UV 减面、18 m 船体、开放甲板、战斗舞台 | 平台贴图压缩、LOD1/2、驾驶玩法 |
 | M02–M05 Boss 候选 | 具体规格见下方各自 manifest | Agent 生成、高低模归档、LOD0 Unity 导入、Prefab／四场战斗镜头、来源哈希一致 | 美术定稿、完整多视角、骨骼动画、纹理平台压缩与性能验收 |
 

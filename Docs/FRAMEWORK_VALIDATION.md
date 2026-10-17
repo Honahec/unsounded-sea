@@ -2,6 +2,13 @@
 
 2026-10-17 更新，macOS / Unity 6000.6.5f1 / Unity CLI 1.0.0-beta.13 / Pipeline 0.8.0-exp.1。范围分别为局外航海，以及主线 `OceanBattle.unity`「雾海来客」与 `SeaBossBattle.unity`「沉钟海域」；旧 HUD 的逐轮记录保留在 Git 历史，不重复维护。
 
+## 沉钟之母骨骼动画流程
+
+- `arch` Blender 5.2.2 生成并导出 Generic Armature：30 根骨骼、151,658 顶点、6 个动作；FBX/GLB 重新导入检查通过，Git LFS `fsck` 通过。
+- Unity 通过 `BellMotherAnimationSetup.Build` 生成 `BellMother.controller` 与 `BellMother.prefab`；Prefab 骨骼测试 **2 通过／0 失败**，尺寸约 32 m，包含六组动作和 SkinnedMeshRenderer。
+- Play Mode 打开 `SeaBossBattle.unity`，Game View 1280×720 正常显示船、海面与巨兽；运行时调用 `BattleActorView.Feedback(false, true, true)` 返回 `skeletal=True`，攻击序列进入表现层。截图只保留在本地临时目录，不作为运行时资源。
+- 沉钟规则回归 `SeaBossTests` **6 通过／0 失败**；未修改生命、伤害、撤离进度等规则。尚未验收独立 Player、目标硬件性能和最终权重美术质量。
+
 ## M02–M05 Boss 战
 
 2026-10-17，macOS / Unity 6000.6.5f1；合并 main 与 LFS 后，以归档减面模型和共享水面／调查船制作四个独立场景。主菜单入口为「禁航海域」，未改动航图生成或航程规则。
@@ -114,4 +121,4 @@
 
 ## 验证边界
 
-尚未验证独立 Player 打包、目标硬件帧率/显存、非 16:9 布局、第三名及以上敌人的名牌排布、正式骨骼动画。当前 4K 内嵌纹理未做平台压缩；甲板战三个模型约 230k 三角面，海面战船与 Boss 约 190k 三角面，另加水面 245,760 三角面及半分辨率反射额外绘制，不等于性能预算已经通过。水体目前仅验证 macOS Metal / PC Forward+；移动管线、XR、其他图形 API 尚未验收。音轨是程序合成底噪和动作提示，尚非完整录制/混音制作。特殊玩法目前提供规则模块入口，未实现尚未设计的特殊战。
+尚未验证独立 Player 打包、目标硬件帧率/显存、非 16:9 布局、第三名及以上敌人的名牌排布、最终骨骼权重美术质量。当前 4K 内嵌纹理未做平台压缩；甲板战三个模型约 230k 三角面，海面战船与 Boss 约 190k 三角面，另加水面 245,760 三角面及半分辨率反射额外绘制，不等于性能预算已经通过。水体目前仅验证 macOS Metal / PC Forward+；移动管线、XR、其他图形 API 尚未验收。音轨是程序合成底噪和动作提示，尚非完整录制/混音制作。特殊玩法目前提供规则模块入口，未实现尚未设计的特殊战。

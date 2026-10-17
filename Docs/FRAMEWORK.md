@@ -56,7 +56,7 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
     → BattleDirector（独立 Session、选敌、命令、反馈锁、重开）
         → OceanBattleHud（BattleView → UI；Command → Director）
         → BattleStage（船体、相机、灯光、海面、音响、生成锚点）
-            → BattleActorView（模型实例、碰撞选敌、名牌锚点、静态网格反馈）
+            → BattleActorView（模型实例、碰撞选敌、名牌锚点、可选骨骼动作反馈）
 ```
 
 - **换场景**：复制或创建带 `BattleStage` 的 Prefab，配置 `battleCamera`、`vessel`（所有随船运动的物体父节点）、`actorAnchors` 和选中材质，再替换 Scenario 的 `stagePrefab`。海面与音响可选；当前舞台不支持角色移动/导航。
@@ -67,7 +67,7 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 - **特殊战入口**：派生 `BattleRuleModule`，为每次会话创建新的 `EffectRegistry` / `IEncounterObjective`。`SealingRuleModule` 用于雾海封线；`SurvivalRuleModule` 用于海面撤离，按已结算轮数计数。两者均不靠敌人全部死亡判胜。模块资产只存配置，不能共享可变进度。需要新命令、敌人阶段策略或即时玩法时仍需扩展 Core 与测试；当前入口不等于这些玩法已实现。
 - **反馈事件**：Director 的 `Resolved(before, after, command)` 通知舞台，`Changed` 通知 UI；短暂反馈期间拒绝连点，规则仍同步确定性结算。暂停冻结舞台运动与环境声；减少动效关闭船体摇晃、镜头震动和角色摆动。
 
-「沉钟海域」使用 **Uber Stylized Water**：多向不规则涌浪、细波法线、半分辨率破碎倒影、浪尖/接触泡沫和海雾；深海材质关闭折射与岸边透明渐隐，浅深色均为不透明；甲板战保留原轻量水面。巨兽扰流与钟声只负责表现，不影响规则随机数。场景雾、月光、暖色船灯、Bloom/Vignette 构成海洋氛围；音轨为原创合成底噪和动作提示。三名角色仍是无骨骼静态网格；海面战关闭占位攻击/受击位移和镜头震动，仅保留常态运动、音效与结算提示，正式动作等待骨骼动画接入。`BattleStage.placeholderCombatMotion` 控制占位动作和对应输入等待时长，甲板样例保留原表现。
+「沉钟海域」使用 **Uber Stylized Water**：多向不规则涌浪、细波法线、半分辨率破碎倒影、浪尖/接触泡沫和海雾；深海材质关闭折射与岸边透明渐隐，浅深色均为不透明；甲板战保留原轻量水面。巨兽扰流与钟声只负责表现，不影响规则随机数。场景雾、月光、暖色船灯、Bloom/Vignette 构成海洋氛围；沉钟之母现已使用 Generic Armature 和 Animator 播放 Telegraph、Attack、Recover、Hit、Death，`BattleActorView` 的表现层只消费 `Resolved` 结果，规则仍独立结算；没有骨骼的旧模型继续使用兼容的简化反馈。`BattleStage.placeholderCombatMotion` 只控制无骨骼模型的占位运动。
 
 ### 海面配置
 

@@ -73,6 +73,11 @@ public static class SeaBossSetup
 
     public static object ImportModel()
     {
+        // Prefer the authored generic rig when it is present. This keeps a later
+        // encounter rebuild from silently replacing the animated Boss with the
+        // legacy static GLB prefab.
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/Art/Models/BellMother_Rigged.fbx") != null)
+            return BellMotherAnimationSetup.Build();
         var source=AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/Art/Models/BellMother_LOD0.glb");
         if(source==null)throw new InvalidOperationException("Import BellMother_LOD0.glb first.");
         Folder(Art);

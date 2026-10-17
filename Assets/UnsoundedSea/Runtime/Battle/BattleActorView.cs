@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace UnsoundedSea.Runtime
 {
-    // Static source meshes: whole-body staging, never a substitute for skeletal animation.
     public sealed class BattleActorView : MonoBehaviour
     {
         public string EnemyId { get; private set; }
@@ -17,6 +16,12 @@ namespace UnsoundedSea.Runtime
         private Vector3 bodyPosition, labelPosition;
         private Quaternion bodyRotation;
         private float height, impulse, attack, fall, age;
+        private Animator animator;
+        private Coroutine actionSequence;
+        private bool skeletalPresentation;
+        private bool legacyMotion;
+
+        public bool HasSkeletalPresentation => skeletalPresentation;
 
         public void Bind(BattleDirector owner, string id, GameObject prefab, Material ringMaterial)
         {
@@ -24,6 +29,14 @@ namespace UnsoundedSea.Runtime
             placement = transform.parent.GetComponent<BattleAnchor>();
             body = Instantiate(prefab, transform).transform;
             bodyPosition = body.localPosition; bodyRotation = body.localRotation;
+            animator = body.GetComponentInChildren<Animator>();
+            skeletalPresentation = animator != null && animator.runtimeAnimatorController != null;
+            if (skeletalPresentation)
+            {
+                animator.updateMode = AnimatorUpdateMode.UnscaledTime;
+                animator.applyRootMotion = false;
+                animator.Play("BellMother_Idle", 0, 0);
+            }
             var bounds = MeasureLocalBounds(transform);
             height = bounds.size.y;
             labelPosition = new Vector3(bounds.center.x, Mathf.Lerp(bounds.min.y, bounds.max.y, placement == null ? 1 : placement.labelHeight), bounds.center.z)
@@ -39,6 +52,11 @@ namespace UnsoundedSea.Runtime
             var radius = Mathf.Max(0.7f, Mathf.Max(bounds.extents.x, bounds.extents.z));
             for (var i = 0; i < 64; i++) { var a = i * Mathf.PI / 32; ring.SetPosition(i, new Vector3(Mathf.Cos(a) * radius, 0.035f, Mathf.Sin(a) * radius)); }
             Select(false);
+        }
+
+        public void ConfigureMotion(bool enableLegacyMotion)
+        {
+            legacyMotion = enableLegacyMotion;
         }
 
         public static Bounds MeasureLocalBounds(Transform root)
@@ -58,14 +76,55 @@ namespace UnsoundedSea.Runtime
         }
 
         public void Select(bool selected) { if (ring != null) ring.enabled = selected && Alive; }
-        public void Feedback(bool damaged, bool attacking, bool alive) { impulse = damaged ? 1 : 0; attack = attacking ? 1 : 0; Alive = alive; }
+        public void Feedback(bool damaged, bool attacking, bool alive)
+        {
+            Alive = alive;
+            if (skeletalPresentation)
+            {
+                if (actionSequence != null) StopCoroutine(actionSequence);
+                if (!alive) actionSequence = StartCoroutine(PlayAction("BellMother_Death", false));
+                else if (damaged) actionSequence = StartCoroutine(PlayAction("BellMother_Hit", false));
+                else if (attacking) actionSequence = StartCoroutine(PlayAttack());
+                return;
+            }
+            impulse = damaged ? 1 : 0; attack = attacking ? 1 : 0;
+        }
+
+        private System.Collections.IEnumerator PlayAttack()
+        {
+            yield return PlayAction("BellMother_Telegraph", false);
+            yield return new WaitForSecondsRealtime(0.2f);
+            yield return PlayAction("BellMother_Attack_A", false);
+            yield return PlayAction("BellMother_Recover", false);
+            animator.Play("BellMother_Idle", 0, 0);
+            actionSequence = null;
+        }
+
+        private System.Collections.IEnumerator PlayAction(string action, bool loop)
+        {
+            animator.CrossFadeInFixedTime(action, 0.08f, 0, 0);
+            var clip = animator.runtimeAnimatorController.animationClips;
+            var duration = 0.5f;
+            for (var i = 0; i < clip.Length; i++)
+                if (clip[i].name == action || clip[i].name.EndsWith(action, System.StringComparison.Ordinal)) { duration = clip[i].length; break; }
+            if (!loop) yield return new WaitForSecondsRealtime(Mathf.Max(0.05f, duration - 0.08f));
+        }
+
         private void Update()
         {
-            if (body == null || director.Paused) return;
+            if (body == null) return;
+            if (animator != null) animator.speed = director.Paused ? 0 : 1;
+            if (director.Paused) return;
             var dt = Time.unscaledDeltaTime; age += dt;
             impulse = Mathf.MoveTowards(impulse, 0, dt * 2.2f); attack = Mathf.MoveTowards(attack, 0, dt * (IsSeaActor ? 0.8f : 1.4f));
             fall = Mathf.MoveTowards(fall, Alive ? 0 : 1, dt * 0.9f);
             var reduced = GameSettings.ReducedMotion;
+            if (skeletalPresentation && !legacyMotion)
+            {
+                body.localPosition = bodyPosition + Vector3.up * (-fall * height);
+                body.localRotation = bodyRotation;
+                return;
+            }
             if (IsSeaActor)
             {
                 body.localPosition = bodyPosition + Vector3.up * (-fall * height + (reduced ? 0 : Mathf.Sin(age * 0.34f) * placement.heave + Mathf.Sin(attack * Mathf.PI) * 0.45f));
