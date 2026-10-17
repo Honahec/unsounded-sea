@@ -89,5 +89,45 @@ namespace UnsoundedSea.Tests
             }
             finally { Object.DestroyImmediate(go); }
         }
+        [TestCase(16f/9)] [TestCase(21f/9)] [TestCase(4f/3)]
+        public void ChoirSummonsAreFramedAboveTheHandWithReadableSize(float aspect)
+        {
+            var scenario=Scenario(2);var stage=Object.Instantiate(scenario.stagePrefab);
+            try
+            {
+                stage.battleCamera.aspect=aspect;
+                for(int i=1;i<3;i++)
+                {
+                    var anchor=stage.actorAnchors[i];
+                    Assert.That(anchor.IsChildOf(stage.vessel),Is.True,"Summons must follow the deck.");
+                    var actor=Object.Instantiate(scenario.ActorPrefab(i),anchor);
+                    var bounds=BattleActorView.MeasureLocalBounds(actor.transform);
+                    var bottom=stage.battleCamera.WorldToViewportPoint(actor.transform.TransformPoint(new Vector3(bounds.center.x,bounds.min.y,bounds.center.z)));
+                    var top=stage.battleCamera.WorldToViewportPoint(actor.transform.TransformPoint(new Vector3(bounds.center.x,bounds.max.y,bounds.center.z)));
+                    Assert.That(top.z,Is.GreaterThan(0));
+                    Assert.That(top.y-bottom.y,Is.GreaterThan(.045f),"Summon silhouette too small to read.");
+                    Assert.That(bottom.y,Is.GreaterThan(.3f),"Summon hidden by the hand.");
+                    Assert.That(top.y,Is.LessThan(.6f),"Summon intrudes into the giant's silhouette.");
+                    Assert.That(top.x,Is.InRange(.25f,.75f),"Summon hidden behind side HUD.");
+                }
+            }
+            finally { Object.DestroyImmediate(stage.gameObject); }
+        }
+        [Test] public void ChoirPressureOriginFollowsTheJawWhileChargeStaysAtTheGullet()
+        {
+            var actor=Object.Instantiate(Scenario(2).ActorPrefab(0));
+            try
+            {
+                var motion=actor.GetComponentInChildren<GiantBossMotion>();
+                var head=motion.joints.Single(j=>j.bone.name=="GB_Head").bone;
+                Assert.That(motion.sonicOrigin,Is.Not.Null);Assert.That(motion.sonicOrigin.IsChildOf(head),Is.True);
+                Assert.That(motion.effectOrigin.name,Is.EqualTo("GB_Gullet"));
+                var mouth=motion.SonicOrigin;var charge=motion.Origin;
+                head.localRotation*=Quaternion.Euler(12,0,0);
+                Assert.That(Vector3.Distance(motion.SonicOrigin,mouth),Is.GreaterThan(.1f));
+                Assert.That(motion.Origin,Is.EqualTo(charge));
+            }
+            finally { Object.DestroyImmediate(actor); }
+        }
     }
 }

@@ -48,6 +48,7 @@ namespace UnsoundedSea.Editor
                 environment.reflection = reflection; environment.reflectionIntensity = .35f;
                 if (number == 2)
                 {
+                    ConfigureChoirDeck(stage);
                     var anchor = stage.actorAnchors[0];
                     anchor.localPosition = new Vector3(-45, 50, 360); anchor.localScale = Vector3.one * 16;
                     var placement = anchor.GetComponent<BattleAnchor>();
@@ -82,6 +83,69 @@ namespace UnsoundedSea.Editor
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || Enumerable.Range(0,SceneManager.sceneCount).Any(i=>SceneManager.GetSceneAt(i).isDirty))
                 throw new InvalidOperationException("Stop Play and save scene edits before configuring boss atmosphere.");
+        }
+        public static string ConfigureChoirDeck()
+        {
+            Check();
+            const string path=Root+"Art/Bosses/M02Stage.prefab";
+            if(EditorUtility.IsDirty(AssetDatabase.LoadAssetAtPath<GameObject>(path)))
+                throw new InvalidOperationException("Unsaved M02 stage edits.");
+            var root=PrefabUtility.LoadPrefabContents(path);
+            try { ConfigureChoirDeck(root.GetComponent<BattleStage>()); PrefabUtility.SaveAsPrefabAsset(root,path); }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+            return "M02 forward deck and two visible summons configured; boss, camera and rules preserved.";
+        }
+        static void ConfigureChoirDeck(BattleStage stage)
+        {
+            // Match the vessel's presentation scale to this distant giant-boss camera.
+            // Face the open foredeck towards it so the cabin cannot hide summoned actors.
+            stage.vessel.localPosition=new Vector3(-28,stage.vessel.localPosition.y,80);
+            stage.vessel.localRotation=Quaternion.Euler(0,120,0);
+            stage.vessel.localScale=Vector3.one*6;
+            stage.vesselSampleExtents=new Vector2(15,42);
+            for(int i=1;i<=2;i++)
+            {
+                stage.actorAnchors[i].localPosition=new Vector3(i==1?-1.2f:1.2f,1.46f,6.2f);
+                stage.actorAnchors[i].localRotation=Quaternion.Euler(0,-20,0);
+            }
+            var lights=stage.GetComponentsInChildren<Light>();
+            var deck=lights.Single(l=>l.name=="Cold deck fill");
+            deck.transform.SetParent(stage.vessel,false);deck.transform.localPosition=new Vector3(0,5,4);
+            deck.range=65;deck.intensity=1600;
+            var exterior=lights.Single(l=>l.name=="Vessel exterior fill");
+            exterior.transform.position=stage.vessel.position+new Vector3(18,28,-18);
+            exterior.range=140;exterior.intensity=1800;
+        }
+        public static string ConfigureChoirMouth()
+        {
+            Check();
+            const string path=Root+"Art/Prefabs/TideBonesChoirmaster.prefab";
+            if(EditorUtility.IsDirty(AssetDatabase.LoadAssetAtPath<GameObject>(path)))throw new InvalidOperationException("Unsaved choir actor edits.");
+            var root=PrefabUtility.LoadPrefabContents(path);
+            try { ConfigureChoirMouth(root.GetComponentInChildren<GiantBossMotion>()); PrefabUtility.SaveAsPrefabAsset(root,path); }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+            return "Pressure front now starts at the head's snout; gullet charge and other bosses preserved.";
+        }
+        static void ConfigureChoirMouth(GiantBossMotion motion)
+        {
+            var head=motion.joints.Single(j=>j.bone.name=="GB_Head").bone;
+            var skin=motion.GetComponentsInChildren<SkinnedMeshRenderer>().Single(r=>r.name=="Part_06_Mesh");
+            var mesh=new Mesh();var bounds=new Bounds();
+            try
+            {
+                skin.BakeMesh(mesh,true);bool first=true;
+                foreach(var vertex in mesh.vertices)
+                {
+                    var point=motion.transform.InverseTransformPoint(skin.transform.TransformPoint(vertex));
+                    if(first){bounds=new Bounds(point,Vector3.zero);first=false;}else bounds.Encapsulate(point);
+                }
+            }
+            finally { UnityEngine.Object.DestroyImmediate(mesh); }
+            var mouth=head.Find("Mouth pressure origin");
+            if(mouth==null){mouth=new GameObject("Mouth pressure origin").transform;mouth.SetParent(head,false);}
+            // Part 06 is the rigid jaw/snout. Use its front opening, not the gullet joint behind the head.
+            mouth.position=motion.transform.TransformPoint(new Vector3(bounds.center.x,bounds.min.y+bounds.size.y*.35f,bounds.max.z-bounds.size.z*.02f));
+            motion.sonicOrigin=mouth;
         }
         static void ConfigureActor(int index)
         {
@@ -123,6 +187,7 @@ namespace UnsoundedSea.Editor
                     Joint("Fin_L").attackEuler = new Vector3(0,0,10);
                     Joint("Fin_R").attackEuler = new Vector3(0,0,-10);
                     motion.effectOrigin = Joint("Gullet").bone;
+                    ConfigureChoirMouth(motion);
                 }
                 PrefabUtility.SaveAsPrefabAsset(root, path);
             }

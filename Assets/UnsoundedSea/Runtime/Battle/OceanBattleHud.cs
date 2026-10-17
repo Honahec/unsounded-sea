@@ -853,8 +853,8 @@ namespace UnsoundedSea.Runtime
                 label.button.style.top = rect.y;
                 label.button.style.display = position.z > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             }
-            // The salt board and relay dials own the left column, so their summons stack on the right.
-            var summonsRight = presentedBoss == BossEncounterKind.Surveyor || presentedBoss == BossEncounterKind.FlagBearer;
+            // All three mechanism panels own the left column, including the choir boxes.
+            var summonsRight = presentedBoss == BossEncounterKind.Choirmaster || presentedBoss == BossEncounterKind.Surveyor || presentedBoss == BossEncounterKind.FlagBearer;
             var summonTop = summonsRight ? 110f : 170f;
             for (var i = 0; i < nameplates.Count; i++)
             {
