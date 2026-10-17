@@ -60,7 +60,7 @@ namespace UnsoundedSea.Runtime
         }
         public void Select(string id)
         {
-            if (Paused || View == null || !View.Enemies.Any(x => x.Id == id && x.Health > 0 && x.Targetable)) return;
+            if (Paused || Busy || View == null || !View.Enemies.Any(x => x.Id == id && x.Health > 0 && x.Targetable)) return;
             SelectedEnemy = id; Stage.RefreshSelection(); Changed?.Invoke();
         }
         public void SetPaused(bool value) { Paused = value; Changed?.Invoke(); }
@@ -85,9 +85,10 @@ namespace UnsoundedSea.Runtime
             feedbackUntil = Time.unscaledTime + (GameSettings.ReducedMotion || !Stage.placeholderCombatMotion ? 0.12f : command.kind == CommandKind.EndTurn ? 1.05f : 0.4f);
             wasBusy = true;
             Resolved?.Invoke(before, after, command);
-            Changed?.Invoke();
+            if (!Stage.DelaysHudUntilImpact) Changed?.Invoke();
             return result;
         }
+        internal void NotifyPresentationImpact() => Changed?.Invoke();
         private void OnDestroy() { if (Stage != null) Destroy(Stage.gameObject); }
     }
 }

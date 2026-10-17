@@ -665,6 +665,11 @@ namespace UnsoundedSea.Runtime
                     plate.style.left = Mathf.Max(18, (root.resolvedStyle.width - width) * .42f);
                     plate.style.top = 100;
                 }
+                else if (presentedBoss == BossEncounterKind.Watcher)
+                {
+                    plate.style.left = Mathf.Clamp(p.x + (screen.x < .5f ? -width - 34 : 34), 18, Mathf.Max(18, root.resolvedStyle.width - width - 18));
+                    plate.style.top = Mathf.Clamp(p.y - height * .5f, 100, Mathf.Max(100, root.resolvedStyle.height - height - 250));
+                }
                 else if (presentedBoss != BossEncounterKind.None)
                 {
                     plate.style.left = 32;

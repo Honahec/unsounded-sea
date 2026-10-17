@@ -25,7 +25,6 @@
 .game-menu Button, .settings Button, .pause Button { margin: 0; padding: 0; border-width: 0; border-radius: 0; background-color: rgba(0,0,0,0); color: #eee4c9; -unity-text-align: middle-center; transition-property: translate, background-color, border-color; transition-duration: 0.12s; }
 .reduced-motion Button { transition-duration: 0s; }
 .game-menu Button:disabled, .settings Button:disabled, .pause Button:disabled { opacity: 0.45; }
-.menu-apparition { position: absolute; right: 8%; top: 12%; width: 620px; height: 620px; opacity: 0.22; rotate: -18deg; }
 .menu-column { position: absolute; left: 9%; top: 16%; width: 440px; }
 .menu-title-block { margin-bottom: 32px; }
 .menu-overline { font-size: 13px; color: #9e8755; letter-spacing: 5px; text-shadow: 0 2px 6px #081316; }

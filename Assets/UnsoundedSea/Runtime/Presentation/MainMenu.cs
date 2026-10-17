@@ -77,9 +77,6 @@ namespace UnsoundedSea.Runtime
         {
             root.Clear();
             root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion);
-            var apparition = new SeaUiArt("tentacle");
-            apparition.AddToClassList("menu-apparition");
-            root.Add(apparition);
             var column = new VisualElement { pickingMode = PickingMode.Ignore };
             column.AddToClassList("menu-column");
             var title = new VisualElement { pickingMode = PickingMode.Ignore };
