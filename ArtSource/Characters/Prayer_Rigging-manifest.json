@@ -1099,9 +1099,9 @@
   },
   "consumed": 0,
   "api_jobs": "all four jobs Done, including pack",
-  "status": "rejected_for_production_pending_user_review",
+  "status": "bound_with_pose_constraints_animation_design_pending",
   "visual_findings": [
-    "Forearm flexion drags a large section of the lower robe; arm/hand localization and skin weights require correction.",
+    "Forearm flexion drags a large section of the lower robe. Independent arm gestures would require correction; they are not required by the current tucked-hand direction.",
     "Torso rotation produces visible robe self-intersections.",
     "This first-review result has not been imported into Unity or substituted for the production prefab.",
     "Only diagnostic poses were authored; idle, attack and hit animations are not delivered."
@@ -1126,8 +1126,9 @@
   ],
   "validation": {
     "dcc": "Blender 5.2.2 LTS on arch",
-    "engine": "Not imported: deformation gate failed",
+    "engine": "Not imported; candidate retained with pose constraints, motion design deferred",
     "performance": "Not tested",
     "remote_lfs_readback": "Not performed; local review candidate only"
-  }
+  },
+  "usage_constraint": "User accepts tucked hands as intentional. Future attack/hit may keep arms tucked; torso motion range and cloth intersections require validation after level/action design."
 }

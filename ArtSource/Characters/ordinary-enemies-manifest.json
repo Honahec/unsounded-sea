@@ -2,17 +2,17 @@
   "project": "未测之海普通敌人25种",
   "source": "https://hyper3d.ai/workspace/agent?project=815bddca-e04a-476f-845a-b07f233ec326&thread=674d72a2-889b-4fe5-ab4d-95827faf242f&lang=zh",
   "method": "User Chrome Hyper3D Agent via computer use",
-  "status": "All 25 enemy static sources archived. LostSailor, WhiteLampSignaller and BarrelThief were regenerated through the original Chrome Agent project and locally checked. The existing 22 rigs remain an incomplete animation checkpoint.",
+  "status": "All 25 enemy static sources archived and bound through Hyper3D developer Rigging API. Binding-only delivery; combat animations deferred. Existing 22 RigTrials remain an incomplete historical animation checkpoint.",
   "requestedAssetCount": 25,
   "checkpoint": {
     "archivedEnemyCount": 25,
     "missingSources": [],
-    "notYetRigged": ["LostSailor", "WhiteLampSignaller", "BarrelThief"],
+    "notYetRigged": [],
     "fittingProfiles": "rig-profiles.json",
     "knownIssues": [
       "Unity review normalization uses padded SkinnedMeshRenderer bounds; measured Death bottom is 0.144m above ground for AbandonShipMedic.",
       "Latest held-tool fitting/action corrections have not all been re-exported and imported; archive and Unity copies are a work checkpoint, not a synchronized final release.",
-      "The assets list covers the original two-sample trial and three regenerated sources; other archived source files and per-enemy binding JSON exist but consolidated inventory is not yet complete.",
+      "The assets list below is the earlier source sample inventory. The complete 25-model source/hash/binding inventory is Hyper3DRigs/manifest.json.",
       "Existing validation JSON describes earlier trial runs, not acceptance of all 22 current rigs."
     ]
   },
@@ -179,5 +179,12 @@
       "knee flex",
       "torso twist"
     ]
+  },
+  "bindingOnly": {
+    "manifest": "Hyper3DRigs/manifest.json",
+    "count": 25,
+    "animations": 0,
+    "engineEvidence": "Hyper3DRigs/unity-validation.json",
+    "integration": "Standalone prefabs; encounter and gameplay references unchanged"
   }
 }

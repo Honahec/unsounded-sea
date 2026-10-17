@@ -107,7 +107,9 @@ unity command run_script --project-path "$UNITY_PROJECT_PATH" --timeout 180 --fo
 
 **新增或替换模型：**先更新导入配置/脚本的名称、路径、SHA、预算和验收预期；当前 `ImportSources` 会拒绝覆盖不同哈希文件。应通过单独的 Unity CLI/AssetDatabase 更新步骤替换目标内容、保留 `.meta` GUID、重导入并检查子资产引用及 Prefab。不要删掉已编辑的场景来强迫初始化脚本重建；已有场景的重新绑定需要显式处理。同步更新 manifest 和验收结果。
 
-**普通敌人绑定检查点：**25 种静态源已归档；其中 22 种已有绑定 GLB/Blend，并导入独立 `Assets/UnsoundedSea/Scenes/EnemyRigReview.unity`，各含 Idle、Action、Hit、Death、RigValidation 五段动作；未替换战斗模型。02/03/05 已按用户要求在原 Chrome Agent 项目重新生成、下载并核验，尚未绑定。来源、实测规格及限制见 [普通敌人 manifest](../ArtSource/Characters/ordinary-enemies-manifest.json)。复现使用 `Tools/rig_enemy_trials.py`（拟合数据为 `ArtSource/Characters/rig-profiles.json`）、`Tools/validate_enemy_rigs.py`；Unity CLI 执行 `Tools/EnemyRigReviewSetup.cs` 的 `EnemyRigReviewSetup.Build`，Play 后执行 `Tools/EnemyAnimationQA.cs` 的 `EnemyAnimationQA.Run`。现有 Unity 审阅归一化使用扩大的蒙皮包围盒，已测到死亡姿势离地约 0.14 米，未修复；最新持物侧拟合修订尚未全部重新导出并导入。道具/衣摆未独立分件、无手指骨骼，不能视为全部动画或目标设备性能验收通过。日常游戏入口仍为 `MainMenu.unity`，审阅结束后恢复打开该场景。
+**普通敌人绑定检查点：**来自 `origin/main` 的 25 种静态源均已通过 Hyper3D Rigging API 生成独立骨架；本批不生成动画。原始返回归档于 `ArtSource/Characters/Hyper3DRigs/`，恢复源 UV／材质后的模型和独立 Prefab 位于 `Assets/UnsoundedSea/Art/{Models,Prefabs}/Hyper3DRigs/`，未替换关卡或战斗引用。完整来源、哈希、实测规格及 Unity 检查见 [绑定 manifest](../ArtSource/Characters/Hyper3DRigs/manifest.json)；[静态总览](ArtReferences/hyper3d-humanoid-bindings.jpg) 为 Blender 渲染。复现入口为 `Tools/Hyper3DRigBatch.py`、`Tools/PrepareHyper3DRigs.py`、Unity CLI 执行 `Tools/Hyper3DRigImport.cs` 的 `Hyper3DRigImport.ImportValidate`。GLB 保留 API 骨架坐标，Prefab 按实际蒙皮顶点归一化尺寸与脚底；Unity 当前 glTFast 导入每顶点最多四权重，原始及归档 GLB 保留完整权重。检查仅涵盖结构、材质与可恢复的小幅躯干变形，不代表大幅动作、持物／衣摆或性能验收；战斗动画等关卡设计后再制作。
+
+旧的 22 种 `RigTrials` 和 `EnemyRigReview.unity` 仍是包含测试动作的历史检查点，不属于本次绑定交付。其扩大包围盒导致死亡姿势离地、持物拟合未全部重导出等限制，继续保留在 [普通敌人 manifest](../ArtSource/Characters/ordinary-enemies-manifest.json)；旧流程复现入口为 `Tools/rig_enemy_trials.py`、`Tools/validate_enemy_rigs.py`，Unity CLI 执行 `Tools/EnemyRigReviewSetup.cs` 的 `EnemyRigReviewSetup.Build`，Play 后执行 `Tools/EnemyAnimationQA.cs` 的 `EnemyAnimationQA.Run`。旧检查记录不代表当前动画验收；日常入口仍为 `MainMenu.unity`，独立审阅结束后恢复原工作场景。
 
 ## 5. 引擎验收
 
@@ -178,7 +180,7 @@ git lfs fsck
 
 Prayer 与 Echo 各 1 网格/材质、3 张 4K 纹理，无蒙皮/动画；尚无 LOD1/2 或 LODGroup。内嵌纹理为 ARGB32、13 级 mip，两角色完整纹理链理论约 512 MiB（非 Profiler 实测），尚未 GPU 压缩。后续需提取/重映射为可配置 TextureImporter 资产，按平台选择压缩与尺寸后复核；普通纹理平台覆写不能直接套用到这些内嵌子资产。
 
-Prayer 的首个 Hyper3D API 绑定候选已完成，但未通过变形审阅，未替换上述静态运行时资产。上传模型的 UV 被服务重新展开；审阅脚本通过重合三角面的角点恢复原 UV，再复用原材质，未修改自动骨骼与权重。弯臂会牵拉长袍下摆，转身出现衣摆穿插；下一步需修正骨骼定位与权重，再制作正式动作。参数、来源、规格与检查结果见 [候选 manifest](../ArtSource/Characters/Prayer_Rigging-manifest.json)，[三姿势对照](ArtReferences/prayer-rigging-review.jpg) 为 Blender 诊断渲染，不代表 Unity 动画或性能验收。Echo 也已完成首个绑定候选：同样的弯臂、转身诊断未见 Prayer 的大面积衣摆牵拉，但尚未验证大幅动作、头盔／领圈刚性、多视角和 Unity 播放；未替换运行时模型。来源与实测见 [Echo 候选 manifest](../ArtSource/Characters/Echo_Rigging-manifest.json)，画面见 [三姿势对照](ArtReferences/echo-rigging-review.jpg)。
+Prayer 的首个 Hyper3D API 绑定候选已完成，保留手臂收拢的造型，未替换上述静态运行时资产。上传模型的 UV 被服务重新展开；审阅脚本通过重合三角面的角点恢复原 UV，再复用原材质，未修改自动骨骼与权重。弯臂压力测试会牵拉长袍下摆，较大转身出现衣摆穿插；按当前用户确认的方向，攻击和受击可以保持双手藏在衣内，以躯干和重心表现，具体动作范围等关卡设计后再定，不预先要求抽手动作。参数、来源、规格与检查结果见 [候选 manifest](../ArtSource/Characters/Prayer_Rigging-manifest.json)，[三姿势对照](ArtReferences/prayer-rigging-review.jpg) 为 Blender 诊断渲染，不代表 Unity 动画或性能验收。Echo 也已完成首个绑定候选：同样的弯臂、转身诊断未见 Prayer 的大面积衣摆牵拉，但尚未验证大幅动作、头盔／领圈刚性、多视角和 Unity 播放；未替换运行时模型。来源与实测见 [Echo 候选 manifest](../ArtSource/Characters/Echo_Rigging-manifest.json)，画面见 [三姿势对照](ArtReferences/echo-rigging-review.jpg)。
 
 M02–M05 的高模与减面版保留在 `ArtSource/Bosses/`；减面版另存 `Assets/UnsoundedSea/Art/Models/` 并接入 `BossM02`–`BossM05`，导入副本与归档 SHA-256 一致。来源、实测规格和 Prefab 路径：[M02](../ArtSource/Bosses/TideBonesChoirmaster-manifest.json)、[M03](../ArtSource/Bosses/InvertedSurveyor-manifest.json)、[M04](../ArtSource/Bosses/UnlitFlagBearer-manifest.json)、[M05](../ArtSource/Bosses/StarlessWatcher-manifest.json)。M03 已重生成，M04 使用新项目重试；M05 轮廓仍偏人形，尚未美术定稿。没有重新生成水面，四场复用现有水体与调查船。具体运行范围见 [验证记录](FRAMEWORK_VALIDATION.md#m02m05-boss-战)。
 
