@@ -83,8 +83,8 @@ public static class GiantBossSetup
                 if(i>0)go.AddComponent<BossTargetAnchor>().targetId=M05GuardIds[i-1];
                 stage.actorAnchors[i]=go.transform;
             }
-            stage.vessel.localPosition=new Vector3(0,stage.vessel.localPosition.y,75);
-            stage.vessel.localScale=Vector3.one*1.4f;
+            stage.vessel.localPosition=new Vector3(0,stage.vessel.localPosition.y,45);
+            stage.vessel.localScale=Vector3.one*5.8f;
             stage.vessel.localRotation=Quaternion.identity;
             stage.battleCamera.transform.localPosition=new Vector3(0,120,-200);
             stage.battleCamera.transform.localRotation=Quaternion.LookRotation(new Vector3(0,80,170)-stage.battleCamera.transform.localPosition,Vector3.up);

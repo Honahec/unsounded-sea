@@ -686,9 +686,12 @@ namespace UnsoundedSea.Runtime
                 {
                     plate.style.width = 210;
                     var right = i >= 4;
-                    plate.style.left = i == 3 ? root.resolvedStyle.width * .34f - 105 : right ? root.resolvedStyle.width - 228 : 18;
-                    plate.style.top = i == 3 ? Mathf.Max(100, root.resolvedStyle.height - height - 245) :
-                        Mathf.Min(root.resolvedStyle.height * (i == 1 || i == 5 ? .25f : .55f), Mathf.Max(100, root.resolvedStyle.height - height - 245));
+                    plate.style.left = i == 1 ? Mathf.Max(18, p.x - width - 20) :
+                        i == 5 ? Mathf.Min(p.x + 20, root.resolvedStyle.width - width - 18) :
+                        i == 3 ? root.resolvedStyle.width * .34f - 105 : right ? root.resolvedStyle.width - 228 : 18;
+                    plate.style.top = i == 1 || i == 5 ? Mathf.Max(100, p.y - height - 20) :
+                        i == 3 ? Mathf.Max(100, root.resolvedStyle.height - height - 245) :
+                        Mathf.Min(root.resolvedStyle.height * .55f, Mathf.Max(100, root.resolvedStyle.height - height - 245));
                 }
                 else if (presentedBoss != BossEncounterKind.None)
                 {
