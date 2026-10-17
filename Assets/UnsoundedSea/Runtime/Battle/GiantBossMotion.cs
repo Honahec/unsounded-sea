@@ -22,6 +22,7 @@ namespace UnsoundedSea.Runtime
         public BossEncounterKind kind;
         public GiantJointMotion[] joints = Array.Empty<GiantJointMotion>();
         public Transform effectOrigin;
+        public Transform sonicOrigin;
         public Material mistMaterial;
         public Color effectColor = new Color(.45f,.68f,.66f,1);
         public float duration = 2.8f, contactTime = 1.45f, waveAmplitude = 65;
@@ -87,6 +88,7 @@ namespace UnsoundedSea.Runtime
             retiring=true; ActionTime=-1; hitTime=-1; HitWeight=0;
         }
         public Vector3 Origin => effectOrigin != null ? effectOrigin.position : transform.position;
+        public Vector3 SonicOrigin => sonicOrigin != null ? sonicOrigin.position : Origin;
         public void Tick(float dt)
         {
             Initialize(); if (paused || dt<=0) return;
@@ -143,7 +145,7 @@ namespace UnsoundedSea.Runtime
                     SurfaceReleased?.Invoke(point,waveAmplitude);
                 if (kind == BossEncounterKind.FlagBearer && !ritual && !observing)
                     effects?.PoleContact(GameSettings.ReducedMotion ? StrikeTarget : PoleTip);
-                else effects?.Release(Origin,ritual,observing,kind);
+                else effects?.Release(kind == BossEncounterKind.Choirmaster && !ritual && !observing ? SonicOrigin : Origin,ritual,observing,kind);
             }
             effects?.Tick(dt,Origin,ActionTime>=0 && !released,retiring);
             if (ActionTime>=duration) ActionTime=-1;

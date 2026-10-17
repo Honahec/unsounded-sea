@@ -220,7 +220,9 @@
 
 四份环境反射与两张验收图已从 `b803d9c` 的独立空 LFS 缓存回读，6 份 SHA-256 匹配，见[回读记录](../ArtSource/Bosses/Atmosphere-readback.json)。`GiantBossQA.AtmosphereReview` 在隔离验证会话中复查四场天空、外置贴图引用和实际画面。
 
-静态画面：[四场天空与表面](ArtReferences/boss-atmosphere-review.jpg)；实机动作：[领唱者空中攻击](ArtReferences/boss-airborne-attack.jpg)。M04／M05 原始贴图偏暗，尚未进行最终美术定稿；M02 召唤后的世界标签与左侧唱诗匣区存在重叠，属于待修 UI 问题。
+静态画面：[四场天空与表面](ArtReferences/boss-atmosphere-review.jpg)；实机动作：[领唱者空中攻击](ArtReferences/boss-airborne-attack.jpg)。M04／M05 原始贴图偏暗，尚未进行最终美术定稿。
+
+2026-10-18，Windows / Unity 6000.6.5f1 / Pipeline 本机 API，M02 召唤构图复验：完整 EditMode **313 通过／0 失败／0 跳过**。`BossSummonQA.Verify` 通过真实八回合产生骨片侍从与潮囊信使，在 1920×1080、2560×1080、1600×1200 检查两者模型可见、射线选取和右侧信息互不重叠／不遮唱诗匣；经实际 UI 选择召唤物并定向出牌成功。船保持稍偏左，前甲板朝向镜头；声波发射起点贴合随头骨运动的嘴部锚点，蓄势雾流仍在发声囊。**0 运行时错误，正式存档逐字节未变**；截图与结果在本机被忽略的 `Logs/BossSummons/`。此项只验证召唤显示、选择和声波起点，未重新通关整场或测量目标设备性能。
 
 以下是同日 Windows 上的规则与 UI 验收，M02 的旧海浪结论已由上方飞行表现替代。
 

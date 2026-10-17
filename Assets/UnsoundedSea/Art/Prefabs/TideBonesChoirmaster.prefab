@@ -32,6 +32,37 @@ Transform:
   - {fileID: 6708661661564598830}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8411018289563936344
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9024192429911244922}
+  m_Layer: 0
+  m_Name: Mouth pressure origin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9024192429911244922
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8411018289563936344}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.0015725122, y: -0.19553018, z: 0.3397826}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7364731954893175542}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1473404067689517265
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -138,7 +169,10 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: a601229a2bb4745598156b62246606d6, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -989000263482217945, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9024192429911244922}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: -1724898737691362094, guid: 0e3de00d9fb9f40d29c8a3ab82cacaee, type: 3}
       insertIndex: -1
@@ -281,6 +315,7 @@ MonoBehaviour:
     phase: 3.78
     lag: 0.35
   effectOrigin: {fileID: 2696093157041741225}
+  sonicOrigin: {fileID: 9024192429911244922}
   mistMaterial: {fileID: 2100000, guid: a2c1f2c084a4f410490d7472b0acc685, type: 2}
   effectColor: {r: 0.76, g: 0.8, b: 0.69, a: 1}
   duration: 2.8
