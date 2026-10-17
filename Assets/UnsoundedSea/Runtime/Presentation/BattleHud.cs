@@ -294,8 +294,8 @@ namespace UnsoundedSea.Runtime
 
 
             // Right edge: concise investigation tools retain uses, purpose and price.
-            var tools = Element("tools");
-            foreach (var tool in view.Tools)
+            var tools = new ScrollView(ScrollViewMode.Vertical); tools.AddToClassList("tools"); tools.style.maxHeight = new StyleLength(new Length(48, LengthUnit.Percent));
+            foreach (var tool in view.Tools.Where(x=>(int)x.Definition.Kind<3))
             {
                 var id = tool.Definition.Id;
                 var spent = tool.RemainingUses == 0;
@@ -328,10 +328,10 @@ namespace UnsoundedSea.Runtime
                 button.Add(new SeaUiArt(crew.Definition.Kind == CrewSupportKind.Medic ? "heart" : "ear"));
                 button.Add(Text(crew.Definition.Name, "tool-name"));
                 button.Add(Text(crew.Used ? "本场已用" : "1 行动 · 船员支援", crew.Used ? "tool-spent" : "tool-uses"));
-                button.tooltip = crew.Enabled ? "每回合最多一次，每名船员每场一次。" : crew.DisabledReason;
+                button.tooltip = crew.Enabled ? SupportCatalog.CrewDescription(crew.Definition.Kind)+" 每回合一次，每人每场一次。" : crew.DisabledReason;
                 tools.Add(button);
             }
-            root.Add(tools);
+            tools.Add(BattleSupplyPanel.Build(view,command=>Send(command),playing)); root.Add(tools);
 
             if (journalOpen)
             {
@@ -352,7 +352,7 @@ namespace UnsoundedSea.Runtime
                     var item = Element("evidence");
                     var line = Element("evidence-head");
                     line.Add(LevelTag(evidence.Level));
-                    line.Add(Text("来源：" + evidence.Source, "evidence-source"));
+                    line.Add(Text(BattleSupplyPanel.EvidenceLabel(evidence,view.Turn), "evidence-source"));
                     item.Add(line);
                     item.Add(Text(evidence.Text, "evidence-text"));
                     entries.Add(item);

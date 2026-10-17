@@ -22,6 +22,7 @@ namespace UnsoundedSea.Core
         private void ApplyThreat(DamageChannel channel, int amount, string source, string description = null)
         {
             if (health == 0 || sanity == 0) return;
+            if(channel==DamageChannel.Sanity&&amount>0&&TriggerEquipment("i20",1))amount=Math.Max(0,amount-3);
             if (channel == DamageChannel.Health) amount = ConsumeHealthReduction(amount);
             var protection = channel == DamageChannel.Health ? block : ward;
             var absorbed = Math.Min(protection, amount); var damage = amount - absorbed;
@@ -32,6 +33,11 @@ namespace UnsoundedSea.Core
 
         private sealed class BossEncounterState
         {
+            public int BoundCount => completed.Count(x=>x.EndsWith(":bound",StringComparison.Ordinal));
+            public int EvacuationProgress => kind==BossEncounterKind.Watcher&&stage==3?progress:0;
+            public int SafeOpenedCount => kind==BossEncounterKind.Surveyor?completed.Count(x=>!B03Initial.Contains(x)&&!B03Mines.Contains(x)):0;
+            public IEnumerable<EncounterTargetView> ConnectionTargets() => GuardAnchorOptions().Where(x=>!s.knowledge.Entries.Any(e=>e.Key=="scene/connection/"+SceneId(x.Id)));
+            public bool RevealNextConstraint() { if(kind!=BossEncounterKind.Choirmaster||stage!=1||known>=2)return false;known++;s.Record(Constraint(known-1));if(known>=2)RemoveCard("E02-01");return true; }
             private static readonly string[][] Orders =
             {
                 new[] { "choir-a", "choir-b", "choir-c" }, new[] { "choir-a", "choir-c", "choir-b" },
@@ -141,7 +147,7 @@ namespace UnsoundedSea.Core
                 var cost = Math.Max(0, card.Definition.Cost - s.sceneDiscount);
                 if (s.actions < cost) return new CommandResult(false, "行动点不足。");
                 var error = Validate(card.Definition.Id, target); if (error != null) return new CommandResult(false, error);
-                s.actions -= cost; s.sceneDiscount = 0; s.Record($"使用 {card.Definition.Name}；支付 {cost} 行动。");
+                s.actions -= cost; s.currentPaidActions=cost;s.sceneDiscount = 0; s.Record($"使用 {card.Definition.Name}；支付 {cost} 行动。");
                 Apply(card.Definition.Id, target); s.MarkSceneAction(); RefreshCards(); return new CommandResult(true);
             }
 
@@ -433,7 +439,7 @@ namespace UnsoundedSea.Core
                     Apply("E04-01", id); s.MarkSceneAction(); return true;
                 }
                 if (card == 65) { if (kind != BossEncounterKind.FlagBearer || stage != 2 || progress != 1 || s.health <= 4) return false; s.PayHealth(4); progress++; s.MarkSceneAction(); return true; }
-                if (card == 66) { if (!VerifyGuardAnchor(selection)) return false; completed.Add(SceneId(selection).Split('|')[0] + ":bound"); s.AddBlock(4); return true; }
+                if (card == 66) { if (!VerifyGuardAnchor(selection)) return false; completed.Add(SceneId(selection).Split('|')[0] + ":bound"); s.AddBlock(4); s.MarkSceneAction();return true; }
                 if (card == 67) return OpenProvenSafe(selection, false);
                 if (card == 68) { if (kind != BossEncounterKind.Choirmaster || stage != 1 || known < 2 || primaryUsed || id != order[progress]) return false; Apply("E02-02", id); s.AddBlock(6); s.MarkSceneAction(); return true; }
                 if (card == 69) { if (kind != BossEncounterKind.Watcher || stage != 3 || progress >= 2) return false; if (++progress >= 2) victory = true; s.MarkSceneAction(); return true; }
@@ -442,7 +448,7 @@ namespace UnsoundedSea.Core
                 if (card == 56 && kind == BossEncounterKind.Choirmaster && stage == 1 && known >= 2 && !primaryUsed && id == order[progress]) { Apply("E02-02", id); s.MarkSceneAction(); return true; }
                 return false;
             }
-            public bool InspectConnection(string selection) { var id = SceneId(selection); if (kind != BossEncounterKind.Watcher || string.IsNullOrEmpty(id)) return false; s.knowledge.Record(new Evidence("scene/connection/" + id, "该物件存在可调查连接", "查验潮痕", KnowledgeLevel.Observed)); return true; }
+            public bool InspectConnection(string selection) { var id=SceneId(selection);if(kind!=BossEncounterKind.Watcher||!GuardAnchorOptions().Any(x=>SceneId(x.Id)==id))return false;var subject=id.Split('|')[0];s.knowledge.Record(new Evidence("scene/connection/"+id,"该物件存在可调查连接","查验潮痕",KnowledgeLevel.Observed,EvidenceScope.Encounter,subject,SubjectType(subject),"Connection",s.definition.Id,s.turn));return true; }
             public bool MeasureCell(string selection) { var id = SceneId(selection); if (kind != BossEncounterKind.Surveyor || !targets.Any(x => x.Id == id) || completed.Contains(id) || read.Contains(id)) return false; read.Add(id); s.Record($"{id} 相邻危险数：{AdjacentMines(id)}。"); return true; }
             private IEnumerable<string> ProvenSafeCells()
             {
@@ -467,8 +473,16 @@ namespace UnsoundedSea.Core
                 var id = SceneId(selection); if (kind != BossEncounterKind.Surveyor || !ProvenSafeCells().Contains(id) || countsQuota && opensThisTurn >= 2) return false;
                 if (countsQuota) opensThisTurn++; completed.Add(id); if (B03Goals.Contains(id)) progress++; if (progress == 4) victory = true; s.MarkSceneAction(); return true;
             }
-            public bool VerifySummonSource(string id) { var e = s.Find(id); if (e == null || e.Health == 0 || s.enemies.IndexOf(e) == 0) return false; var key = id + ":source"; var fresh = completed.Add(key); s.knowledge.Record(new Evidence(id + "/source", "召唤来源已验证", "追踪召唤", KnowledgeLevel.Verified)); return fresh; }
-            public bool VerifyGuardAnchor(string selection) { var id = SceneId(selection); if (kind != BossEncounterKind.Watcher || string.IsNullOrEmpty(id)) return false; var p = id.Split('|'); if (p.Length != 2 || BaseId(p[0]).Replace("b05-guard-", "anchor-") != p[1]) return false; s.knowledge.Record(new Evidence(p[0] + "/anchor", "守卫与航标对应已验证", "核验印记", KnowledgeLevel.Verified)); return true; }
+            public bool VerifySummonSource(string id) { var e=s.Find(id);if(e==null||e.Health==0||s.enemies.IndexOf(e)==0)return false;var fresh=completed.Add(id+":source");s.knowledge.Record(new Evidence(id+"/source","召唤来源已验证","追踪召唤",KnowledgeLevel.Verified,EvidenceScope.Encounter,id,SubjectType(id),"Source",s.definition.Id,s.turn,"source-v1",e.ActualIntent?.SoundSource??e.Definition.Name));return fresh; }
+            public bool VerifyGuardAnchor(string selection)
+            {
+                var id=SceneId(selection);if(kind!=BossEncounterKind.Watcher||string.IsNullOrEmpty(id))return false;
+                var p=id.Split('|');if(p.Length!=2||!s.IsLiving(p[0])||BaseId(p[0]).Replace("b05-guard-","anchor-")!=p[1])return false;
+                var keys=new[]{p[0]+"/imprint",p[0]+"/rubbing"};
+                s.knowledge.Record(new Evidence(keys[0],"已公开的守卫铭牌","核验印记",KnowledgeLevel.Observed,EvidenceScope.Encounter,p[0],SubjectType(p[0]),"GuardImprint",s.definition.Id,s.turn,fact:p[1]));
+                s.knowledge.Record(new Evidence(keys[1],"航标拓片与铭牌相符","核验印记",KnowledgeLevel.Observed,EvidenceScope.Encounter,p[0],SubjectType(p[0]),"AnchorRubbing",s.definition.Id,s.turn,fact:p[1]));
+                s.knowledge.Record(new Evidence(p[0]+"/anchor","守卫与航标对应已验证","核验印记",KnowledgeLevel.Verified,EvidenceScope.Encounter,p[0],SubjectType(p[0]),"Anchor",s.definition.Id,s.turn,"anchor-v1",p[1],keys));return true;
+            }
             public bool IsVerifiedSource(string id) => completed.Contains(id + ":source") || completed.Contains(id + ":bound") || s.knowledge.Entries.Any(e => e.Key == id + "/anchor" && e.Level == KnowledgeLevel.Verified);
             public bool IsBoundGuard(string id) => completed.Contains(id + ":bound");
             public bool IsExposed(string id) => (kind == BossEncounterKind.Choirmaster && stage == 2 || kind == BossEncounterKind.FlagBearer && stage == 3) && id == s.enemies[0].Definition.Id;

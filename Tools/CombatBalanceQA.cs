@@ -19,7 +19,9 @@ public static class CombatBalanceQA
         ["defend"] = new[] { 1,12,16,19,20,23,24,26,31,32,55,71 },
         ["source"] = new[] { 1,4,8,9,13,19,20,34,38,46,55,66 },
         ["retain"] = new[] { 2,3,14,16,17,19,20,28,45,51,54,55 },
-        ["confirm-without-answers"] = new[] { 1,2,14,16,19,20,21,22,35,45,50,55 }
+        ["confirm-without-answers"] = new[] { 1,2,14,16,19,20,21,22,35,45,50,55 },
+        ["cross-examine"] = new[] { 1,2,16,19,20,21,39,41,42,50,92,55 },
+        ["cross-examine-without-answers"] = new[] { 1,2,16,19,20,21,22,35,45,50,92,55 }
     };
     private sealed class Row
     {
@@ -32,6 +34,8 @@ public static class CombatBalanceQA
     {
         public readonly Dictionary<string, HashSet<int>> Hit = new Dictionary<string, HashSet<int>>();
         public readonly HashSet<string> Answer = new HashSet<string>();
+        public readonly Dictionary<string,HashSet<int>> Questions = new Dictionary<string,HashSet<int>>();
+        public int QuestionCount(string id) => id!=null&&Questions.TryGetValue(id,out var questions)?questions.Count:0;
         public readonly HashSet<int> Carried = new HashSet<int>();
         public readonly HashSet<int> Retain = new HashSet<int>();
         public int Combos;
@@ -39,10 +43,12 @@ public static class CombatBalanceQA
         public readonly HashSet<string> Bound = new HashSet<string>();
         public bool OtherHit(string target, int instance) => target != null && Hit.TryGetValue(target, out var instances) && instances.Any(id => id != instance);
         public void RecordHit(string target, int instance) { if (!Hit.TryGetValue(target, out var instances)) Hit.Add(target, instances = new HashSet<int>()); instances.Add(instance); }
-        public void End() { Hit.Clear(); Answer.Clear(); Carried.Clear(); foreach (var id in Retain) Carried.Add(id); Retain.Clear(); BoundThisTurn = ObservationUsed = false; }
+        public void End() { Hit.Clear(); Answer.Clear(); Questions.Clear(); Carried.Clear(); foreach (var id in Retain) Carried.Add(id); Retain.Clear(); BoundThisTurn = ObservationUsed = false; }
     }
 
-    public static string Main()
+    public static string Main() => Run(Decks);
+    public static string NewInvestigation() => Run(Decks.Where(x=>x.Key.StartsWith("cross-examine")));
+    private static string Run(IEnumerable<KeyValuePair<string,int[]>> decks)
     {
         var rows = new List<Row>();
         Directory.CreateDirectory("Logs/CombatBalance");
@@ -51,7 +57,7 @@ public static class CombatBalanceQA
         {
             var id = $"voyage-{region}-{variant}";
             var source = AssetDatabase.LoadAssetAtPath<EncounterDefinition>($"Assets/UnsoundedSea/Content/Encounters/Voyage/{id}.asset").Build();
-            foreach (var deck in Decks)
+            foreach (var deck in decks)
             {
                 var definition = new BattleDefinition(id, deck.Value.Select(n => CardCatalog.All[n - 1]), source.Enemies, Array.Empty<ToolSpec>());
                 var turns = new List<int>(); var hp = new List<int>(); var sanity = new List<int>(); var combos = 0;
@@ -187,11 +193,16 @@ public static class CombatBalanceQA
             if (options.Count == 0 || options[0].Score <= 0) break;
             var pick = options[0]; var number = Number(pick.Card);
             Must(s.Execute(BattleCommand.Play(pick.Card.InstanceId, pick.Target)));
-            var after = s.View; var target = pick.Target?.Replace("enemy:", "");
-            if (number == 50 && policy.Answer.Contains(target)) policy.ObservationUsed = true;
+            var after = s.View; var target = pick.Target?.StartsWith("enemy:")==true?pick.Target.Substring(6):pick.Target;
+            if (new[]{39,41,50}.Contains(number)&&after.Actions>v.Actions-pick.Card.Definition.Cost)policy.ObservationUsed=true;
             var enemy = v.Enemies.FirstOrDefault(e => e.Id == target);
             if (number == 2 && enemy?.IntentConfirmed == true && policy.Answer.Contains(target) || number == 12 && v.Block >= 6 || number == 14 && enemy?.IntentConfirmed == true && policy.Carried.Contains(pick.Card.InstanceId) || number == 16 && policy.OtherHit(target, pick.Card.InstanceId)) policy.Combos++;
-            if (number <= 18) foreach (var e in v.Enemies) if (after.Enemies.First(x => x.Id == e.Id).Health < e.Health) policy.RecordHit(e.Id, pick.Card.InstanceId);
+            if (number <= 18 || number == 92) foreach (var e in v.Enemies) if (after.Enemies.First(x => x.Id == e.Id).Health < e.Health) policy.RecordHit(e.Id, pick.Card.InstanceId);
+            if (new[]{39,41,42}.Contains(number)&&target!=null&&after.Evidence.Count>v.Evidence.Count)
+            {
+                if(!policy.Questions.TryGetValue(target,out var questions))policy.Questions[target]=questions=new HashSet<int>();questions.Add(number);
+            }
+            if(number==92&&policy.QuestionCount(target)>=2)policy.Combos++;
             if ((number == 39 && enemy != null && !enemy.IntentConfirmed && after.Enemies.First(e => e.Id == target).IntentConfirmed) || number == 41 && after.Evidence.Count > v.Evidence.Count) policy.Answer.Add(target);
             if (new[] { 28,45,51,71 }.Contains(number) && pick.Target != null) foreach (var id in pick.Target.Substring(5).Split(',')) policy.Retain.Add(int.Parse(id));
             policy.Carried.Remove(pick.Card.InstanceId); policy.Retain.Remove(pick.Card.InstanceId);
@@ -234,11 +245,19 @@ public static class CombatBalanceQA
             case 37: value = 4; break; case 38: value = target == null ? 2 : v.Actions >= 2 ? 6 : 1; break;
             case 39: value = e != null && !e.IntentConfirmed ? 3 + (Has(v, 2) ? 4 : 0) + (Has(v,50) && !p.ObservationUsed && v.Actions >= 2 ? 12 : 0) : 2; break;
             case 41: value = 3 + (e != null && !p.Answer.Contains(e.Id) && e.IntentConfirmed ? (Has(v, 2) ? 3 : 0) + (Has(v,50) && !p.ObservationUsed && v.Actions >= 2 ? 12 : 0) : 0); break;
+            case 42: value = target==null?2:3; break;
+            case 92: value = e==null?0:hit(e,p.QuestionCount(e.Id)>=2?18:4); break;
             case 45: case 51: case 71: value = target != null && target.Substring(5).Split(',').Select(int.Parse).Any(id => v.Hand.Any(c => c.InstanceId == id && Number(c) == 14) && !p.Carried.Contains(id)) ? 7 : 1; break;
             case 46: value = 2; break; case 50: value = e?.IntentConfirmed == true ? 5 + (p.Answer.Contains(e.Id) ? ward(3) + (!p.ObservationUsed ? 20 : 0) : 0) : 2; break;
             case 54: value = v.Actions > 1 ? 4 : 1; break;
             case 55: value = e == null ? 0 : hit(e,4) + (e.IntentConfirmed && e.Intent.Contains("可打断") ? Threat(e,false)+Threat(e,true)*1.6 : 0); break;
             case 66: value = block(5); break;
+        }
+        // The extra payoff is scored only from observed answers and cards in hand.
+        if(Has(v,92)&&e!=null&&new[]{39,41,42}.Contains(n)&&p.QuestionCount(e.Id)<2)
+        {
+            bool fresh=n==39?!e.IntentConfirmed:n==41?!v.Evidence.Any(x=>x.SubjectId==e.Id&&x.Question=="SoundSource"&&x.Turn==v.Turn):!v.Evidence.Any(x=>x.SubjectId==e.Id&&x.Question=="Connection");
+            if(fresh&&v.Actions>=2)value+=p.QuestionCount(e.Id)==1?22:12;
         }
         if (new[] {19,21,24,28,31,34,66}.Contains(n) && v.Block < 6 && Has(v,12) && v.Actions > 1) value += 2;
         return value / Math.Max(1, card.Definition.Cost);

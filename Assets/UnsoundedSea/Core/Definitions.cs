@@ -6,11 +6,11 @@ namespace UnsoundedSea.Core
 {
     public enum BattlePhase { TurnStart, IntentLocked, PlayerTurn, Resolve, TurnEnd, Victory, Defeat }
     public enum DamageChannel { Health, Sanity }
-    public enum InvestigationKind { VisibleAction, SoundSource, DamageChannel }
+    public enum InvestigationKind { VisibleAction, SoundSource, DamageChannel, Grid, Anchor, Relay, Connection }
     public enum KnowledgeLevel { Unknown, Rumored, Observed, Verified }
     public enum ObjectiveKind { Defeat, Seal, Survive }
-    public enum CommandKind { PlayCard, UseTool, UseCrewSupport, ReorderDeck, AdvanceObjective, EndTurn }
-    public enum CrewSupportKind { Medic, Listener }
+    public enum CommandKind { PlayCard, UseTool, UseCrewSupport, ReorderDeck, AdvanceObjective, EndTurn, UseConsumable }
+    public enum CrewSupportKind { Medic, Listener, Engineer, Archivist, Navigator, Gunsmith, Diver, Cook, Cartographer, Decoder }
 
     internal static class Require
     {
@@ -103,8 +103,9 @@ namespace UnsoundedSea.Core
         public string Id { get; }
         public string Name { get; }
         public CrewSupportKind Kind { get; }
-        public CrewSupportSpec(string id, string name, CrewSupportKind kind)
-        { Id = Require.Id(id); Name = Require.Id(name); Kind = Require.Defined(kind); }
+        public bool Injured { get; }
+        public CrewSupportSpec(string id, string name, CrewSupportKind kind, bool injured = false)
+        { Id = Require.Id(id); Name = Require.Id(name); Kind = Require.Defined(kind); Injured = injured; }
     }
 
     public sealed class BattleDefinition
@@ -123,15 +124,18 @@ namespace UnsoundedSea.Core
         public IReadOnlyList<ToolSpec> Tools { get; }
         public IReadOnlyList<CrewSupportSpec> Supports { get; }
         public IReadOnlyList<Evidence> Archive { get; }
+        public BattleLoadout Loadout { get; }
         public BattleDefinition(string id, IEnumerable<CardSpec> deck, IEnumerable<EnemySpec> enemies,
             IEnumerable<ToolSpec> tools, ObjectiveKind objective = ObjectiveKind.Defeat, int objectiveTarget = 4,
             int health = 60, int sanity = 30, int actions = 3, int drawCount = 5,
             IEnumerable<CrewSupportSpec> supports = null, IEnumerable<Evidence> archive = null,
-            int? initialHealth = null, int? initialSanity = null)
+            int? initialHealth = null, int? initialSanity = null, BattleLoadout loadout = null)
         {
             Id = Require.Id(id); Deck = Require.Copy(deck); Enemies = Require.Copy(enemies); Tools = Require.Copy(tools);
             Supports = Require.Copy(supports ?? Array.Empty<CrewSupportSpec>());
             Archive = Require.Copy(archive ?? Array.Empty<Evidence>());
+            Loadout = loadout ?? new BattleLoadout();
+            if (Tools.Count + Loadout.Consumables.Count(x=>x=="i09") > 2) throw new ArgumentException("Powder also occupies a tool slot.");
             Health = Require.Positive(health); Sanity = Require.Positive(sanity); Actions = Require.Positive(actions);
             InitialHealth = Require.Positive(initialHealth ?? Health);
             InitialSanity = Require.Positive(initialSanity ?? Sanity);
@@ -144,7 +148,7 @@ namespace UnsoundedSea.Core
                 throw new ArgumentException("Equip at most two unique tools.");
             if (Enemies.Select(x => x.Id).Distinct().Count() != Enemies.Count)
                 throw new ArgumentException("Enemy instance IDs must be unique.");
-            if (Supports.Select(x => x.Id).Distinct().Count() != Supports.Count)
+            if (Supports.Count > 4 || Supports.Select(x => x.Id).Distinct().Count() != Supports.Count)
                 throw new ArgumentException("Crew support IDs must be unique.");
         }
     }
