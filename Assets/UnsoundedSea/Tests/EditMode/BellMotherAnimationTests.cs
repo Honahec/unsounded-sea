@@ -47,11 +47,15 @@ namespace UnsoundedSea.Tests
                 var bodyBefore = motion.body.localRotation;
                 var bodyHeightBefore = motion.body.localPosition.y;
                 var tentacleBefore = motion.tentacles[0].localRotation;
+                var tentacleHeightBefore = motion.tentacles[0].localPosition.y;
                 motion.PlayAttack();
-                motion.Tick(0.30f);
+                motion.Tick(0.20f);
+                Assert.That(motion.tentacles[0].localPosition.y, Is.GreaterThan(tentacleHeightBefore + 0.10f));
+                motion.Tick(0.20f);
                 Assert.That(Quaternion.Angle(bodyBefore, motion.body.localRotation), Is.GreaterThan(1));
                 Assert.That(Quaternion.Angle(tentacleBefore, motion.tentacles[0].localRotation), Is.GreaterThan(1));
                 Assert.That(motion.body.localPosition.y, Is.LessThanOrEqualTo(bodyHeightBefore));
+                Assert.That(motion.tentacles[0].localPosition.y, Is.LessThan(tentacleHeightBefore));
                 Assert.That(motion.ActionImpact, Is.GreaterThan(0));
                 Assert.That(instance.GetComponentsInChildren<SkinnedMeshRenderer>(true), Is.Empty);
             }

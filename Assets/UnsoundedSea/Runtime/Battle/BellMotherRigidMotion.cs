@@ -120,10 +120,10 @@ namespace UnsoundedSea.Runtime
 
         private void UpdateAttack()
         {
-            // The attack is a low, lateral water strike.  Keep the shell's centre
-            // of mass below its rest pose and let the separated tentacle parts do
-            // the readable work; a positive lift makes this huge creature look
-            // like it is jumping out of the sea.
+            // The attack is a clear raise-and-slap: the tentacles lift first,
+            // then swing down through the water while the shell stays heavy and
+            // low. A positive body lift makes this huge creature look like it is
+            // jumping out of the sea, so the shell never leaves its waterline.
             const float telegraph = 0.24f;
             const float strike = 0.20f;
             const float recover = 0.42f;
@@ -133,7 +133,7 @@ namespace UnsoundedSea.Runtime
                 var u = Smooth(t / telegraph);
                 ApplyAttackPose(Mathf.Lerp(0, -3.2f, u), Mathf.Lerp(0, -1.2f, u), Mathf.Lerp(0, -1.4f, u),
                     Mathf.Lerp(0, -5f, u), Mathf.Lerp(0, -2.5f, u), Mathf.Lerp(0, -2f, u),
-                    Mathf.Lerp(0, -0.045f, u), Mathf.Lerp(0, 4f, u));
+                    Mathf.Lerp(0, -0.045f, u), Mathf.Lerp(0, 4f, u), Mathf.Lerp(0, 28f, u), Mathf.Lerp(0, 0.36f, u));
                 return;
             }
             if (t < telegraph + strike)
@@ -146,7 +146,7 @@ namespace UnsoundedSea.Runtime
                 ActionImpact = Mathf.Max(ActionImpact, snap);
                 ApplyAttackPose(Mathf.Lerp(-3.2f, 2.8f, u), Mathf.Lerp(-1.2f, 1.5f, u), Mathf.Lerp(-1.4f, 2.2f, u),
                     Mathf.Lerp(-5f, 8f, u), Mathf.Lerp(-2.5f, 4f, u), Mathf.Lerp(-2f, 5f, u),
-                    Mathf.Lerp(-0.045f, -0.16f, u), Mathf.Lerp(4f, -24f, u));
+                    Mathf.Lerp(-0.045f, -0.16f, u), Mathf.Lerp(4f, -24f, u), Mathf.Lerp(28f, -32f, u), Mathf.Lerp(0.36f, -0.14f, u));
                 return;
             }
             if (t < telegraph + strike + recover)
@@ -154,7 +154,7 @@ namespace UnsoundedSea.Runtime
                 var u = Smooth((t - telegraph - strike) / recover);
                 ApplyAttackPose(Mathf.Lerp(2.8f, 0, u), Mathf.Lerp(1.5f, 0, u), Mathf.Lerp(2.2f, 0, u),
                     Mathf.Lerp(8f, 0, u), Mathf.Lerp(4f, 0, u), Mathf.Lerp(5f, 0, u),
-                    Mathf.Lerp(-0.16f, 0, u), Mathf.Lerp(-24f, 0, u));
+                    Mathf.Lerp(-0.16f, 0, u), Mathf.Lerp(-24f, 0, u), Mathf.Lerp(-32f, 0, u), Mathf.Lerp(-0.14f, 0, u));
                 return;
             }
             ResetIdle();
@@ -208,7 +208,7 @@ namespace UnsoundedSea.Runtime
         }
 
         private void ApplyAttackPose(float bodyPitch, float bodyYaw, float bodyRoll,
-            float crownPitch, float crownYaw, float crownRoll, float bodyLift, float slap)
+            float crownPitch, float crownYaw, float crownRoll, float bodyLift, float slap, float tentacleRaise, float tentacleLift)
         {
             if (tentacles == null) return;
             if (tentaclePositions == null || tentaclePositions.Length != tentacles.Length) CaptureRestPose();
@@ -232,8 +232,9 @@ namespace UnsoundedSea.Runtime
                 // slap across the surface instead of a synchronized jump.
                 var fan = slap * (0.72f + (i % 3) * 0.10f);
                 var angle = bodyRoll * 0.16f + wave * 0.35f + fan * side;
-                var pitch = bodyPitch * 0.18f + wave * 0.8f + slap * (0.35f + (i % 2) * 0.12f);
-                tentacles[i].localPosition = tentaclePositions[i] + Vector3.up * (bodyLift * 0.20f);
+                var pitch = tentacleRaise + bodyPitch * 0.18f + wave * 0.8f + slap * (0.35f + (i % 2) * 0.12f);
+                var lift = tentacleLift * (0.82f + (i % 3) * 0.08f);
+                tentacles[i].localPosition = tentaclePositions[i] + Vector3.up * (bodyLift * 0.20f + lift);
                 tentacles[i].localRotation = tentacleRotations[i] * Quaternion.Euler(pitch, bodyYaw * 0.12f, angle);
             }
         }
