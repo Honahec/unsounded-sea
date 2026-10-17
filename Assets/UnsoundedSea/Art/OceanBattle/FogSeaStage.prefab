@@ -58,6 +58,7 @@ MonoBehaviour:
   actorAnchors:
   - {fileID: 8832207708348601725}
   - {fileID: 124975955645170575}
+  singleActorAnchor: {fileID: 124975955645170575}
   selectionMaterial: {fileID: 2100000, guid: 40be4d4ee9c654d378f6d07054be2b00, type: 2}
   ocean: {fileID: 1386595732245795998}
   water: {fileID: 4321490684095721147}
