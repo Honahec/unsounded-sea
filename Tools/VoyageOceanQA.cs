@@ -38,6 +38,70 @@ public static class VoyageOceanQA
         Click("route-"+session.Choices[choice].Id);
         return new{session.Seed,selected=session.Selected.Id,heading=session.HeadingTo(session.Selected),reduced=GameSettings.ReducedMotion};
     }
+    public static async Task<object> NavigationLayout(int choiceCount = 2)
+    {
+        // Find a real known-route state, including one- and three-exit stops.
+        VoyageSession fixture = null;
+        for (uint seed = 0; seed < 128 && fixture == null; seed++)
+        {
+            var candidate = VoyageSession.Create(seed);
+            for (int leg = 0; leg < 5; leg++)
+            {
+                candidate.RevealRoutes();
+                if (candidate.Choices.Count == choiceCount) { fixture = candidate; break; }
+                candidate.Select(candidate.Choices.Last().Id); candidate.SetSail(); candidate.Arrive();
+                if (candidate.Current.Kind == RunNodeKind.Battle || candidate.Current.Kind == RunNodeKind.Boss)
+                { candidate.BeginEncounter(); candidate.ResolveEncounter(true); }
+                else candidate.Continue();
+            }
+        }
+        Check(fixture != null, "No fixture with requested exits");
+        var hud = Hud; hud.enabled = false;
+        foreach (var name in new[] { "paused", "settingsOpen", "journalOpen", "chartOpen" })
+            typeof(VoyageHud).GetField(name, Private).SetValue(hud, false);
+        typeof(VoyageHud).GetField("notice", Private).SetValue(hud, null);
+        typeof(VoyageRuntime).GetProperty("Session").SetValue(null, fixture);
+        hud.enabled = true;
+        Check(Root.Q<Button>("set-sail") == null, "Unselected route offers sail");
+        Check(Root.Q<Button>("scout-ahead") == null, "Tools still clutter closed sea view");
+        await Task.Delay(200);
+        var choices = Root.Query<Button>(className: "route-choice").ToList();
+        Check(choices.Count == choiceCount, "Visible route count differs from known choices");
+        var before = choices.Select(b => b.worldBound).ToArray();
+        for (int i = 0; i < choices.Count; i++)
+        {
+            var id = fixture.Choices[i].Id;
+            Root.Q<Button>("route-" + id).Focus(); Click("route-" + id); await Task.Delay(100);
+            Check(fixture.Selected.Id == id && fixture.Phase == VoyagePhase.ChoosingRoute, "Selection departed automatically");
+            var button = Root.Q<Button>("route-" + id);
+            Check(button.ClassListContains("selected"), "Selection has no visible state");
+            Check(Mathf.Abs(before[i].y - button.worldBound.y) < 1, "Route selection shifts hit areas");
+            foreach (var item in Root.Query<Button>().ToList())
+            {
+                var r = item.worldBound;
+                Check(r.xMin >= 0 && r.yMin >= 0 && r.xMax <= Root.worldBound.xMax + 1 && r.yMax <= Root.worldBound.yMax + 1,
+                    "Button outside viewport: " + item.name);
+                Check(r.height >= 32, "Button target too small: " + item.name);
+            }
+        }
+        ScreenCapture.CaptureScreenshot(Path.GetFullPath("Logs/VoyageUi/routes-" + choiceCount + "-" + Screen.width + "x" + Screen.height + ".png"));
+        await Task.Delay(100);
+        Click("voyage-chart-toggle"); await Task.Delay(150);
+        Check(Root.Q<Button>("scout-ahead") != null && Root.Q<Button>("reveal-routes") != null, "Chart tools missing");
+        Check(Root.Query<Button>(className: "chart-node").ToList().Count == fixture.KnownStops.Count, "Chart reveals unknown stops");
+        var map = Root.Q(className: "voyage-map-panel").worldBound;
+        Check(!map.Overlaps(Root.Q(className: "voyage-navigation").worldBound), "Chart overlaps destination action");
+        Check(!map.Overlaps(Root.Q(className: "navigation-tools").worldBound), "Chart overlaps tools");
+        if (fixture.CanScoutAhead)
+        {
+            int uses = fixture.LookoutUses; Click("scout-ahead"); await Task.Delay(100);
+            Check(fixture.LookoutUses == uses - 1, "Lookout did not spend exactly once");
+            Check(!Root.Q<Button>("scout-ahead").enabledInHierarchy, "Repeated scouting enabled");
+        }
+        ScreenCapture.CaptureScreenshot(Path.GetFullPath("Logs/VoyageUi/chart-" + Screen.width + "x" + Screen.height + ".png"));
+        await Task.Delay(100); Click("voyage-chart-toggle");
+        return new { choiceCount, screen = Screen.width + "x" + Screen.height, selectionOnly = true, stableTargets = true, toolsInChart = true };
+    }
     public static string Start() { Click("set-sail");return "Sailing"; }
     public static async Task<object> Passage(int choice=0)
     {
@@ -156,6 +220,7 @@ public static class VoyageOceanQA
         Check(UnityEngine.Object.FindObjectsByType<BattleWater>().Length==0,"Voyage water leaked across scene");
         Check(UnityEngine.Object.FindObjectsByType<PlanarReflectionManager>().Length==0,"Reflection manager leaked");
         Check(UnityEngine.Object.FindObjectsByType<PlanarReflectionVolume>().Length==0,"Reflection volume leaked");
+        Check(UnityEngine.Object.FindObjectsByType<VoyageSceneView>().Length==0,"Voyage destination leaked across scene");
         Check(!Resources.FindObjectsOfTypeAll<Mesh>().Any(m=>m.name=="Voyage wake (runtime)"),"Wake mesh leaked");
     }
     public static async Task<object> Lifecycle()

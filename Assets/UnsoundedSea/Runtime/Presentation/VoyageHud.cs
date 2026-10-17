@@ -47,7 +47,7 @@ namespace UnsoundedSea.Runtime
                 var current = Session.Current;
                 var previous = Session.Visited.Count > 1
                     ? System.Linq.Enumerable.FirstOrDefault(Session.KnownStops, x => x.Id == Session.Visited[Session.Visited.Count - 2]) : null;
-                sailingPresentation.SetLocation(new Vector2(current.X, current.Y), previous == null ? Vector2.up : new Vector2(current.X - previous.X, current.Y - previous.Y));
+                sailingPresentation.SetLocation(new Vector2(current.X, current.Y), previous == null ? Vector2.up : new Vector2(current.X - previous.X, current.Y - previous.Y), current.Name);
                 Refresh();
             }
             catch (Exception exception) { loadError = exception.Message; Refresh(); Debug.LogException(exception); }
@@ -140,38 +140,21 @@ namespace UnsoundedSea.Runtime
                 root.Add(error); return;
             }
             var session = Session;
-            var selected = session.Selected;
             var header = Element("voyage-header");
             var utilities = Element("voyage-utilities");
-            utilities.Add(Action("voyage-chart-toggle", chartOpen ? "收起海图  M" : "海图  M", "secondary", () => { chartOpen = !chartOpen; Refresh(); }, session.Phase != VoyagePhase.Sailing));
-            utilities.Add(Action("voyage-journal", "日志  J", "secondary", () => { journalOpen = true; Refresh(); }));
-            utilities.Add(Action("voyage-menu", "菜单  Esc", "secondary", () => { paused = true; Refresh(); }));
+            utilities.Add(Action("voyage-chart-toggle", chartOpen ? "收起海图" : "海图", "secondary", () => { chartOpen = !chartOpen; Refresh(); }, session.Phase != VoyagePhase.Sailing));
+            utilities.Add(Action("voyage-journal", "日志", "secondary", () => { journalOpen = true; Refresh(); }));
+            utilities.Add(Action("voyage-menu", "菜单", "secondary", () => { paused = true; Refresh(); }));
+            utilities.Q<Button>("voyage-chart-toggle").tooltip = "海图 / M";
+            utilities.Q<Button>("voyage-journal").tooltip = "航海日志 / J";
+            utilities.Q<Button>("voyage-menu").tooltip = "暂停 / Esc";
             header.Add(utilities); root.Add(header);
 
             var workspace = Element("voyage-workspace");
             var location = Element("current-location");
-            location.Add(Text("当前位置", "section-label"));
             location.Add(Text(session.Current.Name, "location-name"));
-            location.Add(Text($"{session.ElapsedHours} 小时  ·  {session.LegsSailed} 段", "fact"));
+            if (chartOpen) location.Add(Text($"{session.ElapsedHours} 小时  ·  {session.LegsSailed} 段", "fact"));
             workspace.Add(location);
-
-            var tools = Element("navigation-tools");
-            var chartTool = Action("reveal-routes", $"旧海图  ×{session.ChartUses}", "navigation-tool", () =>
-            {
-                chartOpen = true; Change(Session.RevealRoutes, "旧海图已补记此处岔路。");
-            }, session.CanRevealRoutes && string.IsNullOrEmpty(saveError));
-            chartTool.tooltip = "揭开当前位置未测出口；没有新发现时不消耗次数。";
-            chartTool.text = string.Empty;
-            var chartArt = new SeaUiArt("scroll"); chartArt.AddToClassList("tool-art"); chartTool.Add(chartArt);
-            chartTool.Add(Text($"旧海图  ×{session.ChartUses}", "tool-label")); tools.Add(chartTool);
-            var lookoutTool = Action("scout-ahead", string.Empty, "navigation-tool", () =>
-            {
-                chartOpen = true; Change(Session.ScoutAhead, "远望记录已加入海图。");
-            }, session.CanScoutAhead && string.IsNullOrEmpty(saveError));
-            lookoutTool.tooltip = "需先选择航向；窥探所选航向下一段，没有新发现时不消耗次数。";
-            var lookoutArt = new SeaUiArt("ear"); lookoutArt.AddToClassList("tool-art"); lookoutTool.Add(lookoutArt);
-            lookoutTool.Add(Text($"远望  ×{session.LookoutUses}", "tool-label")); tools.Add(lookoutTool);
-            workspace.Add(tools);
 
             VoyageChart chart = null;
             if (chartOpen)
@@ -179,33 +162,35 @@ namespace UnsoundedSea.Runtime
                 var map = new VoyageMapPanel(session, id => Change(() => Session.Select(id)), string.IsNullOrEmpty(saveError));
                 chart = map.Chart;
                 workspace.Add(map);
+                BuildNavigationTools(workspace, session);
             }
-            else
+
+            var navigation = Element("voyage-navigation");
+            navigation.EnableInClassList("choosing-route", session.Phase == VoyagePhase.ChoosingRoute);
+            if (!chartOpen && session.Phase == VoyagePhase.ChoosingRoute)
             {
-                var sea = Element("sea-window"); workspace.Add(sea);
-                if (session.Phase == VoyagePhase.ChoosingRoute)
+                var routes = Element("route-list");
+                foreach (var stop in session.Choices)
                 {
-                    var helm = Element("navigation-helm");
-                    var compass = new SeaUiArt("compass"); compass.AddToClassList("helm-compass"); helm.Add(compass);
-                    var index = 0;
-                    foreach (var stop in session.Choices)
-                    {
-                        var destination = stop; var slot = Mathf.Min(index++, 2);
-                        var choice = Action("route-" + stop.Id, string.Empty, "route-choice",
-                            () => Change(() => Session.Select(destination.Id)), string.IsNullOrEmpty(saveError));
-                        choice.AddToClassList("route-slot-" + slot);
-                        var needle = new SeaUiArt("bearing"); needle.AddToClassList("route-needle");
-                        needle.AddToClassList(slot == 0 ? "needle-left" : slot == 1 ? "needle-right" : "needle-center");
-                        choice.Add(needle);
-                        choice.Add(Text(session.HeadingTo(stop), "route-heading"));
-                        choice.Add(Text(stop.Name, "route-name"));
-                        choice.EnableInClassList("selected", selected?.Id == stop.Id); helm.Add(choice);
-                    }
-                    workspace.Add(helm);
+                    var destination = stop;
+                    var choice = Action("route-" + stop.Id, string.Empty, "route-choice",
+                        () => Change(() => Session.Select(destination.Id)), string.IsNullOrEmpty(saveError));
+                    var chosen = session.Selected?.Id == stop.Id;
+                    choice.tooltip = chosen ? "已选航向；确认启航后出发。" : "预览此航路，确认启航后出发。";
+                    var description = Element("route-description");
+                    description.Add(Text(stop.Name, "route-name"));
+                    description.Add(Text($"{session.HeadingTo(stop)}  ·  {stop.TravelHours} 小时", "route-duration"));
+                    choice.Add(description);
+                    choice.EnableInClassList("selected", chosen);
+                    routes.Add(choice);
                 }
+                navigation.Add(routes);
             }
             var destinationPanel = Element("destination-panel");
-            BuildDestination(destinationPanel, session, chart); workspace.Add(destinationPanel); root.Add(workspace);
+            BuildDestination(destinationPanel, session, chart);
+            navigation.Add(destinationPanel);
+            workspace.Add(navigation);
+            root.Add(workspace);
             if (!string.IsNullOrEmpty(notice))
             {
                 var footer = Element("voyage-footer");
@@ -226,25 +211,40 @@ namespace UnsoundedSea.Runtime
                 if (target != null && target.canGrabFocus) target.Focus();
             });
         }
+        private void BuildNavigationTools(VisualElement workspace, VoyageSession session)
+        {
+            var tools = Element("navigation-tools");
+            var chartTool = Action("reveal-routes", $"旧海图  ×{session.ChartUses}", "navigation-tool",
+                () => Change(Session.RevealRoutes, "旧海图已补记此处岔路。"),
+                session.CanRevealRoutes && string.IsNullOrEmpty(saveError));
+            chartTool.tooltip = "旧海图：揭开当前位置未测出口；数字为剩余次数，没有新发现时不消耗。";
+            tools.Add(chartTool);
+            var lookoutTool = Action("scout-ahead", $"远望  ×{session.LookoutUses}", "navigation-tool",
+                () => Change(Session.ScoutAhead, "远望记录已加入海图。"),
+                session.CanScoutAhead && string.IsNullOrEmpty(saveError));
+            lookoutTool.tooltip = "测绘望远镜：需先选择航向；侦察目的地再往前一段，数字为剩余次数，没有新发现时不消耗。";
+            tools.Add(lookoutTool);
+            workspace.Add(tools);
+        }
+
         private void BuildDestination(VisualElement panel, VoyageSession session, VoyageChart chart)
         {
             bool saved = string.IsNullOrEmpty(saveError);
             var stop = session.Selected ?? session.Current;
-            if (session.Phase == VoyagePhase.ChoosingRoute && session.Selected == null)
+            if (session.Phase == VoyagePhase.ChoosingRoute && session.Selected == null) return;
+            // The route list and current-location label already identify the destination.
+            if (session.Phase == VoyagePhase.ChoosingRoute && chartOpen)
             {
-                panel.Add(Text("择定雾中航向", "destination-empty"));
-                var disabled = Action("set-sail", string.Empty, "seal-action", null, false);
-                disabled.Add(new SeaUiArt("seal")); disabled.Add(Text("待定", "seal-label")); panel.Add(disabled); return;
+                panel.Add(Text(stop.Name, "destination-title"));
+                panel.Add(Text($"{session.HeadingTo(stop)}  ·  {stop.TravelHours} 小时", "bearing"));
             }
-            panel.Add(Text(session.Phase == VoyagePhase.ChoosingRoute ? "已定航向" : PhaseName(session.Phase), "section-label"));
-            panel.Add(Text(stop.Name, "destination-title"));
-            if (session.Selected != null) panel.Add(Text($"{session.HeadingTo(stop)}  ·  {stop.TravelHours} 小时", "bearing"));
-            panel.Add(Text(stop.Clue, "destination-clue"));
+            if (session.Phase == VoyagePhase.Completed || session.Phase == VoyagePhase.Failed)
+                panel.Add(Text(PhaseName(session.Phase), "destination-title"));
+            if (session.Phase != VoyagePhase.Sailing) panel.Add(Text(stop.Clue, "destination-clue"));
             switch (session.Phase)
             {
                 case VoyagePhase.ChoosingRoute:
-                    var sail = Action("set-sail", string.Empty, "seal-action", () => { chartOpen = false; Change(Session.SetSail); }, saved);
-                    sail.Add(new SeaUiArt("seal")); sail.Add(Text("启航", "seal-label")); panel.Add(sail);
+                    panel.Add(Action("set-sail", "启航", "primary", () => { chartOpen = false; Change(Session.SetSail); }, saved));
                     break;
                 case VoyagePhase.Sailing:
                     var track = Element("sailing-track"); var fill = Element("sailing-fill"); track.Add(fill); panel.Add(track);
@@ -275,7 +275,7 @@ namespace UnsoundedSea.Runtime
             if (!sailingPresentation.IsPlaying)
             {
                 var to = Session.Selected;
-                sailingPresentation.Begin(new Vector2(to.X, to.Y), GameSettings.ReducedMotion);
+                sailingPresentation.Begin(new Vector2(to.X, to.Y), GameSettings.ReducedMotion, to.Name);
             }
             lastTick = Time.realtimeSinceStartup;
             sailing = root.schedule.Execute(() =>
