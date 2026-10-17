@@ -19,7 +19,7 @@ import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
 STATE = ROOT / 'Logs/AssetDesign/hyper3d-humanoids'
-RAW = ROOT / 'ArtSource/Characters/Hyper3DRigs'
+RAW = STATE / 'raw'
 BASE = 'https://api.hyper3d.com/api/v2/'
 
 
@@ -46,6 +46,9 @@ def request(endpoint, body, content_type='application/json', timeout=180):
 
 
 def run(name, source):
+    curated = ROOT / 'ArtSource/Characters/CuratedRigs/manifest.json'
+    if curated.exists() and any(a['name'] == name for a in json.loads(curated.read_text())['assets']):
+        raise RuntimeError(f'{name}: curated binding already exists; no automatic regeneration or recovery of discarded raw candidates')
     state_path = STATE / (name + '.json')
     raw = source.read_bytes()
     if raw[:4] != b'glTF' or struct.unpack_from('<I', raw, 8)[0] != len(raw):

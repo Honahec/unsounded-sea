@@ -107,9 +107,13 @@ unity command run_script --project-path "$UNITY_PROJECT_PATH" --timeout 180 --fo
 
 **新增或替换模型：**先更新导入配置/脚本的名称、路径、SHA、预算和验收预期；当前 `ImportSources` 会拒绝覆盖不同哈希文件。应通过单独的 Unity CLI/AssetDatabase 更新步骤替换目标内容、保留 `.meta` GUID、重导入并检查子资产引用及 Prefab。不要删掉已编辑的场景来强迫初始化脚本重建；已有场景的重新绑定需要显式处理。同步更新 manifest 和验收结果。
 
-**普通敌人绑定检查点：**来自 `origin/main` 的 25 种静态源均已通过 Hyper3D Rigging API 生成独立骨架；本批不生成动画。原始返回归档于 `ArtSource/Characters/Hyper3DRigs/`，恢复源 UV／材质后的模型和独立 Prefab 位于 `Assets/UnsoundedSea/Art/{Models,Prefabs}/Hyper3DRigs/`，未替换关卡或战斗引用。完整来源、哈希、实测规格及 Unity 检查见 [绑定 manifest](../ArtSource/Characters/Hyper3DRigs/manifest.json)；[静态总览](ArtReferences/hyper3d-humanoid-bindings.jpg) 为 Blender 渲染。复现入口为 `Tools/Hyper3DRigBatch.py`、`Tools/PrepareHyper3DRigs.py`、Unity CLI 执行 `Tools/Hyper3DRigImport.cs` 的 `Hyper3DRigImport.ImportValidate`。GLB 保留 API 骨架坐标，Prefab 按实际蒙皮顶点归一化尺寸与脚底；Unity 当前 glTFast 导入每顶点最多四权重，原始及归档 GLB 保留完整权重。检查仅涵盖结构、材质与可恢复的小幅躯干变形，不代表大幅动作、持物／衣摆或性能验收；战斗动画等关卡设计后再制作。
+**普通敌人绑定保留集：**25 个普通人形敌人已按同角度诊断从两批绑定中择优，统一到 `Assets/UnsoundedSea/Art/{Models,Prefabs}/CuratedRigs/`：旧版 10 个、新版 10 个、合并版 5 个，每个角色只保留一个模型；来源、选择理由、SHA 和延后问题集中在 [保留集 manifest](../ArtSource/Characters/CuratedRigs/manifest.json)。`ArtSource/Characters/CuratedRigs/` 仅保存元数据与验收依据，不重复存放模型。旧 `RigTrials`、`Hyper3DRigs` 的原始返回、Blender 文件、运行时候选、独立测试动画和旧审阅场景已从当前树清理；静态源、Prayer／Echo、关卡与战斗引用不变。
 
-旧的 22 种 `RigTrials` 和 `EnemyRigReview.unity` 仍是包含测试动作的历史检查点，不属于本次绑定交付。其扩大包围盒导致死亡姿势离地、持物拟合未全部重导出等限制，继续保留在 [普通敌人 manifest](../ArtSource/Characters/ordinary-enemies-manifest.json)；旧流程复现入口为 `Tools/rig_enemy_trials.py`、`Tools/validate_enemy_rigs.py`，Unity CLI 执行 `Tools/EnemyRigReviewSetup.cs` 的 `EnemyRigReviewSetup.Build`，Play 后执行 `Tools/EnemyAnimationQA.cs` 的 `EnemyAnimationQA.Run`。旧检查记录不代表当前动画验收；日常入口仍为 `MainMenu.unity`，独立审阅结束后恢复原工作场景。
+5 个合并版保留新版上肢，迁移旧版下肢关节／权重，并在骨盆平滑过渡；修正新版权重中把靴部固定到 Root 的情况，屈膝牵拉减少。依据见 [质量审阅](../ArtSource/Characters/CuratedRigs/quality-review.json)、[合并版诊断图](ArtReferences/curated-rig-hybrids.jpg) 和 [Unity 检查](../ArtSource/Characters/CuratedRigs/unity-validation.json)。复现工具为 `Tools/CompareHumanoidRigs.py`、`Tools/CombineHumanoidRigs.py`；恢复当前独立 Prefab 可通过 Unity CLI 执行 `Tools/CurateHumanoidRigs.cs` 的 `CurateHumanoidRigs.Consolidate`，参数为 `ArtSource/Characters/CuratedRigs/manifest.json`。历史比较输入只留 SHA 与历史修订；远端永久清理后，不保证淘汰版本可恢复。
+
+本批不制作战斗动画。10 个旧版 GLB 为复用已有 LFS 对象而保留原内嵌测试片段，独立 Prefab 不带动画驱动；它们不代表战斗动作可用。Unity 检查涵盖真实导入网格的胸部、肘部、膝部可恢复变形、材质、尺度和脚底；大幅动作、持物刚性、衣摆、藏手约束与设备性能继续延后。glTFast 当前导入每顶点四权重，GLB 保留完整权重。
+
+**LFS 额度：**删除当前文件、历史改写和本地 `git lfs prune` 都不会直接清除 GitHub 远端存储。实际清除需 [GitHub Support 或删除重建仓库](https://docs.github.com/en/repositories/working-with-files/managing-large-files/removing-files-from-git-large-file-storage)。本次的保留对象与历史清理候选见 [LFS 清理清单](../ArtSource/Characters/CuratedRigs/lfs-cleanup.json)；未改写共享分支历史、未删除远端仓库，新增合并模型暂不推送，避免先增加用量。
 
 ## 5. 引擎验收
 
