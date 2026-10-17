@@ -152,6 +152,8 @@ MonoBehaviour:
   water: {fileID: 84440408}
   menuCamera: {fileID: 1703731681}
   vessel: {fileID: 1715621660}
+  lighthouse: {fileID: 1189964068}
+  departureWakeMaterial: {fileID: 2100000, guid: ea297f9d0fead4f5baba6697e49dd68e, type: 2}
 --- !u!114 &84440408
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -200,6 +202,7 @@ GameObject:
   m_Component:
   - component: {fileID: 499882269}
   - component: {fileID: 499882270}
+  - component: {fileID: 499882271}
   m_Layer: 0
   m_Name: Moon through cloud
   m_TagString: Untagged
@@ -287,6 +290,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &499882271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 499882268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &818043478
 GameObject:
   m_ObjectHideFlags: 0

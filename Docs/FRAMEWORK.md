@@ -12,7 +12,7 @@ Editor 点击 Play 默认从 `Assets/UnsoundedSea/Scenes/MainMenu.unity` 启动�
 
 ## 航海选路（局外）
 
-场景切换统一经 `GameSceneLoader.Load` 异步执行，独立持久加载面板提供反馈，加载期间阻止快捷键、重复启动及战斗命令，完成后恢复后台加载优先级。`VoyageEncounterCatalog.MenuEntries` 只读取名称、分组和资源路径；`Resolve` 按需加载独立 `VoyageScenarioReference`。`AllEntries` 会加载全部遭遇，仅用于内容检查／模拟，不用于菜单。`VoyageEncounterLoadingSetup.Configure` 经 Editor API 生成独立引用资产，保留原 Scenario 路径和 GUID；航程内容同步后自动调用。标题菜单在进入时检查存档，点击新航程时重新核实覆盖条件；打开／关闭弹窗不重复回放存档。图鉴翻页不主动执行全局资源回收。
+场景切换统一经 `GameSceneLoader` 异步执行，普通加载使用独立持久面板，新航程使用下述离港过渡，加载期间阻止快捷键、重复启动及战斗命令，完成后恢复后台加载优先级。`VoyageEncounterCatalog.MenuEntries` 只读取名称、分组和资源路径；`Resolve` 按需加载独立 `VoyageScenarioReference`。`AllEntries` 会加载全部遭遇，仅用于内容检查／模拟，不用于菜单。`VoyageEncounterLoadingSetup.Configure` 经 Editor API 生成独立引用资产，保留原 Scenario 路径和 GUID；航程内容同步后自动调用。标题菜单在进入时检查存档，点击新航程时重新核实覆盖条件；打开／关闭弹窗不重复回放存档。图鉴翻页不主动执行全局资源回收。
 
 - **三幕标准航程（方案 A）**：海域仍为第一幕灰雾航道、第二幕尸骸之海／倒悬潮庭／无灯裂海三选一、第三幕无星深渊。各幕 Boss 独立按主种子抽取：第一幕为雾海来客／黑潮压舱者／空心航标，第二幕为 M02／M03／M04，第三幕为 M05／沉钟；第二幕海域选择不绑定 Boss。每幕 11 层，一条完整航线实际访问 11 个节点（含出发整备和幕末 Boss），全局 33 个节点；分支候选不是额外必经节点。主种子派生拓扑、布局、Boss、内容、可见性和战斗种子；调查与动画不推进规则随机数。
 - **分支与合并**：起点两个出口，终点前一层单出口；中间层宽 2–3，普通连接至少两个出口，第 2→3、7→8 层按同分支配对单出口，避免交换顺序后重复访问同类节点。只连接相邻层，保留近邻几何约束。
@@ -87,7 +87,7 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 - PC 管线需要 **Depth Texture / Opaque Texture**；当前 Unity 6000.6.5f1、URP 17.6、Forward+ 已配置。`reflectionScale` 默认 0.5，降低可减少额外渲染成本。移动管线、XR、多相机/多水位组合尚未验收。
 - 上游版本、MIT 许可、原始哈希与本地补丁集中记录在 [UPSTREAM.json](../Assets/ThirdParty/UberStylizedWater/UPSTREAM.json)。只引入运行依赖，不依赖上游 Shader Graph 编辑插件。升级需重新应用时钟、风暴波形/法线/泡沫、光照、扰流和反射补丁，并验证所有 Shader pass；不要用上游重新导出的 Shader 直接覆盖本地版。
 
-主页使用真实 `SurveyVessel` 与 `Lighthouse` Prefab，不再保留几何体占位背景或右侧圆形装饰。`Tools/MainMenuSceneSetup.Apply` 重建该背景：船位于右下、船头朝右上，灯塔位于右侧远景；`MainMenuSeaPresentation` 复用 `VoyageOcean` 材质与 `BattleWater` 时钟，使船随海面升沉，并遵守减少动效设置。灯塔来源见 `ArtSource/Landmarks/manifest.json`。
+主页使用真实 `SurveyVessel` 与 `Lighthouse` Prefab，不再保留几何体占位背景或右侧圆形装饰。`Tools/MainMenuSceneSetup.Apply` 重建该背景：船位于右下、船头朝右上，灯塔位于右侧远景；`MainMenuSeaPresentation` 复用 `VoyageOcean` 材质与 `BattleWater` 时钟，使船随海面升沉。确认新航程与船员后，`GameSceneLoader.Depart` 驱动 `NewVoyageDeparture`：灯塔渐亮、海雾聚拢、船带尾流离港，雾完全遮住画面后才激活航海场景，再由 `VoyageSailingPresentation` 驶入初始泊位并淡入 HUD。入场只改变表现，不选路、不消耗航时；继续航程仍走普通异步加载。减少动效保留短暂灯光／雾层淡化，跳过船体位移和镜头运动；过渡期间拦截输入与重复启动。`Tools/MainMenuSceneSetup.ConfigureDeparture` 只绑定现有灯塔与共享尾流材质，不重建场景。灯塔来源见 `ArtSource/Landmarks/manifest.json`。
 
 `OceanBattlePanel` 参考 1600×900；USS 位于 `Runtime/Battle/OceanBattleHud.uss`。中央保留 3D 画面，局内不显示章节与地点标题。左下显示生命／理智，格挡与防护仅在生效时显示；调查工具列于上方并保留余次／费用。左上显示目标进度，右下集中回合、行动与结束回合；结束回合复用 `SeaUiArt("seal")` 印记，按钮无额外黄色圆底，文字独立放在图案下方，右上常驻无边框「海图 / M」与「行动簿 / B」，J 打开日志。牌库／弃牌／消耗数量在手牌右侧及日志显示；Boss 特殊行动使用额外遭遇牌，不提供重复的任务按钮。字体使用项目 TextCore SDF，保留破损装饰字体与旧铜色细线。
 

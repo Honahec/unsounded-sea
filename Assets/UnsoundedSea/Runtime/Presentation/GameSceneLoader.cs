@@ -11,8 +11,15 @@ namespace UnsoundedSea.Runtime
     {
         public static bool IsLoading { get; private set; }
         private UnityEngine.ThreadPriority previousPriority;
+        private NewVoyageDeparture departure;
 
         public static void Load(string scene)
+            => Begin(scene, null);
+
+        public static void Depart(string scene, MainMenuSeaPresentation sea)
+            => Begin(scene, sea);
+
+        private static void Begin(string scene, MainMenuSeaPresentation sea)
         {
             if (IsLoading) return;
             if (!Application.CanStreamedLevelBeLoaded(scene))
@@ -24,7 +31,12 @@ namespace UnsoundedSea.Runtime
             loader.previousPriority = Application.backgroundLoadingPriority;
             try
             {
-                loader.ShowLoadingPanel();
+                if (sea != null)
+                {
+                    loader.departure = host.AddComponent<NewVoyageDeparture>();
+                    loader.departure.Configure(sea);
+                }
+                else loader.ShowLoadingPanel();
                 loader.StartCoroutine(loader.LoadScene(scene));
             }
             catch
@@ -63,16 +75,27 @@ namespace UnsoundedSea.Runtime
             yield return null;
             Application.backgroundLoadingPriority = UnityEngine.ThreadPriority.BelowNormal;
             AsyncOperation operation;
-            try { operation = SceneManager.LoadSceneAsync(scene); }
+            try
+            {
+                operation = SceneManager.LoadSceneAsync(scene);
+                if (departure != null) operation.allowSceneActivation = false;
+            }
             catch (Exception exception)
             {
                 Debug.LogException(exception);
                 Destroy(gameObject);
                 yield break;
             }
+            if (departure != null)
+            {
+                yield return departure.Leave();
+                while (operation.progress < .9f) yield return null;
+                operation.allowSceneActivation = true;
+            }
             yield return operation;
             // Keep input locked through the new scene's Start callbacks.
             yield return null;
+            if (departure != null) yield return departure.Arrive();
             Destroy(gameObject);
         }
 

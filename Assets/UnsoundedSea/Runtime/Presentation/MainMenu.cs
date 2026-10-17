@@ -317,7 +317,8 @@ namespace UnsoundedSea.Runtime
             try
             {
                 VoyageRuntime.StartNew();
-                GameSceneLoader.Load(voyageScene);
+                Build(null);
+                GameSceneLoader.Depart(voyageScene, FindAnyObjectByType<MainMenuSeaPresentation>());
             }
             catch (Exception exception)
             {

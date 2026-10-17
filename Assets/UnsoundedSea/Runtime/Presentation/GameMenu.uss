@@ -219,3 +219,5 @@
 
 .scene-loading { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(8,19,22,.96); }
 .scene-loading-label { color: #eee4c9; font-size: 22px; -unity-text-align: middle-center; }
+.departure-veil { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgb(46,74,82); }
+.departure-mist { position: absolute; left: -10%; right: -10%; top: -10%; bottom: -10%; -unity-background-scale-mode: scale-and-crop; -unity-background-image-tint-color: rgb(113,143,146); }

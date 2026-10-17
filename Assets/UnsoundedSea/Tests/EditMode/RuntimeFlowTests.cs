@@ -101,6 +101,9 @@ namespace UnsoundedSea.Tests
         {
             Assert.Throws<InvalidOperationException>(() => GameSceneLoader.Load("missing-performance-test-scene"));
             Assert.That(GameSceneLoader.IsLoading, Is.False);
+            Assert.Throws<InvalidOperationException>(() => GameSceneLoader.Depart("missing-performance-test-scene", null));
+            Assert.That(GameSceneLoader.IsLoading, Is.False);
+            Assert.That(NewVoyageDeparture.IsActive, Is.False);
         }
     }
 }

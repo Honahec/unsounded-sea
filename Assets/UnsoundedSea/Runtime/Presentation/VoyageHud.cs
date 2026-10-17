@@ -59,6 +59,7 @@ namespace UnsoundedSea.Runtime
         }
         private void Update()
         {
+            if (NewVoyageDeparture.IsActive) return;
             HotkeyRelay.Poll(root, HandleKey);
             sailingPresentation?.Tick(Time.unscaledDeltaTime,
                 GameSceneLoader.IsLoading || paused || settingsOpen || journalOpen || chartOpen || deckOpen || supportOpen || replacingReward || Session?.DebriefPending==true || Session?.RegionIntroPending==true || !string.IsNullOrEmpty(saveError) || !string.IsNullOrEmpty(loadError),
