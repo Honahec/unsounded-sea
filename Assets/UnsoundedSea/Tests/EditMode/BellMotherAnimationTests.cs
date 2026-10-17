@@ -53,7 +53,7 @@ namespace UnsoundedSea.Tests
                 var motion = instance.GetComponent<BellMotherRigidMotion>();
                 Assert.That(motion.tentacleRoots, Has.Length.EqualTo(6));
                 Assert.That(motion.tentacleTips, Has.Length.EqualTo(6));
-                Assert.That(motion.attackTentacles.Select(p => p.name), Is.EquivalentTo(new[] { "Tentacle_04", "Tentacle_05" }));
+                Assert.That(motion.attackTentacles.Select(p => p.name), Is.EquivalentTo(new[] { "Tentacle_02", "Tentacle_06" }));
                 var roots = motion.tentacles.Select((p, i) => p.TransformPoint(motion.tentacleRoots[i])).ToArray();
                 var attachments = roots.Select(p => motion.body.InverseTransformPoint(p)).ToArray();
                 var tips = motion.tentacles.Select((p, i) => p.TransformPoint(motion.tentacleTips[i])).ToArray();
@@ -65,10 +65,14 @@ namespace UnsoundedSea.Tests
                 var bodyHeight = instance.GetComponentsInChildren<Renderer>().Max(r => r.bounds.max.y) -
                     instance.GetComponentsInChildren<Renderer>().Min(r => r.bounds.min.y);
                 var contactBodyY = bodyPosition.y;
+                var selected = motion.attackTentacles[0];
+                var previousRotation = selected.rotation;
+                var earlyStrikeSpeed = 0f;
+                var pressedRotation = Quaternion.identity;
                 motion.PlayAttack();
                 // Verify the entire arc, including lift, contact and recovery;
                 // moving transform origins upward cannot satisfy this test.
-                for (var frame = 1; frame <= 96; frame++)
+                for (var frame = 1; frame <= 206; frame++)
                 {
                     motion.Tick(0.01f);
                     for (var i = 0; i < motion.tentacles.Length; i++)
@@ -82,23 +86,31 @@ namespace UnsoundedSea.Tests
                         if (!strikes)
                             Assert.That(Vector3.Distance(tip, motion.body.TransformPoint(tipAttachments[i])),
                                 Is.LessThan(lengths[i] * 0.02f), $"Support limb {i + 1} must not join the slap");
-                        if (strikes && frame == 35)
+                        if (strikes && frame == 80)
                             Assert.That(tip.y - tips[i].y, Is.GreaterThan(lengths[i] * 0.2f), $"Outer end {i + 1} must rise");
-                        if (strikes && frame == 57)
+                        if (strikes && frame == 113)
                             Assert.That(tip.y, Is.LessThan(tips[i].y), $"Outer end {i + 1} must slap downward");
                     }
                     Assert.That(Vector3.Distance(motion.body.position, bodyPosition), Is.LessThan(bodyHeight * 0.02f));
                     Assert.That(Quaternion.Angle(motion.body.rotation, bodyRotation), Is.LessThan(1.1f));
                     Assert.That(Vector3.Distance(motion.crown.position, motion.body.TransformPoint(crownAttachment)),
                         Is.LessThan(bodyHeight * 0.0001f));
-                    if (frame == 35)
+                    if (frame == 80)
                     {
                         Assert.That(motion.ActionImpact, Is.Zero);
                         Assert.That(motion.body.position.y, Is.GreaterThan(bodyPosition.y + bodyHeight * 0.001f));
                     }
-                    if (frame == 56) contactBodyY = motion.body.position.y;
-                    if (frame == 64) Assert.That(motion.body.position.y, Is.LessThan(contactBodyY));
-                    if (frame == 57) Assert.That(motion.ActionImpact, Is.GreaterThan(0.8f));
+                    if (frame == 112) contactBodyY = motion.body.position.y;
+                    if (frame == 124) Assert.That(motion.body.position.y, Is.LessThan(contactBodyY));
+                    if (frame == 113) Assert.That(motion.ActionImpact, Is.GreaterThan(0.8f));
+                    var speed = Quaternion.Angle(previousRotation, selected.rotation) / 0.01f;
+                    if (frame == 90) earlyStrikeSpeed = speed;
+                    if (frame == 110) Assert.That(speed, Is.GreaterThan(earlyStrikeSpeed * 2f), "Strike must gain speed into contact");
+                    if (frame == 125) pressedRotation = Quaternion.Inverse(motion.body.rotation) * selected.rotation;
+                    if (frame == 140)
+                        Assert.That(Quaternion.Angle(pressedRotation, Quaternion.Inverse(motion.body.rotation) * selected.rotation),
+                            Is.LessThan(0.05f), "Hold pressure below the water before recovering; no instant rebound");
+                    previousRotation = selected.rotation;
                     if (motion.ActiveAction == "Idle") break;
                 }
                 Assert.That(motion.ActiveAction, Is.EqualTo("Idle"));

@@ -12,7 +12,7 @@ namespace UnsoundedSea.Runtime
         public Transform body;
         public Transform crown;
         public Transform[] tentacles;
-        [Tooltip("Only these front tentacles perform the water slap; the others keep a restrained sway.")]
+        [Tooltip("Only these selected tentacles perform the water slap; the others keep a restrained sway.")]
         public Transform[] attackTentacles;
         [Tooltip("Attachment points in each tentacle transform's local space, baked by BellMotherBangSetup.")]
         public Vector3[] tentacleRoots;
@@ -154,29 +154,39 @@ namespace UnsoundedSea.Runtime
                 wave * 0.65f, wave * 2.4f, 0, 0, 0);
         }
 
+        private const float RaiseEnd = 0.72f;
+        private const float StrikeStart = RaiseEnd + 0.12f;
+        private const float ContactTime = StrikeStart + 0.28f;
+        private const float SettleEnd = ContactTime + 0.12f;
+        private const float RecoverStart = SettleEnd + 0.18f;
+        private const float AttackEnd = RecoverStart + 0.62f;
+
         private void UpdateAttack()
         {
-            const float raise = 0.32f;
-            const float hold = 0.06f;
-            const float strike = 0.18f;
-            const float recover = 0.38f;
-            const float raisedAngle = 48f;
-            const float contactAngle = -8f;
             var t = ActionElapsed;
-            if (t < raise)
-                ApplyAttackPose(raisedAngle * Smooth(t / raise));
-            else if (t < raise + hold)
-                ApplyAttackPose(raisedAngle);
-            else if (t < raise + hold + strike)
+            if (t < RaiseEnd)
+                ApplyAttackPose(46f * Smooth(t / RaiseEnd));
+            else if (t < StrikeStart)
+                // Keep a little travel at the apex instead of freezing the pose.
+                ApplyAttackPose(Mathf.Lerp(46f, 48f, Smooth((t - RaiseEnd) / (StrikeStart - RaiseEnd))));
+            else if (t < ContactTime)
             {
-                var u = (t - raise - hold) / strike;
-                ApplyAttackPose(Mathf.Lerp(raisedAngle, contactAngle, u * u));
+                var u = (t - StrikeStart) / (ContactTime - StrikeStart);
+                ApplyAttackPose(Mathf.Lerp(48f, -6f, u * u));
             }
-            else if (t < raise + hold + strike + recover)
+            else if (t < AttackEnd)
             {
-                var elapsed = t - raise - hold - strike;
-                ActionImpact = Mathf.Clamp01(1f - elapsed / 0.18f);
-                ApplyAttackPose(Mathf.Lerp(contactAngle, 0, Smooth(elapsed / recover)));
+                ActionImpact = Mathf.Clamp01(1f - (t - ContactTime) / 0.18f);
+                if (t < SettleEnd)
+                {
+                    // Water resistance brakes the downward motion; no rebound.
+                    var u = (t - ContactTime) / (SettleEnd - ContactTime);
+                    ApplyAttackPose(Mathf.Lerp(-6f, -10f, 1f - (1f - u) * (1f - u)));
+                }
+                else if (t < RecoverStart)
+                    ApplyAttackPose(-10f);
+                else
+                    ApplyAttackPose(Mathf.Lerp(-10f, 0, Smooth((t - RecoverStart) / (AttackEnd - RecoverStart))));
             }
             else
             {
@@ -239,7 +249,7 @@ namespace UnsoundedSea.Runtime
         {
             // A small shared body motion carries the attached roots and crown.
             // At stage scale this is about 3 m of travel on a 208 m creature;
-            // the lowest point trails contact by 80 ms, with no spring bounce.
+            // the lowest point trails contact by 120 ms, with no spring bounce.
             var load = AttackBodyLoad(ActionElapsed);
             var lift = load < 0 ? -load * 0.008f : -load * 0.018f;
             var sway = Quaternion.Euler(load * 0.85f, 0, load * 0.30f);
@@ -257,7 +267,7 @@ namespace UnsoundedSea.Runtime
                 var strikes = attackTentacles != null && System.Array.IndexOf(attackTentacles, part) >= 0;
                 // Support limbs stay low. Fade their sub-degree movement back
                 // to the starting pose so recovery has no discontinuity.
-                var supportSway = Mathf.Sin(Mathf.PI * Mathf.Clamp01(ActionElapsed / 0.94f)) *
+                var supportSway = Mathf.Sin(Mathf.PI * Mathf.Clamp01(ActionElapsed / AttackEnd)) *
                     Mathf.Sin(idleTime * 1.8f + i * 0.82f + ActionElapsed * 1.8f) * 0.8f;
                 var rotation = sway * Quaternion.AngleAxis(strikes ? angle : supportSway, attackAxes[i]) * attackRotations[i];
                 var anchor = pivot + sway * (attackAnchors[i] - attackBodyPosition);
@@ -268,11 +278,16 @@ namespace UnsoundedSea.Runtime
 
         private static float AttackBodyLoad(float time)
         {
-            if (time < 0.32f) return -Smooth(time / 0.32f);
-            if (time < 0.38f) return -1f;
-            if (time < 0.56f) return Mathf.Lerp(-1f, 0.65f, Smooth((time - 0.38f) / 0.18f));
-            if (time < 0.64f) return Mathf.Lerp(0.65f, 1f, Smooth((time - 0.56f) / 0.08f));
-            return Mathf.Lerp(1f, 0, Smooth((time - 0.64f) / 0.30f));
+            if (time < RaiseEnd) return -Smooth(time / RaiseEnd);
+            if (time < StrikeStart) return -1f;
+            if (time < ContactTime)
+            {
+                var u = (time - StrikeStart) / (ContactTime - StrikeStart);
+                return Mathf.Lerp(-1f, 0.65f, u * u);
+            }
+            if (time < SettleEnd) return Mathf.Lerp(0.65f, 1f, Smooth((time - ContactTime) / (SettleEnd - ContactTime)));
+            if (time < RecoverStart) return 1f;
+            return Mathf.Lerp(1f, 0, Smooth((time - RecoverStart) / (AttackEnd - RecoverStart)));
         }
 
         private static float Smooth(float value)
