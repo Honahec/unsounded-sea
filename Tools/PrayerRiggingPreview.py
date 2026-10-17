@@ -1,7 +1,8 @@
 """Inspect a Hyper3D rig without changing weights or the production prefab.
 
 blender -b --python Tools/PrayerRiggingPreview.py -- RIG.glb SOURCE.glb OUTPUT
-The three poses are skinning diagnostics, not finished gameplay animations.
+Supports the Prayer and Echo single-mesh sources. The three poses are skinning
+diagnostics, not finished gameplay animations.
 """
 import sys, json, math, pathlib, hashlib, struct
 import bpy
@@ -10,6 +11,7 @@ from mathutils import Vector
 from mathutils.kdtree import KDTree
 
 rig_path, source_path, output = map(pathlib.Path, sys.argv[sys.argv.index('--') + 1:])
+asset_name = source_path.stem.removesuffix('_LOD0')
 output.mkdir(parents=True, exist_ok=True)
 
 
@@ -78,7 +80,7 @@ materials = [m for obj in bpy.context.scene.objects if obj.type == 'MESH' for m 
 source_mesh = next(o for o in bpy.context.scene.objects if o.type == 'MESH').data
 source_positions = np.array([v.co[:] for v in source_mesh.vertices])
 source_center = (source_positions.min(0) + source_positions.max(0)) / 2
-source_scale = 1.9 / (source_positions.max(0)[2] - source_positions.min(0)[2])
+source_scale = float(rp.max(0)[1] - rp.min(0)[1]) / (source_positions.max(0)[2] - source_positions.min(0)[2])
 source_positions = (source_positions - source_center) * source_scale
 source_faces = []
 face_tree = KDTree(len(source_mesh.polygons))
@@ -176,7 +178,7 @@ scene.frame_start = 1
 scene.frame_end = 61
 scene.frame_set(1)
 arm.animation_data.action.name = 'Rig_Diagnostic_Poses_Not_Gameplay'
-bpy.ops.wm.save_as_mainfile(filepath=str(output / 'Prayer_RiggingReview.blend'))
+bpy.ops.wm.save_as_mainfile(filepath=str(output / (asset_name + '_RiggingReview.blend')))
 report['bones'] = [{'name': b.name, 'parent': b.parent.name if b.parent else None,
                     'head': list(b.head_local), 'tail': list(b.tail_local)} for b in arm.data.bones]
 (output / 'inspection.json').write_text(json.dumps(report, indent=2))

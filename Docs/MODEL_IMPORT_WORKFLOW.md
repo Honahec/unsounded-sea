@@ -176,7 +176,7 @@ git lfs fsck
 
 Prayer 与 Echo 各 1 网格/材质、3 张 4K 纹理，无蒙皮/动画；尚无 LOD1/2 或 LODGroup。内嵌纹理为 ARGB32、13 级 mip，两角色完整纹理链理论约 512 MiB（非 Profiler 实测），尚未 GPU 压缩。后续需提取/重映射为可配置 TextureImporter 资产，按平台选择压缩与尺寸后复核；普通纹理平台覆写不能直接套用到这些内嵌子资产。
 
-Prayer 的首个 Hyper3D API 绑定候选已完成，但未通过变形审阅，未替换上述静态运行时资产。上传模型的 UV 被服务重新展开；审阅脚本通过重合三角面的角点恢复原 UV，再复用原材质，未修改自动骨骼与权重。弯臂会牵拉长袍下摆，转身出现衣摆穿插；下一步需修正骨骼定位与权重，再制作正式动作。参数、来源、规格与检查结果见 [候选 manifest](../ArtSource/Characters/Prayer_Rigging-manifest.json)，[三姿势对照](ArtReferences/prayer-rigging-review.jpg) 为 Blender 诊断渲染，不代表 Unity 动画或性能验收。Echo 尚未提交绑定。
+Prayer 的首个 Hyper3D API 绑定候选已完成，但未通过变形审阅，未替换上述静态运行时资产。上传模型的 UV 被服务重新展开；审阅脚本通过重合三角面的角点恢复原 UV，再复用原材质，未修改自动骨骼与权重。弯臂会牵拉长袍下摆，转身出现衣摆穿插；下一步需修正骨骼定位与权重，再制作正式动作。参数、来源、规格与检查结果见 [候选 manifest](../ArtSource/Characters/Prayer_Rigging-manifest.json)，[三姿势对照](ArtReferences/prayer-rigging-review.jpg) 为 Blender 诊断渲染，不代表 Unity 动画或性能验收。Echo 也已完成首个绑定候选：同样的弯臂、转身诊断未见 Prayer 的大面积衣摆牵拉，但尚未验证大幅动作、头盔／领圈刚性、多视角和 Unity 播放；未替换运行时模型。来源与实测见 [Echo 候选 manifest](../ArtSource/Characters/Echo_Rigging-manifest.json)，画面见 [三姿势对照](ArtReferences/echo-rigging-review.jpg)。
 
 M02–M05 的高模与减面版保留在 `ArtSource/Bosses/`；减面版另存 `Assets/UnsoundedSea/Art/Models/` 并接入 `BossM02`–`BossM05`，导入副本与归档 SHA-256 一致。来源、实测规格和 Prefab 路径：[M02](../ArtSource/Bosses/TideBonesChoirmaster-manifest.json)、[M03](../ArtSource/Bosses/InvertedSurveyor-manifest.json)、[M04](../ArtSource/Bosses/UnlitFlagBearer-manifest.json)、[M05](../ArtSource/Bosses/StarlessWatcher-manifest.json)。M03 已重生成，M04 使用新项目重试；M05 轮廓仍偏人形，尚未美术定稿。没有重新生成水面，四场复用现有水体与调查船。具体运行范围见 [验证记录](FRAMEWORK_VALIDATION.md#m02m05-boss-战)。
 
