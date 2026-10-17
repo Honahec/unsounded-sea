@@ -97,7 +97,7 @@ unity command run_script --project-path "$UNITY_PROJECT_PATH" --timeout 180 --fo
 
 **新增或替换模型：**先更新导入配置/脚本的名称、路径、SHA、预算和验收预期；当前 `ImportSources` 会拒绝覆盖不同哈希文件。应通过单独的 Unity CLI/AssetDatabase 更新步骤替换目标内容、保留 `.meta` GUID、重导入并检查子资产引用及 Prefab。不要删掉已编辑的场景来强迫初始化脚本重建；已有场景的重新绑定需要显式处理。同步更新 manifest 和验收结果。
 
-**普通敌人绑定检查点：**当前已归档 22 种普通敌人的静态源、绑定 GLB/Blend，并导入独立 `Assets/UnsoundedSea/Scenes/EnemyRigReview.unity`；未替换战斗模型。每种提供 Idle、Action、Hit、Death、RigValidation 五段动作。源文件、结构检查与限制统一记录在 [普通敌人 manifest](../ArtSource/Characters/ordinary-enemies-manifest.json)。复现使用 `Tools/rig_enemy_trials.py`（拟合数据为 `ArtSource/Characters/rig-profiles.json`）、`Tools/validate_enemy_rigs.py`；Unity CLI 执行 `Tools/EnemyRigReviewSetup.cs` 的 `EnemyRigReviewSetup.Build`，Play 后执行 `Tools/EnemyAnimationQA.cs` 的 `EnemyAnimationQA.Run`。本次按用户要求先提交当前状态：02/03/05 尚未下载归档；Unity 审阅归一化使用扩大的蒙皮包围盒，已测到死亡姿势离地约 0.14 米，未修复；最新持物侧拟合修订尚未全部重新导出并导入。道具/衣摆未独立分件、无手指骨骼，不能视为全部动画或目标设备性能验收通过。
+**普通敌人绑定检查点：**25 种静态源已归档；其中 22 种已有绑定 GLB/Blend，并导入独立 `Assets/UnsoundedSea/Scenes/EnemyRigReview.unity`，各含 Idle、Action、Hit、Death、RigValidation 五段动作；未替换战斗模型。02/03/05 已按用户要求在原 Chrome Agent 项目重新生成、下载并核验，尚未绑定。来源、实测规格及限制见 [普通敌人 manifest](../ArtSource/Characters/ordinary-enemies-manifest.json)。复现使用 `Tools/rig_enemy_trials.py`（拟合数据为 `ArtSource/Characters/rig-profiles.json`）、`Tools/validate_enemy_rigs.py`；Unity CLI 执行 `Tools/EnemyRigReviewSetup.cs` 的 `EnemyRigReviewSetup.Build`，Play 后执行 `Tools/EnemyAnimationQA.cs` 的 `EnemyAnimationQA.Run`。现有 Unity 审阅归一化使用扩大的蒙皮包围盒，已测到死亡姿势离地约 0.14 米，未修复；最新持物侧拟合修订尚未全部重新导出并导入。道具/衣摆未独立分件、无手指骨骼，不能视为全部动画或目标设备性能验收通过。日常游戏入口仍为 `MainMenu.unity`，审阅结束后恢复打开该场景。
 
 ## 5. 引擎验收
 
