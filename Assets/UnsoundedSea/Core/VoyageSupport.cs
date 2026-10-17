@@ -73,6 +73,7 @@ namespace UnsoundedSea.Core
         private bool IsNodeResolutionChoice(VoyageNodeChoice choice)
         {
             if(phase!=VoyagePhase.Arrived||nodeResolved)return false;
+            if(CurrentFull.Kind==RunNodeKind.Event&&Watched==3&&ServiceAvailable("return-gaze"))return false;
             if(choice.Id=="ritual:learn")return true;
             var verb=choice.Id.Split(':')[0];
             return CurrentFull.Kind==RunNodeKind.Event&&(verb=="rescue"||verb=="voucher"||verb=="specimen"||verb=="repair-boat"||verb=="crew"||verb=="risk")

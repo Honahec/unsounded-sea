@@ -25,8 +25,10 @@
 .game-menu Button, .settings Button, .pause Button { margin: 0; padding: 0; border-width: 0; border-radius: 0; background-color: rgba(0,0,0,0); color: #eee4c9; -unity-text-align: middle-center; transition-property: translate, background-color, border-color; transition-duration: 0.12s; }
 .reduced-motion Button { transition-duration: 0s; }
 
-.boss-compatibility { margin-top: 3px; font-size: 11px; color: #d7bd82; white-space: nowrap; }
+.boss-compatibility { margin-top: 3px; font-size: 11px; color: #d7bd82; white-space: normal; }
 .key-badge { align-self: center; margin-left: 8px; min-width: 19px; height: 20px; padding: 0 3px; border-width: 1px; border-color: #9e8755; border-radius: 3px; color: #d7bd82; font-size: 11px; -unity-text-align: middle-center; white-space: nowrap; }
+.key-control { flex-direction: row; justify-content: center; align-items: center; }
+.key-control .key-control-title { margin: 0; white-space: nowrap; }
 .status-badge { flex-direction: row; align-items: center; margin-right: 10px; }
 .status-badge Label { font-size: 12px; color: #d7bd82; white-space: nowrap; }
 .status-icon { width: 24px; height: 24px; margin-right: 4px; }

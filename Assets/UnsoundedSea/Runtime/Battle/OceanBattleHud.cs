@@ -35,6 +35,7 @@ namespace UnsoundedSea.Runtime
         private string playedCardFeedback;
         private BossEncounterKind presentedBoss;
         private readonly List<(Button button, Transform anchor, Vector2 offset)> encounterLabels = new List<(Button, Transform, Vector2)>();
+        private readonly Dictionary<string,(int before,int after,float until)> surgeChanges=new Dictionary<string,(int,int,float)>();
         public int RenderedFrames { get; private set; }
         private void OnEnable()
         {
@@ -60,6 +61,11 @@ namespace UnsoundedSea.Runtime
         private void OnResolved(BattleView before, BattleView after, BattleCommand command)
         {
             PresentResolution(before, after, command);
+            foreach(var enemy in after.Enemies)
+            {
+                var previous=before.Enemies.FirstOrDefault(x=>x.Id==enemy.Id);
+                if(previous!=null&&previous.Surge!=enemy.Surge)surgeChanges[enemy.Id]=(previous.Surge,enemy.Surge,Time.unscaledTime+1.6f);
+            }
             if (command.kind != CommandKind.PlayCard) return;
             playedCardFeedback = before.Hand.FirstOrDefault(card => card.InstanceId == command.cardInstanceId)?.Definition.Name;
         }
@@ -129,7 +135,7 @@ namespace UnsoundedSea.Runtime
         {
             var b = new Button(action) { name = name, text = text }; b.AddToClassList(cls);
             var slash=text.LastIndexOf(" / ",StringComparison.Ordinal);
-            if(slash>=0){var key=text.Substring(slash+3);b.text=text.Substring(0,slash);KeyBadge.Attach(b,key);b.tooltip=b.text+"（"+key+"）";}
+            if(slash>=0){var key=text.Substring(slash+3);var caption=text.Substring(0,slash);b.text=caption;KeyBadge.Attach(b,key);b.tooltip=caption+"（"+key+"）";}
             return b;
         }
         private static string CrewMotif(CrewSupportKind kind)
@@ -321,7 +327,7 @@ namespace UnsoundedSea.Runtime
                 IllustratedCard.Apply(face, def);
                 if (c.IsEncounter) face.Q<Label>("illustrated-cost").text = c.ActionCost.ToString();
                 face.Add(Text("D 详情", "card-detail-hint"));
-                b.Add(face); b.tooltip = def.Name + "：" + def.Description;
+                b.Add(face); b.tooltip = UiRules.CardDescription(def);
                 b.EnableInClassList("card-disabled", !c.Enabled || !c.IsEncounter && (def.Cost > v.Actions || def.SanityCost >= v.Sanity));
                 ActionButton(b, active); fan.Add(b);
             }
@@ -362,7 +368,15 @@ namespace UnsoundedSea.Runtime
                     }
                     // LateUpdate positions labels after layout; changing position inside a
                     // GeometryChangedEvent can recursively invalidate the same layout pass.
-                    plate.Add(Text(enemy.Name, "actor-name"));
+                    var heading=Box("actor-heading");heading.Add(Text(enemy.Name,"actor-name"));
+                    if(enemy.Style==EnemyStyle.Rhythm||enemy.Style==EnemyStyle.Hidden)heading.Add(Text(enemy.Style==EnemyStyle.Rhythm?"节奏":"隐匿","enemy-style-badge"));
+                    if(enemy.Surge>0){var surge=Text("蓄势 "+enemy.Surge,"enemy-surge-badge");surge.pickingMode=PickingMode.Position;surge.tooltip=UiRules.Describe("蓄势");heading.Add(surge);}
+                    plate.Add(heading);
+                    if(surgeChanges.TryGetValue(enemy.Id,out var surgeChange)&&surgeChange.until>Time.unscaledTime)
+                    {
+                        var feedback=Text("蓄势 "+surgeChange.before+" → "+surgeChange.after,"surge-feedback");plate.Add(feedback);
+                        feedback.schedule.Execute(feedback.RemoveFromHierarchy).StartingIn((long)((surgeChange.until-Time.unscaledTime)*1000));
+                    }
                     if (!hideHealth)
                     {
                         var hp = Box("actor-health"); var fill = Box("actor-health-fill");
@@ -585,7 +599,7 @@ namespace UnsoundedSea.Runtime
                     button.AddToClassList("salt-cell");
                     button.text="";
                     button.AddToClassList("salt-"+publicState.State.ToString().ToLowerInvariant());
-                    var value=publicState.State==MechanismState.Open?"✓":publicState.State==MechanismState.Disabled?"×":publicState.MeasuredValue?.ToString()??"?";
+                    var value=publicState.State==MechanismState.Open?"✓ "+publicState.MeasuredValue:publicState.State==MechanismState.Disabled?"×":publicState.MeasuredValue?.ToString()??"?";
                     button.Add(Text(value,"salt-value"));
                     if(publicState.IsSeal){var seal=new SeaUiArt("seal");seal.AddToClassList("salt-seal");button.Add(seal);}
                     button.tooltip=anchorId+"："+(publicState.State==MechanismState.Open?"已开 · ":publicState.State==MechanismState.Measured?"已测 · ":publicState.State==MechanismState.Disabled?"已停用 · ":"未测 · ")+button.tooltip;
@@ -684,15 +698,27 @@ namespace UnsoundedSea.Runtime
         private void PositionLabels()
         {
             if (director.Stage == null || root.panel == null) return;
+            var placedTargets=new List<Rect>();
             foreach (var label in encounterLabels)
             {
                 if (label.anchor == null) continue;
                 var position = director.Stage.battleCamera.WorldToViewportPoint(label.anchor.position);
-                label.button.style.left = position.x * root.resolvedStyle.width - label.button.resolvedStyle.width * .5f + label.offset.x;
-                label.button.style.top = (1 - position.y) * root.resolvedStyle.height - label.button.resolvedStyle.height * .5f + label.offset.y;
+                var width=label.button.resolvedStyle.width;var height=label.button.resolvedStyle.height;
+                if(float.IsNaN(width)||float.IsNaN(height))continue;
+                var x=Mathf.Clamp(position.x*root.resolvedStyle.width-width*.5f+label.offset.x,12,Mathf.Max(12,root.resolvedStyle.width-width-12));
+                var y=Mathf.Clamp((1-position.y)*root.resolvedStyle.height-height*.5f+label.offset.y,110,Mathf.Max(110,root.resolvedStyle.height-height-340));
+                for(int attempt=0;attempt<placedTargets.Count+1;attempt++)
+                {
+                    var bounds=new Rect(x,y,width,height);var collision=placedTargets.FirstOrDefault(rect=>rect.Overlaps(bounds));
+                    if(collision.width<=0)break;
+                    x=collision.xMax+8;if(x+width>root.resolvedStyle.width-12){x=12;y=Mathf.Max(110,collision.y-height-8);}
+                }
+                label.button.style.left=x;label.button.style.top=y;
+                if(position.z>0)placedTargets.Add(new Rect(x,y,width,height));
                 label.button.style.display = position.z > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             }
-            var summonTop = presentedBoss == BossEncounterKind.Surveyor || presentedBoss == BossEncounterKind.FlagBearer ? 520f : 170f;
+            var mechanism=root.Q(className:"salt-board")??root.Q(className:"relay-board");
+            var summonTop=mechanism!=null&&!float.IsNaN(mechanism.resolvedStyle.height)?mechanism.resolvedStyle.top+mechanism.resolvedStyle.height+12:170f;
             for (var i = 0; i < nameplates.Count; i++)
             {
                 var actor = director.Stage.Actors[i];
@@ -731,6 +757,8 @@ namespace UnsoundedSea.Runtime
                     plate.style.left = Mathf.Clamp(right ? p.x + 70 : p.x - width - 70, 18, Mathf.Max(18, root.resolvedStyle.width - width - 18));
                     plate.style.top = Mathf.Clamp(p.y - height * .5f, 64, Mathf.Max(64, root.resolvedStyle.height - height - 170));
                 }
+                plate.style.left=Mathf.Clamp(plate.style.left.value.value,12,Mathf.Max(12,root.resolvedStyle.width-width-12));
+                plate.style.top=Mathf.Clamp(plate.style.top.value.value,90,Mathf.Max(90,root.resolvedStyle.height-height-300));
                 plate.style.display = screen.z > 0 && actor.Alive ? DisplayStyle.Flex : DisplayStyle.None;
             }
             foreach (var choice in enemyChoices)

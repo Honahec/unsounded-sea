@@ -42,7 +42,7 @@ namespace UnsoundedSea.Tests
             var s=VoyageSession.Create(20);
             Assert.That(s.GetNodeServices().Any(x=>x.Id.StartsWith("buy:")),Is.True);
             Assert.That(s.GetNodeServices().Any(VoyageSession.IsLoadoutChoice),Is.False);
-            MoveToLayer(s,2);Assert.That(s.EventTitle,Is.Not.Empty);
+            MoveToLayer(s,2,RunNodeKind.Event);Assert.That(s.EventTitle,Is.Not.Empty);
             Assert.That(s.GetNodeChoices().Any(x=>x.Id=="voucher"),Is.True);Assert.That(s.GetNodeServices().Any(x=>x.Id=="voucher"),Is.False);
             Assert.That(s.ChooseNode("voucher"),Is.True);Assert.That(s.GetNodeChoices(),Is.Empty);Assert.That(s.CanContinue,Is.True);
         }
@@ -190,7 +190,8 @@ namespace UnsoundedSea.Tests
         {
             var routes=VoyageSession.Create(121);MoveToLayer(routes,7,RunNodeKind.Archive);
             var expected=routes.Export().Map.Stops.Single(x=>x.Id==routes.Current.Id).Next;
-            Assert.That(routes.ChooseNode("routes"),Is.True);
+            var routeChoice=routes.GetNodeChoices().Single(x=>x.Id=="routes");
+            Assert.That(routes.ChooseNode(routeChoice.Enabled?"routes":"briefing"),Is.True);
             Assert.That(routes.Current.Next,Is.EquivalentTo(expected));
             Assert.That(routes.ChooseNode("routes"),Is.False);
             var restored=VoyageSession.Restore(routes.Export());
@@ -217,8 +218,8 @@ namespace UnsoundedSea.Tests
         public void KnownRouteChoicesAreDisabledButLegacyCheckpointStillRestores()
         {
             var s=VoyageSession.Create(121);MoveToLayer(s,6);
-            Assert.That(s.BeginEncounter(),Is.True);Assert.That(s.ResolveEncounter(true,s.Health,s.Sanity),Is.True);Assert.That(s.ClaimReward(null),Is.True);
-            Assert.That(s.Select(s.Choices[0].Id),Is.True);Assert.That(s.ScoutAhead(),Is.True);Assert.That(s.SetSail(),Is.True);Assert.That(s.Arrive(),Is.True);
+            Assert.That(s.BeginEncounter(),Is.True);Assert.That(s.ResolveEncounter(true,s.Health,s.Sanity),Is.True);while(s.Phase==VoyagePhase.Reward)Assert.That(s.ClaimReward(null),Is.True);
+            Assert.That(s.Select(s.Choices.First(x=>x.Kind==RunNodeKind.Archive).Id),Is.True);s.ScoutAhead();Assert.That(s.SetSail(),Is.True);Assert.That(s.Arrive(),Is.True);
             var routes=s.GetNodeChoices().Single(x=>x.Id=="routes");
             Assert.That(routes.Enabled,Is.False);Assert.That(routes.Description,Does.Contain("没有新航路"));Assert.That(s.ChooseNode("routes"),Is.False);
 

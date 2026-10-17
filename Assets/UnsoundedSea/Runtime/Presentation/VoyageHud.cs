@@ -125,7 +125,7 @@ namespace UnsoundedSea.Runtime
         {
             var button = new Button(action) { name = id, text = title };
             var slash=title.LastIndexOf(" / ",StringComparison.Ordinal);
-            if(slash>=0){var key=title.Substring(slash+3);button.text=title.Substring(0,slash);KeyBadge.Attach(button,key);button.tooltip=button.text+"（"+key+"）";}
+            if(slash>=0){var key=title.Substring(slash+3);var caption=title.Substring(0,slash);button.text=caption;KeyBadge.Attach(button,key);button.tooltip=caption+"（"+key+"）";}
             button.AddToClassList(style); button.SetEnabled(enabled); return button;
         }
         private void Change(Func<bool> transition, string feedback = null)
@@ -242,7 +242,8 @@ namespace UnsoundedSea.Runtime
                     choice.tooltip = $"{KindName(stop.Kind)} · {stop.Clue}\n{PreviewRoute(session, stop)}";
                     var description = Element("route-description");
                     description.Add(Text(stop.Name, "route-name"));
-                    description.Add(Text($"{KindName(stop.Kind)}  ·  {stop.Clue}", "route-theme"));
+                    description.Add(Text(stop.Kind==RunNodeKind.Battle?PreviewRoute(session,stop).Split('\n')[0]:$"{KindName(stop.Kind)}  ·  {stop.Clue}", "route-theme"));
+                    if(stop.Perilous){var badge=Element("perilous-badge");badge.Add(new SeaUiArt("seal"));badge.Add(Text("险航 · 双敌 · 两次收获","perilous-label"));description.Add(badge);}
                     description.Add(Text($"{session.HeadingTo(stop)}  ·  {stop.TravelHours} 小时", "route-duration"));
                     choice.Add(description);
                     choice.EnableInClassList("selected", chosen);
@@ -417,6 +418,7 @@ namespace UnsoundedSea.Runtime
         private void BuildRewards(VisualElement panel, VoyageSession session, bool saved)
         {
             panel.Add(Text("选择收获","destination-title"));
+            if(session.Current.Perilous)panel.Add(Text(session.RewardPicksRemaining==1?"还可选 1 次":"还可选 "+session.RewardPicksRemaining+" 次","reward-picks"));
             var cards = Element("reward-cards");
             foreach (var reward in session.RewardCards)
             {
@@ -425,7 +427,7 @@ namespace UnsoundedSea.Runtime
                     () => { selectedReward = card.Id; Refresh(); }, saved);
                 var face = Element("reward-card-face"); IllustratedCard.Apply(face, card); button.Add(face);
                 button.EnableInClassList("selected", selectedReward == card.Id);
-                button.tooltip = card.Name + "：" + card.Description; cards.Add(button);
+                button.tooltip = UiRules.CardDescription(card); cards.Add(button);
             }
             panel.Add(cards);
             foreach (var item in session.RewardItems)
@@ -440,6 +442,8 @@ namespace UnsoundedSea.Runtime
                 if(selectedReward.StartsWith("item:",StringComparison.Ordinal))panel.Add(Action("reward-confirm","领取装备","primary",()=>ClaimSelectedReward(),saved));
                 else
                 {
+                    var tag=UiRules.BossTag(CardCatalog.Get(selectedReward));
+                    if(tag!="")panel.Add(Text(tag,"boss-compatibility"));
                     panel.Add(Action("reward-replace","直接编入（替换一张）","primary",()=>{replacingReward=true;Refresh();},saved));
                     panel.Add(Action("reward-confirm","仅收入行动簿","secondary",()=>ClaimSelectedReward(),saved));
                 }
@@ -568,6 +572,7 @@ namespace UnsoundedSea.Runtime
             sheet.Add(Text("远征行动簿", "journal-title"));
             var body = Element("action-book-body"); sheet.Add(body);
             var side = Element("action-book-side"); body.Add(side);
+            var compatibility=Text("","boss-compatibility");side.Add(compatibility);
             var main = Element("action-book-main"); body.Add(main);
             var count = Text("", "collection-count"); main.Add(count);
             var scroll = new ScrollView(ScrollViewMode.Vertical); scroll.AddToClassList("action-book-scroll");
@@ -583,6 +588,9 @@ namespace UnsoundedSea.Runtime
             {
                 var card = CardCatalog.Get(id);
                 var button = Action("book-" + id, string.Empty, "action-book-card", null);
+                void DescribeCard()=>compatibility.text=UiRules.BossTag(card);
+                button.RegisterCallback<FocusInEvent>(_=>DescribeCard());
+                button.RegisterCallback<PointerEnterEvent>(_=>DescribeCard());
                 button.clicked += () =>
                 {
                     if (!editable) return;
@@ -597,7 +605,7 @@ namespace UnsoundedSea.Runtime
                 button.EnableInClassList("new-reward-card",editable&&Session.NewRewardCardIds.Contains(id)&&!Session.DeckIds.Contains(id));
                 if(button.ClassListContains("new-reward-card"))button.Add(Text("新收获","new-reward-badge"));
                 var face = Element("action-book-card-face"); IllustratedCard.Apply(face, card); button.Add(face);
-                button.tooltip = card.Name + "：" + card.Description; cards.Add(button);
+                button.tooltip = UiRules.CardDescription(card); cards.Add(button);
             }
             var selectedTools = new HashSet<string>(Session.ToolIds, StringComparer.Ordinal);
             var toolTitle = Text($"调查工具 {selectedTools.Count}/2", "tool-count"); side.Add(toolTitle);

@@ -141,3 +141,7 @@
 .region-intro-sheet > .primary, .region-intro-sheet > .secondary { min-width: 180px; white-space: nowrap; }
 .new-reward-card { border-color: #80b5a5; }
 .new-reward-badge { position: absolute; top: -14px; right: 0; padding: 2px 5px; background-color: #254b48; color: #eee4c9; font-size: 11px; }
+.perilous-badge { flex-direction: row; align-items: center; margin-top: 4px; }
+.perilous-badge SeaUiArt { width: 24px; height: 24px; }
+.perilous-label, .reward-picks { font-size: 13px; color: #d7bd82; }
+.reward-picks { margin-bottom: 15px; }

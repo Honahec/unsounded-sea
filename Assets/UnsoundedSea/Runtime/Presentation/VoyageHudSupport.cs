@@ -130,7 +130,8 @@ namespace UnsoundedSea.Runtime
             var enemies = VoyageEncounterCatalog.Resolve(stop.EncounterId).encounter.enemies;
             var channels = enemies.SelectMany(enemy => enemy.intents).Where(intent => intent.amount > 0).Select(intent => intent.channel).Distinct().ToArray();
             var danger = string.Join("、", channels.Select(channel => channel == DamageChannel.Health ? "生命伤害" : "理智冲击"));
-            return (enemies.Length > 1 ? "双敌接舷" : "单敌接舷") + " · " + danger + "\n" + preview;
+            var style=session.PreviewStyle(stop);
+            return (style==EnemyStyle.Hidden?"隐匿型":"节奏型") + " · " + danger +(stop.Perilous?"\n险航 · 双敌 · 两次收获":"")+"\n"+preview;
         }
 
         private static void SupportEntry(VisualElement parent, string title, string detail, bool tooltipOnly = false)

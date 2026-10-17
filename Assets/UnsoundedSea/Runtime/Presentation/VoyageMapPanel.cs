@@ -97,6 +97,7 @@ namespace UnsoundedSea.Runtime
                 var title = new Label(stop.Name) { pickingMode = PickingMode.Ignore }; title.AddToClassList("node-name");
                 title.AddToClassList(stop.Y > 78 ? "label-below" : "label-above"); node.Add(title);
                 node.tooltip = $"{StateName(state)} · {KindName(stop.Kind)} · {stop.Name}\n{stop.Clue}\n{VoyageHud.PreviewRoute(session, stop)}";
+                if(stop.Perilous){var badge=new SeaUiArt("seal");badge.AddToClassList("map-perilous-badge");node.Add(badge);node.tooltip+="\n险航 · 双敌 · 两次收获";}
                 Add(node);
             }
 

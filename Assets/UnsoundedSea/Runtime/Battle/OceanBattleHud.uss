@@ -139,3 +139,9 @@
 .salt-open { border-color: #80b5a5; background-color: #254b48; }
 .salt-disabled { border-color: #ac7566; }
 .boss-target:focus, .actor-label:focus { border-width: 2px; border-color: #eee4c9; }
+.actor-heading { flex-direction: row; flex-wrap: wrap; align-items: center; }
+.enemy-style-badge, .enemy-surge-badge { margin-left: 7px; padding: 1px 4px; font-size: 11px; color: #d7bd82; background-color: rgba(8,19,22,.85); border-bottom-width: 1px; border-bottom-color: #9e8755; white-space: nowrap; }
+.enemy-surge-badge, .surge-feedback { color: #f2bc9d; }
+.surge-feedback { font-size: 12px; margin: 3px 0; }
+.salt-board { width: 360px; }
+.battle-piles { right: 32px; bottom: 310px; width: 220px; }

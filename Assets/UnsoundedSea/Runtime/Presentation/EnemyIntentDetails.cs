@@ -68,29 +68,15 @@ namespace UnsoundedSea.Runtime
             ["保留"]="指定的非遭遇牌跨过本回合弃牌边界留在手中；打出或回收不延续原保留资格。",
             ["消耗"]="本场战斗从可循环牌堆移除；物资则扣除实际份数。",
             ["主动支付"]="由玩家承担的明确代价；不被格挡、理智防护抵销，支付后资源至少剩1。",
-            ["被注视"]="0–3层；禁忌接触可累积，3层会在事件点出现回视处置，换幕降低1层。"
+            ["被注视"]="0–3层；禁忌接触可累积，3层会在事件点出现回视处置，换幕降低1层。",
+            ["蓄势"]="第二、三幕普通战第4个敌方回合起，正伤害+2；之后每回合再+1。零伤害不变；层数由回合决定，不揭示隐匿分支。"
         };
         public static string Describe(string text)=>text+string.Concat(Terms.Where(x=>text.Contains(x.Key)).Select(x=>"\n"+x.Key+"："+x.Value));
-        // Only cards whose actual legal targets require one specific Boss mechanism.
-        public static string BossTag(CardSpec card)
-        {
-            switch(card.Id.ToLowerInvariant())
-            {
-                case "c065":return "适用：M04";
-                case "c082":return "适用：M05";
-                default:return "";
-            }
-        }
-        public static string BossTag(ItemSpec item)
-        {
-            switch(item.Id)
-            {
-                case "i06":case "i16":return "适用：M03";
-                case "i08":return "适用：M04";
-                case "i07":case "i09":return "适用：M05";
-                default:return "";
-            }
-        }
+        // The catalog marks mechanism requirements; recommendations and fallback effects do not imply exclusivity.
+        private static string BossTag(IReadOnlyList<string> ids)=>ids.Count==0?"":"适用："+string.Join(" / ",ids);
+        public static string BossTag(CardSpec card)=>BossTag(card.BossIds);
+        public static string BossTag(ItemSpec item)=>BossTag(item.BossIds);
+        public static string CardDescription(CardSpec card)=>Describe(card.Name+"："+card.Description)+(BossTag(card)==""?"":"\n"+BossTag(card));
         public static void SanityTicks(VisualElement track,int max)
         {
             foreach(var threshold in new[]{12,5})
@@ -111,6 +97,11 @@ namespace UnsoundedSea.Runtime
     {
         public static void Attach(VisualElement button,string key)
         {
+            button.AddToClassList("key-control");
+            if(button is Button control&&!string.IsNullOrEmpty(control.text))
+            {
+                var text=new Label(control.text){pickingMode=PickingMode.Ignore};text.AddToClassList("key-control-title");control.text="";control.Add(text);
+            }
             var badge=new Label(key){pickingMode=PickingMode.Ignore};badge.AddToClassList("key-badge");button.Add(badge);
         }
     }

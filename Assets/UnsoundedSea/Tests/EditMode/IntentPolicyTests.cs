@@ -79,7 +79,7 @@ namespace UnsoundedSea.Tests
                 {
                     Assert.That(enemy.intents.Where(intent => intent.amount > 0).Select(intent => intent.channel),
                         Is.EquivalentTo(new[] { DamageChannel.Health, DamageChannel.Sanity }), path);
-                    Assert.That(enemy.intents.Select(intent => intent.clue).Distinct(), Has.Count.EqualTo(1), path);
+                    Assert.That(enemy.intents.Select(intent => intent.clue).Distinct().Count(), Is.EqualTo(1), path);
                     Assert.That(enemy.candidateDescription.IndexOf("生命伤害", StringComparison.Ordinal),
                         Is.LessThan(enemy.candidateDescription.IndexOf("理智冲击", StringComparison.Ordinal)), path);
                     Assert.That(enemy.candidateDescription, Does.Not.Contain("公开"), path);

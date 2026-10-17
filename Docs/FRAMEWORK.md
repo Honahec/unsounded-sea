@@ -4,7 +4,7 @@
 
 ## 快速运行
 
-Editor 点击 Play 默认从 `Assets/UnsoundedSea/Scenes/MainMenu.unity` 启动，再选择「启航」或「继续航程」进入 `Voyage.unity`；有效未完航程需确认覆盖，终局记录不显示继续。`PlayModeEntry` 配置 `playModeStartScene`，不覆盖当前编辑场景；调试单场景时取消菜单 `Unsounded Sea > Play From Main Menu`，该偏好按本机项目保存。开局可选择医师或听音员，记住设备偏好。统一「调试选关」仅在 Editor／Development Build 显示，覆盖 25 个普通遭遇、八个 Boss／目标战与非战斗节点。`Battle.unity` 保留为旧规则样例，`ModelImportReview.unity` 仅供美术审阅；绑定资产保留集见[模型流程](MODEL_IMPORT_WORKFLOW.md)。
+Editor 点击 Play 默认从 `Assets/UnsoundedSea/Scenes/MainMenu.unity` 启动，再选择「启航」或「继续航程」进入 `Voyage.unity`；有效未完航程需确认覆盖，终局记录不显示继续。`PlayModeEntry` 配置 `playModeStartScene`，不覆盖当前编辑场景；调试单场景时取消菜单 `Unsounded Sea > Play From Main Menu`，该偏好按本机项目保存。开局可选择医师或听音员，记住设备偏好。统一「调试选关」仅在 Editor／Development Build 显示，覆盖 25 个普通遭遇、八个 Boss／目标战与非战斗节点。旧 `Battle.unity` 与 `SampleScene.unity` 已退出构建，旧 HUD 组件及生成入口已清理；`ModelImportReview.unity` 仅供美术审阅；绑定资产保留集见[模型流程](MODEL_IMPORT_WORKFLOW.md)。
 
 独立样例「雾海来客」：调查船上仅保留空潜水服「灯塔下的回声」，已移除蒙面祷告者。每回合 3 行动、抽 5 张牌；点击敌人切换查看对象，有目标牌拖到目标后松手，无目标牌上拖达到阈值后松手出牌，具体交互见下文。调查工具每场次数有限。额外遭遇牌「绘制封线」基础消耗 3 行动，每回合一次，累计 4 段获胜；它保留在手，不进入普通牌堆，敌人可以仍然存活。生命或理智归零失败。它是第一幕三个 Boss 候选之一。独立样例允许重开，航程战斗只允许保存后返回航海、继续当前战斗，不提供重试刷新资源。
 
@@ -87,13 +87,15 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 
 主页使用真实 `SurveyVessel` 与 `Lighthouse` Prefab，不再保留几何体占位背景或右侧圆形装饰。`Tools/MainMenuSceneSetup.Apply` 重建该背景：船位于右下、船头朝右上，灯塔位于右侧远景；`MainMenuSeaPresentation` 复用 `VoyageOcean` 材质与 `BattleWater` 时钟，使船随海面升沉，并遵守减少动效设置。灯塔来源见 `ArtSource/Landmarks/manifest.json`。
 
-`OceanBattlePanel` 参考 1600×900；USS 位于 `Runtime/Battle/OceanBattleHud.uss`。中央保留 3D 画面，局内不显示章节与地点标题。左下显示生命／理智，格挡与防护仅在生效时显示；调查工具列于上方并保留余次／费用。左上显示目标进度，右下集中回合、行动与结束回合；结束回合复用 `SeaUiArt("seal")` 印记，按钮无额外黄色圆底，文字独立放在图案下方，两套 HUD 一致。右上常驻无边框「海图 / M」与「行动簿 / B」，J 打开日志。牌库／弃牌／消耗数量在手牌右侧及日志显示；Boss 特殊行动使用额外遭遇牌，不提供重复的任务按钮。字体使用项目 TextCore SDF，保留破损装饰字体与旧铜色细线。
+`OceanBattlePanel` 参考 1600×900；USS 位于 `Runtime/Battle/OceanBattleHud.uss`。中央保留 3D 画面，局内不显示章节与地点标题。左下显示生命／理智，格挡与防护仅在生效时显示；调查工具列于上方并保留余次／费用。左上显示目标进度，右下集中回合、行动与结束回合；结束回合复用 `SeaUiArt("seal")` 印记，按钮无额外黄色圆底，文字独立放在图案下方，右上常驻无边框「海图 / M」与「行动簿 / B」，J 打开日志。牌库／弃牌／消耗数量在手牌右侧及日志显示；Boss 特殊行动使用额外遭遇牌，不提供重复的任务按钮。字体使用项目 TextCore SDF，保留破损装饰字体与旧铜色细线。
 
 手牌默认约一半藏于下沿，常态右牌覆盖左牌；`HandCardPresentation` 将选中牌置顶，悬停／聚焦牌再置于其上，同时抬起 150 像素、放大 10% 并摆正。按钮命中区域稳定，显式 tabIndex 保持键盘顺序；多牌横向滚动随聚焦定位，不改变纵向隐藏量。不可用牌仍可查看精确规则、费用与消耗标记。新增手牌在反馈锁结束后按 35 ms 间隔滑入／淡入，其余手牌约 0.24 秒补位；普通重绘不重复抽牌动画。减少动效保留直接跟手与合法目标提示，关闭飞行、倾斜和入手位移。
 
 鼠标／指针按下后移动至少 8 个面板像素才拿起卡牌，单击不出牌。`OceanBattleHud.Motion` 在根节点捕获指针，卡面脱离手牌裁切区域并平滑跟手。无目标牌不显示瞄准线：从按下点向上拖动不足 80 个 UI 像素后松手会回弹，达到 80 像素后松手立即出牌，不要求落在战场或玩家资源区。有目标牌才显示弯曲引导线与落点，松手时重新验证模型、脚下圆圈、信息区、机关或对应列表项；拖动期间不显示操作提示文字。无效落点、Esc、右键、失去窗口焦点和系统取消均回弹且不提交命令；暂停取消当前拖动。双目标牌先拖放第一目标，再把同一张牌拖向第二目标；再次拖向首个目标可按卡牌规则确认单体，第一步不付费。M05 的 `E05-01` 为无目标牌，随机召唤一名尚未召唤的守卫，不显示指向线或选择列表。手牌／弃牌／证据列表与盐格、继电器均是拖放目的地。
 
-键盘仍可 Tab 聚焦后提交卡牌，再选目标；唯一合法敌人可由键盘直接提交。非拖动状态下点击敌人仍能查看，右键卡牌或 D 查看详情。海图／行动簿／暂停／结算弹窗禁用底层控件及根节点焦点，键盘留在当前弹窗；全局快捷键由根节点捕获。旧 `BattleHud` 仅服务独立规则样例，保留其原选择交互。
+键盘仍可 Tab 聚焦后提交卡牌，再选目标；唯一合法敌人可由键盘直接提交。非拖动状态下点击敌人仍能查看，右键卡牌或 D 查看详情。海图／行动簿／暂停／结算弹窗禁用底层控件及根节点焦点，键盘留在当前弹窗；全局快捷键由根节点捕获。卡牌插画、常态卡面和手牌悬停／拖放沿用现有表现。理智条按实际最大值标出 12／5；状态徽记复用 `SeaUiArt`，快捷键复用 `KeyBadge`，术语提示统一由 `UiRules` 提供。
+
+普通敌人名牌读取 `EnemyView.Style / Surge`，蓄势改变以短暂的前后数字反馈表示，减少动效时仍显示；当前声源／通道仅取当前选中敌人、本回合 `ScopeTurn` 证据。盐格与继电器从 `EncounterTargetView.State / MeasuredValue / IsSeal / IsCurrent` 绘制公开图形，未知格没有危险答案；机关按钮仍使用当前牌实际合法目标。Boss 状态行保留阶段与限制，目标进度只在左上显示。
 
 `BattleMotionLayer` 只消费 `Resolved` 的公开前后快照：枪击短轨迹／近战划击、伤害数字、格挡／理智防护刻线、调查确认、治疗与目标推进反馈。卡面释放后约 0.5 秒缩入弃牌位置，消耗牌向上消散，保留的遭遇牌回到手牌；血条约 0.32 秒缓动，行动数字轻微放大后恢复。结束回合先显示敌方行动，反馈锁结束后显示新回合。动效层跨 HUD 重绘保留，暂停冻结，退场释放临时元素；不读取隐藏意图、不推进规则随机数、不在动画回调中执行命令。图形使用矢量刻线与既有插画，没有新增图片或模型。
 
@@ -104,7 +106,7 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 `BattleDirector.ViewRevision` 仅在规则成功结算或重开时递增；动作解锁只刷新按钮可操作性，不重建 HUD、不闪烁禁用色。状态重建保留可恢复焦点与手牌、工具、日志滚动位置。日志可滚动查看完整可见历史，不再截断为最后 12 条。调查工具使用规则快照 `ToolView.Enabled / DisabledReason / Targets`，工具区域短句标明聚焦目标，已回答问题直接禁用。
 
 
-`MainMenu` 与 `SettingsPanel` 共用深墨绿、旧黄铜与象牙文字样式；Esc 打开简短暂停菜单，J 单独打开航海日志。覆盖存档警告、放弃后果和错误不省略。设置提供总音量、音乐／环境声、音效、1280×720／1600×900／1920×1080、显示模式、垂直同步与减少动效；音量百分比固定留宽且不换行，设置内容可滚动。`GameSettings` 属于设备偏好，不进入规则或回放。旧 `BattleHud` 同步手牌、工具、日志与意图规则，仅服务 `Battle.unity`。
+`MainMenu` 与 `SettingsPanel` 共用深墨绿、旧黄铜与象牙文字样式；Esc 打开简短暂停菜单，J 单独打开航海日志。覆盖存档警告、放弃后果和错误不省略。设置提供总音量、音乐／环境声、音效、1280×720／1600×900／1920×1080、显示模式、垂直同步与减少动效；音量百分比固定留宽且不换行，设置内容可滚动。`GameSettings` 属于设备偏好，不进入规则或回放。旧 `BattleHud.cs / .uss` 和对应 meta 已删除；清理入口 `Tools/UiExperienceSetup.cs` 先检查依赖及未保存场景。
 
 四个 UI 入口通过 `UiFont` 从现有中文源字体创建共用的运行时动态 SDF 字体，保留采样尺寸、图集尺寸和渲染模式。新增字形只填入运行时图集，不修改导入的 `default_zh.asset`；切场景复用，新的 Play 会话重置缓存。不要通过恢复正在使用的字体资产来清理字形缓存，这可能让 TextCore 已缓存的字形失去图集引用。
 
@@ -185,13 +187,13 @@ UnsoundedSea.Tests.EditMode       NUnit 行为测试，引用 Core / Runtime
 
 完整目录以 `Core/CardCatalog.cs` 为数据主出处，C001–C096 为稳定目录／效果号，既有十个内容 ID 保持不变。修改目录后通过 Unity CLI `run_script --file Tools/CardCatalogSetup.cs --entry CardCatalogSetup.Build` 同步 96 份 `Content/Cards/*.asset`、配置插画导入并校验；不会重建场景或替换既有 GUID。目录之外的遭遇卡仍可通过 **Create → Unsounded Sea → Card** 创建，使用通用效果或自定义处理器。
 
-标题菜单图鉴只读浏览全部 96 张卡牌与完整卡面，不再编辑初始构筑。`CardCatalog.Starter` 是固定 12 张不同初始牌的唯一来源，旧自选牌组偏好不再读取；航程内仍可在整备点把已获得方案编入 12 张行动牌。`CardDeckPreparation` 只在游戏入口应用：主线 `BattleDirector` 调用 `CreateSession(..., usePreparedDeck: true)`，旧 `BattleHud` 显式应用；`EncounterDefinition.Build()` 保持纯内容构建，不读取玩家偏好。已验证战斗证据在胜利后归档，后续只注入对应敌人的档案。
+标题菜单图鉴只读浏览全部 96 张卡牌与完整卡面，不再编辑初始构筑。`CardCatalog.Starter` 是固定 12 张不同初始牌的唯一来源，旧自选牌组偏好不再读取；航程内仍可在整备点把已获得方案编入 12 张行动牌。`CardDeckPreparation` 只在游戏入口应用：主线 `BattleDirector` 调用 `CreateSession(..., usePreparedDeck: true)`；`EncounterDefinition.Build()` 保持纯内容构建，不读取玩家偏好。已验证战斗证据在胜利后归档，后续只注入对应敌人的档案。
 
-96 张目录卡与 10 张 Boss／封线遭遇牌均有独立生成的 `Resources/CardArt/<稳定卡牌ID>.png` 背景，统一海洋哥特、旧黄铜暖光与冷蓝阴影。`IllustratedCard` 在主线、旧战斗 HUD 和行动簿复用：整幅插画铺满卡面，左上行动费用独立显示；标题与简短效果句限制在卡面下方 66% 的内缩阴影区，不把规则解释铺满插画。`CardCatalog.FaceDescription` 维护人工精简文案，完整 `Description` 留在提示中；必要条件、主动支付与消耗不能省略。模型、提示词、来源与文件哈希集中在 [插画 manifest](../ArtSource/Cards/manifest.json)。
+96 张目录卡与 10 张 Boss／封线遭遇牌均有独立生成的 `Resources/CardArt/<稳定卡牌ID>.png` 背景，统一海洋哥特、旧黄铜暖光与冷蓝阴影。`IllustratedCard` 在主线和行动簿复用：整幅插画铺满卡面，左上行动费用独立显示；标题与简短效果句限制在卡面下方 66% 的内缩阴影区，不把规则解释铺满插画。`CardCatalog.FaceDescription` 维护人工精简文案，完整 `Description` 留在提示中；必要条件、主动支付与消耗不能省略。模型、提示词、来源与文件哈希集中在 [插画 manifest](../ArtSource/Cards/manifest.json)。
 
 不可用卡牌不显示禁用原因；点击尝试出牌后，失败原因作为 2.5 秒字幕显示，右键／D 仍可查看完整卡面。遭遇牌费用只显示实际行动消耗，包括合法折扣；绘制封线基础消耗 3 行动。航程战胜利在动作反馈结束后自动返回航海，不弹胜利页；保存失败时留在战斗并提供重试保存，避免丢失结算。
 
-滚动条统一复用 `GameMenu.uss` 的原生 ScrollView 样式：墨绿轨道、旧黄铜滑块和箭头、象牙色焦点；行动簿、航海日志及两套战斗 HUD 共用。保留原生内容区滚轮、拖动、键盘和自动显隐；`ScrollWheel` 将面板留白上的滚轮送入该页纵向滚动条，避免鼠标必须压住滑块。行动簿详情宽度包含轨道留白。船上清单物资只显示名称、数量、配装状态和必要费用，详细用途放提示，不再逐行铺陈全文。
+滚动条统一复用 `GameMenu.uss` 的原生 ScrollView 样式：墨绿轨道、旧黄铜滑块和箭头、象牙色焦点；行动簿、航海日志及战斗 HUD 共用。保留原生内容区滚轮、拖动、键盘和自动显隐；`ScrollWheel` 将面板留白上的滚轮送入该页纵向滚动条，避免鼠标必须压住滑块。行动簿详情宽度包含轨道留白。船上清单物资只显示名称、数量、配装状态和必要费用，详细用途放提示，不再逐行铺陈全文。
 
 选目标统一使用 `CardView.Targets` 的稳定 ID；零选择牌传 `null`，失效选项在付款前拒绝。C054 先支付并打出，再通过 `BattleView.PendingChoice` 公开最多三张牌的完整排列；期间阻止其他命令，必须用 `BattleCommand.Reorder` 完成，零行动仍可选择，不能取消退款。确认排序后只抽一张，空抽牌堆禁用且查看不洗牌；两条命令均进入回放。C063 与 Boss 常驻继电器共享调整次数，C044 共享开格额度；其他场景的替代收益不绕过当前场景已有机制的次数或证据门槛。
 
@@ -229,7 +231,11 @@ UnsoundedSea.Tests.EditMode       NUnit 行为测试，引用 Core / Runtime
 
 `SupportCatalog` 定义 25 道具和 10 船员；`BattleLoadout` 校验最多两份战斗物资、三件不同装备且最多一个引擎、航标和被注视。`BattleSupportRules` 处理 `UseConsumable`、船员、装备触发与显式证据组合；`BattleView.SupplyActions` 提供合法目标。所有扣费先验证，消耗记录在 `SpentConsumables`；每次成功战斗命令写回待续回放，战后由 `ResolveEncounter` 验证携带份数并一次扣库存。装备、受伤与类型化证据均进入回放指纹。
 
-`VoyageSupport.GetSupportChoices` 返回配装、仪式及互斥事件扩展，`GetNodeServices` 单独返回购买、招聘、治疗、修械、营救邀请和回望等接驳服务；均通过 `ManageSupport` 验证执行。服务不结算节点，也不能重开一次性节点收益；已结算节点隐藏服务，待邀请候选除外。`BattleSupplyPanel` 继续消费实际物资次数和目标，I14 封泥每场最多推进一次普通／雾海封线。
+节点主面板将 `GetNodeChoices` 的互斥「本节点选项」与 `GetNodeServices` 的「接驳服务」分组；事件标题读取 `EventTitle`，被注视 3 层时回视处置优先。`VoyageSupport.GetSupportChoices` 保留兼容的配装与事件接口；`IsLoadoutChoice` 限制船上清单仅查看／配装，购买、招聘、治疗、修械、营救邀请、筹备和回望均在主面板，经 `ManageSupport` 验证执行。服务不结算节点，也不能重开一次性节点收益；已结算节点隐藏服务，待邀请候选除外。`BattleSupplyPanel` 继续消费实际物资次数和目标，I14 封泥每场最多推进一次普通／雾海封线。
+
+奖励页先选牌，再选择「直接编入（替换一张）」或「仅收入行动簿」。独立替换弹窗调用单次 `ClaimReward(id, oldId)`，Esc／右键／取消不修改状态；每次领取清空 UI 选择。`NewRewardCardIds` 只标记尚未整备的新收获，整备保存后清除。适用 Boss 标签读取目录 `BossIds`，在奖励选择、行动簿焦点／悬停摘要与提示中显示，不修改卡面、不把一般推荐等同于专用。险航徽记同时用于已公开航路和海图，普通预览读取 `PreviewStyle` 与公开候选通道，不反推锁定行动。
+
+胜利先显示 `EncounterDebrief`，包含本场累计生命／理智承伤、实际消耗物资和去重后的可归档证据；承伤在威胁实际扣除资源时累计，排除主动支付、治疗和被抵御部分。`VoyageRuntime` 传入战斗计数，旧调用未提供计数时显示未记录，不推算净差。`DismissDebrief / DismissRegionIntro` 显式确认后才开放奖励／新海域输入；两种待确认状态进入检查点历史，减少动效仍完整显示。小结、替换牌组及行动簿均支持面板留白滚轮。
 
 `VoyagePreparation` 提供 `PreparationBriefing / PreviewStop / PreviewShopItems / PreviewCrew`。未知航点拒绝访问，已知不可达航点仅返回历史摘要；商店按本幕实际 Boss 及本海域普通次目标筛选，幕末装备奖励按下一幕实际 Boss。候选先过滤已拥有项再定量，最后整备保证实际 Boss 筹备用品；预览不读敌方锁定意图。
 
@@ -248,7 +254,9 @@ C039／C041／C050 的调查接力共享每回合一次行动返还；C092 需�
 
 文件存储先写临时文件并 flush，再原子替换已有文件，保留旧 `.bak`；读失败不会自动覆盖或清空。默认实现面向桌面文件系统，WebGL/云存档需另实现 `IBattleSaveStore`。
 
-航海用 `VoyageCheckpoint` 保存首幕地图、初始船员和成功命令历史，重建三幕路径、知识、奖励、配装、资源与阶段。地图版本 **9**、检查点版本 **13**；`Perilous` 进入地图校验，领奖替换通过 ClaimReward 历史的单个 `Values` 元素记录；多次收获、幕末已选海域未领奖均可重放。旧地图与旧检查点直接拒绝，不覆盖原文件，需明确开始新航程。
+航海用 `VoyageCheckpoint` 保存首幕地图、初始船员和成功命令历史，重建三幕路径、知识、奖励、配装、资源与阶段。地图版本 **9**、检查点版本 **14**；`Perilous` 进入地图校验，领奖替换通过 ClaimReward 历史的单个 `Values` 元素记录；多次收获、幕末已选海域未领奖、小结承伤与待确认过场均可重放。旧地图与旧检查点直接拒绝，不覆盖原文件，需明确开始新航程。
+
+Editor 验收脚本 `Tools/UiExperienceQA.cs` 通过 `VoyageRuntime.BeginValidation` 将航程文件限定在项目 `Logs/UiExperience/`，验证会话不写永久证据偏好；真实战斗与命令规则保持不变。截图前实际调整 Game View，分别记录三比例原生像素与 UI 根尺寸。真实航程入口只通过合法命令推进，不直接设置胜利；结束时比较正式存档哈希并恢复减少动效偏好。
 
 `Application.persistentDataPath/voyage.json` 使用版本 **1** 包装，组合航海检查点和可选的未结算 `BattleReplay`。每次成功局内操作保存回放；返回航海或标题后继续，恢复同一战斗状态，不重掷开场。胜负结算后清掉局内回放，进入奖励或失败；整局终结后归档到 `voyage-final.json`，主菜单不再提供继续该终局。结算或保存异常保留待结算数据和错误，可重试，不中断 HUD 的 `Changed` 通知。航行中恢复重播该段过场、不重复计段。文件原子替换并保留 `.bak`，旧格式或损坏文件明确报错，不自动覆盖；用户确认后仍可开始新航程。跨版本迁移尚未提供。
 
