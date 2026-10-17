@@ -1,0 +1,680 @@
+{
+  "date": "2026-10-17",
+  "status": "curated_binding_candidates",
+  "asset_count": 25,
+  "selection_counts": {
+    "rigtrials": 10,
+    "hybrid": 5,
+    "hyper3d": 10
+  },
+  "scope": "One selected rig per ordinary humanoid; source static models, Prayer, Echo and encounter references unchanged. Combat animation deferred.",
+  "provider_request_provenance": {
+    "endpoint": "https://api.hyper3d.com/api/v2/rigging",
+    "bone_template": "unity",
+    "material": "None",
+    "geometry_file_format": "glb",
+    "rigging_mode": "generate",
+    "skinning_method": "shell",
+    "animation_preset": [],
+    "animation_files": []
+  },
+  "historical_input_revision": "cf3b4a1",
+  "models_directory": "Assets/UnsoundedSea/Art/Models/CuratedRigs",
+  "prefabs_directory": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs",
+  "quality_review": "quality-review.json",
+  "unity_evidence": "unity-validation.json",
+  "lfs_cleanup": "lfs-cleanup.json",
+  "reproduction": {
+    "import": "Unity CLI run_script Tools/CurateHumanoidRigs.cs entry CurateHumanoidRigs.Consolidate args [ArtSource/Characters/CuratedRigs/manifest.json]",
+    "combine": "Tools/CombineHumanoidRigs.py; parent hashes and method per asset"
+  },
+  "limitations": [
+    "No new combat animation clips. Ten selected old GLBs retain their existing five diagnostic clips byte-for-byte to avoid creating ten replacement LFS objects; curated prefabs have no animation drivers.",
+    "Fused props, garments, hidden hands, retargeting and target-device performance remain deferred.",
+    "Current Unity glTFast imports four influences per vertex. GLBs retain complete weights; Unity checks exercise actual imported meshes.",
+    "Old candidate folders and duplicate raw/blend files removed from current tree. Remote GitHub LFS quota is NOT reclaimed by deletion commits.",
+    "Five hybrid GLBs are new local LFS objects; not pushed pending remote storage cleanup."
+  ],
+  "assets": [
+    {
+      "name": "AbandonShipMedic",
+      "selection": "rigtrials",
+      "reason": "保留旧版：旧版药箱未完全随握持手移动，不能直接判定持物合格。",
+      "deferred": "药箱握持和刚性；肩部与大幅动作。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/AbandonShipMedic_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/AbandonShipMedic.prefab",
+      "sha256": "2b6d06a38bce473feec2702224cd45b899fe230b24ae2233516272bf4f4befa0",
+      "bytes": 36297748,
+      "source": {
+        "filename": "AbandonShipMedic_Source.glb",
+        "source": "ArtSource/Characters/AbandonShipMedic_Source.glb",
+        "source_sha256": "288d09ebc74cb80d1159dee4f7be66cd3f63a0dc89731ab9fe74cb58624487ee",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "541adad8-31ef-40fa-b415-519009a3ca0c",
+      "original_hyper3d_raw_sha256": "6ee98d53b38fa382de5e0979d941e58b238dbf55f76c09bfeca5534a4670d050",
+      "original_hyper3d_prepared_sha256": "db5f1dc15af518f9940ea4aadba3973445e5036ed790ecc0e267894c532a8aee",
+      "embedded_legacy_clips": 5
+    },
+    {
+      "name": "AbyssRunner",
+      "selection": "hybrid",
+      "reason": "保留新版上肢；合入旧版下肢关节及权重，包含原 Root 权重，骨盆平滑过渡。",
+      "deferred": "传声筒握持侧腕定位、器物刚性与大幅动作。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/AbyssRunner_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/AbyssRunner.prefab",
+      "sha256": "42a0965cb82f5465ffce77b339adda19e2dacc73258e668d4c4529e69f31a184",
+      "bytes": 39981908,
+      "source": {
+        "filename": "AbyssRunner_Source.glb",
+        "source": "ArtSource/Characters/AbyssRunner_Source.glb",
+        "source_sha256": "7942dcdedba6059493edcaa458fc9ea469636e0d1b721f18a15412854c49e4f7",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "cf0d8ad6-592a-401a-a6ee-3e69202ca931",
+      "original_hyper3d_raw_sha256": "912b4ba4454f0636796005a46e6ec97d3c8836d7e66aafcf644c1e6e6abd7165",
+      "original_hyper3d_prepared_sha256": "3fcd62e70fadb9a18c5098a7f1dcf0ad21713ec0d0d7e8dad68b0669a89acc9b",
+      "combination": {
+        "method": "New upper binding + old lower joints/weights, smooth 25 cm pelvis transition at 2 m normalized height",
+        "parents": {
+          "hyper3d": {
+            "historical_path": "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/AbyssRunner_Rigged.glb",
+            "sha256": "3fcd62e70fadb9a18c5098a7f1dcf0ad21713ec0d0d7e8dad68b0669a89acc9b"
+          },
+          "rigtrials": {
+            "historical_path": "ArtSource/Characters/RigTrials/AbyssRunner_Rigged.glb",
+            "sha256": "0def495bb8826d865f0e508b0f5ef373b3b826587ed1231286d8a8ea6a4cb06b"
+          }
+        },
+        "sha256": "42a0965cb82f5465ffce77b339adda19e2dacc73258e668d4c4529e69f31a184",
+        "bytes": 39981908,
+        "vertex_match_max_m": 2.8415638553269673e-06,
+        "export_rest_error_max_m": 7.306128964046366e-07,
+        "animation_count": 0
+      },
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "BarrelThief",
+      "selection": "hyper3d",
+      "reason": "保留新版：三个诊断姿势未见大面积跨部位牵拉，主要关节与可见肢体大致对应。",
+      "deferred": "木桶刚性、肩腋与手指。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/BarrelThief_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/BarrelThief.prefab",
+      "sha256": "3b041ec799d8bf9f5b747c3b4af7549239fd6e434162121866ea602117170a9a",
+      "bytes": 40581408,
+      "source": {
+        "filename": "BarrelThief_Source.glb",
+        "source": "ArtSource/Characters/BarrelThief_Source.glb",
+        "source_sha256": "a097ca2ccc094964614a1c14880d64042e5695d4b6676209da8ab7317e394357",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "e0c7f637-0ce5-4f9a-b27a-faccc6ad0060",
+      "original_hyper3d_raw_sha256": "77b34f730a3045a959fc0f70c8edd8ca20cbd9feef4b30e136b1ee10c08e20c6",
+      "original_hyper3d_prepared_sha256": "3b041ec799d8bf9f5b747c3b4af7549239fd6e434162121866ea602117170a9a",
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "BlackSailMessenger",
+      "selection": "hyper3d",
+      "reason": "保留新版：新版手、旗杆跟随屈肘，腿部保持稳定，主关节位置更接近模型。",
+      "deferred": "旗杆刚性、旗布与手指。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/BlackSailMessenger_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/BlackSailMessenger.prefab",
+      "sha256": "23e9efc86c730fe40eed125becfcd92347351c68b9679e1c7a0e3759b21a7b29",
+      "bytes": 35213660,
+      "source": {
+        "filename": "BlackSailMessenger_Source.glb",
+        "source": "ArtSource/Characters/BlackSailMessenger_Source.glb",
+        "source_sha256": "07c9dba9e989f7cb1faf03699a715a8a9fcb3abcdeeb113508b52e9f3491d70b",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "c6315a8a-bb3e-45b8-93f1-68461363e8f2",
+      "original_hyper3d_raw_sha256": "30d36fc8d1d97a98b45934a396eb1ac006713b640a54719a8d468977d37a0377",
+      "original_hyper3d_prepared_sha256": "23e9efc86c730fe40eed125becfcd92347351c68b9679e1c7a0e3759b21a7b29",
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "BoneFluteAttendant",
+      "selection": "rigtrials",
+      "reason": "保留旧版：旧版抱笛手臂关节更接近可见姿势，衣物牵拉明显更少。",
+      "deferred": "笛管隔离、手腕与衣物；可限制持笛手臂。",
+      "height": 1.95,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/BoneFluteAttendant_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/BoneFluteAttendant.prefab",
+      "sha256": "b5bf8ede55f5e4863a16e8e978550e77d9dd4ac70a66d10e0944b572e503458c",
+      "bytes": 41610552,
+      "source": {
+        "filename": "BoneFluteAttendant_Source.glb",
+        "source": "ArtSource/Characters/BoneFluteAttendant_Source.glb",
+        "source_sha256": "6824adcf221a5670ce298ffb5451f5f721b796d466590f99f17d6c54653d0d64",
+        "height": 1.95,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "761586c3-61fe-4c0b-9646-45539ac60c8a",
+      "original_hyper3d_raw_sha256": "61581ff2a7114bfdb18d662d2b91d315a4f9101c9b978b0c01ad5c50ffba46ae",
+      "original_hyper3d_prepared_sha256": "bd3d0c0b93ea1ebe0576f9e58a24334cd3ac20acb3b21fd0d9455a4ed001448b",
+      "embedded_legacy_clips": 5
+    },
+    {
+      "name": "BoneNetStitcher",
+      "selection": "rigtrials",
+      "reason": "保留旧版：旧版衣物更稳定，但骨针侧腕点与实际握持点仍不吻合。",
+      "deferred": "两侧真实腕点、网袋及骨针独立处理。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/BoneNetStitcher_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/BoneNetStitcher.prefab",
+      "sha256": "c58bb18e5eab2ce1e480813cabca57c18622ad0b2b4498161f3ef7f185dca254",
+      "bytes": 49336172,
+      "source": {
+        "filename": "BoneNetStitcher_Source.glb",
+        "source": "ArtSource/Characters/BoneNetStitcher_Source.glb",
+        "source_sha256": "841cbd7e3d156cf1049cc04d382c90a3fe984ce12b12e116e6fb1fdb8eece2bc",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "562d25d5-4ace-4ef5-ba1d-b2690a507927",
+      "original_hyper3d_raw_sha256": "e9ffa652b6ee78e4e931aa1a4960f59b44ef0fd30beb6ae52b4901df2e74704b",
+      "original_hyper3d_prepared_sha256": "81a83709d1a38e5295a0d0b0ce2782727ffa121e1887695fbb10968278e6bcc6",
+      "embedded_legacy_clips": 5
+    },
+    {
+      "name": "DisplacedWatchman",
+      "selection": "hyper3d",
+      "reason": "保留新版：新版屈肘与屈膝的整体轮廓较干净，未见旧版前衣片牵拉。",
+      "deferred": "肩部、手指与大幅动作。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/DisplacedWatchman_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/DisplacedWatchman.prefab",
+      "sha256": "b7d231e09eda43671c70b1b17082936a0dc8dac8266142077dd490693f9d2036",
+      "bytes": 32214520,
+      "source": {
+        "filename": "DisplacedWatchman_Source.glb",
+        "source": "ArtSource/Characters/DisplacedWatchman_Source.glb",
+        "source_sha256": "52e1a3f0f0eb440c04d0ac1f9e30113b0372b48595dc2b95e048b5d49523bcd7",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "cbdfa6a6-706e-4dc1-8212-4be2b919297f",
+      "original_hyper3d_raw_sha256": "4f9b6ee587da16d3bdabab2b9b58af19182fac90befbfc3e2105f372a1c7a26c",
+      "original_hyper3d_prepared_sha256": "b7d231e09eda43671c70b1b17082936a0dc8dac8266142077dd490693f9d2036",
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "EmptyHoldKnocker",
+      "selection": "hyper3d",
+      "reason": "保留新版：新版三个姿势无明显大面积牵拉。",
+      "deferred": "胸箱与背板刚性。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/EmptyHoldKnocker_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/EmptyHoldKnocker.prefab",
+      "sha256": "48159066c2aa5e39e82d2573885db011b72bc7fcf952ff0b19cc4a621e5d160d",
+      "bytes": 47127032,
+      "source": {
+        "filename": "EmptyHoldKnocker_Source.glb",
+        "source": "ArtSource/Characters/EmptyHoldKnocker_Source.glb",
+        "source_sha256": "09d55181e14aec3676d5f6ac75159c49f5f50e753a51ce8f3e67c7195544de9d",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "8bcdceb5-7b5f-45f0-a7b1-1f8b84ca3b06",
+      "original_hyper3d_raw_sha256": "09b4c9c34a326b40a01e134e2c4b65d5fdf14092bbffcd3f6336999d3c9427f0",
+      "original_hyper3d_prepared_sha256": "48159066c2aa5e39e82d2573885db011b72bc7fcf952ff0b19cc4a621e5d160d",
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "FogRigger",
+      "selection": "rigtrials",
+      "reason": "保留旧版：旧版屈肘时绳圈随手移动，腿部轮廓明显更稳。",
+      "deferred": "绳圈和钩具握持、刚性及大幅动作。",
+      "height": 1.85,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/FogRigger_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/FogRigger.prefab",
+      "sha256": "14b2b8bf2c9cf2a1b259f81c91e2268f252431a84c7774feb00ee117293b8160",
+      "bytes": 54773548,
+      "source": {
+        "filename": "FogRigger_LOD0.glb",
+        "source": "ArtSource/Characters/FogRigger_LOD0.glb",
+        "source_sha256": "ece5fa87f551e927843250683248418431ffcfd2c61f6b0c66a9e4bf4a847ee1",
+        "height": 1.85,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "045fade9-928b-45a8-87cd-0f2d5b68a373",
+      "original_hyper3d_raw_sha256": "dae078c048615a8339a1ba40c38416825c92e1e3f14ebaf2cb9100936028723e",
+      "original_hyper3d_prepared_sha256": "03a160ce830728f001d85de8406d41ac955c2c0a7a4a4e004ec383a81b967791",
+      "embedded_legacy_clips": 5
+    },
+    {
+      "name": "InvertedSurveyHand",
+      "selection": "hybrid",
+      "reason": "保留新版上肢；合入旧版下肢关节及权重，包含原 Root 权重，骨盆平滑过渡。",
+      "deferred": "折尺刚性、腰挂带与倒挂姿势。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/InvertedSurveyHand_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/InvertedSurveyHand.prefab",
+      "sha256": "bbf74f845614bcc7bb3d41008a5c1ca3715440e4121ab82afe271b8c8278f3da",
+      "bytes": 42883824,
+      "source": {
+        "filename": "InvertedSurveyHand_Source.glb",
+        "source": "ArtSource/Characters/InvertedSurveyHand_Source.glb",
+        "source_sha256": "95acf12f076df2bdc1b2a670c5326b118a5c7935d0d14397d4ab96469b342f08",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "7bf5992b-568c-42b0-a6d3-1dac73be2ad2",
+      "original_hyper3d_raw_sha256": "1f7839422508ed7f24ed641d353d1d16566822187a4f110a7de8ae4d29765425",
+      "original_hyper3d_prepared_sha256": "f97acaf60c00ed7b790159480cab28d4cb0dbafc2db9a66fb97f6651ede0616e",
+      "combination": {
+        "method": "New upper binding + old lower joints/weights, smooth 25 cm pelvis transition at 2 m normalized height",
+        "parents": {
+          "hyper3d": {
+            "historical_path": "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/InvertedSurveyHand_Rigged.glb",
+            "sha256": "f97acaf60c00ed7b790159480cab28d4cb0dbafc2db9a66fb97f6651ede0616e"
+          },
+          "rigtrials": {
+            "historical_path": "ArtSource/Characters/RigTrials/InvertedSurveyHand_Rigged.glb",
+            "sha256": "5f30a588a874469c62ccae778892eca05776e0627156bcbcdfc31e16afed3ca8"
+          }
+        },
+        "sha256": "bbf74f845614bcc7bb3d41008a5c1ca3715440e4121ab82afe271b8c8278f3da",
+        "bytes": 42883824,
+        "vertex_match_max_m": 1.5308991351048462e-05,
+        "export_rest_error_max_m": 2.5911115244525718e-06,
+        "animation_count": 0
+      },
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "LampOutBellkeeper",
+      "selection": "rigtrials",
+      "reason": "保留旧版：旧版腕点更靠近提灯把手；本次身体轮廓两版接近。",
+      "deferred": "持灯握持点、提灯刚性。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/LampOutBellkeeper_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/LampOutBellkeeper.prefab",
+      "sha256": "0f2310c7be8a545306110d6a21cf449667d8cecbc02ff7769295b235225ee515",
+      "bytes": 36285164,
+      "source": {
+        "filename": "LampOutBellkeeper_Source.glb",
+        "source": "ArtSource/Characters/LampOutBellkeeper_Source.glb",
+        "source_sha256": "45412a583367042dc9314b997b76fe6eb16700da9122ce9a628248d114737158",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "0c1f7752-c9be-4a0f-b244-22a76a27cdb6",
+      "original_hyper3d_raw_sha256": "c20879398a799054fc199fc7d7e6fd2ab12c9cb621463e596d24315c29fb4389",
+      "original_hyper3d_prepared_sha256": "47fcc40f8a4ee17f09b73c9103d2b08d6eb69f06dcc22bb8d3a57a16a484c6f4",
+      "embedded_legacy_clips": 5
+    },
+    {
+      "name": "LastTideWitness",
+      "selection": "rigtrials",
+      "reason": "保留旧版：旧版同样有袖袍牵拉和左右连片裙摆约束，只是屈肘拉伸较轻。",
+      "deferred": "保持收拢双手、站定的受限设计；抽手或独立迈步前需修袖袍及裙摆。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/LastTideWitness_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/LastTideWitness.prefab",
+      "sha256": "48d0a4df290d4a20eed851f421d84a0be6dbbd16b986b5015a578271702b8b91",
+      "bytes": 34773932,
+      "source": {
+        "filename": "LastTideWitness_Source.glb",
+        "source": "ArtSource/Characters/LastTideWitness_Source.glb",
+        "source_sha256": "787d9d5cfa24756bb92ed7c98460e17d7fc4d72e27533ce674d82ab19db2824d",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "d34e3a4e-a758-47d3-97e6-953bb20c87fd",
+      "original_hyper3d_raw_sha256": "25f2ab97cde5b95c20827af2932ba9f879b423d5afd6034fcc70820c7f85ec92",
+      "original_hyper3d_prepared_sha256": "e0f3df85921d2ab2f7c8aca690d1687566f898a03b2490dd25f3a200f62c4d11",
+      "embedded_legacy_clips": 5
+    },
+    {
+      "name": "LostSailor",
+      "selection": "hyper3d",
+      "reason": "保留新版：新版腕肘与可见肢体大致对应，三个姿势未见大面积衣物牵拉。",
+      "deferred": "短刀刚性、肩部与大幅动作。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/LostSailor_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/LostSailor.prefab",
+      "sha256": "21f13f34e5dd8c0d9b084ff08fd5e93825eebd301d16cff1385fc9d341b56d48",
+      "bytes": 41775700,
+      "source": {
+        "filename": "LostSailor_Source.glb",
+        "source": "ArtSource/Characters/LostSailor_Source.glb",
+        "source_sha256": "5f6e011c2994bdc48deb1a84a9768fc21291ab87452b01fe02fc010c6895289f",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "da385b8d-b158-4616-865e-a9eafb1b1c0e",
+      "original_hyper3d_raw_sha256": "02577080b709ef29c3c93b9cfa3c4e103527582394007aa7ea12383c806903dc",
+      "original_hyper3d_prepared_sha256": "21f13f34e5dd8c0d9b084ff08fd5e93825eebd301d16cff1385fc9d341b56d48",
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "MirrorTideScribe",
+      "selection": "rigtrials",
+      "reason": "保留旧版：旧版腕点贴近抱书姿势，屈肘时下摆基本稳定。",
+      "deferred": "书本刚性、抱书双手约束。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/MirrorTideScribe_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/MirrorTideScribe.prefab",
+      "sha256": "207d3816e861b617d23ff4bbf6a7fbf4237fa301968e6977db531cbc02b043a9",
+      "bytes": 40714708,
+      "source": {
+        "filename": "MirrorTideScribe_Source.glb",
+        "source": "ArtSource/Characters/MirrorTideScribe_Source.glb",
+        "source_sha256": "49850a316d17550190b1f13c2417141f9258ac6a463faeda401361d9869ec212",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "e7e910f6-b429-4000-8ed4-01e5228167c3",
+      "original_hyper3d_raw_sha256": "278b9c0496781801019d25348d64ade9c6326e8c469f96c40457ddcc57f339e5",
+      "original_hyper3d_prepared_sha256": "692e4e0646a6d077b144c467013147aa489208da1f13f9f47994311a211b349a",
+      "embedded_legacy_clips": 5
+    },
+    {
+      "name": "MisfireGunner",
+      "selection": "rigtrials",
+      "reason": "保留旧版：旧版双手持枪姿势更贴近骨架，腰部更稳定。",
+      "deferred": "双手持枪约束、枪械及腰挂物刚性。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/MisfireGunner_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/MisfireGunner.prefab",
+      "sha256": "e1ec975597099bace730046eb802de22fdebe4d1b4d4d22601130b31d0550432",
+      "bytes": 42618824,
+      "source": {
+        "filename": "MisfireGunner_Source.glb",
+        "source": "ArtSource/Characters/MisfireGunner_Source.glb",
+        "source_sha256": "b5f712a149641a57683bb56451e99fe2b5f8280c5304a0dfeec2adb2401552b7",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "df5d5331-e7dd-40c5-a77f-d0ad5908fe71",
+      "original_hyper3d_raw_sha256": "628c2b3be8898400bc589713a60e8ccb695904facf9e6b85b6747c71748f7c03",
+      "original_hyper3d_prepared_sha256": "d62f153cb60a568aa318a5b596f33a679e952daf9f635216acc71c48d5b62542",
+      "embedded_legacy_clips": 5
+    },
+    {
+      "name": "PlumbWatcher",
+      "selection": "rigtrials",
+      "reason": "保留旧版：旧版长衣在相同屈肘下保持稳定，下肢过渡更平顺。",
+      "deferred": "长衣与铅坠刚性、大幅动作。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/PlumbWatcher_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/PlumbWatcher.prefab",
+      "sha256": "f61a52f940daee558a0ca2df741d72d15934f32b169d34c0f5061b5cb6d74cd2",
+      "bytes": 28988356,
+      "source": {
+        "filename": "PlumbWatcher_Source.glb",
+        "source": "ArtSource/Characters/PlumbWatcher_Source.glb",
+        "source_sha256": "3f40f54fa9a580df695d855f41c2854546914c57f232598393015fabce6fda7f",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "38a59ca1-1894-4900-a157-9d76984b3173",
+      "original_hyper3d_raw_sha256": "3bca91f9790ff36d3ced4dcf7bee6f7a37d65cb458155df9b0d20884f397c465",
+      "original_hyper3d_prepared_sha256": "60d39990ebb976fc6a32f6893dffc62f47636d085aafd5c68831f8478bb579ee",
+      "embedded_legacy_clips": 5
+    },
+    {
+      "name": "RailNameTaker",
+      "selection": "hyper3d",
+      "reason": "保留新版：新版骨盆和张开的下肢位置更贴合弯腰轮廓，但屈膝有局部小腿拉伸。",
+      "deferred": "按非标准弯腰站姿继续拟合，修小腿局部牵拉；暂留更贴合的新版。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/RailNameTaker_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/RailNameTaker.prefab",
+      "sha256": "ed5e3495a397118ecd8b8dd53de442124abd82fc19e37f7850816671abc0eeda",
+      "bytes": 34926360,
+      "source": {
+        "filename": "RailNameTaker_Source.glb",
+        "source": "ArtSource/Characters/RailNameTaker_Source.glb",
+        "source_sha256": "3d21de7acb2acbf159692f9b0f89911dcb5a780b86cb498720f0fe7076ae36b3",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "756d31e3-8757-4632-93fc-3f04052f1f3b",
+      "original_hyper3d_raw_sha256": "8232f9faecab0312f5800ed4768aa726ff9fd078453d31efa76444486f6afa69",
+      "original_hyper3d_prepared_sha256": "ed5e3495a397118ecd8b8dd53de442124abd82fc19e37f7850816671abc0eeda",
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "ReverseNavigator",
+      "selection": "hybrid",
+      "reason": "保留新版上肢；合入旧版下肢关节及权重，包含原 Root 权重，骨盆平滑过渡。",
+      "deferred": "海图双手约束及独立形变策略。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/ReverseNavigator_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/ReverseNavigator.prefab",
+      "sha256": "4a3643c890cf4d406edb46fa70a1d9c0a3623243ad3e2162045b3c64e4bb875e",
+      "bytes": 34828852,
+      "source": {
+        "filename": "ReverseNavigator_Source.glb",
+        "source": "ArtSource/Characters/ReverseNavigator_Source.glb",
+        "source_sha256": "59b2de06e31cbc5e8238966a552956e60a2964175dcaa663f097ca139a367bf7",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "fbd79caf-db8f-48f2-97cd-2b2a4cae8cc6",
+      "original_hyper3d_raw_sha256": "4a662e44acfb89b5677cb30ebab05d4cd07ddde5697fcf2292b4cd96d016d113",
+      "original_hyper3d_prepared_sha256": "d8eb451b06dc5ab7f39ac335df6e4d1acb72f697c73de3129cab46eb3dfb9cfa",
+      "combination": {
+        "method": "New upper binding + old lower joints/weights, smooth 25 cm pelvis transition at 2 m normalized height",
+        "parents": {
+          "hyper3d": {
+            "historical_path": "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/ReverseNavigator_Rigged.glb",
+            "sha256": "d8eb451b06dc5ab7f39ac335df6e4d1acb72f697c73de3129cab46eb3dfb9cfa"
+          },
+          "rigtrials": {
+            "historical_path": "ArtSource/Characters/RigTrials/ReverseNavigator_Rigged.glb",
+            "sha256": "5939382a38f76fd5aa19ad384150f747530067ebbd7a5f5ccee67080ff12646f"
+          }
+        },
+        "sha256": "4a3643c890cf4d406edb46fa70a1d9c0a3623243ad3e2162045b3c64e4bb875e",
+        "bytes": 34828852,
+        "vertex_match_max_m": 4.648493813874666e-06,
+        "export_rest_error_max_m": 2.041341076619574e-06,
+        "animation_count": 0
+      },
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "RustChainEscort",
+      "selection": "hyper3d",
+      "reason": "保留新版：新版屈肘、屈膝整体稳定，没有明显跨部位牵拉。",
+      "deferred": "铁链刚性或分件、手指。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/RustChainEscort_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/RustChainEscort.prefab",
+      "sha256": "c02bc4bf108687ef141c778b05a18a2ce653926d7ccbf3c5b66e6c550d81c03d",
+      "bytes": 44706828,
+      "source": {
+        "filename": "RustChainEscort_Source.glb",
+        "source": "ArtSource/Characters/RustChainEscort_Source.glb",
+        "source_sha256": "dfd70c953ff947184d8189e4241bd98b696969da6522458bd3f5e8e583698366",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "126f087a-7a54-41c6-b5d8-1ae86fca8a02",
+      "original_hyper3d_raw_sha256": "c5f1df7a3e268eff61dd88665a5d1f79d4891a2ab1fd6dd5cd0c5f0022c7c7d9",
+      "original_hyper3d_prepared_sha256": "c02bc4bf108687ef141c778b05a18a2ce653926d7ccbf3c5b66e6c550d81c03d",
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "SaltMarrowPriest",
+      "selection": "rigtrials",
+      "reason": "保留旧版：旧版双腕位于捧杯处，屈肘时长袍明显更稳。",
+      "deferred": "捧杯约束、袍身与大幅动作；可限制手臂。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/SaltMarrowPriest_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/SaltMarrowPriest.prefab",
+      "sha256": "5c67fe891bb83b23712a2821dd9dc48659ed5ba53419c15d8a40f660e9dab7f7",
+      "bytes": 33132764,
+      "source": {
+        "filename": "SaltMarrowPriest_Source.glb",
+        "source": "ArtSource/Characters/SaltMarrowPriest_Source.glb",
+        "source_sha256": "72c56cb8e348d82830c2a005aa7314cd8e36735291a1ec0dc216410e2f46f777",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "081afcdb-c1b6-4d8a-8d3b-8a64c3203235",
+      "original_hyper3d_raw_sha256": "95e40a76a3d1e15bffd37d8e8f6c05d2fc4266809655803334ec18c02a17eaed",
+      "original_hyper3d_prepared_sha256": "92c4c96694b2f92bad2ac4ae3435e446b8104c7285fea74bb6f34300e2b9cba8",
+      "embedded_legacy_clips": 5
+    },
+    {
+      "name": "StarlessPeeker",
+      "selection": "hybrid",
+      "reason": "保留新版上肢；合入旧版下肢关节及权重，包含原 Root 权重，骨盆平滑过渡。",
+      "deferred": "手指、衣缘与大幅动作。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/StarlessPeeker_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/StarlessPeeker.prefab",
+      "sha256": "61d60e1bbd30d89f95624d8565bd6ffe0e914e0e3c75b2805d9b9f284e3d25e4",
+      "bytes": 42924160,
+      "source": {
+        "filename": "StarlessPeeker_Source.glb",
+        "source": "ArtSource/Characters/StarlessPeeker_Source.glb",
+        "source_sha256": "610063a36e9eeb134c3498b1b9241f4b1f7d3ea227d8ce792dcaf9aaa8787301",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "a7b77043-9094-4dfe-9b93-057afe517e42",
+      "original_hyper3d_raw_sha256": "e5ba12b31b17da63addd971c22314de5fd88842de6160f4e5e53f7a9a0f016c5",
+      "original_hyper3d_prepared_sha256": "ea3fd425cbf968f11f4374135f1ae8776cddbe745af0c810e73c7ebf35a62393",
+      "combination": {
+        "method": "New upper binding + old lower joints/weights, smooth 25 cm pelvis transition at 2 m normalized height",
+        "parents": {
+          "hyper3d": {
+            "historical_path": "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/StarlessPeeker_Rigged.glb",
+            "sha256": "ea3fd425cbf968f11f4374135f1ae8776cddbe745af0c810e73c7ebf35a62393"
+          },
+          "rigtrials": {
+            "historical_path": "ArtSource/Characters/RigTrials/StarlessPeeker_Rigged.glb",
+            "sha256": "8e28362cc983e35cd73fe767f6c16b9da0e658b3fee375718ae0e02476c36100"
+          }
+        },
+        "sha256": "61d60e1bbd30d89f95624d8565bd6ffe0e914e0e3c75b2805d9b9f284e3d25e4",
+        "bytes": 42924160,
+        "vertex_match_max_m": 4.1434354898228776e-06,
+        "export_rest_error_max_m": 1.0885897836487857e-06,
+        "animation_count": 0
+      },
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "TideBoneScavenger",
+      "selection": "hybrid",
+      "reason": "保留新版上肢；合入旧版下肢关节及权重，包含原 Root 权重，骨盆平滑过渡。",
+      "deferred": "持物及背筐刚性、大幅动作。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/TideBoneScavenger_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/TideBoneScavenger.prefab",
+      "sha256": "39d3317a55ab990d97269aaa8093462d20d6cda251420c3d154cc2d41ba8c2bb",
+      "bytes": 36254924,
+      "source": {
+        "filename": "TideBoneScavenger_Source.glb",
+        "source": "ArtSource/Characters/TideBoneScavenger_Source.glb",
+        "source_sha256": "363eb6146bbdd7fd996f0899f6601be920cbb72a36de0bfbe4ec53f616061f9c",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "d5318f47-b439-4638-84a6-9cdcb7ef7180",
+      "original_hyper3d_raw_sha256": "2910e6200c2ddca8f6d23a1eca34788c3da608b3abf579fe2b68dd01454ce85c",
+      "original_hyper3d_prepared_sha256": "1163652a06e4aca74e102adb587c5cf6d9c5c0c3b6087bcd9dad33937979b2ef",
+      "combination": {
+        "method": "New upper binding + old lower joints/weights, smooth 25 cm pelvis transition at 2 m normalized height",
+        "parents": {
+          "hyper3d": {
+            "historical_path": "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/TideBoneScavenger_Rigged.glb",
+            "sha256": "1163652a06e4aca74e102adb587c5cf6d9c5c0c3b6087bcd9dad33937979b2ef"
+          },
+          "rigtrials": {
+            "historical_path": "ArtSource/Characters/RigTrials/TideBoneScavenger_Rigged.glb",
+            "sha256": "162ae44673d6b8c1a8fedddf94ab027f132d3021063ae9b50640c41dd92569c3"
+          }
+        },
+        "sha256": "39d3317a55ab990d97269aaa8093462d20d6cda251420c3d154cc2d41ba8c2bb",
+        "bytes": 36254924,
+        "vertex_match_max_m": 1.4357792679220438e-06,
+        "export_rest_error_max_m": 2.694661361601902e-06,
+        "animation_count": 0
+      },
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "UnflaggedBoarder",
+      "selection": "hyper3d",
+      "reason": "保留新版：新版可以整体带动舷盾与短刀，未见大面积身体牵拉。",
+      "deferred": "盾牌刚性、握持点及肩部动作。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/UnflaggedBoarder_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/UnflaggedBoarder.prefab",
+      "sha256": "5c3224feb622296b5778e6e0548068c3fee00cd6dbb1420eaab46386065615e4",
+      "bytes": 28303280,
+      "source": {
+        "filename": "UnflaggedBoarder_Source.glb",
+        "source": "ArtSource/Characters/UnflaggedBoarder_Source.glb",
+        "source_sha256": "b416a41ae6075f5eec2d62df0c11c62dd18710f2e55d9c9b7f81e265853e1bb7",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "a8b84f90-0312-45e6-b890-db0ed78533f0",
+      "original_hyper3d_raw_sha256": "637b33711d7cddc2db43afd9fe47481242ff897409ac4b8d7e571d4aa9a8e5ea",
+      "original_hyper3d_prepared_sha256": "5c3224feb622296b5778e6e0548068c3fee00cd6dbb1420eaab46386065615e4",
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "WetCoatPilot",
+      "selection": "hyper3d",
+      "reason": "保留新版：新版袖子与长衣在三个测试姿势下基本稳定。",
+      "deferred": "保留藏手约束，按有限姿态使用；不强制抽手。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/WetCoatPilot_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/WetCoatPilot.prefab",
+      "sha256": "2a54f51709173c96be8d4894c57147517fa62101203b4f7c65994a7786d06509",
+      "bytes": 34401140,
+      "source": {
+        "filename": "WetCoatPilot_Source.glb",
+        "source": "ArtSource/Characters/WetCoatPilot_Source.glb",
+        "source_sha256": "dd62ac9bb248601e3519723f07022cace0ccd4df9ace2779454a8e2e59f7d35d",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "79584d77-9a96-4ab1-9a83-b971404cd96b",
+      "original_hyper3d_raw_sha256": "612378a1f56a9976cb5ca7f75b2a8c0bdd79acb0f738aabba2e4814a30f4656d",
+      "original_hyper3d_prepared_sha256": "2a54f51709173c96be8d4894c57147517fa62101203b4f7c65994a7786d06509",
+      "embedded_legacy_clips": 0
+    },
+    {
+      "name": "WhiteLampSignaller",
+      "selection": "hyper3d",
+      "reason": "保留新版：新版短号随手移动、胸灯基本随躯干，三个姿势未见大面积跨部位牵拉。",
+      "deferred": "短斗篷腋下、号与灯的刚性。",
+      "height": 2.0,
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/WhiteLampSignaller_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/WhiteLampSignaller.prefab",
+      "sha256": "57419f4824c10feb0c2936c6b3e84e8ad29c376a8b89f84b2a4e9f69400a38a4",
+      "bytes": 26679764,
+      "source": {
+        "filename": "WhiteLampSignaller_Source.glb",
+        "source": "ArtSource/Characters/WhiteLampSignaller_Source.glb",
+        "source_sha256": "3eafe585ac7a97a514d9d29cb08c4ef4fa47c47533aaccd36c82df1cbf0e1056",
+        "height": 2.0,
+        "source_revision": "3d300eaf40f668bf30f9731caf706e90db4f3e1b"
+      },
+      "provider_task_uuid": "aff6e2b9-30e4-42f4-a697-b5e3a2f97a77",
+      "original_hyper3d_raw_sha256": "d811d92e14012b9770016d03251953fe5090aea63d9836b4d88a92ddd6660443",
+      "original_hyper3d_prepared_sha256": "57419f4824c10feb0c2936c6b3e84e8ad29c376a8b89f84b2a4e9f69400a38a4",
+      "embedded_legacy_clips": 0
+    }
+  ]
+}

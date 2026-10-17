@@ -31,6 +31,42 @@ public static class OceanBattleQA
         throw new Exception("Feedback lock did not release.");
     }
     static void Check(bool condition,string message) {if(!condition)throw new Exception(message);}
+    public static async Task<object> EndTurnStability()
+    {
+        Check(EditorApplication.isPlaying, "Enter Play Mode before checking the HUD");
+        var d = UnityEngine.Object.FindAnyObjectByType<BattleDirector>();
+        d.Restart(); await Task.Delay(300); await Ready();
+        var root = d.GetComponent<UIDocument>().rootVisualElement;
+        int turn = d.View.Turn;
+        System.IO.Directory.CreateDirectory("Logs/HitAndHud");
+        ScreenCapture.CaptureScreenshot(System.IO.Path.GetFullPath("Logs/HitAndHud/turn-before.png"));
+        await Task.Delay(80);
+        Click("battle-end-turn");
+        var end = root.Q<Button>("battle-end-turn");
+        var hand = root.Q<ScrollView>("hand");
+        var plate = root.Q<Button>(className: "actor-label");
+        Check(!end.enabledInHierarchy, "Feedback did not lock end turn");
+        var firstCard = hand.Q<Button>(className: "card-anchor");
+        float minX = float.MaxValue, maxX = float.MinValue, minOpacity = 1;
+        for (int frame = 0; frame < 110; frame++)
+        {
+            await Task.Delay(25);
+            Check(root.Q<Button>("battle-end-turn") == end && root.Q<ScrollView>("hand") == hand &&
+                root.Q<Button>(className: "actor-label") == plate, "Feedback completion rebuilt the HUD");
+            var rect = plate.worldBound;
+            Check(!float.IsNaN(rect.x) && rect.y >= 63 && rect.width > 100, "Nameplate lost its layout");
+            if (firstCard != null) { minX = Mathf.Min(minX, firstCard.worldBound.x); maxX = Mathf.Max(maxX, firstCard.worldBound.x); }
+            minOpacity = Mathf.Min(minOpacity, end.resolvedStyle.opacity);
+            if (frame < 4 || frame == 8 || frame == 40 || frame == 100)
+                ScreenCapture.CaptureScreenshot(System.IO.Path.GetFullPath($"Logs/HitAndHud/turn-{frame:000}.png"));
+        }
+        Check(!d.Busy && end.enabledInHierarchy, "Feedback did not restore end turn");
+        Check(d.View.Turn == turn + 1, "End turn advanced more than once");
+        Check(maxX - minX < 2, "Hand shifted during feedback: " + (maxX - minX));
+        Check(minOpacity > 0.95f, "Temporary feedback flashed the button dim");
+        return new { turn = d.View.Turn, stableElements = true, handDrift = maxX - minX, minOpacity };
+    }
+
     public static async Task<object> HudFlow()
     {
         var d = UnityEngine.Object.FindAnyObjectByType<BattleDirector>(); d.Restart();

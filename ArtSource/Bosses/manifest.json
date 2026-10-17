@@ -63,7 +63,8 @@
     }
   ],
   "notes": [
-    "Single source candidate; decimation with retained UV/PBR. Static whole-body presentation, no skin or animation.",
+    "Original source candidate; decimation with retained UV/PBR. Kept unchanged as the texture reference and static fallback.",
+    "Runtime Bell Mother uses the BANG rigid-part variant in BellMother_BANG-manifest.json; it is validated separately.",
     "Separate emission PNGs archived. Generation report is not a substitute for Unity validation."
   ],
   "unity": {

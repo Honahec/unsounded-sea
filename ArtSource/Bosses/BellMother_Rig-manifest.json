@@ -1,0 +1,103 @@
+{
+  "asset": "BellMother",
+  "source": "Assets/UnsoundedSea/Art/Models/BellMother_LOD0.glb",
+  "method": "Blender 5.2.2 custom creature rig; source mesh unchanged",
+  "rig_type": "generic",
+  "armature": "BellMother_Rig",
+  "bones": 30,
+  "vertex_count": 151658,
+  "actions": [
+    {
+      "name": "BellMother_Idle",
+      "frames": 120
+    },
+    {
+      "name": "BellMother_Telegraph",
+      "frames": 36
+    },
+    {
+      "name": "BellMother_Attack_A",
+      "frames": 48
+    },
+    {
+      "name": "BellMother_Recover",
+      "frames": 36
+    },
+    {
+      "name": "BellMother_Hit",
+      "frames": 24
+    },
+    {
+      "name": "BellMother_Death",
+      "frames": 72
+    }
+  ],
+  "deformation_samples": [
+    {
+      "name": "BellMother_Idle",
+      "frame_end": 120,
+      "samples": [
+        1,
+        60,
+        120
+      ]
+    },
+    {
+      "name": "BellMother_Telegraph",
+      "frame_end": 36,
+      "samples": [
+        1,
+        18,
+        36
+      ]
+    },
+    {
+      "name": "BellMother_Attack_A",
+      "frame_end": 48,
+      "samples": [
+        1,
+        24,
+        48
+      ]
+    },
+    {
+      "name": "BellMother_Recover",
+      "frame_end": 36,
+      "samples": [
+        1,
+        18,
+        36
+      ]
+    },
+    {
+      "name": "BellMother_Hit",
+      "frame_end": 24,
+      "samples": [
+        1,
+        12,
+        24
+      ]
+    },
+    {
+      "name": "BellMother_Death",
+      "frame_end": 72,
+      "samples": [
+        1,
+        36,
+        72
+      ]
+    }
+  ],
+  "outputs": {
+    "blend": "ArtSource/Bosses/BellMother_Rigged.blend",
+    "fbx": "Assets/UnsoundedSea/Art/Models/BellMother_Rigged.fbx",
+    "glb": "Assets/UnsoundedSea/Art/Models/BellMother_Rigged.glb",
+    "preview": "ArtSource/Bosses/BellMother_Rig-preview.png"
+  },
+  "sha256": {
+    "fbx": "cb292759a0b0ff51d18f3a81658c1756d7b54bde276e9325b134edec2e4c02a0",
+    "glb": "4ae07b4bf490fe44b6514a065f09b563db5fef55dec9e3f488cc563605b86ecc",
+    "blend": "763fb3806973bf63e6b9f3b6fe81b50a604e6a52b5863595a95fc7c2ce176642",
+    "preview": "424fdc1453657add909139c9d62dd5cc8237cde74633b5999acf50b9dec4ca6d"
+  }
+}

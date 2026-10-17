@@ -40,6 +40,10 @@ Deemos Agent 是可选生产工具，不是每件资产的必经步骤。高模�
 3. 等附件上传完成再提交，确认 Agent 可读取网格和贴图，且聊天中出现对应模型预览。
 4. 在同一聊天完成修订并下载结果。若掉线，先检查原任务状态，避免重复创建任务。
 
+### 沉钟之母：分件与动画样例
+
+当前采用 BANG 分件 → Blender 低模与支点 → Unity 刚性部件动画，未使用柔性骨骼蒙皮。整网格骨骼试验的取舍、当前生产步骤、根部约束与重量感设计，以及后续骨骼链方案，统一见[沉钟之母动画设计](BELL_MOTHER_ANIMATION_DESIGN.md)。规格以 [BANG manifest](../ArtSource/Bosses/BellMother_BANG-manifest.json) 为准，测试范围见[验证记录](FRAMEWORK_VALIDATION.md#沉钟之母-bang-分件与刚性动作流程)。
+
 ### 下载后的最低检查
 
 检查 GLB 声明长度与文件长度、SHA-256、网格/primitive、索引拓扑与实际三角面、顶点、材质槽、UV/法线、图片尺寸和通道，以及 skins/animations。只有 TRIANGLES 拓扑才能直接按索引数 ÷ 3 计面；其它拓扑需转换统计。外部纹理/缓冲依赖也必须归档，不能只下载壳文件。
@@ -99,7 +103,13 @@ unity command run_script --project-path "$UNITY_PROJECT_PATH" --timeout 180 --fo
 
 **普通敌人运行时静态接入：**25 种归档源已通过 `Assets/UnsoundedSea/Editor/Tools/OrdinaryEnemyStaticSetup.cs` 导入 `Art/Characters/OrdinaryStatic`，表现 Prefab 位于 `Art/Prefabs/OrdinaryStatic`，供 25 个普通遭遇使用。`VoyageCampaignSetup.Setup` 同时生成这些资产和遭遇目录；仅保存本次资产，不全局保存无关编辑。导入文件与归档源逐字节匹配，完整运行时路径／SHA／规格维护在 [运行时 manifest](../ArtSource/runtime-manifest.json)。普通战仍为静态网格反馈，不宣称具备骨骼动画。
 
-**绑定审阅暂缓：**22 种已有绑定 GLB/Blend，并导入独立 `EnemyRigReview.unity`，含 Idle、Action、Hit、Death、RigValidation；02/03/05 尚未绑定，运行时未引用这些未验收动画。来源及限制见 [普通敌人 manifest](../ArtSource/Characters/ordinary-enemies-manifest.json)。复现使用 `Tools/rig_enemy_trials.py`、`rig-profiles.json`、`Tools/validate_enemy_rigs.py`；Unity CLI 执行 `Tools/EnemyRigReviewSetup.cs` 的 `Build`，Play 后执行 `Tools/EnemyAnimationQA.cs` 的 `Run`。审阅归一化仍使用扩大的蒙皮包围盒，曾测到死亡姿势离地约 0.14 米；最新拟合修订尚未全部导出／导入，道具、衣摆、手指与目标设备性能未验收。日常入口仍为 `MainMenu.unity`。
+**普通敌人绑定保留集：**25 个普通人形敌人已按同角度诊断从两批绑定中择优，统一到 `Assets/UnsoundedSea/Art/{Models,Prefabs}/CuratedRigs/`：旧版 10 个、新版 10 个、合并版 5 个，每个角色只保留一个模型；来源、选择理由、SHA 和延后问题集中在 [保留集 manifest](../ArtSource/Characters/CuratedRigs/manifest.json)。`ArtSource/Characters/CuratedRigs/` 仅保存元数据与验收依据，不重复存放模型。旧 `RigTrials`、`Hyper3DRigs` 的原始返回、Blender 文件、运行时候选、独立测试动画和旧审阅场景已从当前树清理；绑定候选保持独立，普通关卡引用上方静态模型；Prayer／Echo 不变。
+
+5 个合并版保留新版上肢，迁移旧版下肢关节／权重，并在骨盆平滑过渡；修正新版权重中把靴部固定到 Root 的情况，屈膝牵拉减少。依据见 [质量审阅](../ArtSource/Characters/CuratedRigs/quality-review.json)、[合并版诊断图](ArtReferences/curated-rig-hybrids.jpg) 和 [Unity 检查](../ArtSource/Characters/CuratedRigs/unity-validation.json)。复现工具为 `Tools/CompareHumanoidRigs.py`、`Tools/CombineHumanoidRigs.py`；恢复当前独立 Prefab 可通过 Unity CLI 执行 `Tools/CurateHumanoidRigs.cs` 的 `CurateHumanoidRigs.Consolidate`，参数为 `ArtSource/Characters/CuratedRigs/manifest.json`。历史比较输入只留 SHA 与历史修订；远端永久清理后，不保证淘汰版本可恢复。
+
+本批不制作战斗动画。10 个旧版 GLB 为复用已有 LFS 对象而保留原内嵌测试片段，独立 Prefab 不带动画驱动；它们不代表战斗动作可用。Unity 检查涵盖真实导入网格的胸部、肘部、膝部可恢复变形、材质、尺度和脚底；大幅动作、持物刚性、衣摆、藏手约束与设备性能继续延后。glTFast 当前导入每顶点四权重，GLB 保留完整权重。
+
+**LFS 额度：**删除当前文件、历史改写和本地 `git lfs prune` 都不会直接清除 GitHub 远端存储。实际清除需 [GitHub Support 或删除重建仓库](https://docs.github.com/en/repositories/working-with-files/managing-large-files/removing-files-from-git-large-file-storage)。本次的保留对象与历史清理候选见 [LFS 清理清单](../ArtSource/Characters/CuratedRigs/lfs-cleanup.json)；未改写共享分支历史、未删除远端仓库，后续推送前检查额度，并单独验证远端回读。
 
 ## 5. 引擎验收
 
@@ -164,11 +174,13 @@ git lfs fsck
 | --- | --- | --- | --- |
 | Prayer | 500,000 → 60,000 | Unity 材质、1.8 m、脚底、Prefab 引用、正面 Play 画面 | 袖内刀/铃分件、动画、全视角与目标设备验收 |
 | Echo | 800,000 → 90,000 | Unity 材质、2.1 m、脚底、Prefab 引用、战斗场景 | 更明显的空壳塌陷、独立铜铃、动画、全视角与目标设备验收 |
-| BellMother | 1,500,000 → 109,998 | Agent 制作、32 m、独立海面锚点、浸没与运行画面 | 触手骨骼动画、主体贴图平台压缩、LOD1/2 |
+| BellMother | 1,500,000 → 119,992 | BANG 12 部件、6 触手 pivot、32 m、独立海面锚点、Unity 刚性战斗反馈 | 主体贴图平台压缩、LOD1/2、最终部件动画与性能验收 |
 | SurveyVessel | 800,000 → 80,000 | Agent 参考制作、保留 UV 减面、18 m 船体、开放甲板、战斗舞台 | 平台贴图压缩、LOD1/2、驾驶玩法 |
 | M02–M05 Boss 候选 | 具体规格见下方各自 manifest | Agent 生成、高低模归档、LOD0 Unity 导入、Prefab／四场战斗镜头、来源哈希一致 | 美术定稿、完整多视角、骨骼动画、纹理平台压缩与性能验收 |
 
 Prayer 与 Echo 各 1 网格/材质、3 张 4K 纹理，无蒙皮/动画；尚无 LOD1/2 或 LODGroup。内嵌纹理为 ARGB32、13 级 mip，两角色完整纹理链理论约 512 MiB（非 Profiler 实测），尚未 GPU 压缩。后续需提取/重映射为可配置 TextureImporter 资产，按平台选择压缩与尺寸后复核；普通纹理平台覆写不能直接套用到这些内嵌子资产。
+
+Prayer 的首个 Hyper3D API 绑定候选已完成，保留手臂收拢的造型，未替换上述静态运行时资产。上传模型的 UV 被服务重新展开；审阅脚本通过重合三角面的角点恢复原 UV，再复用原材质，未修改自动骨骼与权重。弯臂压力测试会牵拉长袍下摆，较大转身出现衣摆穿插；按当前用户确认的方向，攻击和受击可以保持双手藏在衣内，以躯干和重心表现，具体动作范围等关卡设计后再定，不预先要求抽手动作。参数、来源、规格与检查结果见 [候选 manifest](../ArtSource/Characters/Prayer_Rigging-manifest.json)，[三姿势对照](ArtReferences/prayer-rigging-review.jpg) 为 Blender 诊断渲染，不代表 Unity 动画或性能验收。Echo 也已完成首个绑定候选：同样的弯臂、转身诊断未见 Prayer 的大面积衣摆牵拉，但尚未验证大幅动作、头盔／领圈刚性、多视角和 Unity 播放；未替换运行时模型。来源与实测见 [Echo 候选 manifest](../ArtSource/Characters/Echo_Rigging-manifest.json)，画面见 [三姿势对照](ArtReferences/echo-rigging-review.jpg)。
 
 M02–M05 的高模与减面版保留在 `ArtSource/Bosses/`；减面版另存 `Assets/UnsoundedSea/Art/Models/` 并接入 `BossM02`–`BossM05`，导入副本与归档 SHA-256 一致。来源、实测规格和 Prefab 路径：[M02](../ArtSource/Bosses/TideBonesChoirmaster-manifest.json)、[M03](../ArtSource/Bosses/InvertedSurveyor-manifest.json)、[M04](../ArtSource/Bosses/UnlitFlagBearer-manifest.json)、[M05](../ArtSource/Bosses/StarlessWatcher-manifest.json)。M03 已重生成，M04 使用新项目重试；M05 轮廓仍偏人形，尚未美术定稿。没有重新生成水面，四场复用现有水体与调查船。具体运行范围见 [验证记录](FRAMEWORK_VALIDATION.md#m02m05-boss-战)。
 

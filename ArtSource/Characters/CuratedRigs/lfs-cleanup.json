@@ -1,0 +1,682 @@
+{
+  "date": "2026-10-17",
+  "repository": "https://github.com/Honahec/unsounded-sea",
+  "status": "current-tree consolidation complete; remote quota NOT reclaimed; no shared history rewritten",
+  "official_guidance": "https://docs.github.com/en/repositories/working-with-files/managing-large-files/removing-files-from-git-large-file-storage",
+  "scope": "LFS objects from the two discarded rig collections only; static sources and unrelated assets excluded. Inventory uses locally known refs/history, not a server storage audit.",
+  "required_next_steps": [
+    "Review and merge the curated selection before coordinated history cleanup; main and older commits may still reference candidates.",
+    "Ask GitHub Support about purging the listed discarded OIDs and storage recovery while preserving selected OIDs. No support message sent.",
+    "Do not delete/recreate the whole repository without separate explicit authorization; this affects issues, stars and forks.",
+    "Do not claim git rm, filter-repo or local prune has reclaimed GitHub quota. New hybrids are committed locally but not uploaded."
+  ],
+  "statistics": {
+    "previous_candidate_file_count": 116,
+    "previous_candidate_path_bytes": 3563067628,
+    "previous_unique_candidate_objects": 95,
+    "previous_unique_candidate_bytes": 2798271340,
+    "retained_model_count": 25,
+    "retained_model_bytes": 961335128,
+    "current_candidate_path_bytes_reduced": 2601732500,
+    "current_unique_candidate_bytes_reduced": 1836936212,
+    "retired_current_unique_objects": 75,
+    "retired_current_unique_bytes": 2033809880,
+    "historical_purge_candidate_objects": 75,
+    "historical_purge_candidate_bytes": 2033809880,
+    "new_local_lfs_bytes_not_uploaded": 196972137
+  },
+  "protected_selected_objects": [
+    {
+      "oid": "2b6d06a38bce473feec2702224cd45b899fe230b24ae2233516272bf4f4befa0",
+      "bytes": 36297748,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/AbandonShipMedic_Rigged.glb"
+    },
+    {
+      "oid": "42a0965cb82f5465ffce77b339adda19e2dacc73258e668d4c4529e69f31a184",
+      "bytes": 39981908,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/AbyssRunner_Rigged.glb"
+    },
+    {
+      "oid": "3b041ec799d8bf9f5b747c3b4af7549239fd6e434162121866ea602117170a9a",
+      "bytes": 40581408,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/BarrelThief_Rigged.glb"
+    },
+    {
+      "oid": "23e9efc86c730fe40eed125becfcd92347351c68b9679e1c7a0e3759b21a7b29",
+      "bytes": 35213660,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/BlackSailMessenger_Rigged.glb"
+    },
+    {
+      "oid": "b5bf8ede55f5e4863a16e8e978550e77d9dd4ac70a66d10e0944b572e503458c",
+      "bytes": 41610552,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/BoneFluteAttendant_Rigged.glb"
+    },
+    {
+      "oid": "c58bb18e5eab2ce1e480813cabca57c18622ad0b2b4498161f3ef7f185dca254",
+      "bytes": 49336172,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/BoneNetStitcher_Rigged.glb"
+    },
+    {
+      "oid": "b7d231e09eda43671c70b1b17082936a0dc8dac8266142077dd490693f9d2036",
+      "bytes": 32214520,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/DisplacedWatchman_Rigged.glb"
+    },
+    {
+      "oid": "48159066c2aa5e39e82d2573885db011b72bc7fcf952ff0b19cc4a621e5d160d",
+      "bytes": 47127032,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/EmptyHoldKnocker_Rigged.glb"
+    },
+    {
+      "oid": "14b2b8bf2c9cf2a1b259f81c91e2268f252431a84c7774feb00ee117293b8160",
+      "bytes": 54773548,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/FogRigger_Rigged.glb"
+    },
+    {
+      "oid": "bbf74f845614bcc7bb3d41008a5c1ca3715440e4121ab82afe271b8c8278f3da",
+      "bytes": 42883824,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/InvertedSurveyHand_Rigged.glb"
+    },
+    {
+      "oid": "0f2310c7be8a545306110d6a21cf449667d8cecbc02ff7769295b235225ee515",
+      "bytes": 36285164,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/LampOutBellkeeper_Rigged.glb"
+    },
+    {
+      "oid": "48d0a4df290d4a20eed851f421d84a0be6dbbd16b986b5015a578271702b8b91",
+      "bytes": 34773932,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/LastTideWitness_Rigged.glb"
+    },
+    {
+      "oid": "21f13f34e5dd8c0d9b084ff08fd5e93825eebd301d16cff1385fc9d341b56d48",
+      "bytes": 41775700,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/LostSailor_Rigged.glb"
+    },
+    {
+      "oid": "207d3816e861b617d23ff4bbf6a7fbf4237fa301968e6977db531cbc02b043a9",
+      "bytes": 40714708,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/MirrorTideScribe_Rigged.glb"
+    },
+    {
+      "oid": "e1ec975597099bace730046eb802de22fdebe4d1b4d4d22601130b31d0550432",
+      "bytes": 42618824,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/MisfireGunner_Rigged.glb"
+    },
+    {
+      "oid": "f61a52f940daee558a0ca2df741d72d15934f32b169d34c0f5061b5cb6d74cd2",
+      "bytes": 28988356,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/PlumbWatcher_Rigged.glb"
+    },
+    {
+      "oid": "ed5e3495a397118ecd8b8dd53de442124abd82fc19e37f7850816671abc0eeda",
+      "bytes": 34926360,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/RailNameTaker_Rigged.glb"
+    },
+    {
+      "oid": "4a3643c890cf4d406edb46fa70a1d9c0a3623243ad3e2162045b3c64e4bb875e",
+      "bytes": 34828852,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/ReverseNavigator_Rigged.glb"
+    },
+    {
+      "oid": "c02bc4bf108687ef141c778b05a18a2ce653926d7ccbf3c5b66e6c550d81c03d",
+      "bytes": 44706828,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/RustChainEscort_Rigged.glb"
+    },
+    {
+      "oid": "5c67fe891bb83b23712a2821dd9dc48659ed5ba53419c15d8a40f660e9dab7f7",
+      "bytes": 33132764,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/SaltMarrowPriest_Rigged.glb"
+    },
+    {
+      "oid": "61d60e1bbd30d89f95624d8565bd6ffe0e914e0e3c75b2805d9b9f284e3d25e4",
+      "bytes": 42924160,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/StarlessPeeker_Rigged.glb"
+    },
+    {
+      "oid": "39d3317a55ab990d97269aaa8093462d20d6cda251420c3d154cc2d41ba8c2bb",
+      "bytes": 36254924,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/TideBoneScavenger_Rigged.glb"
+    },
+    {
+      "oid": "5c3224feb622296b5778e6e0548068c3fee00cd6dbb1420eaab46386065615e4",
+      "bytes": 28303280,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/UnflaggedBoarder_Rigged.glb"
+    },
+    {
+      "oid": "2a54f51709173c96be8d4894c57147517fa62101203b4f7c65994a7786d06509",
+      "bytes": 34401140,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/WetCoatPilot_Rigged.glb"
+    },
+    {
+      "oid": "57419f4824c10feb0c2936c6b3e84e8ad29c376a8b89f84b2a4e9f69400a38a4",
+      "bytes": 26679764,
+      "path": "Assets/UnsoundedSea/Art/Models/CuratedRigs/WhiteLampSignaller_Rigged.glb"
+    }
+  ],
+  "historical_purge_candidates": [
+    {
+      "oid": "6ee98d53b38fa382de5e0979d941e58b238dbf55f76c09bfeca5534a4670d050",
+      "bytes": 3946812,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/AbandonShipMedic_Raw.glb"
+      ]
+    },
+    {
+      "oid": "912b4ba4454f0636796005a46e6ec97d3c8836d7e66aafcf644c1e6e6abd7165",
+      "bytes": 3933616,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/AbyssRunner_Raw.glb"
+      ]
+    },
+    {
+      "oid": "77b34f730a3045a959fc0f70c8edd8ca20cbd9feef4b30e136b1ee10c08e20c6",
+      "bytes": 5307512,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/BarrelThief_Raw.glb"
+      ]
+    },
+    {
+      "oid": "30d36fc8d1d97a98b45934a396eb1ac006713b640a54719a8d468977d37a0377",
+      "bytes": 4148272,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/BlackSailMessenger_Raw.glb"
+      ]
+    },
+    {
+      "oid": "61581ff2a7114bfdb18d662d2b91d315a4f9101c9b978b0c01ad5c50ffba46ae",
+      "bytes": 6286548,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/BoneFluteAttendant_Raw.glb"
+      ]
+    },
+    {
+      "oid": "e9ffa652b6ee78e4e931aa1a4960f59b44ef0fd30beb6ae52b4901df2e74704b",
+      "bytes": 4779936,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/BoneNetStitcher_Raw.glb"
+      ]
+    },
+    {
+      "oid": "4f9b6ee587da16d3bdabab2b9b58af19182fac90befbfc3e2105f372a1c7a26c",
+      "bytes": 4454796,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/DisplacedWatchman_Raw.glb"
+      ]
+    },
+    {
+      "oid": "09b4c9c34a326b40a01e134e2c4b65d5fdf14092bbffcd3f6336999d3c9427f0",
+      "bytes": 4146304,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/EmptyHoldKnocker_Raw.glb"
+      ]
+    },
+    {
+      "oid": "dae078c048615a8339a1ba40c38416825c92e1e3f14ebaf2cb9100936028723e",
+      "bytes": 6126476,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/FogRigger_Raw.glb"
+      ]
+    },
+    {
+      "oid": "1f7839422508ed7f24ed641d353d1d16566822187a4f110a7de8ae4d29765425",
+      "bytes": 4304784,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/InvertedSurveyHand_Raw.glb"
+      ]
+    },
+    {
+      "oid": "c20879398a799054fc199fc7d7e6fd2ab12c9cb621463e596d24315c29fb4389",
+      "bytes": 3031560,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/LampOutBellkeeper_Raw.glb"
+      ]
+    },
+    {
+      "oid": "25f2ab97cde5b95c20827af2932ba9f879b423d5afd6034fcc70820c7f85ec92",
+      "bytes": 4007396,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/LastTideWitness_Raw.glb"
+      ]
+    },
+    {
+      "oid": "02577080b709ef29c3c93b9cfa3c4e103527582394007aa7ea12383c806903dc",
+      "bytes": 3845416,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/LostSailor_Raw.glb"
+      ]
+    },
+    {
+      "oid": "278b9c0496781801019d25348d64ade9c6326e8c469f96c40457ddcc57f339e5",
+      "bytes": 4448744,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/MirrorTideScribe_Raw.glb"
+      ]
+    },
+    {
+      "oid": "628c2b3be8898400bc589713a60e8ccb695904facf9e6b85b6747c71748f7c03",
+      "bytes": 4393604,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/MisfireGunner_Raw.glb"
+      ]
+    },
+    {
+      "oid": "3bca91f9790ff36d3ced4dcf7bee6f7a37d65cb458155df9b0d20884f397c465",
+      "bytes": 4572520,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/PlumbWatcher_Raw.glb"
+      ]
+    },
+    {
+      "oid": "8232f9faecab0312f5800ed4768aa726ff9fd078453d31efa76444486f6afa69",
+      "bytes": 3821696,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/RailNameTaker_Raw.glb"
+      ]
+    },
+    {
+      "oid": "4a662e44acfb89b5677cb30ebab05d4cd07ddde5697fcf2292b4cd96d016d113",
+      "bytes": 5950044,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/ReverseNavigator_Raw.glb"
+      ]
+    },
+    {
+      "oid": "c5f1df7a3e268eff61dd88665a5d1f79d4891a2ab1fd6dd5cd0c5f0022c7c7d9",
+      "bytes": 5993036,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/RustChainEscort_Raw.glb"
+      ]
+    },
+    {
+      "oid": "95e40a76a3d1e15bffd37d8e8f6c05d2fc4266809655803334ec18c02a17eaed",
+      "bytes": 4392948,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/SaltMarrowPriest_Raw.glb"
+      ]
+    },
+    {
+      "oid": "e5ba12b31b17da63addd971c22314de5fd88842de6160f4e5e53f7a9a0f016c5",
+      "bytes": 4528308,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/StarlessPeeker_Raw.glb"
+      ]
+    },
+    {
+      "oid": "2910e6200c2ddca8f6d23a1eca34788c3da608b3abf579fe2b68dd01454ce85c",
+      "bytes": 3420272,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/TideBoneScavenger_Raw.glb"
+      ]
+    },
+    {
+      "oid": "637b33711d7cddc2db43afd9fe47481242ff897409ac4b8d7e571d4aa9a8e5ea",
+      "bytes": 3275276,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/UnflaggedBoarder_Raw.glb"
+      ]
+    },
+    {
+      "oid": "612378a1f56a9976cb5ca7f75b2a8c0bdd79acb0f738aabba2e4814a30f4656d",
+      "bytes": 4448564,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/WetCoatPilot_Raw.glb"
+      ]
+    },
+    {
+      "oid": "d811d92e14012b9770016d03251953fe5090aea63d9836b4d88a92ddd6660443",
+      "bytes": 3963548,
+      "historical_paths": [
+        "ArtSource/Characters/Hyper3DRigs/WhiteLampSignaller_Raw.glb"
+      ]
+    },
+    {
+      "oid": "f1f1ca4473ef563479fdab2e2053a386bc104220689043b80c26335a2d9f5c32",
+      "bytes": 36491682,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/AbandonShipMedic_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "b3661a73119454efa65aba03beb3e08ab64b82d2dd35b2e75d7fe4e9f99afc19",
+      "bytes": 37771418,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/AbyssRunner_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "0def495bb8826d865f0e508b0f5ef373b3b826587ed1231286d8a8ea6a4cb06b",
+      "bytes": 37621436,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/AbyssRunner_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "3ff4c82f9a9abcf3ef6c668d0d28ccef43e498febc8d0f2ee8e4bd197a110b4d",
+      "bytes": 32822918,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/BlackSailMessenger_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "d391a08376380cbfaedd5afbc84e3a89ce3a60eeb83e4c2e5e3d8017a92c370c",
+      "bytes": 32776900,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/BlackSailMessenger_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "aae12471172b7890457ccc15c2639a16ec202171a764e7c9f7cb701f8bc9b9fa",
+      "bytes": 41651128,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/BoneFluteAttendant_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "441eaca6d563b49905af1ef5e9879c6f1c87b265de990b0d3ea0b74ea1498eea",
+      "bytes": 49668279,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/BoneNetStitcher_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "878f1c8cf948e391291a436d98410fd6af3a4e734c16c497995cd1f0679d65b4",
+      "bytes": 29508563,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/DisplacedWatchman_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "87dbecbd5e169b100e385226c458c834a9ca214cf93d74d67d578dce10789ea8",
+      "bytes": 29355668,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/DisplacedWatchman_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "7a7b88764587a2d827463930dfc5ab346a25484c5418b56b1dfb3814785fa1c4",
+      "bytes": 44840278,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/EmptyHoldKnocker_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "4d3f2938237b4da691b349658356fed039d7db7f657a66fc3940180826f0e3e7",
+      "bytes": 44568884,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/EmptyHoldKnocker_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "53042e9e26e1d7dbe9823201f4acf25edf266514315dcbbb75dcf072cf90186a",
+      "bytes": 54900328,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/FogRigger_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "2e132d86596ae9a1747344eed22057792eb0bfece7469b41ff218517b9777db5",
+      "bytes": 40241160,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/InvertedSurveyHand_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "5f30a588a874469c62ccae778892eca05776e0627156bcbcdfc31e16afed3ca8",
+      "bytes": 40158712,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/InvertedSurveyHand_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "8a8fa15efb98c9eda96630d54e47062c7e55b89f77ce2df8e151fb08638e740e",
+      "bytes": 36337397,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/LampOutBellkeeper_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "9af7a8ce420e806827c555dea65438f850bfbf3a08c143dd15389173cc0674df",
+      "bytes": 34944725,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/LastTideWitness_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "e142d3d7c9e48740e89fdaf2cfbfdccd7bebddd474f486fe3dc01c757b671984",
+      "bytes": 40810822,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/MirrorTideScribe_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "8da630bd2c160a02c81231fd0088cb3ccf5eaa1288502c7201be6190d774bd07",
+      "bytes": 42741922,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/MisfireGunner_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "3fdc07f2ffa02719edbc03527ec11c25af7509c4858224d5feda3e2b0d626073",
+      "bytes": 28872669,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/PlumbWatcher_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "e50a70c3a6eebaf65b2f818ae62f658429fb6dddbf452a54b766006db2ac5f9d",
+      "bytes": 32889438,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/RailNameTaker_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "8bf47ef80d0558619b132f5ea0a038b431b5adfec8c5dfc04d10c3956b940de8",
+      "bytes": 32774152,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/RailNameTaker_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "1ddea1f484f44bc354ffd770e828be090327ea5792bfdbd8c3036547cb2909e2",
+      "bytes": 30539500,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/ReverseNavigator_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "5939382a38f76fd5aa19ad384150f747530067ebbd7a5f5ccee67080ff12646f",
+      "bytes": 30516020,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/ReverseNavigator_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "e3cf7cb3c05a457a25b71887e88e6eb55994f926f8816be49374c65935cc19fd",
+      "bytes": 40513138,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/RustChainEscort_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "10fab2093a37e95611a54e33c3ce8af82a6d762de2c2819bf1d216307de922fb",
+      "bytes": 40576012,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/RustChainEscort_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "fcd6de0f714c8c13ab2ddb50df374112b51abd038f95f458d2d0cf24a8e9a9ea",
+      "bytes": 33257438,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/SaltMarrowPriest_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "3ffe6e2b9dea3a3b79f1ea91b271c0821382452510a8d6658a22e8a3aa05a8fa",
+      "bytes": 40112976,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/StarlessPeeker_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "8e28362cc983e35cd73fe767f6c16b9da0e658b3fee375718ae0e02476c36100",
+      "bytes": 40022752,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/StarlessPeeker_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "f48e68313928f4b445c46c30540ff687d760a24d8b5fff645211ceb042ce5bb2",
+      "bytes": 34485658,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/TideBoneScavenger_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "162ae44673d6b8c1a8fedddf94ab027f132d3021063ae9b50640c41dd92569c3",
+      "bytes": 34456384,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/TideBoneScavenger_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "7f2278fbdd9e77bda1191f45f68a489745e7883452d05ccf77a2288d948bdc9b",
+      "bytes": 26636455,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/UnflaggedBoarder_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "42c720277c408ddde25be0546d53080d264d37446a019da7cd0e285bbff8d42d",
+      "bytes": 26636492,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/UnflaggedBoarder_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "0f32d6093a4e0e8a8c8f7e716e608c6ed799b9cc35e473e2d097b8ee70b229b5",
+      "bytes": 31751984,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/WetCoatPilot_Rigged.blend"
+      ]
+    },
+    {
+      "oid": "21bedb997d0bab8571cee1cf829720013e82f2eea6e59d0ccc6dd19d9e487796",
+      "bytes": 31574656,
+      "historical_paths": [
+        "ArtSource/Characters/RigTrials/WetCoatPilot_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "db5f1dc15af518f9940ea4aadba3973445e5036ed790ecc0e267894c532a8aee",
+      "bytes": 38662044,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/AbandonShipMedic_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "3fcd62e70fadb9a18c5098a7f1dcf0ad21713ec0d0d7e8dad68b0669a89acc9b",
+      "bytes": 39979400,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/AbyssRunner_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "bd3d0c0b93ea1ebe0576f9e58a24334cd3ac20acb3b21fd0d9455a4ed001448b",
+      "bytes": 46165868,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/BoneFluteAttendant_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "81a83709d1a38e5295a0d0b0ce2782727ffa121e1887695fbb10968278e6bcc6",
+      "bytes": 52463832,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/BoneNetStitcher_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "03a160ce830728f001d85de8406d41ac955c2c0a7a4a4e004ec383a81b967791",
+      "bytes": 58818104,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/FogRigger_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "f97acaf60c00ed7b790159480cab28d4cb0dbafc2db9a66fb97f6651ede0616e",
+      "bytes": 42879508,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/InvertedSurveyHand_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "47fcc40f8a4ee17f09b73c9103d2b08d6eb69f06dcc22bb8d3a57a16a484c6f4",
+      "bytes": 37732816,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/LampOutBellkeeper_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "e0f3df85921d2ab2f7c8aca690d1687566f898a03b2490dd25f3a200f62c4d11",
+      "bytes": 37200488,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/LastTideWitness_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "692e4e0646a6d077b144c467013147aa489208da1f13f9f47994311a211b349a",
+      "bytes": 43531592,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/MirrorTideScribe_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "d62f153cb60a568aa318a5b596f33a679e952daf9f635216acc71c48d5b62542",
+      "bytes": 45400688,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/MisfireGunner_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "60d39990ebb976fc6a32f6893dffc62f47636d085aafd5c68831f8478bb579ee",
+      "bytes": 31953804,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/PlumbWatcher_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "d8eb451b06dc5ab7f39ac335df6e4d1acb72f697c73de3129cab46eb3dfb9cfa",
+      "bytes": 34823948,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/ReverseNavigator_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "92c4c96694b2f92bad2ac4ae3435e446b8104c7285fea74bb6f34300e2b9cba8",
+      "bytes": 35898248,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/SaltMarrowPriest_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "ea3fd425cbf968f11f4374135f1ae8776cddbe745af0c810e73c7ebf35a62393",
+      "bytes": 42918864,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/StarlessPeeker_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "1163652a06e4aca74e102adb587c5cf6d9c5c0c3b6087bcd9dad33937979b2ef",
+      "bytes": 36251196,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/Hyper3DRigs/TideBoneScavenger_Rigged.glb"
+      ]
+    },
+    {
+      "oid": "7817377038ce90206d43b66e03892ce5c1896b8662ad14bf5bda2b244346dd1c",
+      "bytes": 54773548,
+      "historical_paths": [
+        "Assets/UnsoundedSea/Art/Models/RigTrials/FogRigger_Rigged.glb"
+      ]
+    }
+  ]
+}

@@ -11,7 +11,7 @@ from mathutils import Vector
 from mathutils.kdtree import KDTree
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / 'ArtSource/Characters/RigTrials'
+OUT = ROOT / 'Logs/RigTrials/models'  # Historical reconstruction only; curated assets are maintained separately.
 RENDERS = ROOT / 'Logs/RigTrials'
 SAMPLES = json.loads((ROOT / 'ArtSource/Characters/rig-profiles.json').read_text())
 
