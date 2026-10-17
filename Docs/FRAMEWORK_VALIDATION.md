@@ -216,6 +216,8 @@
 - 四场原先 `BattleStage.skybox` 均为空，会继承入口场景的天空。现在显式绑定各自天空、环境反射和环境光；新增测试检查进入／退出恢复与 Cubemap 非黑，并逐材质核对必需贴图非空、与当前 GLB 导入源一致。独立表面材质降低金属度与法线强度；M05 补光跟随当前构图重新定位。
 - `GiantBossQA.Record(0)` 两个真实结束回合推进 931 帧、两次动作释放，攻击海面冲击 **0 次**，粒子峰值 157；Busy 结束和暂停冻结通过。M02 从声囊直接向船发出空气压力环，首道到达才更新资源；完整召唤／规则胜负沿用下方既有验收，此轮没有重做整场通关或独立 Player／设备性能验收。
 
+四份环境反射与两张验收图已从 `b803d9c` 的独立空 LFS 缓存回读，6 份 SHA-256 匹配，见[回读记录](../ArtSource/Bosses/Atmosphere-readback.json)。`GiantBossQA.AtmosphereReview` 在隔离验证会话中复查四场天空、外置贴图引用和实际画面。
+
 静态画面：[四场天空与表面](ArtReferences/boss-atmosphere-review.jpg)；实机动作：[领唱者空中攻击](ArtReferences/boss-airborne-attack.jpg)。M04／M05 原始贴图偏暗，尚未进行最终美术定稿；M02 召唤后的世界标签与左侧唱诗匣区存在重叠，属于待修 UI 问题。
 
 以下是同日 Windows 上的规则与 UI 验收，M02 的旧海浪结论已由上方飞行表现替代。
