@@ -11,6 +11,7 @@ namespace UnsoundedSea.Runtime
         public Camera battleCamera;
         public Transform vessel;
         public Transform[] actorAnchors;
+        public Transform singleActorAnchor;
         public Material selectionMaterial;
         public Renderer ocean;
         public BattleWater water;
@@ -69,7 +70,7 @@ namespace UnsoundedSea.Runtime
             for (var i = 0; i < view.Enemies.Count; i++)
             {
                 var actor = new GameObject(view.Enemies[i].Name).AddComponent<BattleActorView>();
-                actor.transform.SetParent(actorAnchors[i], false);
+                actor.transform.SetParent(view.Enemies.Count == 1 && singleActorAnchor != null ? singleActorAnchor : actorAnchors[i], false);
                 actor.Bind(owner, view.Enemies[i].Id, owner.scenario.ActorPrefab(i), selectionMaterial);
                 if(actor.IsSeaActor&&water!=null)actor.ConfigureSeaEmergence(water.SurfaceHeight);
                 actor.ConfigureMotion(placeholderCombatMotion);

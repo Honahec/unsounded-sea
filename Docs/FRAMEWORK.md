@@ -67,7 +67,7 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 
 - **换场景**：复制或创建带 `BattleStage` 的 Prefab，配置 `battleCamera`、`vessel`（所有随船运动的物体父节点）、`actorAnchors` 和选中材质，再替换 Scenario 的 `stagePrefab`。海面与音响可选；当前舞台不支持角色移动/导航。
 - **镜头构图**：海面 Boss 的相机独立于船体 rig，船体横摇不带动镜头；巨浪来临时按前方水位预判升高并调整俯角，浪后回到基础构图。基础位置 `(85,22,-26)`、看向 `(0,8,70)`、垂直 FOV 60°。换船或海怪后需一起检查尺度、距离、海面覆盖、名牌和 HUD 遮挡，不能只移动相机。
-- **甲板 / 海面锚点**：普通锚点保持甲板表现；海面锚点挂 `BattleAnchor` 并设为 `Sea`，必须放在船体 rig 之外，校验会拒绝错误挂载。设置独立位置、浸没深度、名牌高度/偏移、轻微升沉与扰流半径；海面角色通常关闭脚底选中环。碰撞范围按模型局部包围盒计算，锚点旋转/缩放不重复放大范围。
+- **甲板 / 海面锚点**：普通锚点保持甲板表现；`FogSeaStage.singleActorAnchor` 指向原右侧第二站位，单敌使用此引用，双敌仍依次使用原两个 `actorAnchors`；其他舞台不配置该可选引用时保持原布局。`Tools/OceanBattleSetup.ConfigureSingleEnemyPlacement` 只更新此引用，不重建舞台。海面锚点挂 `BattleAnchor` 并设为 `Sea`，必须放在船体 rig 之外，校验会拒绝错误挂载。设置独立位置、浸没深度、名牌高度/偏移、轻微升沉与扰流半径；海面角色通常关闭脚底选中环。碰撞范围按模型局部包围盒计算，锚点旋转/缩放不重复放大范围。
 - **换角色**：修改 Enemy 的 `presentationPrefab`，或在 Scenario 的 `actorOverrides` 按敌人槽位覆写。模型约定脚底 y=0、正面 +Z、真实米制；锚点决定位置和朝向。同种敌人可以重复引用，规则实例 ID 为 `id:槽位`。出生前校验相机、船体、锚点和模型引用。
 - **换遭遇**：Scenario 指向另一个 Encounter；牌组、资源、敌人意图和工具仍属于规则数据。UI 按快照更新，不依赖两只敌人的名字。新增敌人需增加相应舞台锚点并检查名牌排布。
 - **特殊战入口**：派生 `BattleRuleModule`，为每次会话创建新的 `EffectRegistry` / `IEncounterObjective`。`SealingRuleModule` 用于雾海封线；`SurvivalRuleModule` 用于海面撤离，按已结算轮数计数。两者均不靠敌人全部死亡判胜。模块资产只存配置，不能共享可变进度。需要新命令、敌人阶段策略或即时玩法时仍需扩展 Core 与测试；当前入口不等于这些玩法已实现。

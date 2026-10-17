@@ -57,6 +57,22 @@ public static class OceanBattleSetup
         PrefabUtility.SaveAsPrefabAsset(root,Art+"/FogSeaStage.prefab");PrefabUtility.UnloadPrefabContents(root);
         AssetDatabase.DeleteAsset(Art+"/WetOak.mat");AssetDatabase.DeleteAsset(Art+"/Basalt.mat");AssetDatabase.SaveAssets();return "Saved final fill light and removed unused materials.";
     }
+    public static string ConfigureSingleEnemyPlacement()
+    {
+        var path=Art+"/FogSeaStage.prefab";
+        var editing=PrefabStageUtility.GetCurrentPrefabStage();
+        if(editing!=null&&editing.assetPath==path&&editing.scene.isDirty)
+            throw new InvalidOperationException("Save the open FogSeaStage prefab edits first.");
+        var root=PrefabUtility.LoadPrefabContents(path);
+        try
+        {
+            var stage=root.GetComponent<BattleStage>();
+            stage.singleActorAnchor=stage.actorAnchors[1];
+            PrefabUtility.SaveAsPrefabAsset(root,path);
+        }
+        finally {PrefabUtility.UnloadPrefabContents(root);}
+        return "Preserved the original two-enemy layout; solo deck enemies use its right-hand slot.";
+    }
     public static string Build()
     {
         if(EditorApplication.isPlaying) throw new InvalidOperationException("Stop Play first.");
@@ -80,6 +96,7 @@ public static class OceanBattleSetup
         stage.actorAnchors=new Transform[2];
         stage.actorAnchors[0]=Obj("Enemy slot 0",vessel,new Vector3(-1.15f,1.45f,1.3f)).transform;
         stage.actorAnchors[1]=Obj("Enemy slot 1",vessel,new Vector3(1.15f,1.45f,2.3f)).transform;
+        stage.singleActorAnchor=stage.actorAnchors[1];
         foreach(var anchor in stage.actorAnchors) anchor.localRotation=Quaternion.Euler(0,140,0);
         // Deck props are modular and stay with the vessel during the subtle roll.
         for(int side=-1;side<=1;side+=2)
