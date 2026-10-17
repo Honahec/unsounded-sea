@@ -57,7 +57,7 @@ public static class NewVoyageDepartureQA
         SceneManager.LoadScene("MainMenu");await Task.Delay(500);await Resize(width,height);
         await Wait(()=>Root.Q<Button>("menu-start")?.enabledInHierarchy==true,"Menu did not become ready.");
         var sea=UnityEngine.Object.FindAnyObjectByType<MainMenuSeaPresentation>();var start=sea.vessel.position;var camera=sea.menuCamera.transform.position;
-        var priority=Application.backgroundLoadingPriority;
+        var priority=Application.backgroundLoadingPriority;var initialHeading=sea.vessel.forward;var starboard=sea.vessel.right;
         // Cancelling the crew picker must not create a voyage or light the beacon.
         Click("menu-start");if(Root.Q<Button>("menu-confirm-new")!=null)Click("menu-confirm-new");Click("crew-back");
         Check(!GameSceneLoader.IsLoading&&sea.BeaconStrength==0,"Cancelling crew selection launched the transition.");
@@ -77,7 +77,7 @@ public static class NewVoyageDepartureQA
             }
         }
         SceneManager.sceneLoaded+=Loaded;
-        var phases=new HashSet<string>();float maxTravel=0,maxCamera=0;int wake=0;float beacon=0;
+        var phases=new HashSet<string>();float maxTravel=0,maxCamera=0,maxRightTurn=0,maxStarboardTravel=0;int wake=0;float beacon=0;
         try
         {
             var began=Time.realtimeSinceStartup;
@@ -91,7 +91,10 @@ public static class NewVoyageDepartureQA
                     {
                         var drift=Vector3.ProjectOnPlane(sea.vessel.position-start,Vector3.up).magnitude;
                         maxTravel=Mathf.Max(maxTravel,drift);maxCamera=Mathf.Max(maxCamera,Vector3.Distance(camera,sea.menuCamera.transform.position));
+                        maxRightTurn=Mathf.Max(maxRightTurn,Vector3.SignedAngle(initialHeading,sea.vessel.forward,Vector3.up));
+                        maxStarboardTravel=Mathf.Max(maxStarboardTravel,Vector3.Dot(sea.vessel.position-start,starboard));
                         wake=Mathf.Max(wake,sea.DepartureWakeSamples);beacon=Mathf.Max(beacon,sea.BeaconStrength);
+                        if(!reduced&&!switchMidway&&maxRightTurn>12&&transition.VeilOpacity<.8f&&phases.Add("turning"))await Capture(label+"-turning");
                     }
                     if(phases.Add(transition.Phase))await Capture(label+"-"+transition.Phase);
                     if(switchMidway&&transition.Phase=="departure")PlayerPrefs.SetInt("settings.reducedMotion",1);
@@ -108,9 +111,13 @@ public static class NewVoyageDepartureQA
         Check(checkpoint==JsonConvert.SerializeObject(VoyageRuntime.Session.Export()),"The cinematic changed voyage rules or history.");
         Check(Root.style.opacity.value>=.99f&&Root.Q<Button>("voyage-support-manifest")!=null,"Voyage UI did not recover.");
         Check(beacon>.5f,"Lighthouse did not light.");
-        if(reduced)Check(maxCamera<.01f&&maxTravel<.3f&&wake==0,"Reduced motion moved the camera or sailed the ship.");
-        else if(!switchMidway)Check(maxTravel>15&&maxCamera>5&&wake>0,"Normal departure did not sail with its camera and wake.");
-        var report=new{label,loadedUnderFog,maxTravel,maxCamera,wake,beacon,phases=phases.ToArray(),rulesUnchanged=true};
+        if(reduced)Check(maxCamera<.01f&&maxTravel<.3f&&wake==0&&maxRightTurn<.01f,"Reduced motion moved the camera or sailed the ship.");
+        else if(!switchMidway)
+        {
+            Check(maxTravel>15&&maxCamera>5&&wake>0,"Normal departure did not sail with its camera and wake.");
+            Check(maxRightTurn>18&&maxRightTurn<35&&maxStarboardTravel>15&&phases.Contains("turning"),"Departure did not visibly steer gently to starboard.");
+        }
+        var report=new{label,loadedUnderFog,maxTravel,maxCamera,maxRightTurn,maxStarboardTravel,wake,beacon,phases=phases.ToArray(),rulesUnchanged=true};
         File.WriteAllText(Dir+"/"+label+"-result.json",JsonConvert.SerializeObject(report,Formatting.Indented));return report;
     }
     public static async Task<object> Verify()

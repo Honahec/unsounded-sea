@@ -38,7 +38,10 @@ namespace UnsoundedSea.Runtime
             if (vessel == null) return;
             var point = vesselRestPosition; var heading = vesselRestRotation * Vector3.forward;
             if (departing && !GameSettings.ReducedMotion)
+            {
                 departurePath.Evaluate(Mathf.SmoothStep(0, 1, Mathf.InverseLerp(.25f, 1, departureProgress)), out point, out heading);
+                vessel.rotation = Quaternion.FromToRotation(vesselRestRotation * Vector3.forward, heading) * vesselRestRotation;
+            }
             vessel.position = point + water.SampleDisplacement(point);
             if (departing)
             {
@@ -58,7 +61,9 @@ namespace UnsoundedSea.Runtime
         public void BeginDeparture()
         {
             departing = true; departureProgress = 0;
-            departurePath = new VoyageSailingPath(vesselRestPosition, vesselRestPosition + vessel.forward * 45, vessel.forward);
+            var heading = vesselRestRotation * Vector3.forward;
+            var starboard = Vector3.Cross(Vector3.up, heading).normalized;
+            departurePath = new VoyageSailingPath(vesselRestPosition, vesselRestPosition + heading * 42 + starboard * 18, heading);
             if (departureWakeMaterial != null)
             {
                 var host = new GameObject("Departure wake"); host.transform.SetParent(transform, false);
