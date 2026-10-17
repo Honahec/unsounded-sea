@@ -11,6 +11,7 @@ namespace UnsoundedSea.Tests
     {
         private const string Path = "Assets/UnsoundedSea/Content/Scenarios/FogVisitors.asset";
         private static BattleScenario Scenario => AssetDatabase.LoadAssetAtPath<BattleScenario>(Path);
+        private static BattleCommand Seal(BattleSession session) => BattleCommand.Play(session.View.Hand.Single(x => x.IsEncounter).InstanceId);
         [Test] public void ScenarioHasCompleteReplaceablePresentation()
         {
             Assert.That(Scenario, Is.Not.Null);
@@ -20,7 +21,7 @@ namespace UnsoundedSea.Tests
         [Test] public void RestartCreatesIndependentObjectiveAndInvestigationState()
         {
             var a = Scenario.CreateSession(23); var b = Scenario.CreateSession(23);
-            Assert.That(a.Execute(BattleCommand.Task()).Success, Is.True);
+            Assert.That(a.Execute(Seal(a)).Success, Is.True);
             var tool = a.View.Tools[0].Definition.Id;
             a.Execute(BattleCommand.Investigate(tool, a.View.Enemies[0].Id));
             Assert.That(b.View.ObjectiveProgress, Is.Zero);
@@ -32,8 +33,8 @@ namespace UnsoundedSea.Tests
             var session = Scenario.CreateSession(20261016);
             for (var i = 0; i < 4; i++)
             {
-                Assert.That(session.Execute(BattleCommand.Task()).Success, Is.True);
-                Assert.That(session.Execute(BattleCommand.Task()).Success, Is.False, "Only one task per turn.");
+                Assert.That(session.Execute(Seal(session)).Success, Is.True);
+                Assert.That(session.Execute(Seal(session)).Success, Is.False, "Only one seal per turn.");
                 if (i < 3) Assert.That(session.Execute(BattleCommand.EndTurn()).Success, Is.True);
             }
             Assert.That(session.View.Phase, Is.EqualTo(BattlePhase.Victory));

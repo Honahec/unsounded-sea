@@ -95,6 +95,39 @@ namespace UnsoundedSea.Tests
         }
 
         [Test]
+        public void NormalExplorationShowsTwoViableExitsAndAveragesOneBranchPerTwoStops()
+        {
+            var branchStops=0;var visitedStops=0;var keptChartDiscovery=false;
+            for(uint seed=0;seed<64;seed++)
+            {
+                var session=VoyageSession.Create(seed);
+                var fullById=session.Export().Map.Stops.ToDictionary(x=>x.Id);
+                while(session.Current.Layer<VoyageMapGenerator.Layers-1)
+                {
+                    if(session.Phase==VoyagePhase.ChoosingRoute)
+                    {
+                        Assert.That(session.Choices.Select(x=>x.Id),Is.SupersetOf(fullById[session.Current.Id].Next.Take(2)));
+                        Assert.That(session.Choices.Select(x=>x.Id),Is.SubsetOf(fullById[session.Current.Id].Next));
+                        if(fullById[session.Current.Id].Next.Length==3&&session.Choices.Count==2){Assert.That(session.CanRevealRoutes,Is.True);keptChartDiscovery=true;}
+                        if(session.Choices.Count>1)branchStops++;
+                        visitedStops++;
+                        Sail(session);
+                    }
+                    else if(session.Phase==VoyagePhase.Arrived)
+                    {
+                        if(session.Current.Kind==RunNodeKind.Battle){session.BeginEncounter();session.ResolveEncounter(true,session.Health,session.Sanity);}
+                        else {var choice=session.GetNodeChoices().First(x=>x.Enabled);session.ChooseNode(choice.Id);session.Continue();}
+                    }
+                    else if(session.Phase==VoyagePhase.Reward)session.ClaimReward(null);
+                }
+                visitedStops++; // Boss is the eleventh visited waypoint and has no outgoing branch.
+            }
+            Assert.That(branchStops*2,Is.GreaterThanOrEqualTo(visitedStops),
+                $"Visible branch density was {branchStops/(double)visitedStops:P1} across all 11 visited stops and {branchStops/(double)(visitedStops-64):P1} across the 10 navigable stops; expected at least 50.0% across visits.");
+            Assert.That(keptChartDiscovery,Is.True);
+        }
+
+        [Test]
         public void ArchiveKnowledgeHasTruthfulEffectAndSurvivesRestore()
         {
             var routes=VoyageSession.Create(121);MoveToLayer(routes,7);

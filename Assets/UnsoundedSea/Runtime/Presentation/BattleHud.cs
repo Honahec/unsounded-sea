@@ -28,7 +28,7 @@ namespace UnsoundedSea.Runtime
         private bool journalOpen;
         private bool menuOpen;
         private bool settingsOpen;
-        private bool chartOpen, chartWasMenuOpen, chartWasJournalOpen;
+        private bool chartOpen, chartWasMenuOpen, chartWasJournalOpen, bookOpen;
         private int selectedCard;
         private readonly EnemyCardSelection enemySelection = new EnemyCardSelection();
         private int inspectedCard;
@@ -61,7 +61,7 @@ namespace UnsoundedSea.Runtime
         private void Update() { RenderedFrames++; }
         private void OnDisable()
         {
-            chartOpen = false; chartWasMenuOpen = false; chartWasJournalOpen = false;
+            chartOpen = false; chartWasMenuOpen = false; chartWasJournalOpen = false; bookOpen = false;
             journalOpen = false; menuOpen = false; settingsOpen = false;
             root?.UnregisterCallback<GeometryChangedEvent>(Resize);
             root?.UnregisterCallback<KeyDownEvent>(OnKey, TrickleDown.TrickleDown);
@@ -77,7 +77,13 @@ namespace UnsoundedSea.Runtime
             }
             if (session == null) return;
             if (session.View.PendingChoice != null) { evt.StopPropagation(); return; }
-            if (chartOpen)
+            if (evt.keyCode == KeyCode.B) ToggleActionBook();
+            else if (bookOpen)
+            {
+                if (evt.keyCode != KeyCode.Escape) return;
+                ToggleActionBook();
+            }
+            else if (chartOpen)
             {
                 if (evt.keyCode != KeyCode.Escape && evt.keyCode != KeyCode.M) return;
                 CloseChart();
@@ -101,6 +107,7 @@ namespace UnsoundedSea.Runtime
             else return;
             evt.StopPropagation();
         }
+        private void ToggleActionBook() { bookOpen = !bookOpen; Refresh(bookOpen ? "battle-action-book-close" : "battle-action-book"); }
         private void ToggleChart()
         {
             if (chartOpen) { CloseChart(); return; }
@@ -138,7 +145,7 @@ namespace UnsoundedSea.Runtime
             message = "";
             journalOpen = false;
             menuOpen = false; settingsOpen = false;
-            chartOpen = false; chartWasMenuOpen = false; chartWasJournalOpen = false;
+            chartOpen = false; chartWasMenuOpen = false; chartWasJournalOpen = false; bookOpen = false;
             selectedCard = 0;
             previousHand = Array.Empty<int>();
             revealed.Clear();
@@ -267,7 +274,7 @@ namespace UnsoundedSea.Runtime
             if (view.Enemies.All(e => e.Id != selectedEnemy || e.Health == 0))
                 selectedEnemy = (view.Enemies.FirstOrDefault(e => e.Health > 0) ?? view.Enemies[0]).Id;
             root.Clear();
-            root.focusable = view.PendingChoice == null && inspectedCard == 0 && !chartOpen && !menuOpen && !concluded;
+            root.focusable = view.PendingChoice == null && inspectedCard == 0 && !bookOpen && !chartOpen && !menuOpen && !concluded;
             root.EnableInClassList("concluded", concluded);
             root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion);
 
@@ -281,19 +288,12 @@ namespace UnsoundedSea.Runtime
             heading.tooltip = view.Objective;
             root.Add(heading);
 
-            var toggle = Button("journal-toggle", "", "journal-toggle", ToggleJournal);
-            toggle.EnableInClassList("open", journalOpen);
-            toggle.Add(Text(journalOpen ? "收起档案" : "调查档案", "toggle-title"));
-            toggle.Add(Text($"{view.Evidence.Count} 条记录 · J", "toggle-meta"));
-            root.Add(toggle);
-            var menuToggle = Button("menu-toggle", "", "menu-toggle", ToggleMenu);
-            menuToggle.Add(Text("菜单", "toggle-title"));
-            menuToggle.Add(Text("Esc", "toggle-meta"));
-            root.Add(menuToggle);
             var chartToggle = Button("battle-chart-toggle", "", "chart-toggle", ToggleChart);
-            chartToggle.Add(Text("海图", "toggle-title"));
-            chartToggle.Add(Text("M", "toggle-meta"));
+            chartToggle.Add(Text("海图 / M", "toggle-title"));
             root.Add(chartToggle);
+            var bookToggle = Button("battle-action-book", "", "action-book-toggle", ToggleActionBook);
+            bookToggle.Add(Text("行动簿 / B", "toggle-title"));
+            root.Add(bookToggle);
 
             // Target nameplates float over the stage; selection is shown by brackets and a text label.
             var targetBar = Element("targets");
@@ -301,11 +301,10 @@ namespace UnsoundedSea.Runtime
             {
                 var id = enemy.Id;
                 var alive = enemy.Health > 0;
-                var target = Button("enemy-" + id, "", "target", () => { selectedEnemy = id; Refresh(); }, alive && !concluded);
+                var target = Button("enemy-" + id, "", "target", () => { if (selectedCard == 0) { selectedEnemy = id; Refresh(); } else TryPlaySelectedTarget(id); }, alive && !concluded);
                 var isSelected = selectedEnemy == id;
                 target.EnableInClassList("selected", isSelected);
                 target.EnableInClassList("defeated", !alive);
-                target.Add(Text(!alive ? "已击退" : isSelected ? "目标" : "", "target-state"));
                 target.Add(Text(enemy.Name, "target-name"));
                 var hp = Element("target-health");
                 var track = Element("target-track"); var fill = Element("target-fill");
@@ -313,8 +312,7 @@ namespace UnsoundedSea.Runtime
                 track.Add(fill); hp.Add(track);
                 hp.Add(Text($"{enemy.Health} / {enemy.MaxHealth}", "target-value"));
                 target.Add(hp);
-                if (isSelected) target.Add(new EnemyIntentDetails(enemy));
-                foreach (var corner in new[] { "tl", "tr", "bl", "br" }) target.Add(Element("bracket " + corner));
+                target.Add(new EnemyIntentDetails(enemy));
                 var group = Element("enemy-target-group");
                 group.Add(target);
                 var chosen = view.Hand.FirstOrDefault(c => c.InstanceId == selectedCard);
@@ -443,8 +441,8 @@ namespace UnsoundedSea.Runtime
             foreach (var card in view.Hand)
             {
                 var id = card.InstanceId; var data = card.Definition;
-                var shortAction = view.Actions < data.Cost;
-                var shortSanity = view.Sanity <= data.SanityCost;
+                var shortAction = !card.IsEncounter && view.Actions < data.Cost;
+                var shortSanity = !card.IsEncounter && view.Sanity <= data.SanityCost;
                 var button = Button("card-" + id, "", "card-anchor", () =>
                 {
                     if (!card.Enabled || shortAction || shortSanity) { inspectedCard = id; Refresh(); return; }
@@ -534,18 +532,6 @@ namespace UnsoundedSea.Runtime
 
             // Lower right: the fixed encounter action stays separate from the random hand.
             var controls = Element("turn-controls");
-            if (definition.Objective == ObjectiveKind.Seal)
-            {
-                var task = Button("objective-action", "", "task", () => Send(BattleCommand.Task()), playing && view.CanAdvanceObjective);
-                var drawnThisTurn = playing && !view.CanAdvanceObjective && view.Actions >= 1;
-                task.EnableInClassList("spent", drawnThisTurn);
-                var taskHead = Element("task-head");
-                taskHead.Add(Text("绘制封线", "task-name"));
-                taskHead.Add(Pips(view.ObjectiveProgress, view.ObjectiveTarget, "seal-pips"));
-                task.Add(taskHead);
-                task.Add(Text(drawnThisTurn ? "本回合已绘制" : playing && view.Actions < 1 ? "行动不足" : "1 行动 · 每回合一次 · 不占手牌", "task-note"));
-                controls.Add(task);
-            }
             var end = Button("end-turn", "", "end-turn", () => Send(BattleCommand.EndTurn()), playing);
             end.Add(new SeaUiArt("seal")); end.Add(Text("结束\n回合", "end-title"));
             controls.Add(end);
@@ -575,7 +561,13 @@ namespace UnsoundedSea.Runtime
                 root.Add(outcome);
             }
 
-            if (chartOpen)
+            if (bookOpen)
+            {
+                foreach (var child in root.Children().ToArray()) child.SetEnabled(false);
+                root.Add(new BattleActionBookPanel(ToggleActionBook, false));
+            }
+
+            else if (chartOpen)
             {
                 foreach (var child in root.Children()) child.SetEnabled(false);
                 var chart = new VisualElement { name = "battle-chart-overlay" };

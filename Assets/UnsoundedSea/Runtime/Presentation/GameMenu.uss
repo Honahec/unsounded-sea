@@ -90,39 +90,44 @@
 .pause .pause-option:active { background-color: #355248; }
 .pause .pause-option.danger { color: #e6b19b; margin-top: 18px; }
 .pause .pause-option.danger:hover { background-color: #49332c; }
-.enemy-details { width: 100%; margin-top: 6px; }
-.enemy-detail-heading { font-size: 12px; color: #a8b8a9; letter-spacing: 2px; margin-top: 9px; margin-bottom: 4px; -unity-text-align: middle-left; }
-.enemy-clue-lines { font-size: 15px; color: #eee4c9; white-space: normal; -unity-text-align: middle-left; }
-.enemy-intent-row { flex-direction: row; align-items: flex-start; padding: 6px 0; border-top-width: 1px; border-top-color: rgba(158,135,85,.3); }
-.enemy-intent-action { width: 70px; flex-shrink: 0; font-size: 16px; color: #d7bd82; -unity-text-align: upper-left; }
-.enemy-intent-effect { flex-grow: 1; flex-shrink: 1; font-size: 16px; color: #eee4c9; white-space: normal; -unity-text-align: upper-left; }
+.enemy-details { width: 100%; margin-top: 4px; }
+.enemy-clue-lines { font-size: 13px; color: #eee4c9; white-space: normal; -unity-text-align: middle-left; }
+.enemy-intent-row { flex-direction: row; align-items: center; padding: 3px 0; }
+.enemy-intent-icon { width: 22px; height: 22px; margin-right: 5px; flex-shrink: 0; }
+.enemy-intent-action { width: 76px; flex-shrink: 0; font-size: 14px; color: #d7bd82; -unity-text-align: upper-left; }
+.enemy-intent-effect { flex-grow: 1; flex-shrink: 1; font-size: 14px; color: #eee4c9; white-space: normal; -unity-text-align: upper-left; }
 .enemy-intent-row.confirmed .enemy-intent-effect { color: #a7dbca; }
+.battle-action-book-overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; padding: 5% 12%; align-items: center; background-color: rgba(1,8,13,.96); color: #eee4c9; }
+.battle-action-book-sheet { width: 940px; max-width: 100%; flex-grow: 1; min-height: 0; padding: 22px 28px; background-color: rgba(8,19,22,.96); border-width: 1px; border-color: #9e8755; }
+.battle-action-book-heading { flex-direction: row; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.battle-action-book-title { font-size: 28px; letter-spacing: 5px; color: #eee4c9; }
+.battle-action-book-close { min-width: 100px; min-height: 36px; color: #eee4c9; border-width: 0; background-color: transparent; }
+.battle-action-book-sheet .collection-scroll { flex-grow: 1; min-height: 0; }
 
-.card-collection { position: absolute; left: 6%; right: 6%; top: 5%; bottom: 5%; padding: 22px 28px; background-color: rgba(5,15,18,.94); border-width: 1px; border-color: #9e8755; border-top-left-radius: 28px; border-bottom-right-radius: 28px; color: #eee4c9; }
-.collection-head { flex-direction: row; align-items: baseline; margin-bottom: 14px; }
-.collection-title { font-size: 30px; color: #eee4c9; letter-spacing: 6px; margin-right: 24px; }
-.collection-copy { flex-grow: 1; color: #a9b6ad; font-size: 14px; }
-.collection-count { color: #d7bd82; font-size: 17px; margin-left: 20px; }
-.collection-body { flex-grow: 1; flex-direction: row; min-height: 0; }
-.collection-browser { flex-grow: 1; min-width: 0; margin-right: 28px; }
+.card-collection { position: absolute; left: 6%; right: 6%; top: 5%; bottom: 5%; min-width: 0; min-height: 0; padding: 22px 28px; background-color: rgba(5,15,18,.94); border-width: 1px; border-color: #9e8755; border-top-left-radius: 28px; border-bottom-right-radius: 28px; color: #eee4c9; }
+.collection-head { flex-direction: row; flex-shrink: 0; align-items: baseline; margin-bottom: 14px; }
+.collection-title { flex-shrink: 0; font-size: 30px; color: #eee4c9; letter-spacing: 6px; margin-right: 24px; }
+.collection-copy { flex-grow: 1; flex-shrink: 1; color: #a9b6ad; font-size: 14px; }
+.collection-count { flex-shrink: 0; color: #d7bd82; font-size: 17px; margin-left: 20px; }
+.collection-body { flex-grow: 1; flex-shrink: 1; flex-direction: row; min-width: 0; min-height: 0; }
+.collection-browser { flex-grow: 1; flex-shrink: 1; min-width: 0; min-height: 0; margin-right: 28px; }
 .collection-list { flex-grow: 1; flex-direction: row; flex-wrap: wrap; align-content: flex-start; }
-.collection-card { width: 150px; height: 225px; margin: 5px; padding: 0; border-width: 1px; border-color: rgba(158,135,85,.45); border-radius: 8px; background-color: #0f1d21; }
+.collection-list .collection-card { width: 150px; height: 225px; margin: 5px; padding: 0; border-width: 1px; border-color: rgba(158,135,85,.45); border-radius: 8px; background-color: #0f1d21; }
 .collection-card.selected { border-width: 3px; border-color: #d7bd82; }
 .collection-card:focus { border-width: 3px; border-color: #eee4c9; }
 .collection-card-face { width: 100%; height: 100%; border-radius: 7px; }
-.collection-pages { height: 42px; flex-direction: row; justify-content: center; }
+.collection-pages { height: 42px; flex-shrink: 0; flex-direction: row; justify-content: center; }
 .collection-pages Button, .collection-detail Button { min-width: 110px; margin: 5px; padding: 8px 14px; border-width: 1px; border-color: #9e8755; background-color: #19383c; color: #eee4c9; }
 .collection-pages Button:focus, .collection-detail Button:focus { border-width: 2px; border-color: #eee4c9; }
-.collection-detail { width: 350px; min-width: 350px; flex-shrink: 0; align-items: stretch; }
-.collection-detail-card { width: 300px; height: 450px; align-self: center; border-width: 1px; border-color: #9e8755; border-radius: 12px; }
-.collection-detail .collection-toggle { background-color: #355248; color: #fff0c9; margin-top: 12px; }
-.collection-crew { margin-top: 8px; padding: 8px; border-top-width: 1px; border-color: rgba(158,135,85,.45); }
+.collection-detail { width: 350px; min-width: 350px; min-height: 0; flex-shrink: 0; align-items: stretch; }
+.collection-detail-card { width: 300px; height: 450px; flex-shrink: 0; align-self: center; border-width: 1px; border-color: #9e8755; border-radius: 12px; }
+.collection-detail .collection-toggle { flex-shrink: 0; background-color: #355248; color: #fff0c9; margin-top: 12px; }
+.collection-crew { flex-shrink: 0; margin-top: 8px; padding: 8px; border-top-width: 1px; border-color: rgba(158,135,85,.45); }
 .collection-crew-title { color: #d7bd82; font-size: 14px; margin-bottom: 4px; }
 .collection-crew Button { min-height: 34px; margin: 2px 0; padding: 5px 8px; border-width: 1px; border-color: #53645d; background-color: rgba(8,19,22,.9); color: #a9b6ad; }
 .collection-crew Button.selected { color: #fff0c9; border-color: #d7bd82; background-color: #263e36; }
-.collection-scroll { flex-grow: 1; min-height: 0; }
+.collection-scroll { flex-grow: 1; flex-shrink: 1; min-height: 0; }
 .collection-scroll .unity-scroll-view__content-container { flex-direction: row; flex-wrap: wrap; align-content: flex-start; }
-.collection-detail { min-height: 0; }
 .collection-detail > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container { align-items: stretch; }
 .card-inspection { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(1,8,13,.88); }
 .card-inspection-face { width: 340px; height: 510px; border-width: 2px; border-color: #d7bd82; border-radius: 14px; }

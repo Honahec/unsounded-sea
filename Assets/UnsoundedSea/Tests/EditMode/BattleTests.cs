@@ -160,18 +160,25 @@ namespace UnsoundedSea.Tests
             }
         }
 
-        [Test] public void SealCanBeCompletedWithoutInvestigationOrKilling()
+        [Test] public void SealCardPersistsAndCompletesWithoutInvestigationOrKilling()
         {
-            var session = new BattleSession(Definition(objective: ObjectiveKind.Seal), 1);
+            var definition = Definition(objective: ObjectiveKind.Seal);
+            var session = new BattleSession(definition, 1);
+            var seal = session.View.Hand.Single(x => x.IsEncounter);
+            Assert.That(seal.Definition.Name, Is.EqualTo("绘制封线"));
             for (var i = 0; i < 4; i++)
             {
-                Assert.That(session.Execute(BattleCommand.Task()).Success, Is.True);
-                Assert.That(session.Execute(BattleCommand.Task()).Success, Is.False);
+                Assert.That(session.Execute(BattleCommand.Play(seal.InstanceId)).Success, Is.True);
+                Assert.That(session.Execute(BattleCommand.Play(seal.InstanceId)).Success, Is.False);
+                Assert.That(session.View.Hand.Single(x => x.IsEncounter).InstanceId, Is.EqualTo(seal.InstanceId));
                 if (i < 3) session.Execute(BattleCommand.EndTurn());
             }
             Assert.That(session.View.Phase, Is.EqualTo(BattlePhase.Victory));
             Assert.That(session.View.Enemies[0].Health, Is.EqualTo(30));
             Assert.That(session.View.Evidence, Is.Empty);
+            var restored = BattleReplay.Capture(session).Restore(definition);
+            Assert.That(restored.View.Phase, Is.EqualTo(BattlePhase.Victory));
+            Assert.That(restored.View.ObjectiveProgress, Is.EqualTo(4));
         }
 
         [Test] public void SurviveObjectiveCountsResolvedTurns()

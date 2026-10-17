@@ -27,6 +27,7 @@ namespace UnsoundedSea.Runtime
         {
             root = GetComponent<UIDocument>().rootVisualElement;
             root.pickingMode = PickingMode.Ignore;
+            root.focusable = true;
             try
             {
                 if (interfaceFont == null || interfaceStyle == null || menuStyle == null || sailingPresentation == null)
@@ -67,13 +68,19 @@ namespace UnsoundedSea.Runtime
         }
         private void OnKey(KeyDownEvent evt)
         {
-            if (settingsOpen) return;
+            if (settingsOpen || root.panel?.focusController.focusedElement is TextField) return;
             if (evt.keyCode == KeyCode.Escape)
             {
                 if (deckOpen) deckOpen = false;
                 else if (journalOpen) journalOpen = false;
                 else if (chartOpen && !paused) chartOpen = false;
                 else paused = !paused;
+            }
+            else if (evt.keyCode == KeyCode.B)
+            {
+                if (deckOpen) deckOpen = false;
+                else if (paused || journalOpen || chartOpen || Session?.Phase == VoyagePhase.Reward) return;
+                else deckOpen = true;
             }
             else if (deckOpen) return;
             else if (evt.keyCode == KeyCode.M && !paused && !journalOpen && Session?.Phase != VoyagePhase.Sailing) chartOpen = !chartOpen;
@@ -139,7 +146,7 @@ namespace UnsoundedSea.Runtime
             if (root == null) return;
             var focus = (root.panel?.focusController.focusedElement as VisualElement)?.name;
             sailing?.Pause();
-            root.Clear(); root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion);
+            root.Clear(); root.focusable = true; root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion);
             if (Session?.Phase == VoyagePhase.Reward || Session?.Phase == VoyagePhase.ActComplete) chartOpen = false;
             root.EnableInClassList("chart-open", chartOpen);
             root.EnableInClassList("is-sailing", Session?.Phase == VoyagePhase.Sailing);
@@ -160,11 +167,12 @@ namespace UnsoundedSea.Runtime
             status.Add(Text($"生命 {session.Health} / 60    理智 {session.Sanity} / 30    补给 {session.Supplies} / 8", "resource-strip"));
             header.Add(status);
             var utilities = Element("voyage-utilities");
-            if (session.CanEditDeck)
-                utilities.Add(Action("voyage-action-book", "行动簿", "secondary", () => { deckOpen = true; Refresh(); }));
-            utilities.Add(Action("voyage-chart-toggle", chartOpen ? "收起海图" : "海图", "secondary", () => { chartOpen = !chartOpen; Refresh(); }, session.Phase != VoyagePhase.Sailing));
-            utilities.Add(Action("voyage-journal", "日志", "secondary", () => { journalOpen = true; Refresh(); }));
-            utilities.Add(Action("voyage-menu", "菜单", "secondary", () => { paused = true; Refresh(); }));
+            if (session.Phase != VoyagePhase.Reward)
+                utilities.Add(Action("voyage-action-book", "行动簿 / B", "secondary", () => { deckOpen = true; Refresh(); }));
+            utilities.Add(Action("voyage-chart-toggle", chartOpen ? "收起海图 / M" : "海图 / M", "secondary", () => { chartOpen = !chartOpen; Refresh(); }, session.Phase != VoyagePhase.Sailing));
+            utilities.Add(Action("voyage-journal", "日志 / J", "secondary", () => { journalOpen = true; Refresh(); }));
+            utilities.Add(Action("voyage-menu", "菜单 / Esc", "secondary", () => { paused = true; Refresh(); }));
+            utilities.Q<Button>("voyage-action-book")?.SetEnabled(!paused && !journalOpen && !chartOpen);
             utilities.Q<Button>("voyage-chart-toggle").tooltip = "海图 / M";
             utilities.Q<Button>("voyage-journal").tooltip = "航海日志 / J";
             utilities.Q<Button>("voyage-menu").tooltip = "暂停 / Esc";
@@ -271,7 +279,7 @@ namespace UnsoundedSea.Runtime
                 panel.Add(Text(session.IsDebug ? "独立航点完成" : "三幕远征胜利", "destination-title"));
             else if (session.Phase == VoyagePhase.Failed)
                 panel.Add(Text("远征终止", "destination-title"));
-            if (session.Phase != VoyagePhase.Sailing)
+            if (session.Phase != VoyagePhase.Sailing && session.Phase != VoyagePhase.Reward)
                 panel.Add(Text(session.Phase == VoyagePhase.Completed
                     ? session.IsDebug ? "本次独立试玩已结束。" : "归航绳已收回，调查记录带离深渊。"
                     : stop.Clue, "destination-clue"));
@@ -327,7 +335,6 @@ namespace UnsoundedSea.Runtime
         }
         private void BuildRewards(VisualElement panel, VoyageSession session, bool saved)
         {
-            panel.Add(Text("选择一张加入行动库；下次整备时编入牌组，不会自动替换现有行动。", "reward-copy"));
             var cards = Element("reward-cards");
             foreach (var reward in session.RewardCards)
             {
@@ -338,10 +345,11 @@ namespace UnsoundedSea.Runtime
                 button.tooltip = card.Name + "：" + card.Description; cards.Add(button);
             }
             panel.Add(cards);
-            panel.Add(Action("reward-action-book", "查看行动簿", "secondary", () => { deckOpen = true; Refresh(); }));
             var suppliesFull = session.Supplies >= 8;
-            panel.Add(Action("reward-supplies", suppliesFull ? "跳过奖励 · 补给已满" : "放弃卡牌 · 获得 1 补给", "secondary",
-                () => Change(() => Session.ClaimReward(null), suppliesFull ? "已跳过奖励；补给已满，没有额外收益。" : "已将所得换为 1 补给。"), saved));
+            var skip = Action("reward-supplies", suppliesFull ? "放弃：补给已满" : "放弃：获得 1 补给", "secondary",
+                () => Change(() => Session.ClaimReward(null), suppliesFull ? "已跳过奖励；补给已满，没有额外收益。" : "已将所得换为 1 补给。"), saved);
+            skip.AddToClassList("reward-skip");
+            panel.Add(skip);
         }
 
         private void BuildActChoice(VisualElement panel, VoyageSession session, bool saved)
@@ -473,6 +481,7 @@ namespace UnsoundedSea.Runtime
 
         private void PrepareModal()
         {
+            root.focusable = false;
             foreach (var child in root.Children().ToArray()) child.SetEnabled(false);
         }
 

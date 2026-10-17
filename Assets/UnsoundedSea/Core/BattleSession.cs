@@ -14,6 +14,8 @@ namespace UnsoundedSea.Core
             public bool Confirmed;
             public bool Interrupted;
         }
+        private const string SealCardId = "E01-01";
+        private static readonly CardSpec SealCard = new CardSpec(SealCardId, "绘制封线", "推进封门 1 段。每回合一次。", 1, new[] { new EffectSpec("objective", 1) });
         private readonly BattleDefinition definition;
         private readonly EffectRegistry effects;
         private readonly DeterministicRandom deckRandom;
@@ -59,6 +61,8 @@ namespace UnsoundedSea.Core
             deckRandom.Shuffle(draw);
             if (bossKind != BossEncounterKind.None) this.boss = new BossEncounterState(this, bossKind, seed);
             BeginTurn();
+            if (this.boss == null && this.objective.AllowsTaskAction)
+                hand.Add(new CardView(definition.Deck.Count + 1, SealCard, isEncounter: true));
         }
 
         public BattleView View
@@ -98,7 +102,10 @@ namespace UnsoundedSea.Core
                     if (card == null) return Reject("该卡牌不在手中。");
                     if (card.IsEncounter)
                     {
-                        var encounterResult = boss.Play(card, command.targetId);
+                        CommandResult encounterResult;
+                        if (boss != null) encounterResult = boss.Play(card, command.targetId);
+                        else if (card.Definition.Id == SealCardId && command.targetId == null) encounterResult = ExecuteObjectiveAction();
+                        else encounterResult = Reject("该遭遇牌不可用。");
                         if (!encounterResult.Success) return encounterResult;
                         CheckOutcome();
                         break;
@@ -148,9 +155,10 @@ namespace UnsoundedSea.Core
                     Record("完成抽牌顺序调整。");
                     break;
                 case CommandKind.AdvanceObjective:
-                    var taskCost = Math.Max(0, 1 - sceneDiscount);
-                    if (!objective.AllowsTaskAction || taskUsed || actions < taskCost) return Reject("任务行动不可用（每回合一次，行动不足）。");
-                    actions -= taskCost; sceneDiscount = 0; taskUsed = true; sceneActionUsed = true; AdvanceObjective(1); TriggerSceneAction(); CheckOutcome();
+                    // Kept for replay/checkpoint compatibility; current UI plays the persistent encounter card.
+                    var taskResult = ExecuteObjectiveAction();
+                    if (!taskResult.Success) return taskResult;
+                    CheckOutcome();
                     break;
                 case CommandKind.EndTurn:
                     ResolveTurn();
@@ -158,6 +166,16 @@ namespace UnsoundedSea.Core
                 default: return Reject("未知操作。");
             }
             history.Add(command);
+            return new CommandResult(true);
+        }
+
+        private CommandResult ExecuteObjectiveAction()
+        {
+            var taskCost = Math.Max(0, 1 - sceneDiscount);
+            if (!objective.AllowsTaskAction || taskUsed || actions < taskCost)
+                return Reject("任务行动不可用（每回合一次，行动不足）。");
+            actions -= taskCost; sceneDiscount = 0; taskUsed = true; sceneActionUsed = true;
+            AdvanceObjective(1); TriggerSceneAction();
             return new CommandResult(true);
         }
 
@@ -181,7 +199,7 @@ namespace UnsoundedSea.Core
             {
                 if (boss != null) continue;
                 enemy.ActualIntent = enemy.Definition.Intents[intentRandom.Next(enemy.Definition.Intents.Count)];
-                enemy.Confirmed = enemy.ActualIntent.IsPublic; enemy.Interrupted = false;
+                enemy.Confirmed = enemy.ActualIntent.IsPublic || enemy.Definition.Intents.Count == 1; enemy.Interrupted = false;
                 Record($"{enemy.Definition.Name}：{enemy.ActualIntent.Clue}");
             }
             SetPhase(BattlePhase.IntentLocked); SetPhase(BattlePhase.PlayerTurn);

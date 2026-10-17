@@ -45,6 +45,13 @@ namespace UnsoundedSea.Core
                 card.Enabled = reason == null;
                 card.DisabledReason = reason ?? "";
             }
+            foreach (var card in hand.Where(x => x.IsEncounter && x.Definition.Id == SealCardId))
+            {
+                var cost = Math.Max(0, card.Definition.Cost - sceneDiscount);
+                card.Targets = EmptyTargets;
+                card.Enabled = phase == BattlePhase.PlayerTurn && objective.AllowsTaskAction && !taskUsed && actions >= cost;
+                card.DisabledReason = card.Enabled ? "" : "任务行动不可用（每回合一次，行动不足）。";
+            }
         }
 
         private IEnumerable<EncounterTargetView> BuildCardTargets(CardView card)

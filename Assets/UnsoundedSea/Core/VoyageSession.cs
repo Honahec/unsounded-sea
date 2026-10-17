@@ -283,7 +283,7 @@ namespace UnsoundedSea.Core
         private void AddKnowledge(string entry){if(!knowledge.Contains(entry))knowledge.Add(entry);}
         private void FinishNode(){map.CompleteCurrent();phase=map.IsFinished?VoyagePhase.Completed:VoyagePhase.ChoosingRoute;}
         private void RevealInitialRoutes(){foreach(var id in CurrentFull.Next)RevealRoute(CurrentFull.Id,id);}
-        private void RevealDefaultRoutes(VoyageStop stop){if(stop.Next.Count>0)RevealRoute(stop.Id,stop.Next[(int)(VoyageSeeds.Derive(Seed,"visibility",stop.Id)%stop.Next.Count)]);}
+        private void RevealDefaultRoutes(VoyageStop stop){foreach(var id in stop.Next.Take(2))RevealRoute(stop.Id,id);}
         private void RevealAllRoutes(VoyageStop stop){foreach(var id in stop.Next)RevealRoute(stop.Id,id);}
         private void RevealRoute(string from,string to){knownRouteKeys.Add(RouteKey(from,to));knownStopIds.Add(to);}
         private VoyageStop CurrentFull=>byId[map.CurrentId];
