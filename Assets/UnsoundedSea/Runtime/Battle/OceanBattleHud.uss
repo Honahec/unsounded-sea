@@ -9,6 +9,7 @@
 .sea-button:focus, .tool:focus, .end-turn:focus { border-color: #eee4c9; }
 .sea-card:focus, .actor-label:focus { border-bottom-color: #eee4c9; }
 .tool:disabled, .end-turn:disabled { opacity: .4; }
+.ocean-ui .feedback-locked:disabled { opacity: 1; }
 .intel-name { color: #d7bd82; font-size: 12px; letter-spacing: 2px; }
 .clue { margin-top: 3px; font-size: 15px; -unity-text-align: middle-center; text-shadow: 0 1px 2px #020708; }
 .intel-text { margin-top: 3px; color: #80b5a5; font-size: 14px; -unity-text-align: middle-center; }
@@ -51,8 +52,10 @@
 .card-name { font-size: 17px; color: #202b2c; }
 .card-description { font-size: 15px; color: #303c3b; flex-grow: 1; }
 .fine-print { font-size: 10px; color: #7d3e35; }
-.end-turn { align-self: center; width: 88px; height: 88px; min-height: 88px; flex-shrink: 0; margin: 0; padding: 0; border-radius: 44px; border-width: 2px; border-color: #cbb27b; background-color: rgba(112,79,38,.94); }
-.end-turn:hover { background-color: #816035; border-color: #eee4c9; }
+.end-turn { align-self: center; width: 88px; height: 88px; min-height: 88px; flex-shrink: 0; margin: 0; padding: 0; border-width: 0; background-color: transparent; }
+.end-turn:hover, .end-turn:focus { background-color: transparent; }
+.end-turn SeaUiArt { width: 88px; height: 88px; }
+.end-turn:hover SeaUiArt, .end-turn:focus SeaUiArt { scale: 1.08; }
 .end-title { margin-top: 10px; font-size: 17px; color: #eee4c9; -unity-text-align: middle-center; }
 .battle-subtitle { position: absolute; bottom: 310px; left: 25%; right: 25%; padding: 8px 14px; font-size: 18px; white-space: normal; -unity-text-align: middle-center; color: #eee4c9; text-shadow: 0 2px 4px #000; background-color: rgba(8,19,22,.78); }
 .actor-label { position: absolute; width: 285px; min-height: 48px; padding: 3px 8px; border-width: 0; background-color: transparent; color: #eee4c9; align-items: flex-start; }

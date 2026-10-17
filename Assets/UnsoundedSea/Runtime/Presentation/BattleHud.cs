@@ -544,6 +544,7 @@ namespace UnsoundedSea.Runtime
             var controls = Element("turn-controls");
             var end = Button("end-turn", "", "end-turn", () => Send(BattleCommand.EndTurn()), playing);
             end.tooltip = "结束回合";
+            end.Add(new SeaUiArt("seal"));
             controls.Add(end);
             controls.Add(Text("结束回合", "end-title"));
             root.Add(controls);

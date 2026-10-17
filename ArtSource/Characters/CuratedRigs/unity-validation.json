@@ -1,0 +1,782 @@
+{
+  "date": "2026-10-17",
+  "unity": "6000.6.5f1",
+  "scope": "Editor import, grounded normalized prefab, torso/elbow/knee BakeMesh checks using actual imported weights. No gameplay/performance acceptance.",
+  "assets": [
+    {
+      "name": "AbandonShipMedic",
+      "selection": "rigtrials",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/AbandonShipMedic_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/AbandonShipMedic.prefab",
+      "modelGuid": "fc7eadf4c846e4914acf76eb97a4fc24",
+      "bones": 20,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 5,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.112628713,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.313045263,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.3399438,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "AbyssRunner",
+      "selection": "hybrid",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/AbyssRunner_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/AbyssRunner.prefab",
+      "modelGuid": "bf8773008f4714aac9a2b727efa4b183",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.213485152,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.4390304,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.328138858,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "BarrelThief",
+      "selection": "hyper3d",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/BarrelThief_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/BarrelThief.prefab",
+      "modelGuid": "8a4566381d29b48ea88471f281dcd37b",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.13568297,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.302287877,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.366012752,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "BlackSailMessenger",
+      "selection": "hyper3d",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/BlackSailMessenger_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/BlackSailMessenger.prefab",
+      "modelGuid": "4791d3254470f4436a11ba7592447af1",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.282459885,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.451320559,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.377933,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "BoneFluteAttendant",
+      "selection": "rigtrials",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/BoneFluteAttendant_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/BoneFluteAttendant.prefab",
+      "modelGuid": "c7a6a46777a09476cae50b503d8caeb6",
+      "bones": 20,
+      "triangles": 50000,
+      "height": 1.95,
+      "bottom": 5.96046448E-08,
+      "embeddedLegacyClips": 5,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.106236309,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.263192624,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.36365056,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "BoneNetStitcher",
+      "selection": "rigtrials",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/BoneNetStitcher_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/BoneNetStitcher.prefab",
+      "modelGuid": "0e1cd32b82da44c9da943c5649275275",
+      "bones": 20,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 5,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.168000355,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.167740092,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.313516378,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "DisplacedWatchman",
+      "selection": "hyper3d",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/DisplacedWatchman_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/DisplacedWatchman.prefab",
+      "modelGuid": "b9c4142d26fc8409da9bb276ba777f45",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 1.99999964,
+      "bottom": 1.1920929E-07,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.110387512,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.326230884,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.3944432,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "EmptyHoldKnocker",
+      "selection": "hyper3d",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/EmptyHoldKnocker_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/EmptyHoldKnocker.prefab",
+      "modelGuid": "14b4565318aa84a0b85585ca638c9ee8",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.149723887,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.422165155,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.3571165,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "FogRigger",
+      "selection": "rigtrials",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/FogRigger_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/FogRigger.prefab",
+      "modelGuid": "40a9f31ecef7b41499a47fb1ed8427fc",
+      "bones": 20,
+      "triangles": 45000,
+      "height": 1.84999943,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 5,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.1620432,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.491951376,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.310705781,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "InvertedSurveyHand",
+      "selection": "hybrid",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/InvertedSurveyHand_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/InvertedSurveyHand.prefab",
+      "modelGuid": "6f67632881dd2425eacf6ab249d7be66",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.170625448,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.704120457,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.324929118,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "LampOutBellkeeper",
+      "selection": "rigtrials",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/LampOutBellkeeper_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/LampOutBellkeeper.prefab",
+      "modelGuid": "eeea298d1eb544edd8fcda8044dc995e",
+      "bones": 20,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 5,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.155679226,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.4463031,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.332826972,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "LastTideWitness",
+      "selection": "rigtrials",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/LastTideWitness_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/LastTideWitness.prefab",
+      "modelGuid": "5e4e8b7864d1f4d7db469ee43bc56ca6",
+      "bones": 20,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 5,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.08299689,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.235415652,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.3465385,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "LostSailor",
+      "selection": "hyper3d",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/LostSailor_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/LostSailor.prefab",
+      "modelGuid": "1e5edea79468a49a681015ba609878a1",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 1.99999976,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.160712138,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.407762945,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.354994416,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "MirrorTideScribe",
+      "selection": "rigtrials",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/MirrorTideScribe_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/MirrorTideScribe.prefab",
+      "modelGuid": "ed7db9680c6ed451793f4a4d5006a53a",
+      "bones": 20,
+      "triangles": 45000,
+      "height": 2.00000048,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 5,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.156665966,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.206663847,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.364516646,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "MisfireGunner",
+      "selection": "rigtrials",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/MisfireGunner_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/MisfireGunner.prefab",
+      "modelGuid": "743d9eb20a8464e7094f3e54fc704630",
+      "bones": 20,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 5,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.193551734,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.251734883,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.367212832,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "PlumbWatcher",
+      "selection": "rigtrials",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/PlumbWatcher_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/PlumbWatcher.prefab",
+      "modelGuid": "35ca17654b4a24e5087b71086552e9aa",
+      "bones": 20,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 5,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.0928692445,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.281430483,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.349194348,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "RailNameTaker",
+      "selection": "hyper3d",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/RailNameTaker_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/RailNameTaker.prefab",
+      "modelGuid": "e50751a5cb4394a0fb94e5f83da8dfc4",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": -1.1920929E-07,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.20710659,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.5995275,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.368970424,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "ReverseNavigator",
+      "selection": "hybrid",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/ReverseNavigator_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/ReverseNavigator.prefab",
+      "modelGuid": "78cb303b1effd4027ac988f9f186ba8d",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.1656114,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.341437757,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.317582846,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "RustChainEscort",
+      "selection": "hyper3d",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/RustChainEscort_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/RustChainEscort.prefab",
+      "modelGuid": "d51c9e318d2904cc2bd6a0426b6fe57d",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.163067043,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.3146834,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.369085521,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "SaltMarrowPriest",
+      "selection": "rigtrials",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/SaltMarrowPriest_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/SaltMarrowPriest.prefab",
+      "modelGuid": "6e617df90b4f044b0ba191b268c1ce23",
+      "bones": 20,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 5,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.112227663,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.129258886,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.310123682,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "StarlessPeeker",
+      "selection": "hybrid",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/StarlessPeeker_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/StarlessPeeker.prefab",
+      "modelGuid": "7a06ce9e9072b437ba54c362671f9aac",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.100280024,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.3801146,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.323363125,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "TideBoneScavenger",
+      "selection": "hybrid",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/TideBoneScavenger_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/TideBoneScavenger.prefab",
+      "modelGuid": "f7afbcd978a9744829e8b06f8341d742",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.185195044,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.5687379,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.3468976,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "UnflaggedBoarder",
+      "selection": "hyper3d",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/UnflaggedBoarder_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/UnflaggedBoarder.prefab",
+      "modelGuid": "54536b8b885cc4005ae8aa438d90db6e",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.242626831,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.671527445,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.365497977,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "WetCoatPilot",
+      "selection": "hyper3d",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/WetCoatPilot_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/WetCoatPilot.prefab",
+      "modelGuid": "23dfad5abc9524ab8b419a5598f9ac0e",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 2.0,
+      "bottom": -1.1920929E-07,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.12550509,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.388110071,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.382392377,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    },
+    {
+      "name": "WhiteLampSignaller",
+      "selection": "hyper3d",
+      "model": "Assets/UnsoundedSea/Art/Models/CuratedRigs/WhiteLampSignaller_Rigged.glb",
+      "prefab": "Assets/UnsoundedSea/Art/Prefabs/CuratedRigs/WhiteLampSignaller.prefab",
+      "modelGuid": "efe8d0aa73d3f4612b96a8947409bff7",
+      "bones": 73,
+      "triangles": 45000,
+      "height": 1.99999952,
+      "bottom": 0.0,
+      "embeddedLegacyClips": 0,
+      "prefabAnimationDrivers": 0,
+      "materialsSupported": true,
+      "poses": [
+        {
+          "pose": "torso",
+          "maxMotionMetres": 0.182871908,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "elbows",
+          "maxMotionMetres": 0.365220159,
+          "restoreErrorMetres": 0.0
+        },
+        {
+          "pose": "knee",
+          "maxMotionMetres": 0.3446255,
+          "restoreErrorMetres": 0.0
+        }
+      ]
+    }
+  ]
+}

@@ -21,6 +21,11 @@ namespace UnsoundedSea.Runtime
         private readonly List<Button> nameplates = new List<Button>();
         private bool showSettings, journalOpen;
         private bool chartOpen, chartWasPaused, bookOpen, bookWasPaused;
+        private int renderedRevision = -1;
+        private bool renderedPaused;
+        private string renderedSelection, renderedNotice;
+        private readonly List<(Button button, bool eligible)> actionButtons = new List<(Button, bool)>();
+
         private int selectedEncounterCard;
         private readonly EnemyCardSelection enemySelection = new EnemyCardSelection();
         private readonly List<(Button button, BattleActorView actor)> enemyChoices = new List<(Button, BattleActorView)>();
@@ -38,7 +43,7 @@ namespace UnsoundedSea.Runtime
             if (menuStyle != null) root.styleSheets.Add(menuStyle);
             if (styleSheet != null) root.styleSheets.Add(styleSheet);
             if (font != null) root.style.unityFontDefinition = FontDefinition.FromSDFFont(font);
-            director.Changed += Render;
+            director.Changed += Refresh;
             director.Resolved += OnResolved;
             root.RegisterCallback<KeyDownEvent>(Key, TrickleDown.TrickleDown);
             Render();
@@ -46,7 +51,7 @@ namespace UnsoundedSea.Runtime
         private void OnDisable()
         {
             chartOpen = false; chartWasPaused = false; bookOpen = false; bookWasPaused = false; showSettings = false; journalOpen = false;
-            director.Changed -= Render; director.Resolved -= OnResolved; root.UnregisterCallback<KeyDownEvent>(Key, TrickleDown.TrickleDown); root.Clear();
+            director.Changed -= Refresh; director.Resolved -= OnResolved; root.UnregisterCallback<KeyDownEvent>(Key, TrickleDown.TrickleDown); root.Clear();
         }
         private void OnResolved(BattleView before, BattleView after, BattleCommand command)
         {
@@ -116,8 +121,36 @@ namespace UnsoundedSea.Runtime
         private static Label Text(string text, string cls) { var l = new Label(text) { pickingMode = PickingMode.Ignore }; l.AddToClassList(cls); return l; }
         private static Button Button(string name, string text, Action action, string cls = "sea-button")
         { var b = new Button(action) { name = name, text = text }; b.AddToClassList(cls); return b; }
+        private void Refresh()
+        {
+            // Finishing an animation changes input availability, not the view contents.
+            if (root.focusable && renderedRevision == director.ViewRevision && renderedPaused == director.Paused &&
+                renderedSelection == director.SelectedEnemy && renderedNotice == director.Notice)
+            {
+                foreach (var entry in actionButtons) ApplyActionAvailability(entry.button, entry.eligible);
+                return;
+            }
+            Render();
+        }
+        private void ActionButton(Button button, bool eligible)
+        {
+            actionButtons.Add((button, eligible));
+            ApplyActionAvailability(button, eligible);
+        }
+        private void ApplyActionAvailability(Button button, bool eligible)
+        {
+            // Temporary feedback locks should not flash every control's disabled tint.
+            button.EnableInClassList("feedback-locked", eligible && director.Busy);
+            button.SetEnabled(eligible && !director.Busy);
+        }
         private void Render()
         {
+            var oldHand = root.Q<ScrollView>("hand");
+            var handWidth = oldHand?.contentViewport.resolvedStyle.width ?? 0;
+            var oldPositions = nameplates.ToDictionary(p => p.name, p => new Vector2(p.resolvedStyle.left, p.resolvedStyle.top));
+            renderedRevision = director.ViewRevision;
+            renderedPaused = director.Paused; renderedSelection = director.SelectedEnemy; renderedNotice = director.Notice;
+            actionButtons.Clear();
             root.Clear(); root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion); nameplates.Clear(); var v = director.View; if (v == null) return;
             root.focusable = v.PendingChoice == null && inspectedCard == 0 && !bookOpen && !chartOpen && !director.Paused && v.Phase == BattlePhase.PlayerTurn;
             if (root.focusable) root.Focus();
@@ -126,7 +159,7 @@ namespace UnsoundedSea.Runtime
             if (selectedEncounterCard == 0) enemySelection.Reset();
             presentedBoss = v.BossKind;
             if (!v.Hand.Any(c => c.InstanceId == selectedEncounterCard && c.Targets.Count > 0)) selectedEncounterCard = 0;
-            var scenario = director.scenario; bool active = v.Phase == BattlePhase.PlayerTurn && !director.Paused && !director.Busy;
+            var scenario = director.scenario; bool active = v.Phase == BattlePhase.PlayerTurn && !director.Paused;
             var surface = Box("battle-surface"); surface.name = "battle-surface"; surface.pickingMode = PickingMode.Position;
             surface.RegisterCallback<PointerDownEvent>(evt =>
             {
@@ -160,7 +193,7 @@ namespace UnsoundedSea.Runtime
                 var b = Button("tool-" + t.Definition.Id, "", () => director.Submit(BattleCommand.Investigate(t.Definition.Id, director.SelectedEnemy)), "tool");
                 b.Add(Text(t.Definition.Name, "tool-name")); b.Add(Text($"×{t.RemainingUses}" + (t.Definition.SanityCost > 0 ? $" · {t.Definition.SanityCost} 理智" : ""), "tool-meta"));
                 b.tooltip = $"{t.Definition.Name}：调查当前目标，剩余 {t.RemainingUses} 次，代价 {cost}";
-                b.SetEnabled(active && selected != null && t.RemainingUses > 0 && v.Sanity > t.Definition.SanityCost); tools.Add(b);
+                ActionButton(b, active && selected != null && t.RemainingUses > 0 && v.Sanity > t.Definition.SanityCost); tools.Add(b);
             }
             foreach (var support in v.Supports)
             {
@@ -174,7 +207,7 @@ namespace UnsoundedSea.Runtime
                 button.Add(Text(crew.Definition.Name, "tool-name"));
                 button.Add(Text(crew.Used ? "本场已用" : $"{crew.Definition.Cost}行动", "tool-meta"));
                 button.tooltip = crew.Enabled ? "船员支援 · 每回合最多一次，每人每场一次" : crew.DisabledReason;
-                button.SetEnabled(active && crew.Enabled); tools.Add(button);
+                ActionButton(button, active && crew.Enabled); tools.Add(button);
             }
 
             var objective = Box("battle-objective"); root.Add(objective);
@@ -206,6 +239,7 @@ namespace UnsoundedSea.Runtime
             hand.Query<VisualElement>().ForEach(element => element.pickingMode = PickingMode.Ignore);
             hand.horizontalScrollerVisibility = ScrollerVisibility.Hidden; hand.verticalScrollerVisibility = ScrollerVisibility.Hidden; root.Add(hand);
             var fan = Box("fan-track"); fan.style.width = Mathf.Max(620, 180 + Mathf.Max(0, v.Hand.Count - 1) * 110); hand.Add(fan);
+            if (handWidth > 0) fan.style.marginLeft = Mathf.Max(0, (handWidth - fan.style.width.value.value) * .5f);
             hand.RegisterCallback<GeometryChangedEvent>(_ => fan.style.marginLeft = Mathf.Max(0, (hand.contentViewport.resolvedStyle.width - fan.resolvedStyle.width) * .5f));
             var cardPresentation = new HandCardPresentation(hand);
             var animateDraw = !director.Paused && !chartOpen && v.PendingChoice == null && previousHand.Length > 0 && !GameSettings.ReducedMotion;
@@ -251,14 +285,15 @@ namespace UnsoundedSea.Runtime
                 face.Add(Text("D 详情", "card-detail-hint"));
                 b.Add(face); b.tooltip = def.Name + "：" + def.Description;
                 b.EnableInClassList("card-disabled", !c.Enabled || !c.IsEncounter && (def.Cost > v.Actions || def.SanityCost >= v.Sanity));
-                b.SetEnabled(active); fan.Add(b);
+                ActionButton(b, active); fan.Add(b);
             }
             previousHand = v.Hand.Select(card => card.InstanceId).ToArray();
             RenderCardChoices(v, active);
             RenderSupportChoices(v, active);
             var end = Button("battle-end-turn", "", () => director.Submit(BattleCommand.EndTurn()), "end-turn");
             end.tooltip = "结束回合";
-            end.SetEnabled(active); controls.Add(end);
+            end.Add(new SeaUiArt("seal"));
+            ActionButton(end, active); controls.Add(end);
             controls.Add(Text("结束回合", "end-title"));
             if (director.NoticeIsError)
                 root.Add(Text(director.Notice, "battle-subtitle"));
@@ -281,6 +316,11 @@ namespace UnsoundedSea.Runtime
                         if (selectedEncounterCard == 0) director.Select(a.EnemyId);
                         else TryPlaySelectedTarget(a.EnemyId);
                     }, "actor-label");
+                    if (oldPositions.TryGetValue(plate.name, out var previousPosition))
+                    {
+                        plate.style.left = previousPosition.x; plate.style.top = previousPosition.y;
+                    }
+                    plate.RegisterCallback<GeometryChangedEvent>(_ => PositionLabels());
                     plate.Add(Text(enemy.Name, "actor-name"));
                     if (!hideHealth)
                     {
@@ -387,7 +427,7 @@ namespace UnsoundedSea.Runtime
                     var result = director.Submit(BattleCommand.Support(supportId, target.Id));
                     if (!result.Success) { selectedSupport = supportId; Render(); }
                 }, "card-target-choice");
-                button.SetEnabled(active && target.Enabled); options.Add(button);
+                ActionButton(button, active && target.Enabled); options.Add(button);
             }
             root.Add(panel);
         }
@@ -413,7 +453,7 @@ namespace UnsoundedSea.Runtime
                     if (!result.Success) { selectedEncounterCard = cardId; Render(); }
                 }, "card-target-choice");
                 button.EnableInClassList("target-ready", target.Enabled);
-                button.SetEnabled(active && target.Enabled);
+                ActionButton(button, active && target.Enabled);
                 button.tooltip = target.Detail;
                 options.Add(button);
             }
@@ -460,7 +500,7 @@ namespace UnsoundedSea.Runtime
                 button.tooltip = target.Name + "：" + target.Detail;
                 if (view.BossKind == BossEncounterKind.Watcher) button.text = target.Name;
                 button.EnableInClassList("target-ready", selected != null && target.Enabled);
-                button.SetEnabled(active && selected != null && target.Enabled);
+                ActionButton(button, active && selected != null && target.Enabled);
                 button.tabIndex = 100 + targetIndex++;
                 if (view.BossKind == BossEncounterKind.FlagBearer)
                 {
@@ -563,6 +603,10 @@ namespace UnsoundedSea.Runtime
         private void LateUpdate()
         {
             RenderedFrames++;
+            PositionLabels();
+        }
+        private void PositionLabels()
+        {
             if (director.Stage == null || root.panel == null) return;
             foreach (var label in encounterLabels)
             {
@@ -581,6 +625,7 @@ namespace UnsoundedSea.Runtime
                 var plate = nameplates[i];
                 var width = plate.resolvedStyle.width;
                 var height = plate.resolvedStyle.height;
+                if (float.IsNaN(width) || float.IsNaN(height) || width <= 0 || height <= 0) continue;
                 if ((presentedBoss != BossEncounterKind.None || director.scenario.encounter.objective != ObjectiveKind.Defeat) && i == 0)
                 {
                     plate.style.left = Mathf.Max(18, (root.resolvedStyle.width - width) * .42f);
