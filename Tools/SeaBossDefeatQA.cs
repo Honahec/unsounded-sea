@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.UIElements;
 using UnsoundedSea.Runtime;
 using UnsoundedSea.Core;
 
@@ -40,6 +41,7 @@ public static class SeaBossDefeatQA
     public static string StartIntegration()
     {
         Check(Application.isPlaying, "Enter Play first");
+        Directory.CreateDirectory(Dir); Application.runInBackground = true;
         VoyageRuntime.BeginValidation(Path.GetFullPath("Logs/UiExperience/BossDefeat"));
         _ = Run(false); return "Validating real commands";
     }
@@ -83,10 +85,14 @@ public static class SeaBossDefeatQA
             Check(lethal.Success,"Lethal card rejected: "+lethal.Error);
             Check(director.View.Phase==BattlePhase.Victory&&director.Busy,"Victory must wait for the corpse");
             await Task.Delay(900);Check(director!=null&&director.Busy,"Victory left before the body lost support");
+            var hud=UnityEngine.Object.FindAnyObjectByType<UIDocument>();
+            Check(hud!=null&&hud.rootVisualElement.Q(className:"ocean-modal")==null,"Outcome overlay hid the collapse");
             director.SetPaused(true);float progress=director.Stage.Actors[0].RetirementProgress;
             await Task.Delay(300);Check(Mathf.Abs(progress-director.Stage.Actors[0].RetirementProgress)<.001f,"Pause advanced death");director.SetPaused(false);
             for(int i=0;i<1000&&director.Busy;i++)await Task.Delay(25);
             Check(!director.Busy&&director.View.Phase==BattlePhase.Victory,"Completed death did not release victory");
+            await Task.Delay(100);
+            Check(hud.rootVisualElement.Q(className:"ocean-modal")!=null,"Standalone outcome never appeared");
             UnityEngine.Object.Destroy(scenario.encounter);UnityEngine.Object.Destroy(scenario);UnityEngine.Object.Destroy(enemy);
             await Open("storm-gauntlet"); director=Director;
             for(int turn=0;turn<5;turn++)

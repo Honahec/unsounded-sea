@@ -221,7 +221,7 @@ namespace UnsoundedSea.Tests
             Assert.That(s.BeginEncounter(),Is.True);Assert.That(s.ResolveEncounter(true,s.Health,s.Sanity),Is.True);while(s.Phase==VoyagePhase.Reward)Assert.That(s.ClaimReward(null),Is.True);
             Assert.That(s.Select(s.Choices.First(x=>x.Kind==RunNodeKind.Archive).Id),Is.True);s.ScoutAhead();Assert.That(s.SetSail(),Is.True);Assert.That(s.Arrive(),Is.True);
             var routes=s.GetNodeChoices().Single(x=>x.Id=="routes");
-            Assert.That(routes.Enabled,Is.False);Assert.That(routes.Description,Does.Contain("没有新航路"));Assert.That(s.ChooseNode("routes"),Is.False);
+            Assert.That(routes.Enabled,Is.False);Assert.That(routes.Description,Does.Contain("后续航路已全部记录"));Assert.That(s.ChooseNode("routes"),Is.False);
 
             var legacy=s.Export();
             legacy.History=legacy.History.Concat(new[]{new VoyageActionData{Kind=VoyageActionKind.ChooseNode,Value="routes"}}).ToArray();
@@ -235,7 +235,7 @@ namespace UnsoundedSea.Tests
             var s=Enumerable.Range(0,100).Select(seed=>VoyageSession.CreateDebug((uint)seed,"fog",RunNodeKind.Event))
                 .First(x=>x.GetNodeChoices().Any(choice=>choice.Id=="mark"));
             var mark=s.GetNodeChoices().Single(x=>x.Id=="mark");
-            Assert.That(mark.Enabled,Is.False);Assert.That(mark.Description,Does.Contain("没有新水流"));Assert.That(s.ChooseNode("mark"),Is.False);
+            Assert.That(mark.Enabled,Is.False);Assert.That(mark.Description,Does.Contain("后续航路已全部记录"));Assert.That(s.ChooseNode("mark"),Is.False);
             Assert.That(s.ChooseNode("leave"),Is.True);
         }
 

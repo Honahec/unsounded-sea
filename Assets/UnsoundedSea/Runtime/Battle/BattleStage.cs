@@ -222,7 +222,7 @@ namespace UnsoundedSea.Runtime
             {
                 var threat = Vector4.zero;
                 foreach (var actor in actors)
-                    if (actor.IsSeaActor && (actor.Alive || actor.RetirementProgress < 1)) { var p = actor.transform.position; threat = new Vector4(p.x, p.z, actor.WaterRadius * (1 - actor.RetirementProgress), reduced ? 0 : shake); break; }
+                    if (actor.IsSeaActor && (actor.Alive || actor.HasPendingRetirement || actor.GiantMotion != null && actor.GiantMotion.IsRetiring)) { var p = actor.transform.position; threat = new Vector4(p.x, p.z, actor.WaterRadius * (1 - actor.RetirementProgress), reduced ? 0 : shake); break; }
                 if (water != null) water.Tick(Time.unscaledDeltaTime, false, reduced, threat);
                 else
                 {

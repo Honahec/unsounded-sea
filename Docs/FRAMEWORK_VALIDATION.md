@@ -4,9 +4,9 @@
 
 ## 巨兽死亡与存活退场
 
-2026-10-18，macOS / Unity 6000.6.5f1 / Unity CLI 1.0.0-beta.13。`SeaBossDefeatTests` 7 项、`BellMotherAnimationTests` 7 项、`GiantBossAnimationTests` 13 项通过；覆盖死亡首帧连续、刚性冠部／触手连接、体积不缩放、暂停、减少动效、重复死亡通知、完整沉没、单次水面接触、执旗者髋部固定以及存活退场不侧翻。
+2026-10-18，macOS / Unity 6000.6.5f1 / Unity CLI 1.0.0-beta.13。`SeaBossDefeatTests` 7 项、`BellMotherAnimationTests` 7 项、`GiantBossAnimationTests` 13 项通过；覆盖死亡首帧连续、刚性冠部／触手连接、体积不缩放、暂停、减少动效、重复死亡通知、完整沉没、单次水面接触、执旗者髋部固定以及存活退场不侧翻。合并远端 main 后全量 EditMode **332 通过／0 失败**；同步两处旧航路提示断言到 main 的现行文案。
 
-`Tools/SeaBossDefeatQA.Start` 在隔离会话中实机采样沉钟／黑潮与 M02–M05，复查[退场关键帧](ArtReferences/giant-defeat-review.jpg)。其中 M03 的死亡为直接表现调用，用于检查通用能力，不代表解谜胜利杀死本体；M05 验证存活退场。真实致命卡以脱离航程契约的内存 1 HP 遭遇副本验证 Victory 等待、暂停与解锁；随后使用**原版**黑潮配置完成五轮 EndTurn，确认末次拍击之后才进入存活 Withdraw，等待完成后返回。最终这一轮没有新增运行错误，入水水声触发计数同步增加。未改正式存档、模型或规则数值，未进行独立 Player／设备性能验收。
+`Tools/SeaBossDefeatQA.Start` 在隔离会话中实机采样沉钟／黑潮与 M02–M05，复查[退场关键帧](ArtReferences/giant-defeat-review.jpg)。其中 M03 的死亡为直接表现调用，用于检查通用能力，不代表解谜胜利杀死本体；M05 验证存活退场。真实致命卡以脱离航程契约的内存 1 HP 遭遇副本验证 Victory 等待、暂停、解锁，以及独立场景的结算弹窗在退场前隐藏、完成后出现；随后使用**原版**黑潮配置完成五轮 EndTurn，确认末次拍击之后才进入存活 Withdraw，等待完成后返回。最终这一轮没有新增运行错误，入水水声触发计数同步增加。未改正式存档、模型或规则数值，未进行独立 Player／设备性能验收。
 
 ## 黑潮压舱者外观
 

@@ -480,7 +480,8 @@ namespace UnsoundedSea.Runtime
             else if (director.Paused || v.Phase == BattlePhase.Victory || v.Phase == BattlePhase.Defeat)
             {
                 foreach (var child in root.Children().ToArray()) child.SetEnabled(false);
-                if (v.Phase != BattlePhase.Victory || !VoyageRuntime.OwnsEncounter(director) || !string.IsNullOrEmpty(VoyageRuntime.EncounterSaveError))
+                if ((!director.Busy || director.Paused) &&
+                    (v.Phase != BattlePhase.Victory || !VoyageRuntime.OwnsEncounter(director) || !string.IsNullOrEmpty(VoyageRuntime.EncounterSaveError)))
                     Modal(v);
             }
             if (v.PendingChoice != null)
