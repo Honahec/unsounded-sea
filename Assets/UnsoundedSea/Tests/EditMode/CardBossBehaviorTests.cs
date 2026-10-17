@@ -63,7 +63,7 @@ namespace UnsoundedSea.Tests
             End(session);
             var correction = Card(session, "c063");
             Play(session, correction, correction.Targets.Single(x => x.Id == "scene:R1:positive").Id);
-            Assert.That(session.View.BossStatus, Does.Contain("R1 正接"));
+            Assert.That(session.View.EncounterTargets.Single(x=>x.Id=="R1:positive").IsCurrent, Is.True);
             Assert.That(Encounter(session, "E04-01").Enabled, Is.False);
         }
 

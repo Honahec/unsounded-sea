@@ -24,6 +24,24 @@
 .game-menu { background-color: rgba(0,0,0,0); color: #eee4c9; font-size: 16px; }
 .game-menu Button, .settings Button, .pause Button { margin: 0; padding: 0; border-width: 0; border-radius: 0; background-color: rgba(0,0,0,0); color: #eee4c9; -unity-text-align: middle-center; transition-property: translate, background-color, border-color; transition-duration: 0.12s; }
 .reduced-motion Button { transition-duration: 0s; }
+
+.boss-compatibility { margin-top: 3px; font-size: 11px; color: #d7bd82; white-space: normal; }
+.key-badge { align-self: center; margin-left: 8px; min-width: 19px; height: 20px; padding: 0 3px; border-width: 1px; border-color: #9e8755; border-radius: 3px; color: #d7bd82; font-size: 11px; -unity-text-align: middle-center; white-space: nowrap; }
+.key-control { flex-direction: row; justify-content: center; align-items: center; }
+.key-control .key-control-title { margin: 0; white-space: nowrap; }
+.status-badge { flex-direction: row; align-items: center; margin-right: 10px; }
+.status-badge Label { font-size: 12px; color: #d7bd82; white-space: nowrap; }
+.status-icon { width: 24px; height: 24px; margin-right: 4px; }
+.sanity-tick { position: absolute; top: -3px; bottom: -3px; width: 2px; background-color: #d7bd82; }
+.sanity-tick-label { position: absolute; top: 8px; left: -12px; width: 40px; font-size: 11px; color: #d7bd82; white-space: nowrap; }
+.crew-selection { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; background-color: rgba(1,8,13,.9); }
+.crew-selection-sheet { width: 600px; max-width: 92%; max-height: 90%; padding: 28px; background-color: #0f1f23; border-width: 1px; border-color: #9e8755; align-items: stretch; }
+.crew-choice { min-height: 130px; margin-top: 10px; padding: 14px 18px; border-width: 1px; border-color: #9e8755; background-color: #132c30; color: #eee4c9; }
+.crew-choice SeaUiArt { position: absolute; left: 12px; top: 20px; width: 72px; height: 72px; }
+.crew-choice-name { margin-left: 80px; font-size: 20px; color: #d7bd82; }
+.crew-choice-description { margin-left: 80px; margin-top: 8px; white-space: normal; font-size: 15px; }
+.crew-choice:hover, .crew-choice:focus { background-color: #254b48; border-color: #eee4c9; }
+.crew-selection-sheet > .card-inspection-close { align-self: flex-end; }
 .game-menu Button:disabled, .settings Button:disabled, .pause Button:disabled { opacity: 0.45; }
 .menu-column { position: absolute; left: 9%; top: 16%; width: 440px; }
 .menu-title-block { margin-bottom: 32px; }

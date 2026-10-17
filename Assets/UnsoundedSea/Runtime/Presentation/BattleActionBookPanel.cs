@@ -22,6 +22,7 @@ namespace UnsoundedSea.Runtime
             IEnumerable<string> ids = voyage != null ? voyage.LearnedCardIds : equipped;
             var body = new VisualElement(); body.AddToClassList("battle-action-book-body"); sheet.Add(body);
             var side = new VisualElement(); side.AddToClassList("battle-action-book-side"); body.Add(side);
+            var compatibility=new Label();compatibility.AddToClassList("boss-compatibility");side.Add(compatibility);
             var tools = (voyage != null
                 ? voyage.ToolIds.Select(VoyageEncounterCatalog.ResolveTool)
                 : (preparedTools ?? Array.Empty<ToolView>()).Select(tool => tool.Definition)).ToArray();
@@ -44,6 +45,8 @@ namespace UnsoundedSea.Runtime
                 var applicability = BossApplicability.CardLabel(card);
                 var button = new Button { name = "book-" + id, tooltip = card.Name + "：" + card.Description + (string.IsNullOrEmpty(applicability) ? "" : "\n" + applicability) };
                 UiKeywords.Attach(button, card.Description);
+                button.RegisterCallback<FocusInEvent>(_ => compatibility.text = UiRules.BossTag(card));
+                button.RegisterCallback<PointerEnterEvent>(_ => compatibility.text = UiRules.BossTag(card));
                 button.AddToClassList("collection-card"); button.EnableInClassList("selected", equipped.Contains(id));
                 var face = new VisualElement(); face.AddToClassList("collection-card-face"); IllustratedCard.Apply(face, card);
                 button.Add(face); cards.Add(button);

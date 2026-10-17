@@ -33,6 +33,7 @@ public static class BalanceSimulation
         public int trials, wins, timeouts; public double winPercent, medianTurns, p90Turns, medianHealthLoss, medianPassiveSanityDamage, medianActiveSanityPayment;
         public double averageToolUses, averageSupportUses, averageConsumableUses; public string turnStatistic = "victories only", criterion; public bool criterionMet;
         [JsonIgnore] public List<Trial> samples;
+        public List<Failure> failures=new List<Failure>();
     }
     [Serializable] private sealed class Failure { public uint seed; public string outcome; public BattleReplay replay; public string definitionDigest; public string[] deck, tools, supports, consumables, equipment; }
     [Serializable] private sealed class Aggregate { public int act; public string cohort; public int trials, wins; public double winPercent, medianHealthLoss, medianPassiveSanityDamage, medianActiveSanityPayment; public bool criterionMet; public string criterion; }
@@ -46,6 +47,15 @@ public static class BalanceSimulation
         public bool Win, Timeout; public int Turns, HealthLoss, PassiveSanity, ActiveSanity, ToolUses, SupportUses, ConsumableUses; public BattleSession Session; public readonly Dictionary<string,int> CardUses = new Dictionary<string,int>();
     }
     private sealed class Option { public CardView Card; public string Target; public double Score; }
+    // Reuse the simulator's public-information card policy in the real CLI acceptance journey.
+    public static BattleCommand SuggestCommand(BattleView view)
+    {
+        var options=view.Hand.Where(x=>x.Enabled&&!x.IsEncounter).SelectMany(card=>card.Targets.Count==0
+            ?new[]{new Option{Card=card,Score=Score(view,card,null)}}
+            :card.Targets.Where(x=>x.Enabled).Select(x=>new Option{Card=card,Target=x.Id,Score=Score(view,card,x.Id)}))
+            .OrderByDescending(x=>x.Score).ThenBy(x=>x.Card.InstanceId).ToArray();
+        return options.Length==0||options[0].Score<=0?BattleCommand.EndTurn():BattleCommand.Play(options[0].Card.InstanceId,options[0].Target);
+    }
 
     public static string Main()
     {

@@ -130,6 +130,7 @@
 .ocean-ui.reduced-motion .end-turn SeaUiArt, .ocean-ui.reduced-motion .sea-card { transition-duration: 0s; }
 
 .sanity-state { margin-left: 8px; color: #80b5a5; font-size: 12px; }
+.sanity .vital-track { margin-bottom: 18px; }
 .watched { min-height: 40px; flex-direction: row; align-items: center; color: #80b5a5; }
 .watched SeaUiArt { width: 24px; height: 24px; margin-right: 7px; }
 .watched-value { font-size: 18px; color: #eee4c9; }
@@ -143,6 +144,7 @@
 .actor-evidence { min-height: 24px; flex-direction: row; align-items: center; }
 .actor-evidence SeaUiArt { width: 20px; height: 20px; margin-right: 5px; }
 .actor-evidence-text { max-width: 244px; color: #d7bd82; font-size: 12px; white-space: nowrap; overflow: hidden; }
+.enemy-current-answer { font-size: 12px; color: #80b5a5; margin-top: 3px; white-space: normal; }
 
 .compact-card-effect { position: absolute; left: 8px; right: 8px; top: 108px; height: 24px; padding: 3px 7px; color: #eee4c9; background-color: rgba(5,16,18,.88); font-size: 12px; white-space: nowrap; overflow: hidden; -unity-text-overflow-position: end; }
 .card-anchor.inspecting .compact-card-effect, .card-anchor.chosen-card .compact-card-effect { display: none; }
@@ -167,3 +169,5 @@
 .relay-lock-i { left: 70px; }
 .relay-lock-ii { left: 180px; }
 .relay-lock-iii { left: 290px; }
+.boss-target:focus, .actor-label:focus { border-width: 2px; border-color: #eee4c9; }
+.sea-top .sea-button { flex-direction: row; align-items: center; }

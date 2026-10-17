@@ -37,8 +37,22 @@ namespace UnsoundedSea.Runtime
                 catch { return true; }
             }
         }
-        public static string SavePath => Path.Combine(Application.persistentDataPath, "voyage.json");
-        private static string FinalSavePath => Path.Combine(Application.persistentDataPath, "voyage-final.json");
+        private static string SaveDirectory => Application.persistentDataPath;
+        public static string SavePath => Path.Combine(ValidationSaveDirectory ?? SaveDirectory, "voyage.json");
+        private static string FinalSavePath => Path.Combine(ValidationSaveDirectory ?? SaveDirectory, "voyage-final.json");
+        public static bool IsValidationSession => ValidationSaveDirectory != null;
+        public static string ValidationSaveDirectory { get; private set; }
+#if UNITY_EDITOR
+        // CLI acceptance runs use a real save/checkpoint path without replacing the player's voyage.
+        public static void BeginValidation(string directory)
+        {
+            var validationRoot=Path.GetFullPath(Path.Combine(Application.dataPath,"../Logs/UiExperience"))+Path.DirectorySeparatorChar;
+            var path=Path.GetFullPath(directory);
+            if(!path.StartsWith(validationRoot,StringComparison.OrdinalIgnoreCase))throw new ArgumentException("Validation storage must live below Logs/UiExperience.");
+            ResetEncounterState();Session=null;ValidationSaveDirectory=path;
+        }
+        public static void EndValidation(){ResetEncounterState();Session=null;ValidationSaveDirectory=null;}
+#endif
         public static bool IsVoyageEncounter => Session != null && Session.Phase == VoyagePhase.Encounter;
         public static string EncounterSaveError { get; private set; }
         public static bool IsDebugSession => Session != null && Session.IsDebug;
@@ -245,7 +259,7 @@ namespace UnsoundedSea.Runtime
             if (pendingOutcome == null) return;
             var outcome = pendingOutcome;
             if (!Session.ResolveEncounter(outcome.Phase == BattlePhase.Victory, outcome.Health, outcome.Sanity,
-                    outcome.SpentConsumables, outcome.Watched, outcome.Evidence))
+                    outcome.SpentConsumables, outcome.Watched, outcome.Evidence, outcome.HealthDamageTaken, outcome.SanityDamageTaken))
                 throw new InvalidOperationException("航程拒绝了战斗结算。");
             PendingReplay = null;
             pendingOutcome = null;

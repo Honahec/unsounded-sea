@@ -7,6 +7,15 @@ namespace UnsoundedSea.Tests
 {
     public sealed class BossEncounterTests
     {
+        [Test] public void SaltGraphicsExposeOnlyPublishedCountsAndRelayGraphicsMatchCommands()
+        {
+            var salt=new BattleSession(Definition(BossEncounterKind.Surveyor),42,boss:BossEncounterKind.Surveyor);
+            var unknown=salt.View.EncounterTargets.Where(x=>x.State==MechanismState.Unmeasured).ToArray();Assert.That(unknown,Is.Not.Empty);Assert.That(unknown.All(x=>x.MeasuredValue==null),Is.True);
+            Play(salt,"E03-02",unknown[0].Id);var measured=salt.View.EncounterTargets.Single(x=>x.Id==unknown[0].Id);Assert.That(measured.State,Is.EqualTo(MechanismState.Measured));Assert.That(measured.MeasuredValue,Is.InRange(0,8));
+            var relays=new BattleSession(Definition(BossEncounterKind.FlagBearer),42,boss:BossEncounterKind.FlagBearer);
+            Assert.That(relays.View.EncounterTargets.Single(x=>x.Id=="R1:off").IsCurrent,Is.True);
+            Play(relays,"E04-01","R1:positive");Assert.That(relays.View.EncounterTargets.Single(x=>x.Id=="R1:off").IsCurrent,Is.False);Assert.That(relays.View.EncounterTargets.Single(x=>x.Id=="R1:positive").IsCurrent,Is.True);
+        }
         private static readonly IntentSpec Idle = new IntentSpec("idle", "公开行动", "公开行动", DamageChannel.Health, 0, true);
         private static BattleDefinition Definition(BossEncounterKind kind, int health = 100, int sanity = 100)
         {

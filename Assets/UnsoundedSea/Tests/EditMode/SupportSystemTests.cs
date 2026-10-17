@@ -162,7 +162,7 @@ namespace UnsoundedSea.Tests
         {
             var listener=new BattleSession(Definition(new[]{"cover","cover"},crew:new[]{SupportCatalog.CrewMember("listener")},draw:1),0);
             var before=listener.View.Hand.Count;Run(listener,BattleCommand.Support("listener","enemy:1"));
-            Assert.That(listener.View.Hand.Count,Is.EqualTo(before+1));Assert.That(listener.View.Evidence.Any(x=>x.Key.EndsWith("/sound")),Is.True);
+            Assert.That(listener.View.Hand.Count,Is.EqualTo(before+1));Assert.That(listener.View.Evidence.Any(x=>x.SubjectId=="enemy:1"&&x.Question=="SoundSource"&&x.Scope==EvidenceScope.Turn),Is.True);
 
             var cartographer=new BattleSession(Definition(new[]{"c041","c092"},crew:new[]{SupportCatalog.CrewMember("cartographer")}),0);
             Run(cartographer,BattleCommand.Support("cartographer","enemy:1"));

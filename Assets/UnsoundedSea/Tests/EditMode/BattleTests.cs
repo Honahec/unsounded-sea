@@ -9,6 +9,18 @@ namespace UnsoundedSea.Tests
 {
     public sealed class BattleTests
     {
+        [Test] public void DamageCountersExcludeHealingProtectionAndActivePaymentsAndReconstructFromReplay()
+        {
+            var definition=Definition(new[]{Card("heal",8,0),Card("block",3,0),CardCatalog.Get("c081")},damage:10,draw:3);
+            var s=new BattleSession(definition,42);
+            Assert.That(s.Execute(BattleCommand.EndTurn()).Success,Is.True);Assert.That(s.View.HealthDamageTaken,Is.EqualTo(10));
+            Assert.That(s.Execute(BattleCommand.Play(s.View.Hand.Single(x=>x.Definition.Id=="heal").InstanceId)).Success,Is.True);
+            Assert.That(s.Execute(BattleCommand.Play(s.View.Hand.Single(x=>x.Definition.Id=="c081").InstanceId)).Success,Is.True);
+            Assert.That(s.Execute(BattleCommand.Play(s.View.Hand.Single(x=>x.Definition.Id=="block").InstanceId)).Success,Is.True);
+            Assert.That(s.Execute(BattleCommand.EndTurn()).Success,Is.True);
+            Assert.That(s.View.HealthDamageTaken,Is.EqualTo(17));Assert.That(s.View.SanityDamageTaken,Is.Zero);
+            var restored=BattleReplay.Capture(s).Restore(definition);Assert.That(restored.View.HealthDamageTaken,Is.EqualTo(17));
+        }
         private static CardSpec Card(string effect = "block", int amount = 10, int cost = 1, int sanityCost = 0, bool exhaust = false) =>
             new CardSpec(effect, effect, effect, cost, new[] { new EffectSpec(effect, amount) }, sanityCost, exhaust);
         private static BattleDefinition Definition(CardSpec[] deck = null, ObjectiveKind objective = ObjectiveKind.Defeat,

@@ -35,7 +35,7 @@ namespace UnsoundedSea.Runtime
         private string playedCardFeedback;
         private BossEncounterKind presentedBoss;
         private readonly List<(Button button, Transform anchor, Vector2 offset)> encounterLabels = new List<(Button, Transform, Vector2)>();
-        private readonly Dictionary<string, int> presentedSurge = new Dictionary<string, int>();
+        private readonly Dictionary<string, (int before, int after, float until)> surgeChanges = new Dictionary<string, (int, int, float)>();
         public int RenderedFrames { get; private set; }
         private void OnEnable()
         {
@@ -61,6 +61,11 @@ namespace UnsoundedSea.Runtime
         private void OnResolved(BattleView before, BattleView after, BattleCommand command)
         {
             PresentResolution(before, after, command);
+            foreach(var enemy in after.Enemies)
+            {
+                var previous=before.Enemies.FirstOrDefault(x=>x.Id==enemy.Id);
+                if(previous!=null&&previous.Surge!=enemy.Surge)surgeChanges[enemy.Id]=(previous.Surge,enemy.Surge,Time.unscaledTime+1.6f);
+            }
             if (command.kind != CommandKind.PlayCard) return;
             playedCardFeedback = before.Hand.FirstOrDefault(card => card.InstanceId == command.cardInstanceId)?.Definition.Name;
         }
@@ -127,7 +132,12 @@ namespace UnsoundedSea.Runtime
         private static VisualElement Box(string cls) { var v = new VisualElement { pickingMode = PickingMode.Ignore }; v.AddToClassList(cls); return v; }
         private static Label Text(string text, string cls) { var l = new Label(text) { pickingMode = PickingMode.Ignore }; l.AddToClassList(cls); return l; }
         private static Button Button(string name, string text, Action action, string cls = "sea-button")
-        { var b = new Button(action) { name = name, text = text }; b.AddToClassList(cls); return b; }
+        {
+            var b = new Button(action) { name = name, text = text }; b.AddToClassList(cls);
+            var slash=text.LastIndexOf(" / ",StringComparison.Ordinal);
+            if(slash>=0){var key=text.Substring(slash+3);var caption=text.Substring(0,slash);b.text=caption;KeyBadge.Attach(b,key);b.tooltip=caption+"（"+key+"）";}
+            return b;
+        }
         private static string CrewMotif(CrewSupportKind kind)
         {
             switch (kind)
@@ -267,7 +277,7 @@ namespace UnsoundedSea.Runtime
             if (v.Watched > 0)
             {
                 var watched = Box("watched");
-                watched.tooltip = $"被注视 {v.Watched}：异常存在已锁定航迹";
+                watched.tooltip = UiRules.Describe("被注视");
                 watched.Add(new SeaUiArt("eye"));
                 watched.Add(Text(v.Watched.ToString(), "watched-value"));
                 vitals.Add(watched);
@@ -339,6 +349,7 @@ namespace UnsoundedSea.Runtime
                 var face = Box("sea-card"); face.pickingMode = PickingMode.Position;
                 IllustratedCard.Apply(face, def);
                 if (c.IsEncounter) face.Q<Label>("illustrated-cost").text = c.ActionCost.ToString();
+                face.Add(Text("D 详情", "card-detail-hint"));
                 b.Add(face);
                 if (v.Hand.Count > 6)
                 {
@@ -346,7 +357,7 @@ namespace UnsoundedSea.Runtime
                     summary.tooltip = CardCatalog.FaceDescription(def);
                     b.Add(summary);
                 }
-                b.tooltip = def.Name + "：" + def.Description;
+                b.tooltip = UiRules.CardDescription(def);
                 b.EnableInClassList("card-disabled", !c.Enabled || !c.IsEncounter && (def.Cost > v.Actions || def.SanityCost >= v.Sanity));
                 ActionButton(b, active); fan.Add(b);
             }
@@ -391,15 +402,20 @@ namespace UnsoundedSea.Runtime
                     var heading = Box("actor-heading");
                     heading.Add(Text(enemy.Name, "actor-name"));
                     heading.Add(EnemyBadge(enemy.Style));
-                    if (enemy.Surge > 0) heading.Add(Text($"蓄势 {enemy.Surge}", "enemy-badge surge-badge"));
-                    if (presentedSurge.TryGetValue(enemy.Id, out var oldSurge) && oldSurge != enemy.Surge)
+                    if (enemy.Surge > 0)
                     {
-                        var delta = Text(enemy.Surge > oldSurge ? $"蓄势 +{enemy.Surge - oldSurge}" : $"蓄势 {enemy.Surge - oldSurge}", "surge-feedback");
-                        heading.Add(delta);
-                        delta.schedule.Execute(delta.RemoveFromHierarchy).StartingIn(900);
+                        var surge = Text($"蓄势 {enemy.Surge}", "enemy-badge surge-badge");
+                        surge.pickingMode = PickingMode.Position;
+                        surge.tooltip = UiRules.Describe("蓄势");
+                        heading.Add(surge);
                     }
-                    presentedSurge[enemy.Id] = enemy.Surge;
                     plate.Add(heading);
+                    if (surgeChanges.TryGetValue(enemy.Id, out var surgeChange) && surgeChange.until > Time.unscaledTime)
+                    {
+                        var feedback = Text($"蓄势 {surgeChange.before} → {surgeChange.after}", "surge-feedback");
+                        plate.Add(feedback);
+                        feedback.schedule.Execute(feedback.RemoveFromHierarchy).StartingIn((long)((surgeChange.until - Time.unscaledTime) * 1000));
+                    }
                     if (!hideHealth)
                     {
                         var hp = Box("actor-health"); var fill = Box("actor-health-fill");
@@ -413,6 +429,9 @@ namespace UnsoundedSea.Runtime
                     else plate.Add(Text(status, "actor-status"));
                     AddCurrentTurnEvidence(plate, v, enemy);
                     plate.Add(new EnemyIntentDetails(enemy));
+                    if(enemy.Id==director.SelectedEnemy)
+                        foreach(var finding in v.Evidence.Where(x=>x.Scope==EvidenceScope.Turn&&x.SubjectId==enemy.Id&&x.Turn==v.Turn&&(x.Question==nameof(InvestigationKind.SoundSource)||x.Question==nameof(InvestigationKind.DamageChannel))))
+                            plate.Add(Text(finding.Text,"enemy-current-answer"));
                     plate.EnableInClassList("selected", a.EnemyId == director.SelectedEnemy); plate.SetEnabled(a.Alive && !director.Paused); root.Add(plate); nameplates.Add(plate);
                     var selectedCard = v.Hand.FirstOrDefault(c => c.InstanceId == selectedEncounterCard);
                     if (selectedCard == null) a.Select(a.EnemyId == director.SelectedEnemy);
@@ -563,20 +582,22 @@ namespace UnsoundedSea.Runtime
             if (director.Stage == null) return;
             var anchors = director.Stage.GetComponentsInChildren<BossTargetAnchor>();
             var selected = view.Hand.FirstOrDefault(c => c.InstanceId == selectedEncounterCard);
-            if (selected == null && (view.BossKind == BossEncounterKind.FlagBearer || view.BossKind == BossEncounterKind.Watcher)) return;
-            var targets = selected == null ? view.EncounterTargets : selected.Targets;
+            if (selected == null && view.BossKind == BossEncounterKind.Watcher) return;
+            var targets = selected == null || view.BossKind==BossEncounterKind.FlagBearer ? view.EncounterTargets : selected.Targets;
             VisualElement saltBoard = null;
+            VisualElement relayBoard=null;
             if (view.BossKind == BossEncounterKind.Surveyor)
             {
                 saltBoard = Box("salt-board");
                 root.Add(saltBoard);
             }
+            if(view.BossKind==BossEncounterKind.FlagBearer){relayBoard=Box("relay-board");root.Add(relayBoard);}
             var offsets = new Dictionary<string, int>();
             var targetIndex = 0;
             foreach (var target in targets)
             {
                 var id = target.Id;
-                var anchorId = id;
+                var anchorId = id.StartsWith("scene:",StringComparison.Ordinal)?id.Substring(6):id;
                 var pair = id.IndexOf('|');
                 if (pair >= 0)
                 {
@@ -589,25 +610,30 @@ namespace UnsoundedSea.Runtime
                     anchor = anchors.FirstOrDefault(a => a.targetId == anchorId.Substring(0, separator));
                 if (anchor == null) continue;
                 var cardId = selectedEncounterCard;
+                var legalTarget = selected?.Targets.FirstOrDefault(x => x.Enabled && (x.Id == id || x.Id == "scene:" + anchorId));
+                var publicState = view.EncounterTargets.FirstOrDefault(x => x.Id == anchorId) ?? target;
                 var button = Button("boss-target-" + id, "", () =>
                 {
-                    var result = director.Submit(BattleCommand.Play(cardId, id));
+                    if(legalTarget==null)return;
+                    var result = director.Submit(BattleCommand.Play(cardId, legalTarget.Id));
                     if (result.Success) { selectedEncounterCard = 0; Render(); }
                 }, "boss-target");
-                button.tooltip = target.Name + "：" + target.Detail;
+                button.tooltip = UiRules.Describe(target.Name + "：" + publicState.Detail + (legalTarget == null ? "\n" + (selected == null ? "先选择对应机关行动牌。" : selected.DisabledReason == "" ? "该牌当前不可操作此目标。" : selected.DisabledReason) : ""));
                 button.userData = target;
                 if (view.BossKind == BossEncounterKind.Watcher) button.text = target.Name;
                 button.EnableInClassList("target-ready", selected != null && target.Enabled);
-                ActionButton(button, active && selected != null && target.Enabled);
+                ActionButton(button, active && selected != null && selected.Enabled && legalTarget != null);
                 button.tabIndex = 100 + targetIndex++;
                 if (view.BossKind == BossEncounterKind.FlagBearer)
                 {
                     button.AddToClassList("mechanism-dial");
-                    var relay = id.Contains(":");
-                    var state = relay ? id.Substring(id.IndexOf(':') + 1) : "";
+                    var relay = anchorId.Contains(":");
                     if (relay)
                     {
-                        button.AddToClassList(id.StartsWith("R1", StringComparison.Ordinal) ? "relay-one" : "relay-two");
+                        var relayId = anchorId.Substring(0, anchorId.IndexOf(':'));
+                        button.AddToClassList(relayId == "R1" ? "relay-one" : "relay-two");
+                        var state = publicState.State == MechanismState.Off ? "off" :
+                            publicState.State == MechanismState.Positive ? "positive" : "reverse";
                         button.AddToClassList("relay-" + state);
                         button.Add(Text(state == "off" ? "○" : state == "positive" ? "+" : "↶", "relay-symbol"));
                         button.tooltip = target.Name + "：切换至" + (state == "off" ? "断电" : state == "positive" ? "正接" : "反接") + "。" + target.Detail;
@@ -615,15 +641,15 @@ namespace UnsoundedSea.Runtime
                     else
                     {
                         button.AddToClassList("relay-lock");
-                        button.AddToClassList("relay-" + id.ToLowerInvariant());
-                        button.Add(Text(id.EndsWith("I", StringComparison.Ordinal) ? "Ⅰ" : id.EndsWith("II", StringComparison.Ordinal) ? "Ⅱ" : "Ⅲ", "relay-symbol"));
+                        button.AddToClassList("relay-" + anchorId.ToLowerInvariant());
+                        button.Add(Text(anchorId == "lock-I" ? "Ⅰ" : anchorId == "lock-II" ? "Ⅱ" : "Ⅲ", "relay-symbol"));
                     }
-                    button.EnableInClassList("relay-current", target.Detail.Contains("当前极性"));
+                    button.EnableInClassList("relay-current", publicState.IsCurrent);
                     root.Add(button);
                 }
                 else if (saltBoard != null)
                 {
-                    DecorateSaltCell(button, target);
+                    DecorateSaltCell(button, publicState);
                     saltBoard.Add(button);
                 }
                 else
@@ -704,8 +730,8 @@ namespace UnsoundedSea.Runtime
             track.Add(fill);
             if (cls == "sanity")
             {
-                SanityGauge.AddMarks(track, max);
-                el.tooltip = SanityGauge.RuleTooltip;
+                UiRules.SanityTicks(track, max);
+                el.tooltip = UiRules.SanityThresholds;
                 row.Add(Text(SanityGauge.State(value), "sanity-state"));
             }
             el.Add(track);
@@ -844,6 +870,8 @@ namespace UnsoundedSea.Runtime
                     plate.style.left = Mathf.Clamp(right ? p.x + 70 : p.x - width - 70, 18, Mathf.Max(18, root.resolvedStyle.width - width - 18));
                     plate.style.top = Mathf.Clamp(p.y - height * .5f, 64, Mathf.Max(64, root.resolvedStyle.height - height - 170));
                 }
+                plate.style.left=Mathf.Clamp(plate.style.left.value.value,12,Mathf.Max(12,root.resolvedStyle.width-width-12));
+                plate.style.top=Mathf.Clamp(plate.style.top.value.value,90,Mathf.Max(90,root.resolvedStyle.height-height-300));
                 plate.style.display = screen.z > 0 && actor.Alive ? DisplayStyle.Flex : DisplayStyle.None;
             }
             foreach (var choice in enemyChoices)

@@ -33,8 +33,8 @@ namespace UnsoundedSea.Core
             if (channel == DamageChannel.Health) amount = ConsumeHealthReduction(amount);
             var protection = channel == DamageChannel.Health ? block : ward;
             var absorbed = Math.Min(protection, amount); var damage = amount - absorbed;
-            if (channel == DamageChannel.Health) { block -= absorbed; health = Math.Max(0, health - damage); }
-            else { ward -= absorbed; sanity = Math.Max(0, sanity - damage); }
+            if (channel == DamageChannel.Health) { block -= absorbed; healthDamageTaken += Math.Min(health,damage); health = Math.Max(0, health - damage); }
+            else { ward -= absorbed; sanityDamageTaken += Math.Min(sanity,damage); sanity = Math.Max(0, sanity - damage); }
             Record($"{source}执行 {description ?? amount + " 点" + (channel == DamageChannel.Health ? "生命伤害" : "理智冲击")}；抵御 {absorbed}，实际承受 {damage}。");
         }
 
@@ -77,7 +77,23 @@ namespace UnsoundedSea.Core
             public int Target => kind == BossEncounterKind.Choirmaster ? (stage == 1 ? 3 : MainHealth) : kind == BossEncounterKind.Surveyor ? 4 : kind == BossEncounterKind.FlagBearer ? (stage == 2 ? 3 : stage == 3 ? MainHealth : 2) : 5;
             public string Objective => kind == BossEncounterKind.Choirmaster ? (stage == 1 ? "按序关闭唱诗匣" : "击破发声囊") : kind == BossEncounterKind.Surveyor ? "激活四枚安全封栓" : kind == BossEncounterKind.FlagBearer ? (stage == 1 ? "校正双继电器" : stage == 2 ? "依序释放三段闸锁" : "击退执旗者") : "召唤并击退五名守卫";
             public string Status => BuildStatus();
-            public IReadOnlyList<EncounterTargetView> AllTargets { get { RefreshCards(); return targets.Select(x => new EncounterTargetView(x.Id, x.Name, TargetDetail(x.Id), true)).ToList().AsReadOnly(); } }
+            public IReadOnlyList<EncounterTargetView> AllTargets { get { RefreshCards(); return targets.Select(x => PublicTarget(x.Id,x.Name,TargetDetail(x.Id),true)).ToList().AsReadOnly(); } }
+            private EncounterTargetView PublicTarget(string id,string name,string detail,bool enabled)
+            {
+                var key=SceneId(id);
+                if(kind==BossEncounterKind.Surveyor&&targets.Any(x=>x.Id==key))
+                {
+                    var opened=completed.Contains(key);var measured=read.Contains(key);
+                    var state=opened?(b03Mines.Contains(key)?MechanismState.Disabled:MechanismState.Open):measured?MechanismState.Measured:MechanismState.Unmeasured;
+                    return new EncounterTargetView(id,name,detail,enabled,state,measured||opened&&!b03Mines.Contains(key)?(int?)AdjacentMines(key):null,b03Goals.Contains(key));
+                }
+                if(kind==BossEncounterKind.FlagBearer&&key.StartsWith("R",StringComparison.Ordinal)&&key.Contains(":"))
+                {
+                    var parts=key.Split(':');var state=parts[1]=="off"?MechanismState.Off:parts[1]=="positive"?MechanismState.Positive:MechanismState.Reverse;
+                    return new EncounterTargetView(id,name,detail,enabled,state,isCurrent:Relay(parts[0])==parts[1]);
+                }
+                return new EncounterTargetView(id,name,detail,enabled);
+            }
 
             public BossEncounterState(BattleSession session, BossEncounterKind encounter, uint seed)
             {
@@ -369,15 +385,15 @@ namespace UnsoundedSea.Core
             private static string AnchorLabel(string name) => name == "anchor" ? "铁锚" : name == "lamp" ? "裂灯" : name == "bell" ? "铜钟" : name == "sail" ? "折帆" : "闭眼";
             private string BuildStatus()
             {
-                if (kind == BossEncounterKind.Choirmaster) return stage == 1 ? $"{(known == 0 ? "唱序未知" : string.Join("；", Enumerable.Range(0, known).Select(Constraint)))} · 封匣 {progress}/3" : $"护持解除 · 发声囊 {s.enemies[0].Health}/{MainHealth}";
-                if (kind == BossEncounterKind.Surveyor) return $"封栓 {progress}/4 · 总危险 3" + (s.turn == 6 ? "\n下回合盐潮重压：10 生命" : "");
+                if (kind == BossEncounterKind.Choirmaster) return stage == 1 ? $"唱序 · {(known == 0 ? "未知" : string.Join("；", Enumerable.Range(0, known).Select(Constraint)))}" : "护持解除 · 发声囊暴露";
+                if (kind == BossEncounterKind.Surveyor) return "总危险 3 · 每回合最多开两格" + (s.turn == 6 ? "\n下回合盐潮重压：10 生命" : "");
                 if (kind == BossEncounterKind.FlagBearer)
                 {
                     string Polarity(string relay) => Relay(relay) == "off" ? "断电" : Relay(relay) == "positive" ? "正接" : "反接";
                     var relays = $"R1 {Polarity("R1")} · R2 {Polarity("R2")}";
-                    return stage == 1 ? relays : stage == 2 ? $"{relays}\n闸锁 {progress}/3 · 警报 {alarm}\n{TargetDetail("lock-" + new[] { "I", "II", "III" }[Math.Min(progress, 2)])}" : $"主桅暴露 · {s.enemies[0].Health}/{MainHealth}";
+                    return stage == 1 ? "校正双继电器 · 每回合一次" : stage == 2 ? $"警报 {alarm} · 到期冲击12生命\n{TargetDetail("lock-" + new[] { "I", "II", "III" }[Math.Min(progress, 2)])}" : "主桅暴露";
                 }
-                return $"已击退 {progress}/5 · 已召唤 {completed.Count(x => x.EndsWith(":summoned", StringComparison.Ordinal))}/5";
+                return $"已召唤 {completed.Count(x => x.EndsWith(":summoned", StringComparison.Ordinal))}/5";
             }
 
             public IEnumerable<EncounterTargetView> CardTargets(int card)

@@ -23,14 +23,19 @@ namespace UnsoundedSea.Core
             return copy;
         }
     }
+    public enum MechanismState { None, Unmeasured, Measured, Open, Disabled, Off, Positive, Reverse }
     public sealed class EncounterTargetView
     {
         public string Id { get; }
         public string Name { get; }
         public string Detail { get; }
         public bool Enabled { get; }
-        public EncounterTargetView(string id, string name, string detail, bool enabled)
-        { Id = id; Name = name; Detail = detail; Enabled = enabled; }
+        public MechanismState State { get; }
+        public int? MeasuredValue { get; }
+        public bool IsSeal { get; }
+        public bool IsCurrent { get; }
+        public EncounterTargetView(string id, string name, string detail, bool enabled,MechanismState state=MechanismState.None,int? measuredValue=null,bool isSeal=false,bool isCurrent=false)
+        { Id = id; Name = name; Detail = detail; Enabled = enabled; State=state;MeasuredValue=measuredValue;IsSeal=isSeal;IsCurrent=isCurrent; }
     }
     public sealed class EnemyView
     {
@@ -108,6 +113,8 @@ namespace UnsoundedSea.Core
         public int Turn { get; internal set; }
         public int Health { get; internal set; }
         public int Sanity { get; internal set; }
+        public int HealthDamageTaken { get; internal set; }
+        public int SanityDamageTaken { get; internal set; }
         public int Actions { get; internal set; }
         public int Block { get; internal set; }
         public int Ward { get; internal set; }

@@ -68,16 +68,28 @@ namespace UnsoundedSea.Core
         private bool ClaimItemReward(string id){if(!RewardItems.Any(x=>x.Id==id)||!CanGain(id))return false;Gain(id);return true;}
         private void AddMarker(string id,string expiry)=>markers[id]=new VoyageMarker(id,Act+":"+CurrentFull.Id,expiry);
         private int HirePrice=>markers.ContainsKey("docking-voucher")?1:2;
+        public static bool IsLoadoutChoice(VoyageNodeChoice choice)
+            => choice.Id.StartsWith("equip:",StringComparison.Ordinal)||choice.Id.StartsWith("pack:",StringComparison.Ordinal)||choice.Id.StartsWith("unpack:",StringComparison.Ordinal);
+        private bool IsNodeResolutionChoice(VoyageNodeChoice choice)
+        {
+            if(phase!=VoyagePhase.Arrived||nodeResolved)return false;
+            if(CurrentFull.Kind==RunNodeKind.Event&&Watched==3&&ServiceAvailable("return-gaze"))return false;
+            if(choice.Id=="ritual:learn")return true;
+            var verb=choice.Id.Split(':')[0];
+            return CurrentFull.Kind==RunNodeKind.Event&&(verb=="rescue"||verb=="voucher"||verb=="specimen"||verb=="repair-boat"||verb=="crew"||verb=="risk")
+                ||CurrentFull.Kind==RunNodeKind.Archive&&(verb=="survey"||verb=="archive"||verb=="specimen");
+        }
         public IReadOnlyList<VoyageNodeChoice> GetSupportChoices()=>GetCombinedChoices().Where(x=>!IsNodeService(x.Id)).ToArray();
         public IReadOnlyList<VoyageNodeChoice> GetNodeServices()
         {
-            var services=GetCombinedChoices().Where(x=>IsNodeService(x.Id));
+            var services=GetCombinedChoices().Where(x=>IsNodeService(x.Id)||IsPreparationService(x.Id));
             if(nodeResolved&&!initialPreparation)services=escortedCrew==null?Enumerable.Empty<VoyageNodeChoice>():services.Where(x=>x.Id=="accept"||x.Id.StartsWith("accept@",StringComparison.Ordinal)||x.Id=="escort-decline");
             return services.ToArray();
         }
         private static bool IsNodeService(string id)=>id.StartsWith("buy:",StringComparison.Ordinal)||id.StartsWith("hire:",StringComparison.Ordinal)||
             id.StartsWith("treat:",StringComparison.Ordinal)||id.StartsWith("gunsmith:",StringComparison.Ordinal)||id=="accept"||
             id.StartsWith("accept@",StringComparison.Ordinal)||id=="escort-decline"||id=="gaze:hide"||id=="gaze:keep";
+        private static bool IsPreparationService(string id)=>id.StartsWith("starter:",StringComparison.Ordinal)||id.StartsWith("trust:",StringComparison.Ordinal)||id=="tea"||id=="navigate"||id=="ritual:prepare";
         private IReadOnlyList<VoyageNodeChoice> GetCombinedChoices()
         {
             var result=new List<VoyageNodeChoice>();

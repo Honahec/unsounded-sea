@@ -46,3 +46,4 @@
 .map-legend-mark.selected { border-color: rgb(232, 214, 169); background-color: rgb(111, 75, 34); }
 .map-legend-mark.visited { border-color: rgb(85, 151, 131); }
 .map-legend-label { color: rgb(190, 188, 163); font-size: 13px; }
+.map-perilous-badge { position: absolute; right: -12px; top: -12px; width: 24px; height: 24px; }

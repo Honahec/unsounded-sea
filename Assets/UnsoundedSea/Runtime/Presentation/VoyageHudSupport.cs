@@ -100,9 +100,7 @@ namespace UnsoundedSea.Runtime
                     scroll.Add(Text(Session.RitualStatus, "body"));
                     break;
             }
-            var choices = Session.GetSupportChoices()
-                .Where(choice => SupportChoiceTab(choice.Id) == supportTab && IsManifestAction(choice.Id))
-                .ToArray();
+            var choices = Session.GetSupportChoices().Where(choice => VoyageSession.IsLoadoutChoice(choice)&&SupportChoiceTab(choice.Id) == supportTab).ToArray();
             if (choices.Length > 0) scroll.Add(Text("配装", "section-label"));
             foreach (var choice in choices)
             {
@@ -138,7 +136,8 @@ namespace UnsoundedSea.Runtime
             var enemies = VoyageEncounterCatalog.Resolve(stop.EncounterId).encounter.enemies;
             var channels = enemies.SelectMany(enemy => enemy.intents).Where(intent => intent.amount > 0).Select(intent => intent.channel).Distinct().ToArray();
             var danger = string.Join("、", channels.Select(channel => channel == DamageChannel.Health ? "生命伤害" : "理智冲击"));
-            return (enemies.Length > 1 ? "双敌接舷" : "单敌接舷") + " · " + danger + "\n" + preview;
+            var style=session.PreviewStyle(stop);
+            return (style==EnemyStyle.Hidden?"隐匿型":"节奏型") + " · " + danger +(stop.Perilous?"\n险航 · 双敌 · 两次收获":"")+"\n"+preview;
         }
 
         private static void SupportEntry(VisualElement parent, string title, string detail, bool tooltipOnly = false, ItemSpec item = null)
@@ -198,11 +197,6 @@ namespace UnsoundedSea.Runtime
             }
         }
 
-        private static bool IsManifestAction(string id)
-        {
-            var verb = id.Split(':')[0].Split('@')[0];
-            return verb == "starter" || verb == "equip" || verb == "pack" || verb == "unpack";
-        }
 
         private static ItemSpec ChoiceItem(string id)
         {
