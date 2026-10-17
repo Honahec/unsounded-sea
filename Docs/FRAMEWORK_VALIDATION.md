@@ -2,6 +2,18 @@
 
 2026-10-17 更新，macOS / Unity 6000.6.5f1 / Unity CLI 1.0.0-beta.13 / Pipeline 0.8.0-exp.1。范围分别为局外航海，以及主线 `OceanBattle.unity`「雾海来客」与 `SeaBossBattle.unity`「沉钟海域」；旧 HUD 的逐轮记录保留在 Git 历史，不重复维护。
 
+## 甲板敌人战斗动画与普通战海面
+
+2026-10-17，覆盖 25 个航程普通敌人及 Prayer／Echo，共 27 个甲板角色 Prefab；Boss 战复用这些 Prefab 的召唤单位同样生效，巨兽本体沿用原动作。
+
+- 最终重编译 0 错误／0 警告；`UnsoundedSea.Tests` EditMode **126 通过／0 失败／0 跳过**。新增 7 项检查覆盖全部甲板配置、27 个实际蒙皮的变形／足部固定／回收、旋转缩放父节点、连续受击、暂停与减少动效，以及已结算动作记录的打断、致死、零伤害和回放一致性。
+- `DeckAnimationQA.Gallery` 分三页检查全部角色的 idle、前摇、攻击与受击。逐姿态调用 Unity `BakeMesh` 捕获实际蒙皮结果，避免同帧手动渲染复用旧骨骼矩阵；这些是确定性姿态采样，不是帧率测量。[代表动作](ArtReferences/deck-combat-poses.jpg)；曲线与角色分组见[机制设计](ASSET_MECHANICS_DESIGN.md#甲板敌人的战斗动作设计与当前实现)。
+- Prayer 使用 8 组双节裙摆骨骼，攻击时上段／下摆最大摆角为 16°／34°。101 个攻击采样检查下摆变形介于 0.12–0.65 m，靴子与上身没有被裙摆权重带动；逐帧预览检查风力抬升、波动及回收。来源、骨骼与权重记录维护在 [DeckRigs manifest](../ArtSource/Characters/DeckRigs-manifest.json)。
+- `DeckAnimationQA.Live` 在 `OceanBattle` 真实玩家循环和结束回合按钮上通过：帧计数推进 391，船体战斗晃动包络峰值约 0.792，裙摆风力峰值约 0.997。重复提交没有推进第二回合；暂停冻结角色时钟、船体、水体与反射，恢复后动作结束解除 Busy；减少动效时船体稳定且回合正常解锁。测试后恢复原动效偏好。
+- 普通战改用航海／Boss 共用的海面网格和 Uber 水体，独立 `DeckOcean` 材质使用 0.18／0.09 m 波幅、半分辨率反射及雾海天空；测试确认波峰与甲板锚点保持净空，实际截图检查水面、反射、远景和甲板构图：[普通战海面](ArtReferences/deck-ocean.jpg)。
+
+复现入口为 `Tools/DeckAnimationQA.cs`（在 `OceanBattle` Play Mode 调用 `Gallery`／`Live`）、`DeckAnimationSetup.Apply` 和 `Tools/DeckOceanSetup.cs`。完整临时结果在忽略的 `Logs/DeckAnimation/`。裙摆使用定向骨骼动画，不是布料模拟；未验收独立 Player 或目标设备性能。
+
 ## 沉钟之母 BANG 分件与刚性动作流程
 
 - Hyper3D BANG 任务 `a69dfe2b-089e-4ca1-9987-0d36ec94312c` 从原始沉钟之母拆出 12 个网格，Blender 建立身体、冠部和 6 个触手 pivot；低模从 1,500,000 降至 119,992 三角面，源网格未覆盖。
@@ -27,7 +39,7 @@
 - `Tools/VoyageOceanQA.cs` 的 `Lifecycle` 实测航行中返回标题、读档后重播未完成航段且仅抵达一次；普通战第二回合保存返回，再进入保持回合 2、生命 57、理智 30及节点种子。另实际调用磁盘 `TryResume` 验证包含局内回放的文件。
 - 首次磁盘续档暴露 `JsonUtility` 将空引用写成空值导致严格历史校验拒绝的问题；运行时改用已安装的 Newtonsoft.Json，保留可空字段语义。修复后上述磁盘恢复通过。旧版本格式没有迁移，不自动覆盖旧档。
 
-普通敌人本轮使用各自静态模型，正式骨骼与动画延后；未验收独立 Player、非 16:9 或目标设备性能，也不把固定策略通关当作完整美术、25 装备库存或平衡定稿。本地烟测结果与截图位于被忽略的 `Logs/CampaignLevels/`，不作为运行时资产。
+该阶段普通敌人使用各自静态模型；后续骨骼与动作验收见上方「甲板敌人战斗动画与普通战海面」。未验收独立 Player、非 16:9 或目标设备性能，也不把固定策略通关当作完整美术、25 装备库存或平衡定稿。本地烟测结果与截图位于被忽略的 `Logs/CampaignLevels/`，不作为运行时资产。
 
 ## 90 张行动牌
 
