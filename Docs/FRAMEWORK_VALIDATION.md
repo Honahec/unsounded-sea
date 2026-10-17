@@ -2,12 +2,12 @@
 
 2026-10-17 更新，macOS / Unity 6000.6.5f1 / Unity CLI 1.0.0-beta.13 / Pipeline 0.8.0-exp.1。范围分别为局外航海，以及主线 `OceanBattle.unity`「雾海来客」与 `SeaBossBattle.unity`「沉钟海域」；旧 HUD 的逐轮记录保留在 Git 历史，不重复维护。
 
-## 沉钟之母骨骼动画流程
+## 沉钟之母 BANG 分件与刚性动作流程
 
-- `arch` Blender 5.2.2 生成并导出 Generic Armature：30 根骨骼、151,658 顶点、6 个动作；FBX/GLB 重新导入检查通过，Git LFS `fsck` 通过。
-- Unity 通过 `BellMotherAnimationSetup.Build` 生成 `BellMother.controller` 与 `BellMother.prefab`；Prefab 骨骼测试 **2 通过／0 失败**，尺寸约 32 m，包含六组动作和 SkinnedMeshRenderer。
-- Play Mode 打开 `SeaBossBattle.unity`，Game View 1280×720 正常显示船、海面与巨兽；运行时调用 `BattleActorView.Feedback(false, true, true)` 返回 `skeletal=True`，攻击序列进入表现层。截图只保留在本地临时目录，不作为运行时资源。
-- 沉钟规则回归 `SeaBossTests` **6 通过／0 失败**；未修改生命、伤害、撤离进度等规则。尚未验收独立 Player、目标硬件性能和最终权重美术质量。
+- Hyper3D BANG 任务 `a69dfe2b-089e-4ca1-9987-0d36ec94312c` 从原始沉钟之母拆出 12 个网格，Blender 建立身体、冠部和 6 个触手 pivot；低模从 1,500,000 降至 119,992 三角面，源网格未覆盖。
+- Unity 通过 `BellMotherBangSetup.Build` 生成 32 m 的 `BellMother.prefab`；Prefab 包含 12 个 MeshRenderer、6 个触手部件、无 SkinnedMeshRenderer。`BellMotherRigidMotion` 负责短前摇、攻击、命中和死亡动作，避免整块网格蒙皮拉伸。
+- Play Mode 打开 `SeaBossBattle.unity`，Game View 1280×720 正常显示船、海面与巨兽；运行时触发 `BellMotherRigidMotion.PlayAttack()`，0.3 秒内身体和触手均发生旋转，画面无明显撕裂或材质丢失。截图只保留在本地临时目录，不作为运行时资源。
+- BellMother 动画专项 **3 通过／0 失败**，沉钟规则回归 `SeaBossTests` **6 通过／0 失败**；未修改生命、伤害、撤离进度等规则。尚未验收独立 Player、目标硬件性能、平台纹理压缩和 LOD1/2。
 
 ## M02–M05 Boss 战
 
@@ -115,7 +115,7 @@
 
 本次 Uber 水体接入重新跑通两场战斗胜负、模型点击、船外摆放、暂停和减少动效。`UberWaterQA.Lifecycle` 验证连续 3 次重开仅保留一套水体资源、暂停时反射像素哈希不变、恢复后时钟推进、源材质未变；返回菜单及甲板战均无残留反射相机/Volume/水体。1600×900 下反射目标为 800×450；反射相机禁用常规渲染，只有一台主相机。
 
-已检查 1600×900 战斗、胜利和设置画面，及 1280×720 布局。甲板战检查人物全身、脚底和选中环；海面战检查完整小船与远处巨兽的斜侧构图、浸没与尺度差、五段撤离进度；可用 `SeaBossQA.ExteriorComposition(true)` 复查受击过程。此前构图通过 Boss 胜负、选中、暂停、减少动效及水体生命周期检查；最近手牌/近船构图调整重新验证了两种分辨率的手牌几何、悬停/聚焦/恢复、完整牌面命中、海图暂停、整船构图及 Boss 五轮撤离，未重跑完整规则测试。最新日志在 `Logs/HandCamera/`。共同检查船舷灯、湿木甲板、海面、雾和投影名牌。海面战保留常态整体摆动，骨骼动作由 Animator 驱动，关闭无骨骼模型的占位攻击/受击位移。新版海面检查了不透明深水、交错波峰与碎泡沫、减弱破碎的倒影、巨兽宽范围扰流和远景雾衔接。合并新版 UI 后，重新检查 1600×900 / 1280×720 构图和光照：浪尖为受光漫反射，高光跟随真实灯光，关闭旧波峰亮色叠加；GPU 光照检查与截图在 `Logs/SeaLighting/`。最终验证区间无新增编译或运行错误；开发期间的上游兼容错误与测试夹具问题已修复，CLI 曾提示重复进入 Play；脚本重载时 CLI 请求中断，等待编译完成后重新验证；风暴版本遇到编译请求停滞，正常重开 Editor 后恢复并完成验证。
+已检查 1600×900 战斗、胜利和设置画面，及 1280×720 布局。甲板战检查人物全身、脚底和选中环；海面战检查完整小船与远处巨兽的斜侧构图、浸没与尺度差、五段撤离进度；可用 `SeaBossQA.ExteriorComposition(true)` 复查受击过程。此前构图通过 Boss 胜负、选中、暂停、减少动效及水体生命周期检查；最近手牌/近船构图调整重新验证了两种分辨率的手牌几何、悬停/聚焦/恢复、完整牌面命中、海图暂停、整船构图及 Boss 五轮撤离，未重跑完整规则测试。最新日志在 `Logs/HandCamera/`。共同检查船舷灯、湿木甲板、海面、雾和投影名牌。海面战保留常态整体摆动，沉钟之母动作由 `BellMotherRigidMotion` 驱动，关闭无动画模型的占位攻击/受击位移。新版海面检查了不透明深水、交错波峰与碎泡沫、减弱破碎的倒影、巨兽宽范围扰流和远景雾衔接。合并新版 UI 后，重新检查 1600×900 / 1280×720 构图和光照：浪尖为受光漫反射，高光跟随真实灯光，关闭旧波峰亮色叠加；GPU 光照检查与截图在 `Logs/SeaLighting/`。最终验证区间无新增编译或运行错误；开发期间的上游兼容错误与测试夹具问题已修复，CLI 曾提示重复进入 Play；脚本重载时 CLI 请求中断，等待编译完成后重新验证；风暴版本遇到编译请求停滞，正常重开 Editor 后恢复并完成验证。
 
 持久画面：[甲板战](ArtReferences/ocean-battle.png)、[封门胜利](ArtReferences/ocean-victory.png)、[海面 Boss](ArtReferences/sea-boss-battle.png)。详细本地工具日志在被忽略的 `Logs/`，不作为团队唯一交付。船体高低模已从独立 clone 经 LFS 回读，两份 SHA 全部匹配（资产提交 `56a27ff`）。海面 Boss 高低模也已在资产提交 `32388b6` 完成独立远端下载，两份 SHA256 均匹配，`git lfs fsck` 通过。水体资产提交 `2478960` 的 4 张纹理与海面网格也通过独立 clone 的 LFS 下载，5 份 SHA256 全部匹配；扩大并加密、扩展风暴包围盒后的海面网格（`36e8acf`）也从独立 clone 重新下载，SHA256 一致。模型参数、来源和哈希只维护在 [船体 manifest](../ArtSource/Vessels/manifest.json) 与 [Boss manifest](../ArtSource/Bosses/manifest.json)。
 

@@ -17,11 +17,13 @@ namespace UnsoundedSea.Runtime
         private Quaternion bodyRotation;
         private float height, impulse, attack, fall, age;
         private Animator animator;
+        private BellMotherRigidMotion rigidMotion;
         private Coroutine actionSequence;
         private bool skeletalPresentation;
+        private bool rigidPresentation;
         private bool legacyMotion;
 
-        public bool HasSkeletalPresentation => skeletalPresentation;
+        public bool HasSkeletalPresentation => skeletalPresentation || rigidPresentation;
 
         public void Bind(BattleDirector owner, string id, GameObject prefab, Material ringMaterial)
         {
@@ -30,13 +32,16 @@ namespace UnsoundedSea.Runtime
             body = Instantiate(prefab, transform).transform;
             bodyPosition = body.localPosition; bodyRotation = body.localRotation;
             animator = body.GetComponentInChildren<Animator>();
+            rigidMotion = body.GetComponentInChildren<BellMotherRigidMotion>();
             skeletalPresentation = animator != null && animator.runtimeAnimatorController != null;
+            rigidPresentation = rigidMotion != null;
             if (skeletalPresentation)
             {
                 animator.updateMode = AnimatorUpdateMode.UnscaledTime;
                 animator.applyRootMotion = false;
                 animator.Play("BellMother_Idle", 0, 0);
             }
+            else if (rigidPresentation) rigidMotion.ResetIdle();
             var bounds = MeasureLocalBounds(transform);
             height = bounds.size.y;
             labelPosition = new Vector3(bounds.center.x, Mathf.Lerp(bounds.min.y, bounds.max.y, placement == null ? 1 : placement.labelHeight), bounds.center.z)
@@ -87,6 +92,13 @@ namespace UnsoundedSea.Runtime
                 else if (attacking) actionSequence = StartCoroutine(PlayAttack());
                 return;
             }
+            if (rigidPresentation)
+            {
+                if (!alive) rigidMotion.PlayDeath();
+                else if (damaged) rigidMotion.PlayHit();
+                else if (attacking) rigidMotion.PlayAttack();
+                return;
+            }
             impulse = damaged ? 1 : 0; attack = attacking ? 1 : 0;
         }
 
@@ -114,12 +126,13 @@ namespace UnsoundedSea.Runtime
         {
             if (body == null) return;
             if (animator != null) animator.speed = director.Paused ? 0 : 1;
+            if (rigidMotion != null) rigidMotion.SetPaused(director.Paused);
             if (director.Paused) return;
             var dt = Time.unscaledDeltaTime; age += dt;
             impulse = Mathf.MoveTowards(impulse, 0, dt * 2.2f); attack = Mathf.MoveTowards(attack, 0, dt * (IsSeaActor ? 0.8f : 1.4f));
             fall = Mathf.MoveTowards(fall, Alive ? 0 : 1, dt * 0.9f);
             var reduced = GameSettings.ReducedMotion;
-            if (skeletalPresentation && !legacyMotion)
+            if ((skeletalPresentation || rigidPresentation) && !legacyMotion)
             {
                 body.localPosition = bodyPosition + Vector3.up * (-fall * height);
                 body.localRotation = bodyRotation;

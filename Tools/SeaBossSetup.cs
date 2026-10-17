@@ -73,6 +73,10 @@ public static class SeaBossSetup
 
     public static object ImportModel()
     {
+        // Prefer the BANG rigid-part variant: the fused source mesh is not
+        // suitable for large deformation without manual weight painting.
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/Art/Models/BellMother_BANG_LOD0.glb") != null)
+            return BellMotherBangSetup.Build();
         // Prefer the authored generic rig when it is present. This keeps a later
         // encounter rebuild from silently replacing the animated Boss with the
         // legacy static GLB prefab.

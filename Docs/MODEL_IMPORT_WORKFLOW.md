@@ -40,15 +40,15 @@ Deemos Agent 是可选生产工具，不是每件资产的必经步骤。高模�
 3. 等附件上传完成再提交，确认 Agent 可读取网格和贴图，且聊天中出现对应模型预览。
 4. 在同一聊天完成修订并下载结果。若掉线，先检查原任务状态，避免重复创建任务。
 
-### 沉钟之母：绑定骨骼与战斗动画样例（2026-10-17）
+### 沉钟之母：BANG 分件与刚性战斗动画样例（2026-10-17）
 
-Deemos 当前可见的 Agent 快捷动作是部位拆分与材质调整；没有可验收的骨骼、权重或动画导出入口。Rodin 的 T/A pose 只帮助生成姿态，不能代替绑定。因此本例采用“Deemos 造型 → Blender 5.2.2 自定义 Generic Rig → Unity Animator”的可回溯路线，未把 Agent 的文字报告当作动画交付。
+Deemos 的 BANG 适合把单体 Boss 拆成可独立控制的部件，但不是自动绑定器。原始整块网格的自动权重在大幅动作下出现拉伸，因此当前运行时采用“BANG 分件 → Blender 低模与 pivot → Unity 刚性部件动画”，保留旧 Generic Rig 资产作为回溯样例，不再作为默认 Prefab。
 
-1. 在 `arch` 的 `/home/honahec/Projects/unsounded-sea` 检查源 `BellMother_LOD0.glb`，确认单网格、151,658 顶点、无 Armature/Action；保留源文件不改。
-2. 运行 [BellMotherRig.py](../Tools/BellMotherRig.py)：按身体、冠部、下部六条触手建立 30 根骨骼，按空间区域生成权重，制作 `Idle / Telegraph / Attack_A / Recover / Hit / Death` 六组动作，并在起止/中间帧检查有限变形。
-3. 导出 `ArtSource/Bosses/BellMother_Rigged.blend`、LFS 下的 `Assets/UnsoundedSea/Art/Models/BellMother_Rigged.fbx/.glb` 与 manifest。重新导入 Blender 后，FBX/GLB 都能读到 30 根骨骼和 6 个 Action；`git lfs fsck` 通过。
-4. 在 Unity 通过 [BellMotherAnimationSetup.cs](../Tools/BellMotherAnimationSetup.cs) 设置 Generic ModelImporter、创建 `BellMother.controller`，把 Animator 放在导入模型根节点以匹配 FBX 曲线路径，复用原 `BellMother.mat`，生成 32 m 的 `BellMother.prefab`，并将 `bell-mother.asset` 指向它。`BattleActorView` 只接收规则结算结果，按 `Telegraph → Attack_A → Recover`、`Hit`、`Death` 播放；规则层不读取 Animator。无骨骼模型仍走旧的简化反馈。
-5. 验收顺序：Blender 动作截图 → Unity Prefab 骨骼/动作检查 → Play Mode 触发一次攻击并截图 → EditMode 规则回归。当前样例已完成前四项，正式发布前仍需目标设备性能和最终美术权重验收。
+1. 使用原始 Hyper3D 生成记录 `020d73c8-7721-581f-ae65-3f8fd8c93d1d`，通过 BANG 任务 `a69dfe2b-089e-4ca1-9987-0d36ec94312c` 将沉钟之母拆为 12 个网格，其中 6 个作为触手部件，保留 BANG 输出材质。
+2. 在 `arch` 运行 [BellMotherBangBuild.py](../Tools/BellMotherBangBuild.py)：建立身体、冠部和 6 个触手 pivot，保留部件层级，按 0.08 比例减面。实际三角面从 1,500,000 降至 119,992，输出 `BellMother_BANG_LOD0.glb` 和 manifest；源 GLB 不覆盖。
+3. 在 Unity 通过 [BellMotherBangSetup.cs](../Tools/BellMotherBangSetup.cs) 导入 GLB、归一化至 32 m，生成 `BellMother.prefab`，并把 `bell-mother.asset` 指向它。Prefab 不含 `SkinnedMeshRenderer`，由 [BellMotherRigidMotion.cs](../Assets/UnsoundedSea/Runtime/Battle/BellMotherRigidMotion.cs) 驱动身体、冠部和触手的局部刚性运动。
+4. `BattleActorView` 只接收规则结算结果：攻击直接进入短前摇、冲击和恢复；命中、死亡使用同一部件 presenter。没有骨骼的旧模型仍走兼容的简化反馈。
+5. 验收顺序：BANG 预览 → Blender 低模预览 → Unity 部件/三角面检查 → Play Mode 实际触发攻击并截图 → EditMode 规则回归。当前样例已通过 3 项 BellMother 动画测试和 6 项 SeaBoss 测试；最终平台纹理压缩、LOD1/2 和目标硬件性能仍需单独验收。
 
 ### 下载后的最低检查
 
@@ -170,7 +170,7 @@ git lfs fsck
 | --- | --- | --- | --- |
 | Prayer | 500,000 → 60,000 | Unity 材质、1.8 m、脚底、Prefab 引用、正面 Play 画面 | 袖内刀/铃分件、动画、全视角与目标设备验收 |
 | Echo | 800,000 → 90,000 | Unity 材质、2.1 m、脚底、Prefab 引用、战斗场景 | 更明显的空壳塌陷、独立铜铃、动画、全视角与目标设备验收 |
-| BellMother | 1,500,000 → 109,998 | Agent 制作、32 m、独立海面锚点、30 骨骼、6 动作、Unity 战斗反馈 | 主体贴图平台压缩、LOD1/2、最终权重与性能验收 |
+| BellMother | 1,500,000 → 119,992 | BANG 12 部件、6 触手 pivot、32 m、独立海面锚点、Unity 刚性战斗反馈 | 主体贴图平台压缩、LOD1/2、最终部件动画与性能验收 |
 | SurveyVessel | 800,000 → 80,000 | Agent 参考制作、保留 UV 减面、18 m 船体、开放甲板、战斗舞台 | 平台贴图压缩、LOD1/2、驾驶玩法 |
 | M02–M05 Boss 候选 | 具体规格见下方各自 manifest | Agent 生成、高低模归档、LOD0 Unity 导入、Prefab／四场战斗镜头、来源哈希一致 | 美术定稿、完整多视角、骨骼动画、纹理平台压缩与性能验收 |
 
