@@ -23,6 +23,7 @@ namespace UnsoundedSea.Runtime
         private float lastTick;
         private Action actionBookSave;
         private string selectedReward;
+        private VisualElement choiceDetail;
         private bool replacingReward;
         private VoyageSession Session => VoyageRuntime.Session;
 
@@ -83,7 +84,12 @@ namespace UnsoundedSea.Runtime
                 if(key==KeyCode.Escape)CancelReplacement();
                 return key!=KeyCode.Tab&&key!=KeyCode.Return&&key!=KeyCode.KeypadEnter&&key!=KeyCode.Space&&key!=KeyCode.LeftArrow&&key!=KeyCode.RightArrow&&key!=KeyCode.UpArrow&&key!=KeyCode.DownArrow;
             }
-            if (settingsOpen || root.panel?.focusController.focusedElement is TextField) return false;
+            if (root.panel?.focusController.focusedElement is TextField) return false;
+            if (settingsOpen)
+            {
+                if (key != KeyCode.Escape) return false;
+                settingsOpen = false; Refresh(); return true;
+            }
             if (key == KeyCode.Escape)
             {
                 if (supportOpen) supportOpen = false;
@@ -209,6 +215,7 @@ namespace UnsoundedSea.Runtime
             location.Add(Text(session.Current.Name, "location-name"));
             if (chartOpen) location.Add(Text($"{session.ElapsedHours} 小时  ·  {session.LegsSailed} 段", "fact"));
             workspace.Add(location);
+            // Hovering or focusing a purchasable/node option explains it in the empty left-hand space.
 
             VoyageChart chart = null;
             if (chartOpen)
@@ -268,6 +275,9 @@ namespace UnsoundedSea.Runtime
                 }
             workspace.Add(navigation);
             root.Add(workspace);
+            // Hovering a node option or service explains it right beside that button.
+            choiceDetail = Element("choice-detail"); choiceDetail.name = "choice-detail"; choiceDetail.style.display = DisplayStyle.None;
+            root.Add(choiceDetail);
             if (!string.IsNullOrEmpty(notice))
             {
                 var footer = Element("voyage-footer");
@@ -522,6 +532,7 @@ namespace UnsoundedSea.Runtime
                     var applicability = BossApplicability.ItemLabel(item);
                     if (!string.IsNullOrEmpty(applicability)) UiKeywords.Attach(button, applicability);
                 }
+                AttachChoiceDetail(button, choice);
                 panel.Add(button);
             }
         }
@@ -558,8 +569,52 @@ namespace UnsoundedSea.Runtime
                 {
                     var tag=UiRules.BossTag(SupportCatalog.Item(parts[1].Split('@')[0]));if(tag!="")button.Add(Text(tag,"boss-compatibility"));
                 }
+                AttachChoiceDetail(button,entry);
                 panel.Add(button);
             }
+        }
+
+        private void AttachChoiceDetail(Button button, VoyageNodeChoice choice)
+        {
+            void Show()
+            {
+                if (choiceDetail == null || chartOpen) return;
+                choiceDetail.Clear();
+                var (kind, name, effect) = DescribeChoice(choice);
+                if (!string.IsNullOrEmpty(kind)) choiceDetail.Add(Text(kind, "choice-detail-kind"));
+                choiceDetail.Add(Text(name, "choice-detail-name"));
+                if (!string.IsNullOrEmpty(effect)) choiceDetail.Add(Text(effect, "choice-detail-body"));
+                // The option line often embeds the full effect; keep only its cost/limit part here.
+                var cost = choice.Description ?? "";
+                var item = ChoiceItem(choice.Id);
+                if (item != null) cost = cost.Replace(item.Description, "");
+                cost = cost.Trim().TrimEnd('·').Trim();
+                if (cost.Length > 0 && cost != effect) choiceDetail.Add(Text(cost, "choice-detail-cost"));
+                if (!choice.Enabled) choiceDetail.Add(Text("当前不可选", "choice-detail-cost"));
+                var bounds = button.worldBound; var height = root.resolvedStyle.height;
+                choiceDetail.style.left = Mathf.Max(12, bounds.xMin - 14 - 340);
+                choiceDetail.style.top = Mathf.Clamp(bounds.yMin, 12, Mathf.Max(12, height - 220));
+                choiceDetail.style.display = DisplayStyle.Flex;
+            }
+            void Hide() { if (choiceDetail != null) choiceDetail.style.display = DisplayStyle.None; }
+            button.RegisterCallback<PointerEnterEvent>(_ => Show());
+            button.RegisterCallback<PointerLeaveEvent>(_ => Hide());
+        }
+
+        private static (string kind, string name, string effect) DescribeChoice(VoyageNodeChoice choice)
+        {
+            var item = ChoiceItem(choice.Id);
+            if (item != null)
+            {
+                var kind = item.Kind == ItemKind.Equipment ? "装备" : item.Kind == ItemKind.Consumable ? "物资" : item.Kind == ItemKind.Tool ? "调查工具" : "航行工具";
+                var tag = BossApplicability.ItemLabel(item);
+                return (kind, item.Name, item.Description + (string.IsNullOrEmpty(tag) ? "" : "\n" + tag));
+            }
+            var parts = choice.Id.Split('@')[0].Split(':');
+            var crewId = parts.Length > 1 && (parts[0] == "hire" || parts[0] == "rescue" || parts[0] == "treat" || parts[0] == "trust" || parts[0] == "risk") ? parts[1] : null;
+            var crew = crewId == null ? null : SupportCatalog.Crew.FirstOrDefault(x => x.Id == crewId);
+            if (crew != null) return ("船员", crew.Name, SupportCatalog.CrewDescription(crew.Kind));
+            return ("", choice.Title, "");
         }
 
         private void ClaimSelectedReward(string replace=null)

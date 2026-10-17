@@ -103,7 +103,7 @@ namespace UnsoundedSea.Runtime
             var foot = new VisualElement { pickingMode = PickingMode.Ignore };
             foot.AddToClassList("settings-foot");
             foot.Add(Option("settings-reset", "恢复默认", "settings-secondary", GameSettings.ResetDefaults));
-            var back = new Button(() => onClose?.Invoke()) { name = "settings-back", text = "返回" };
+            var back = KeyBadge.Attach(new Button(() => onClose?.Invoke()) { name = "settings-back", text = "返回" }, "Esc");
             back.AddToClassList("settings-primary");
             foot.Add(back);
             Add(foot);

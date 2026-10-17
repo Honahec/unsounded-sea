@@ -50,7 +50,9 @@ namespace UnsoundedSea.Runtime
         private bool HandleKey(KeyCode key)
         {
             if (key != KeyCode.Escape) return false;
-            if (choosingCrew) { choosingCrew = false; Build("menu-start"); }
+            if (settingsOpen) { settingsOpen = false; Build("menu-settings"); }
+            else if (collectionOpen) { collectionOpen = false; Build("menu-collection"); }
+            else if (choosingCrew) { choosingCrew = false; Build("menu-start"); }
             else if (debugSelectionOpen) { debugSelectionOpen = false; Build("menu-debug"); }
             else return false;
             return true;

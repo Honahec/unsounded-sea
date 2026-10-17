@@ -66,6 +66,10 @@ namespace UnsoundedSea.Runtime
                 var previous=before.Enemies.FirstOrDefault(x=>x.Id==enemy.Id);
                 if(previous!=null&&previous.Surge!=enemy.Surge)surgeChanges[enemy.Id]=(previous.Surge,enemy.Surge,Time.unscaledTime+1.6f);
             }
+            // The director withholds Changed until delayed enemy hits land; still clear the ended turn's
+            // discards now (vitals keep showing the pre-impact values until each hit is presented).
+            if (command.kind == CommandKind.EndTurn && impactView != null)
+                root.schedule.Execute(() => { if (impactView != null) Render(); });
             if (command.kind != CommandKind.PlayCard) return;
             playedCardFeedback = before.Hand.FirstOrDefault(card => card.InstanceId == command.cardInstanceId)?.Definition.Name;
         }
@@ -291,8 +295,13 @@ namespace UnsoundedSea.Runtime
             hand.Query<VisualElement>().ForEach(element => element.pickingMode = PickingMode.Ignore);
             hand.horizontalScrollerVisibility = ScrollerVisibility.Hidden; hand.verticalScrollerVisibility = ScrollerVisibility.Hidden; root.Add(hand);
             var fan = Box("fan-track"); hand.Add(fan);
-            var spacing = HandSpacing(handWidth, v.Hand.Count);
-            fan.style.width = HandWidth(spacing, v.Hand.Count);
+            // While enemy hits are still landing, the ended turn's discards are already gone: keep only cards
+            // that survive into the new hand (retained/encounter) and hold back fresh draws until the impacts finish.
+            var handCards = waitingForImpact
+                ? director.View.Hand.Where(c => impactView.Hand.Any(old => old.InstanceId == c.InstanceId)).ToList()
+                : v.Hand.ToList();
+            var spacing = HandSpacing(handWidth, handCards.Count);
+            fan.style.width = HandWidth(spacing, handCards.Count);
             if (handWidth > 0) fan.style.marginLeft = Mathf.Max(0, (handWidth - fan.style.width.value.value) * .5f);
             // Squeeze the fan instead of clipping cards when the panel is narrow (4:3, small windows).
             hand.RegisterCallback<GeometryChangedEvent>(_ =>
@@ -311,7 +320,7 @@ namespace UnsoundedSea.Runtime
             var cardPresentation = new HandCardPresentation(hand);
             var animateDraw = !director.Paused && !chartOpen && v.PendingChoice == null && !GameSettings.ReducedMotion;
             var cardIndex = 0;
-            foreach (var card in v.Hand)
+            foreach (var card in handCards)
             {
                 var c = card; var def = c.Definition;
                 var b = Button("card-" + c.InstanceId, "", () =>
@@ -340,7 +349,7 @@ namespace UnsoundedSea.Runtime
                     evt.StopPropagation();
                 });
                 b.tabIndex = cardIndex + 1; b.style.left = cardIndex * spacing;
-                b.AddToClassList("fan-" + Mathf.Clamp(cardIndex++ - (v.Hand.Count - 1) / 2, -3, 3));
+                b.AddToClassList("fan-" + Mathf.Clamp(cardIndex++ - (handCards.Count - 1) / 2, -3, 3));
                 cardPresentation.Add(b);
                 if (animateDraw && !previousHand.Contains(c.InstanceId))
                 {
@@ -352,7 +361,7 @@ namespace UnsoundedSea.Runtime
                 if (c.IsEncounter) face.Q<Label>("illustrated-cost").text = c.ActionCost.ToString();
                 face.Add(Text("D 详情", "card-detail-hint"));
                 b.Add(face);
-                if (v.Hand.Count > 6)
+                if (handCards.Count > 6)
                 {
                     var summary = Text(CardCatalog.FaceDescription(def), "compact-card-effect");
                     summary.tooltip = CardCatalog.FaceDescription(def);
@@ -362,7 +371,7 @@ namespace UnsoundedSea.Runtime
                 b.EnableInClassList("card-disabled", !c.Enabled || !c.IsEncounter && (def.Cost > v.Actions || def.SanityCost >= v.Sanity));
                 ActionButton(b, active); fan.Add(b);
             }
-            previousHand = v.Hand.Select(card => card.InstanceId).ToArray();
+            previousHand = handCards.Select(card => card.InstanceId).ToArray();
             var piles = Box("battle-piles"); piles.name = "battle-piles";
             PileCount(piles, "牌库", v.DrawCount); PileCount(piles, "弃牌", v.DiscardCount); PileCount(piles, "消耗", v.ExhaustCount);
             controls.Insert(0, piles);

@@ -204,3 +204,10 @@
 .reward-detail-kind { align-self: flex-start; padding: 1px 6px; font-size: 11px; color: #80b5a5; border-width: 1px; border-radius: 3px; border-color: #80b5a5; }
 .reward-detail-name { margin-top: 10px; font-size: 20px; color: #eee4c9; letter-spacing: 2px; }
 .reward-detail-body { margin-top: 10px; font-size: 15px; color: #c8d2c8; white-space: normal; }
+
+/* Option detail: fills the empty left side while a node option or service is hovered/focused. */
+.choice-detail { position: absolute; width: 340px; padding: 18px 20px; background-color: rgba(8,19,22,.92); border-width: 1px; border-left-width: 3px; border-color: rgba(158,135,85,.6); border-left-color: #d7bd82; }
+.choice-detail-kind { align-self: flex-start; margin-bottom: 8px; padding: 1px 6px; font-size: 11px; color: #80b5a5; border-width: 1px; border-radius: 3px; border-color: #80b5a5; }
+.choice-detail-name { font-size: 20px; color: #eee4c9; letter-spacing: 2px; }
+.choice-detail-body { margin-top: 10px; font-size: 15px; color: #e2dcc6; white-space: normal; }
+.choice-detail-cost { margin-top: 10px; font-size: 13px; color: #a9b6ad; white-space: normal; }

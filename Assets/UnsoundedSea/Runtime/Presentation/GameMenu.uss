@@ -205,3 +205,14 @@
 .sanity-threshold { position: absolute; top: -3px; bottom: -3px; width: 2px; translate: -1px 0; background-color: #d7bd82; }
 .sanity-state { padding: 1px 6px; flex-shrink: 0; font-size: 11px; color: #f2bc9d; white-space: nowrap; border-width: 1px; border-radius: 3px; border-color: rgba(242,188,157,.6); }
 .sanity-state.critical { color: #fff0e6; background-color: rgba(122,52,44,.85); border-color: #f2bc9d; }
+
+/* Card collection: a fitted grid (full rows, aligned columns) and one footer row for paging and leaving. */
+.collection-grid { flex-grow: 1; min-height: 0; align-self: center; flex-direction: row; flex-wrap: wrap; align-content: flex-start; justify-content: flex-start; }
+.collection-grid .collection-card { width: 150px; height: 225px; margin: 5px; padding: 0; border-width: 1px; border-color: rgba(158,135,85,.45); border-radius: 8px; background-color: #0f1d21; }
+.collection-footer { flex-shrink: 0; flex-direction: row; align-items: center; justify-content: center; margin-top: 14px; padding-top: 12px; border-top-width: 1px; border-top-color: rgba(158,135,85,.35); }
+.collection-footer Button { min-width: 120px; height: 42px; margin: 0 8px; padding: 0 16px; border-width: 1px; border-color: #9e8755; background-color: #19383c; color: #eee4c9; font-size: 16px; }
+.collection-footer Button:hover, .collection-footer Button:focus { border-color: #eee4c9; background-color: #254b48; }
+.collection-footer Button:disabled { opacity: .4; }
+.collection-page-label { min-width: 70px; color: #d7bd82; font-size: 16px; -unity-text-align: middle-center; }
+.collection-footer .collection-back { margin-left: 40px; }
+.collection-detail { justify-content: center; }

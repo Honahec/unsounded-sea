@@ -20,7 +20,8 @@ namespace UnsoundedSea.Runtime
             var rules = new VisualElement { name = "illustrated-rules" };
             rules.AddToClassList("illustrated-rules");
             rules.Add(Label(card.Name, "illustrated-title"));
-            var description = Label(card.Description, "illustrated-description");
+            // Faces use the short catalog text so it always fits; tooltips and inspection keep the full rules.
+            var description = Label(CardCatalog.FaceDescription(card), "illustrated-description");
             description.name = "illustrated-description";
             rules.Add(description);
             var applicability = BossApplicability.CardLabel(card);
@@ -35,7 +36,8 @@ namespace UnsoundedSea.Runtime
             var overlay = new VisualElement { name = "card-inspection" };
             overlay.AddToClassList("card-inspection");
             var face = new VisualElement(); face.AddToClassList("card-inspection-face"); Apply(face, card); overlay.Add(face);
-            var dismiss = new Button(close) { name = "card-inspection-close", text = "返回" };
+            face.Q<Label>("illustrated-description").text = card.Description;
+            var dismiss = KeyBadge.Attach(new Button(close) { name = "card-inspection-close", text = "返回" }, "Esc");
             dismiss.AddToClassList("card-inspection-close"); overlay.Add(dismiss);
             overlay.RegisterCallback<NavigationMoveEvent>(evt => { dismiss.Focus(); evt.StopPropagation(); });
             overlay.schedule.Execute(dismiss.Focus);
