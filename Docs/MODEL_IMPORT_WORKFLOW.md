@@ -162,8 +162,11 @@ git lfs fsck
 | Echo | 800,000 → 90,000 | Unity 材质、2.1 m、脚底、Prefab 引用、战斗场景 | 更明显的空壳塌陷、独立铜铃、动画、全视角与目标设备验收 |
 | BellMother | 1,500,000 → 109,998 | Agent 制作、32 m、独立海面锚点、浸没与运行画面 | 触手骨骼动画、主体贴图平台压缩、LOD1/2 |
 | SurveyVessel | 800,000 → 80,000 | Agent 参考制作、保留 UV 减面、18 m 船体、开放甲板、战斗舞台 | 平台贴图压缩、LOD1/2、驾驶玩法 |
+| M02–M05 Boss 候选 | 具体规格见下方各自 manifest | Agent 生成、高低模归档、LOD0 Unity 导入、Prefab／四场战斗镜头、来源哈希一致 | 美术定稿、完整多视角、骨骼动画、纹理平台压缩与性能验收 |
 
 Prayer 与 Echo 各 1 网格/材质、3 张 4K 纹理，无蒙皮/动画；尚无 LOD1/2 或 LODGroup。内嵌纹理为 ARGB32、13 级 mip，两角色完整纹理链理论约 512 MiB（非 Profiler 实测），尚未 GPU 压缩。后续需提取/重映射为可配置 TextureImporter 资产，按平台选择压缩与尺寸后复核；普通纹理平台覆写不能直接套用到这些内嵌子资产。
+
+M02–M05 的高模与减面版保留在 `ArtSource/Bosses/`；减面版另存 `Assets/UnsoundedSea/Art/Models/` 并接入 `BossM02`–`BossM05`，导入副本与归档 SHA-256 一致。来源、实测规格和 Prefab 路径：[M02](../ArtSource/Bosses/TideBonesChoirmaster-manifest.json)、[M03](../ArtSource/Bosses/InvertedSurveyor-manifest.json)、[M04](../ArtSource/Bosses/UnlitFlagBearer-manifest.json)、[M05](../ArtSource/Bosses/StarlessWatcher-manifest.json)。M03 已重生成，M04 使用新项目重试；M05 轮廓仍偏人形，尚未美术定稿。没有重新生成水面，四场复用现有水体与调查船。具体运行范围见 [验证记录](FRAMEWORK_VALIDATION.md#m02m05-boss-战)。
 
 `OceanBattle.unity` 已同时实例化两名角色与船体；替换约定见 [框架指南](FRAMEWORK.md)。船体来源、实测规格与哈希见 [船体 manifest](../ArtSource/Vessels/manifest.json)，独立发光图保留在母版目录，当前船舷照明由舞台灯具承担。角色原四份高低模的远端 LFS 回读已在 `ffe264e` 验证；船体高低模也已在 `56a27ff` 完成独立远端回读。海面 Boss 的来源、哈希与导入规格单独维护在 [Boss manifest](../ArtSource/Bosses/manifest.json)，使用独立材质降低金属感并接入 2K 压缩发光图；原始 GLB 与母版未修改。新战斗的检查范围见 [验证记录](FRAMEWORK_VALIDATION.md)。
 

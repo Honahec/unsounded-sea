@@ -1,0 +1,85 @@
+{
+  "boss": "M03/B03 倒悬司衡者",
+  "provider": "Hyper3D Agent",
+  "thread": "https://hyper3d.ai/workspace/agent?project=fa39006a-f7a7-4906-a7d8-2570bcfaa470&thread=8aa3d275-5e95-497a-bccd-07dce7bdd89e&lang=zh",
+  "high_generation": "760c2406-78da-50d4-bf94-c7f19bb5cb5c",
+  "decimation": "455235f9-92c7-550e-a2f8-e9c54d012c5a",
+  "runtime_budget_triangles": 90000,
+  "files": [
+    {
+      "path": "ArtSource/Bosses/InvertedSurveyor_High.glb",
+      "sha256": "c7b6b0a1e731fef3b768641505925456270625ce76c213abb3d0f0b97cecd6fa",
+      "bytes": 61936916,
+      "triangles": 500000,
+      "vertices": 359621,
+      "meshes": 1,
+      "materials": 1,
+      "textures": [
+        {
+          "name": "texture_normal",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 4096,
+          "height": 4096
+        }
+      ],
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "path": "ArtSource/Bosses/InvertedSurveyor_LOD0.glb",
+      "sha256": "76b61a668db49cbe01b428dbd57d031f72bda6b67a7c35f30f13794c8a522731",
+      "bytes": 59359720,
+      "triangles": 80000,
+      "vertices": 102860,
+      "meshes": 1,
+      "materials": 1,
+      "textures": [
+        {
+          "name": "texture_normal_lowpoly",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_diffuse_lowpoly",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_metallic_lowpoly-texture_roughness_lowpoly",
+          "width": 4096,
+          "height": 4096
+        }
+      ],
+      "skins": 0,
+      "animations": 0
+    }
+  ],
+  "verification": {
+    "method": "Parsed GLB accessors and embedded PNG dimensions; archived SHA256 matches browser downloads.",
+    "visual": "Regenerated organic concept, three-quarter render and 1280x720 Unity Play battle camera inspected; full multi-view review pending.",
+    "unity_imported": true,
+    "animation_ready": false,
+    "target_performance_tested": false
+  },
+  "unity": {
+    "model": "Assets/UnsoundedSea/Art/Models/InvertedSurveyor_LOD0.glb",
+    "prefab": "Assets/UnsoundedSea/Art/Prefabs/InvertedSurveyor.prefab",
+    "scene": "Assets/UnsoundedSea/Scenes/BossM03.unity",
+    "archived_lod0_sha256_matches": true,
+    "imported_triangles": 80000,
+    "stage_anchor_scale": 17,
+    "stage_anchor_position": [-25, -25, 255]
+  },
+  "notes": [
+    "Regenerated organic creature candidate; archived LOD0 is also imported into the playable encounter."
+  ]
+}

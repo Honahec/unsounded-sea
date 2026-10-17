@@ -49,8 +49,8 @@ namespace UnsoundedSea.Editor
             var notes = Card("notes", "观察笔记", "记录当前征兆，抽 1 张牌。", 0, "observe", 0, "draw", 1);
             var reload = Card("reload", "快速装填", "抽 2 张牌。", 1, "draw", 2);
             var light = Card("light", "临时照明", "揭示可见动作；若已知意图则抽 1 张。", 1, "investigate", 0);
-            var contradiction = Card("contradiction", "记录矛盾", "意图已确认：9 伤害；否则 5 伤害。", 1, "conditional-damage", 9);
-            var intuition = Card("intuition", "直觉防护", "获得 7 格挡和 3 理智防护。", 1, "block", 7, "ward", 3);
+            var contradiction = Card("contradiction", "记录矛盾", "意图已确认：11 伤害；\n否则造成 5 伤害。", 1, "conditional-damage", 11);
+            var intuition = Card("intuition", "直觉防护", "获得 7 格挡。\n获得 3 理智防护。", 1, "block", 7, "ward", 3);
             var interrupt = Card("tear", "撕毁符纸", "造成 4 伤害，打断可中断施术。", 1, "damage", 4, "interrupt", 0);
             var bandage = Card("bandage", "应急包扎", "恢复 4 生命；使用后消耗。", 1, "heal", 4, exhaust: true);
             var lantern = Asset<ToolDefinition>(Root + "/Content/Tools", "lantern", t => { t.id = "lantern"; t.displayName = "防风提灯"; t.question = InvestigationKind.VisibleAction; });

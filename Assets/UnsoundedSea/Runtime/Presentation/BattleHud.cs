@@ -387,6 +387,7 @@ namespace UnsoundedSea.Runtime
                 if (data.SanityCost > 0) face.Add(Text($"代价 · 主动支付 {data.SanityCost} 理智", "card-price"));
                 if (data.Exhaust) face.Add(Text("本场限用一次", "card-exhaust"));
                 if (playing && (shortAction || shortSanity)) face.Add(Text(shortAction ? "行动不足" : "理智不足", "card-blocked"));
+                IllustratedCard.Apply(face, data);
                 button.Add(face); fan.Add(button);
             }
             root.Add(hand);

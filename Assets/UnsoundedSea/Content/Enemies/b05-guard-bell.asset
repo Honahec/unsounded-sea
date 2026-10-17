@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 704da23baf0814ad2a86fad0cc4954f8, type: 3}
+  m_Name: b05-guard-bell
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
+  id: b05-guard-bell
+  displayName: "\u949F\u5B88\u536B"
+  health: 12
+  candidateDescription: "\u5947\u6570\u6D3B\u52A8\u56DE\u5408 6 \u7406\u667A"
+  intents:
+  - id: boss-script
+    displayName: "\u516C\u5F00\u884C\u52A8"
+    clue: "\u5947\u6570\u6D3B\u52A8\u56DE\u5408 6 \u7406\u667A"
+    channel: 1
+    amount: 6
+    isPublic: 1
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u7532\u677F"
+  presentationPrefab: {fileID: 8503010910801479966, guid: 3174b36a4959843a7b46702d709df05d, type: 3}

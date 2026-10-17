@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b48a067706354f09af18905325392b7, type: 3}
+  m_Name: M04
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.BattleScenario
+  encounter: {fileID: 11400000, guid: 7911b49196140464cb6ebf2526623c2c, type: 2}
+  stagePrefab: {fileID: 68808599278414416, guid: 49bd93a0cc4094d9dba885fe9a7740b9, type: 3}
+  actorOverrides: []
+  rules: {fileID: 11400000, guid: 4c0cba46320314237ae552e8a0bd5ceb, type: 2}
+  chapter: "M04 / \u65E0\u706F\u65D7\u8230"
+  location: "\u9E26\u53F7\u8C03\u67E5\u8239 \xB7 \u7981\u822A\u6D77\u57DF"
+  enemyHeading: "M04 / \u65E0\u706F\u6267\u65D7\u8005"
+  objectiveHint: "\u7EE7\u7535\u5668\u4E0E\u5F53\u524D\u95F8\u9501\u6761\u4EF6\u59CB\u7EC8\u516C\u5F00\uFF1B\u9519\u8BEF\u63A5\u7EBF\u53EF\u4EE5\u76F4\u63A5\u7EA0\u6B63\u3002"
+  enemyStatus: "\u7279\u6B8A\u906D\u9047"
+  introduction: "\u6821\u51C6\u7EE7\u7535\u5668\uFF0C\u4F9D\u6B21\u91CA\u653E\u4E09\u9053\u95F8\u9501\uFF0C\u518D\u51FB\u9000\u6267\u65D7\u8005\u3002"
+  objectiveHeading: "\u6821\u51C6\u7EE7\u7535\u5668\uFF0C\u4F9D\u6B21\u91CA\u653E\u4E09\u9053\u95F8\u9501\uFF0C\u518D\u51FB\u9000\u6267\u65D7\u8005\u3002"
+  taskLabel: 
+  victoryText: "\u5DE5\u5E8F\u5B8C\u6210\u3002\u9E26\u53F7\u8131\u79BB\u4E86\u8FD9\u7247\u6D77\u57DF\u3002"
+  defeatText: "\u7532\u677F\u6C89\u5165\u65E0\u706F\u7684\u6D77\u96FE\u3002"

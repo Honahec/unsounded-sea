@@ -26,7 +26,7 @@ namespace UnsoundedSea.Runtime
         {
             scenario.ValidatePresentation();
             session = scenario.CreateSession(seed);
-            SelectedEnemy = View.Enemies.FirstOrDefault(x => x.Health > 0)?.Id;
+            SelectedEnemy = View.Enemies.FirstOrDefault(x => x.Health > 0 && x.Targetable)?.Id;
             feedbackUntil = 0; wasBusy = false; Paused = false; Notice = scenario.introduction;
             if (Stage != null) { Stage.gameObject.SetActive(false); Destroy(Stage.gameObject); }
             Stage = Instantiate(scenario.stagePrefab);
@@ -39,7 +39,7 @@ namespace UnsoundedSea.Runtime
         }
         public void Select(string id)
         {
-            if (Paused || View == null || !View.Enemies.Any(x => x.Id == id && x.Health > 0)) return;
+            if (Paused || View == null || !View.Enemies.Any(x => x.Id == id && x.Health > 0 && x.Targetable)) return;
             SelectedEnemy = id; Stage.RefreshSelection(); Changed?.Invoke();
         }
         public void SetPaused(bool value) { Paused = value; Changed?.Invoke(); }
@@ -50,8 +50,8 @@ namespace UnsoundedSea.Runtime
             var result = session.Execute(command);
             if (!result.Success) { Notice = result.Error; Changed?.Invoke(); return result; }
             var after = View;
-            if (!after.Enemies.Any(x => x.Id == SelectedEnemy && x.Health > 0))
-                SelectedEnemy = after.Enemies.FirstOrDefault(x => x.Health > 0)?.Id;
+            if (!after.Enemies.Any(x => x.Id == SelectedEnemy && x.Health > 0 && x.Targetable))
+                SelectedEnemy = after.Enemies.FirstOrDefault(x => x.Health > 0 && x.Targetable)?.Id;
             Notice = after.Log.LastOrDefault(x => !x.Contains("阶段：")) ?? "";
             feedbackUntil = Time.unscaledTime + (GameSettings.ReducedMotion || !Stage.placeholderCombatMotion ? 0.12f : command.kind == CommandKind.EndTurn ? 1.05f : 0.4f);
             wasBusy = true;

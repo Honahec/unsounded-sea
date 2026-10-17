@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.CardDefinition
   id: contradiction
   displayName: "\u8BB0\u5F55\u77DB\u76FE"
-  description: "\u610F\u56FE\u5DF2\u786E\u8BA4\uFF1A9 \u4F24\u5BB3\uFF1B\u5426\u5219 5 \u4F24\u5BB3\u3002"
+  description: "\u610F\u56FE\u5DF2\u786E\u8BA4\uFF1A11 \u4F24\u5BB3\uFF1B\n\u5426\u5219\u9020\u6210 5 \u4F24\u5BB3\u3002"
   actionCost: 1
   sanityCost: 0
   exhaust: 0
   effects:
   - effectId: conditional-damage
-    amount: 9
+    amount: 11

@@ -28,7 +28,8 @@ namespace UnsoundedSea.Runtime
             if (encounter == null) throw new InvalidOperationException($"{name}: encounter is missing.");
             var definition = encounter.Build();
             return new BattleSession(definition, seed, rules == null ? null : rules.CreateEffects(),
-                rules == null ? null : rules.CreateObjective(definition));
+                rules == null ? null : rules.CreateObjective(definition),
+                rules is BossRuleModule boss ? boss.bossKind : BossEncounterKind.None);
         }
         public GameObject ActorPrefab(int index) => actorOverrides != null && index < actorOverrides.Length && actorOverrides[index] != null
             ? actorOverrides[index] : encounter.enemies[index].presentationPrefab;

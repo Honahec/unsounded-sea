@@ -16,6 +16,7 @@ namespace UnsoundedSea.Runtime
         private VisualElement root;
         private bool settingsOpen;
         private bool confirmingNewVoyage;
+        private bool bossSelectionOpen;
         private string error;
 
         private void OnEnable()
@@ -84,6 +85,21 @@ namespace UnsoundedSea.Runtime
                 entries.Add(Entry("menu-confirm-new", "开始新航程", StartConfirmed, canStart));
                 entries.Add(Entry("menu-cancel-new", "返回", () => { confirmingNewVoyage = false; error = null; Build("menu-start"); }));
             }
+            else if (bossSelectionOpen)
+            {
+                var encounters = new[]
+                {
+                    ("BossM02", "骸潮领唱者"), ("BossM03", "倒悬司衡者"),
+                    ("BossM04", "无灯执旗者"), ("BossM05", "无星守望者")
+                };
+                foreach (var encounter in encounters)
+                {
+                    var scene = encounter.Item1;
+                    entries.Add(Entry("menu-" + scene, encounter.Item2, () => SceneManager.LoadScene(scene),
+                        Application.CanStreamedLevelBeLoaded(scene)));
+                }
+                entries.Add(Entry("menu-boss-back", "返回", () => { bossSelectionOpen = false; Build("menu-boss-encounters"); }));
+            }
             else
             {
                 entries.Add(Entry("menu-start", "启航", StartGame, canStart));
@@ -92,6 +108,7 @@ namespace UnsoundedSea.Runtime
                 bool hasBoss = !string.IsNullOrWhiteSpace(seaBossScene);
                 if (hasBoss)
                     entries.Add(Entry("menu-sea-boss", "沉钟海域", () => SceneManager.LoadScene(seaBossScene), Application.CanStreamedLevelBeLoaded(seaBossScene)));
+                entries.Add(Entry("menu-boss-encounters", "禁航海域", () => { bossSelectionOpen = true; Build("menu-BossM02"); }));
                 var settings = Entry("menu-settings", "设置", () => { settingsOpen = true; error = null; Build(null); });
                 settings.EnableInClassList("open", settingsOpen);
                 entries.Add(settings);

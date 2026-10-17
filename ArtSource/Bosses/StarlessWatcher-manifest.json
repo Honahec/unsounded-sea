@@ -1,0 +1,82 @@
+{
+  "boss": "M05/B05 无星王座的守望者",
+  "provider": "Hyper3D Agent",
+  "thread": "https://hyper3d.ai/workspace/agent?project=bfa6dc7a-40b7-481f-85a3-34f88f6f56d7&thread=6a482007-6b34-4382-a951-fdfcba52bd0e&lang=zh",
+  "high_generation": "094af0ac-8e6b-599f-99d1-1c6176e0eaf6",
+  "decimation": "0ea1d46e-0d2e-54a8-b367-dba73a100f8b",
+  "runtime_budget_triangles": 90000,
+  "files": [
+    {
+      "path": "ArtSource/Bosses/StarlessWatcher_High.glb",
+      "sha256": "963522baaa7ba2d3d77a3447036f5b4d450e3011d9986108267ce207105aee0b",
+      "bytes": 85157136,
+      "triangles": 1200000,
+      "vertices": 952889,
+      "meshes": 1,
+      "materials": 1,
+      "textures": [
+        {
+          "name": "texture_normal",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 4096,
+          "height": 4096
+        }
+      ],
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "path": "ArtSource/Bosses/StarlessWatcher_LOD0.glb",
+      "sha256": "2ad9776404aa7d62c36763ba5904d38553b43c71dd8101b28b7601e1fd24612a",
+      "bytes": 60561008,
+      "triangles": 80000,
+      "vertices": 133085,
+      "meshes": 1,
+      "materials": 1,
+      "textures": [
+        {
+          "name": "texture_normal_lowpoly",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_diffuse_lowpoly",
+          "width": 4096,
+          "height": 4096
+        },
+        {
+          "name": "texture_metallic_lowpoly-texture_roughness_lowpoly",
+          "width": 4096,
+          "height": 4096
+        }
+      ],
+      "skins": 0,
+      "animations": 0
+    }
+  ],
+  "verification": {
+    "method": "Parsed GLB accessors and embedded PNG dimensions; archived SHA256 matches browser downloads.",
+    "visual": "Concept, front render and 1280x720 Unity Play battle camera inspected; hooded silhouette remains more humanoid than intended. Candidate not art-approved; full multi-view review pending.",
+    "unity_imported": true,
+    "animation_ready": false,
+    "target_performance_tested": false
+  },
+  "unity": {
+    "model": "Assets/UnsoundedSea/Art/Models/StarlessWatcher_LOD0.glb",
+    "prefab": "Assets/UnsoundedSea/Art/Prefabs/StarlessWatcher.prefab",
+    "scene": "Assets/UnsoundedSea/Scenes/BossM05.unity",
+    "archived_lod0_sha256_matches": true,
+    "imported_triangles": 80000,
+    "stage_anchor_scale": 8.5,
+    "stage_anchor_position": [-30, -60, 285]
+  }
+}

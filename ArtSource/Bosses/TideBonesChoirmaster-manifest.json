@@ -1,0 +1,64 @@
+{
+  "boss": "M02/B02 骸潮领唱者",
+  "provider": "Hyper3D Agent",
+  "thread": "https://hyper3d.ai/workspace/agent?project=fa39006a-f7a7-4906-a7d8-2570bcfaa470&thread=2304fe03-f472-474a-8e98-9fde270dacf8&lang=zh",
+  "high_generation": "5c7e56bb-bae6-5db3-939a-ff054831b6a7",
+  "decimation": "dd4a728c-210e-5664-bbb2-badfd50f836a",
+  "runtime_budget_triangles": 90000,
+  "files": [
+    {
+      "path": "ArtSource/Bosses/TideBonesChoirmaster_High.glb",
+      "artifact": "0238d097-1b6b-46b1-8435-c91aaadddd5f",
+      "sha256": "e71a14b5312a359de27e7ad727ed877bf742d3be17cd07722934e2f78e6d2898",
+      "bytes": 80558224,
+      "triangles": 800000,
+      "vertices": 723939,
+      "meshes": 1,
+      "materials": 1,
+      "textures": [
+        {"name": "texture_normal", "width": 4096, "height": 4096},
+        {"name": "texture_diffuse", "width": 4096, "height": 4096},
+        {"name": "texture_metallic-texture_roughness", "width": 4096, "height": 4096}
+      ],
+      "skins": 0,
+      "animations": 0
+    },
+    {
+      "path": "ArtSource/Bosses/TideBonesChoirmaster_LOD0.glb",
+      "artifact": "3f57d339-3052-47b6-b804-b6c3e7172101",
+      "sha256": "fcc187f89cb1aa74832f1420bab01088e6e85d33af5d32f2a77459333120a51d",
+      "bytes": 66138292,
+      "triangles": 84999,
+      "vertices": 145598,
+      "meshes": 1,
+      "materials": 1,
+      "textures": [
+        {"name": "texture_normal_lowpoly", "width": 4096, "height": 4096},
+        {"name": "texture_diffuse_lowpoly", "width": 4096, "height": 4096},
+        {"name": "texture_metallic_lowpoly-texture_roughness_lowpoly", "width": 4096, "height": 4096}
+      ],
+      "skins": 0,
+      "animations": 0
+    }
+  ],
+  "verification": {
+    "method": "Parsed downloaded GLB headers, JSON accessors and embedded PNG dimensions; SHA256 of complete files.",
+    "visual": "Concept reference, front render and 1280x720 Unity Play battle camera inspected; full side/back review pending.",
+    "unity_imported": true,
+    "animation_ready": false,
+    "target_performance_tested": false
+  },
+  "unity": {
+    "model": "Assets/UnsoundedSea/Art/Models/TideBonesChoirmaster_LOD0.glb",
+    "prefab": "Assets/UnsoundedSea/Art/Prefabs/TideBonesChoirmaster.prefab",
+    "scene": "Assets/UnsoundedSea/Scenes/BossM02.unity",
+    "archived_lod0_sha256_matches": true,
+    "imported_triangles": 84999,
+    "stage_anchor_scale": 20,
+    "stage_anchor_position": [-45, -55, 280]
+  },
+  "notes": [
+    "LOD0 is imported for a playable static-mesh encounter; this does not imply art approval or animation readiness.",
+    "Provider reported 85000 triangles; actual indexed triangle count is 84999."
+  ]
+}
