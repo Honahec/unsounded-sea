@@ -267,9 +267,14 @@ namespace UnsoundedSea.Runtime
                 panel.Add(Text(stop.Name, "destination-title"));
                 panel.Add(Text($"{KindName(stop.Kind)}  ·  {session.HeadingTo(stop)}  ·  {stop.TravelHours} 小时", "bearing"));
             }
-            if (session.Phase == VoyagePhase.Completed || session.Phase == VoyagePhase.Failed)
-                panel.Add(Text(PhaseName(session.Phase), "destination-title"));
-            if (session.Phase != VoyagePhase.Sailing) panel.Add(Text(stop.Clue, "destination-clue"));
+            if (session.Phase == VoyagePhase.Completed)
+                panel.Add(Text(session.IsDebug ? "独立航点完成" : "三幕远征胜利", "destination-title"));
+            else if (session.Phase == VoyagePhase.Failed)
+                panel.Add(Text("远征终止", "destination-title"));
+            if (session.Phase != VoyagePhase.Sailing)
+                panel.Add(Text(session.Phase == VoyagePhase.Completed
+                    ? session.IsDebug ? "本次独立试玩已结束。" : "归航绳已收回，调查记录带离深渊。"
+                    : stop.Clue, "destination-clue"));
             switch (session.Phase)
             {
                 case VoyagePhase.ChoosingRoute:
@@ -294,9 +299,10 @@ namespace UnsoundedSea.Runtime
                         foreach (var nodeChoice in nodeChoices)
                         {
                             var choice = nodeChoice;
-                            var button = Action("node-choice-" + choice.Id, choice.Title, "node-choice",
+                            var button = Action("node-choice-" + choice.Id, string.Empty, "node-choice",
                                 () => Change(() => Session.ChooseNode(choice.Id)), saved && choice.Enabled);
                             button.tooltip = choice.Description;
+                            button.Add(Text(choice.Title, "node-choice-title"));
                             button.Add(Text(choice.Description, "node-choice-description"));
                             panel.Add(button);
                         }
@@ -352,8 +358,9 @@ namespace UnsoundedSea.Runtime
 
         private void AddRegionChoice(VisualElement panel, string id, string title, string description, bool enabled)
         {
-            var button = Action("region-" + id, title, "region-choice",
+            var button = Action("region-" + id, string.Empty, "region-choice",
                 () => Change(() => Session.ChooseNextAct(id)), enabled);
+            button.Add(Text(title, "node-choice-title"));
             button.tooltip = description; button.Add(Text(description, "region-description")); panel.Add(button);
         }
 
@@ -494,7 +501,13 @@ namespace UnsoundedSea.Runtime
             PrepareModal();
             var scrim = Element("voyage-overlay"); scrim.pickingMode = PickingMode.Position;
             var sheet = Element("voyage-journal");
-            sheet.Add(Text("航海日志", "journal-title")); sheet.Add(Text("航迹与观测", "muted"));
+            sheet.Add(Text("航海日志", "journal-title"));
+            if (Session.Knowledge.Count > 0)
+            {
+                sheet.Add(Text("已确认情报", "muted"));
+                foreach (var fact in Session.Knowledge) sheet.Add(Text(fact, "journal-entry"));
+            }
+            sheet.Add(Text("航迹与观测", "muted"));
             var entries = new ScrollView(); foreach (var entry in Session.Log) entries.Add(Text(entry, "journal-entry")); sheet.Add(entries);
             sheet.Add(Action("journal-close", "收起日志 / Esc", "primary", () => { journalOpen = false; Refresh(); }));
             scrim.Add(sheet); root.Add(scrim); root.schedule.Execute(() => root.Q<Button>("journal-close")?.Focus());

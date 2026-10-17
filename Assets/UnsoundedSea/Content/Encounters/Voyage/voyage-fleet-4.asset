@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d43cadea211484720a1195097e37f092, type: 3}
+  m_Name: voyage-fleet-4
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EncounterDefinition
+  id: voyage-fleet-4
+  displayName: "\u65E0\u65D7\u8230\u7FA4 / \u9508\u94FE\u62BC\u8FD0\u8005"
+  objective: 0
+  objectiveTarget: 1
+  playerHealth: 60
+  playerSanity: 30
+  actionsPerTurn: 3
+  drawPerTurn: 5
+  deck:
+  - {fileID: 11400000, guid: 0ff56e49aeeb54e38886a61f7e523cca, type: 2}
+  - {fileID: 11400000, guid: 394cc72ea59f3449e99966e72ee7c51c, type: 2}
+  - {fileID: 11400000, guid: 207d264f1222a4c0a94cb833dfdb4f5b, type: 2}
+  - {fileID: 11400000, guid: e1e6d32d3dd6143ada0b7ce278858d5f, type: 2}
+  - {fileID: 11400000, guid: 372e003d9698b49d6acda922f63933cc, type: 2}
+  - {fileID: 11400000, guid: e31aecfe019c64166be06e96dba054e0, type: 2}
+  - {fileID: 11400000, guid: 7e8e94ebc8a2c4208a1f8a1fc050b059, type: 2}
+  - {fileID: 11400000, guid: 3df029c460b504761b4cef1abb4c23f4, type: 2}
+  - {fileID: 11400000, guid: 3bb31c8dc847d4406881c2ae1aee1870, type: 2}
+  - {fileID: 11400000, guid: c01b85071c121429c9b4db05e1735fd2, type: 2}
+  - {fileID: 11400000, guid: daec0b02959294813af001b20b9e885d, type: 2}
+  - {fileID: 11400000, guid: 4baa874021b5a4d51a09249c3be6597b, type: 2}
+  enemies:
+  - {fileID: 11400000, guid: ccbfa935a039b4bb58044faf4487632d, type: 2}
+  - {fileID: 11400000, guid: 125b767beecdc4102bbb0cdda6ec3080, type: 2}
+  equippedTools:
+  - {fileID: 11400000, guid: d2943be9a66734ec2ae7bdaa9992577a, type: 2}
+  - {fileID: 11400000, guid: 1d7a30e50a223431b9ba28e4fc023447, type: 2}

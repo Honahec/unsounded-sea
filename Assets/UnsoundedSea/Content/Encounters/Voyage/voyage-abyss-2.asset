@@ -35,7 +35,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 4baa874021b5a4d51a09249c3be6597b, type: 2}
   enemies:
   - {fileID: 11400000, guid: 301107d06aae64bf1be596e901ab1a2b, type: 2}
-  - {fileID: 11400000, guid: b8d9ca1dc7c6d495ca6e9ed3422338e2, type: 2}
   equippedTools:
   - {fileID: 11400000, guid: d2943be9a66734ec2ae7bdaa9992577a, type: 2}
   - {fileID: 11400000, guid: 1d7a30e50a223431b9ba28e4fc023447, type: 2}

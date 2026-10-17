@@ -13,21 +13,34 @@ namespace UnsoundedSea.Runtime
         {
             public string id;
             public BattleScenario scenario;
+            public string group;
+            public bool isBoss;
         }
 
         private const string ResourcePath = "VoyageEncounterCatalog";
         private static readonly string[] RequiredIds =
         {
-            "voyage-fog-0", "voyage-fog-1", "voyage-fog-2", "voyage-fog-3",
-            "voyage-bones-0", "voyage-bones-1", "voyage-bones-2", "voyage-bones-3",
-            "voyage-inverted-0", "voyage-inverted-1", "voyage-inverted-2", "voyage-inverted-3",
-            "voyage-fleet-0", "voyage-fleet-1", "voyage-fleet-2", "voyage-fleet-3",
-            "voyage-abyss-0", "voyage-abyss-1", "voyage-abyss-2", "voyage-abyss-3",
-            "fog-visitors", "m02", "m03", "m04", "m05"
+            "voyage-fog-0", "voyage-fog-1", "voyage-fog-2", "voyage-fog-3", "voyage-fog-4",
+            "voyage-bones-0", "voyage-bones-1", "voyage-bones-2", "voyage-bones-3", "voyage-bones-4",
+            "voyage-inverted-0", "voyage-inverted-1", "voyage-inverted-2", "voyage-inverted-3", "voyage-inverted-4",
+            "voyage-fleet-0", "voyage-fleet-1", "voyage-fleet-2", "voyage-fleet-3", "voyage-fleet-4",
+            "voyage-abyss-0", "voyage-abyss-1", "voyage-abyss-2", "voyage-abyss-3", "voyage-abyss-4",
+            "fog-visitors", "m02", "m03", "m04", "m05", "drowned-bell"
         };
         [SerializeField] private Entry[] entries = Array.Empty<Entry>();
         [SerializeField] private ToolDefinition[] tools = Array.Empty<ToolDefinition>();
         private Dictionary<string, BattleScenario> lookup;
+        public static IReadOnlyList<Entry> AllEntries
+        {
+            get
+            {
+                var catalog = Resources.Load<VoyageEncounterCatalog>(ResourcePath);
+                if (catalog == null)
+                    throw new InvalidOperationException($"Missing Resources/{ResourcePath}.asset. Run Unsounded Sea/Content/Setup Voyage Campaign.");
+                return Array.AsReadOnly((Entry[])catalog.entries.Clone());
+            }
+        }
+
         private Dictionary<string, ToolDefinition> toolLookup;
 
         public static BattleScenario Resolve(string encounterId)

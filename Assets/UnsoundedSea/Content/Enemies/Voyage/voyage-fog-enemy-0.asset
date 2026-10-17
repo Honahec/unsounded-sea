@@ -15,15 +15,15 @@ MonoBehaviour:
   id: voyage-fog-enemy-0
   displayName: "\u96FE\u4E2D\u7F06\u5DE5"
   health: 18
-  candidateDescription: "\u8D8A\u8237\u5F3A\u88AD\uFF1A7 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  candidateDescription: "\u6536\u7EF3\u7529\u94A9\uFF1A7 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
   intents:
-  - id: assault
-    displayName: "\u8D8A\u8237\u5F3A\u88AD"
-    clue: "\u76EE\u6807\u538B\u4F4E\u91CD\u5FC3\uFF0C\u6B66\u5668\u671D\u5411\u7532\u677F\u3002"
+  - id: hook
+    displayName: "\u6536\u7EF3\u7529\u94A9"
+    clue: "\u6E7F\u7EF3\u9AA4\u7136\u7EF7\u76F4\uFF0C\u77ED\u94A9\u6B63\u671D\u80F8\u524D\u3002"
     channel: 0
     amount: 7
     isPublic: 1
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
-  presentationPrefab: {fileID: 8503010910801479966, guid: 3174b36a4959843a7b46702d709df05d, type: 3}
+  presentationPrefab: {fileID: 3102398871557769871, guid: 6a33484a96c4149cd820ad680420dc2f, type: 3}

@@ -101,13 +101,15 @@ unity command run_script --project-path "$UNITY_PROJECT_PATH" --timeout 180 --fo
 
 **新增或替换模型：**先更新导入配置/脚本的名称、路径、SHA、预算和验收预期；当前 `ImportSources` 会拒绝覆盖不同哈希文件。应通过单独的 Unity CLI/AssetDatabase 更新步骤替换目标内容、保留 `.meta` GUID、重导入并检查子资产引用及 Prefab。不要删掉已编辑的场景来强迫初始化脚本重建；已有场景的重新绑定需要显式处理。同步更新 manifest 和验收结果。
 
-**普通敌人绑定保留集：**25 个普通人形敌人已按同角度诊断从两批绑定中择优，统一到 `Assets/UnsoundedSea/Art/{Models,Prefabs}/CuratedRigs/`：旧版 10 个、新版 10 个、合并版 5 个，每个角色只保留一个模型；来源、选择理由、SHA 和延后问题集中在 [保留集 manifest](../ArtSource/Characters/CuratedRigs/manifest.json)。`ArtSource/Characters/CuratedRigs/` 仅保存元数据与验收依据，不重复存放模型。旧 `RigTrials`、`Hyper3DRigs` 的原始返回、Blender 文件、运行时候选、独立测试动画和旧审阅场景已从当前树清理；静态源、Prayer／Echo、关卡与战斗引用不变。
+**普通敌人运行时静态接入：**25 种归档源已通过 `Assets/UnsoundedSea/Editor/Tools/OrdinaryEnemyStaticSetup.cs` 导入 `Art/Characters/OrdinaryStatic`，表现 Prefab 位于 `Art/Prefabs/OrdinaryStatic`，供 25 个普通遭遇使用。`VoyageCampaignSetup.Setup` 同时生成这些资产和遭遇目录；仅保存本次资产，不全局保存无关编辑。导入文件与归档源逐字节匹配，完整运行时路径／SHA／规格维护在 [运行时 manifest](../ArtSource/runtime-manifest.json)。普通战仍为静态网格反馈，不宣称具备骨骼动画。
+
+**普通敌人绑定保留集：**25 个普通人形敌人已按同角度诊断从两批绑定中择优，统一到 `Assets/UnsoundedSea/Art/{Models,Prefabs}/CuratedRigs/`：旧版 10 个、新版 10 个、合并版 5 个，每个角色只保留一个模型；来源、选择理由、SHA 和延后问题集中在 [保留集 manifest](../ArtSource/Characters/CuratedRigs/manifest.json)。`ArtSource/Characters/CuratedRigs/` 仅保存元数据与验收依据，不重复存放模型。旧 `RigTrials`、`Hyper3DRigs` 的原始返回、Blender 文件、运行时候选、独立测试动画和旧审阅场景已从当前树清理；绑定候选保持独立，普通关卡引用上方静态模型；Prayer／Echo 不变。
 
 5 个合并版保留新版上肢，迁移旧版下肢关节／权重，并在骨盆平滑过渡；修正新版权重中把靴部固定到 Root 的情况，屈膝牵拉减少。依据见 [质量审阅](../ArtSource/Characters/CuratedRigs/quality-review.json)、[合并版诊断图](ArtReferences/curated-rig-hybrids.jpg) 和 [Unity 检查](../ArtSource/Characters/CuratedRigs/unity-validation.json)。复现工具为 `Tools/CompareHumanoidRigs.py`、`Tools/CombineHumanoidRigs.py`；恢复当前独立 Prefab 可通过 Unity CLI 执行 `Tools/CurateHumanoidRigs.cs` 的 `CurateHumanoidRigs.Consolidate`，参数为 `ArtSource/Characters/CuratedRigs/manifest.json`。历史比较输入只留 SHA 与历史修订；远端永久清理后，不保证淘汰版本可恢复。
 
 本批不制作战斗动画。10 个旧版 GLB 为复用已有 LFS 对象而保留原内嵌测试片段，独立 Prefab 不带动画驱动；它们不代表战斗动作可用。Unity 检查涵盖真实导入网格的胸部、肘部、膝部可恢复变形、材质、尺度和脚底；大幅动作、持物刚性、衣摆、藏手约束与设备性能继续延后。glTFast 当前导入每顶点四权重，GLB 保留完整权重。
 
-**LFS 额度：**删除当前文件、历史改写和本地 `git lfs prune` 都不会直接清除 GitHub 远端存储。实际清除需 [GitHub Support 或删除重建仓库](https://docs.github.com/en/repositories/working-with-files/managing-large-files/removing-files-from-git-large-file-storage)。本次的保留对象与历史清理候选见 [LFS 清理清单](../ArtSource/Characters/CuratedRigs/lfs-cleanup.json)；未改写共享分支历史、未删除远端仓库，新增合并模型暂不推送，避免先增加用量。
+**LFS 额度：**删除当前文件、历史改写和本地 `git lfs prune` 都不会直接清除 GitHub 远端存储。实际清除需 [GitHub Support 或删除重建仓库](https://docs.github.com/en/repositories/working-with-files/managing-large-files/removing-files-from-git-large-file-storage)。本次的保留对象与历史清理候选见 [LFS 清理清单](../ArtSource/Characters/CuratedRigs/lfs-cleanup.json)；未改写共享分支历史、未删除远端仓库，后续推送前检查额度，并单独验证远端回读。
 
 ## 5. 引擎验收
 

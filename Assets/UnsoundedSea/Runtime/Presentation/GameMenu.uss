@@ -43,6 +43,17 @@
 .menu-settings-scrim { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(3,9,11,0.78); }
 .menu-settings-scrim .settings { left: 50%; top: 50%; translate: -50% -50%; }
 .menu-error { padding: 14px; color: #f2bc9d; background-color: #342527; font-size: 16px; }
+.debug-selector { position: absolute; left: 16%; right: 16%; top: 7%; bottom: 7%; padding: 26px 32px; background-color: rgba(5,15,18,.97); border-width: 1px; border-color: #9e8755; border-top-left-radius: 28px; border-bottom-right-radius: 28px; color: #eee4c9; }
+.debug-head { flex-direction: row; align-items: baseline; margin-bottom: 16px; padding-bottom: 12px; border-bottom-width: 1px; border-bottom-color: rgba(158,135,85,.45); }
+.debug-title { font-size: 30px; letter-spacing: 6px; color: #eee4c9; margin-right: 24px; }
+.debug-note { font-size: 15px; color: #d7bd82; }
+.debug-levels { flex-grow: 1; min-height: 0; }
+.debug-group { margin: 18px 6px 7px; color: #d7bd82; font-size: 18px; letter-spacing: 3px; }
+.game-menu .debug-level { min-height: 48px; margin: 2px 6px; padding: 8px 14px; background-color: rgba(25,51,47,.72); border-left-width: 2px; border-left-color: #53645d; color: #eee4c9; font-size: 17px; -unity-text-align: middle-left; }
+.game-menu .debug-level:hover { background-color: #263e36; border-left-color: #d7bd82; }
+.game-menu .debug-level:focus { background-color: #355248; border-width: 2px; border-color: #fff0c6; }
+.game-menu .debug-close { align-self: flex-end; min-width: 180px; min-height: 48px; margin-top: 14px; padding: 8px 18px; background-color: #263e36; border-width: 1px; border-color: #9e8755; color: #eee4c9; font-size: 16px; }
+.game-menu .debug-close:focus { border-width: 2px; border-color: #fff0c6; }
 .settings { position: absolute; left: 50%; top: 25%; width: 560px; translate: -15% 0; padding: 32px 38px; background-color: rgba(8,19,22,0.97); border-width: 1px; border-color: #9e8755; border-top-width: 3px; border-top-left-radius: 28px; border-bottom-right-radius: 28px; color: #eee4c9; }
 .pause-scrim .settings { left: 50%; top: 25%; translate: -50% 0; }
 .settings .settings-head { padding-bottom: 20px; margin-bottom: 8px; border-bottom-width: 1px; border-bottom-color: rgba(158,135,85,0.45); }

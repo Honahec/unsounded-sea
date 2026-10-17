@@ -77,7 +77,7 @@ namespace UnsoundedSea.Core
 
     public static class VoyageMapGenerator
     {
-        public const int Version = 4;
+        public const int Version = 5;
         public const int Layers = 11;
         private static readonly RunNodeKind[] Schedule = { RunNodeKind.Supply, RunNodeKind.Battle, RunNodeKind.Event, RunNodeKind.Battle,
             RunNodeKind.Reward, RunNodeKind.Supply, RunNodeKind.Battle, RunNodeKind.Archive, RunNodeKind.Battle, RunNodeKind.Supply, RunNodeKind.Boss };
@@ -223,8 +223,9 @@ namespace UnsoundedSea.Core
         }
         private static int EncounterVariant(uint seed, int act, string region, int layer, int index)
         {
-            var offset = VoyageSeeds.Derive(seed, "encounter", act + ":" + region + ":" + layer) % 4u;
-            return (int)((offset + (uint)index) % 4u);
+            var offset = VoyageSeeds.Derive(seed, "encounter", act + ":" + region) % 5u;
+            var battleOrdinal = layer == 1 ? 0u : layer == 3 ? 1u : layer == 6 ? 2u : 3u;
+            return (int)((offset + battleOrdinal) % 5u);
         }
         private static float SlotX(int count, int index) => count == 1 ? 50f : count == 2 ? 38f + 24f * index : 34f + 16f * index;
         private static int ParseIndex(string id) => int.Parse(id.Substring(id.LastIndexOf('n') + 1));

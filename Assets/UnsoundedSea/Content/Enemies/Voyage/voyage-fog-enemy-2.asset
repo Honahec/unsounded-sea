@@ -14,25 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-fog-enemy-2
   displayName: "\u767D\u706F\u53F8\u53F7"
-  health: 12
-  candidateDescription: "\u540C\u4E00\u5F81\u5146\uFF1A5 \u751F\u547D\u4F24\u5BB3\uFF0C\u6216\u81F3\u591A 2 \u7406\u667A\u51B2\u51FB\uFF08\u53EF\u6253\u65AD\uFF09"
+  health: 15
+  candidateDescription: "\u767D\u706F\u5B9A\u5411\uFF1A4 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u77ED\u53F7\u60CA\u9E23\uFF1A3 \u7406\u667A\u51B2\u51FB"
   intents:
-  - id: feint
-    displayName: "\u8D34\u8237\u7A81\u523A"
-    clue: "\u8D34\u4F4F\u8237\u5899\uFF1B\u624B\u81C2\u85CF\u5728\u6E7F\u8863\u4E0B\uFF1B\u4F20\u6765\u4E00\u6B21\u77ED\u4FC3\u6572\u51FB\u3002"
+  - id: lamp
+    displayName: "\u767D\u706F\u5B9A\u5411"
+    clue: "\u4E73\u767D\u706F\u7F69\u8F6C\u5411\u4F60\uFF0C\u77ED\u53F7\u5C1A\u672A\u4E3E\u8D77\u3002"
     channel: 0
-    amount: 5
-    isPublic: 0
+    amount: 4
+    isPublic: 1
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
-  - id: whisper
-    displayName: "\u8237\u5916\u8033\u8BED"
-    clue: "\u8D34\u4F4F\u8237\u5899\uFF1B\u624B\u81C2\u85CF\u5728\u6E7F\u8863\u4E0B\uFF1B\u4F20\u6765\u4E00\u6B21\u77ED\u4FC3\u6572\u51FB\u3002"
+  - id: horn
+    displayName: "\u77ED\u53F7\u60CA\u9E23"
+    clue: "\u77ED\u53F7\u62B5\u4F4F\u5507\u8FB9\uFF0C\u706F\u7F69\u671D\u5411\u8237\u5916\u3002"
     channel: 1
-    amount: 2
+    amount: 3
     isPublic: 0
-    visibleAction: 1
+    visibleAction: 0
     interruptible: 1
-    soundSource: "\u8237\u5916\u6D77\u9762"
-  presentationPrefab: {fileID: 8503010910801479966, guid: 3174b36a4959843a7b46702d709df05d, type: 3}
+    soundSource: "\u94DC\u53F7"
+  presentationPrefab: {fileID: 1084224620073750986, guid: 033ea3a81ea2c4fdd9818da29724bee0, type: 3}

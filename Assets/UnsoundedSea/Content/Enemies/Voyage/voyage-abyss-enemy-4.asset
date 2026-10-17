@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 704da23baf0814ad2a86fad0cc4954f8, type: 3}
+  m_Name: voyage-abyss-enemy-4
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
+  id: voyage-abyss-enemy-4
+  displayName: "\u8237\u5916\u7D22\u540D\u8005"
+  health: 25
+  candidateDescription: "\u8237\u5916\u7D22\u540D\uFF1A4 \u7406\u667A\u51B2\u51FB / \u957F\u81C2\u652B\u53D6\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  intents:
+  - id: ask
+    displayName: "\u8237\u5916\u7D22\u540D"
+    clue: "\u4F4E\u5782\u8863\u9886\u91CC\u4F20\u6765\u95EE\u53E5\uFF0C\u957F\u81C2\u4ECD\u642D\u5728\u8EAB\u524D\u3002"
+    channel: 1
+    amount: 4
+    isPublic: 0
+    visibleAction: 0
+    interruptible: 1
+    soundSource: "\u8863\u9886\u5185"
+  - id: reach
+    displayName: "\u957F\u81C2\u652B\u53D6"
+    clue: "\u53CC\u81C2\u79BB\u5F00\u8EAB\u4FA7\uFF0C\u957F\u6307\u8D34\u8FD1\u7532\u677F\u3002"
+    channel: 0
+    amount: 10
+    isPublic: 1
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
+  presentationPrefab: {fileID: 2593350922655424501, guid: 8947f87c87b7342c282211b9741c1fcf, type: 3}

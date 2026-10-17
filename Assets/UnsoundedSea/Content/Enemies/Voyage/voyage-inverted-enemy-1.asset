@@ -14,25 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-inverted-enemy-1
   displayName: "\u53CD\u5199\u9886\u822A\u5458"
-  health: 22
-  candidateDescription: "\u6574\u5907\uFF1A\u65E0\u4F24\u5BB3 / \u91CD\u51FB\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u5747\u516C\u5F00\uFF09"
+  health: 19
+  candidateDescription: "\u9006\u56FE\u8BEF\u5BFC\uFF1A3 \u7406\u667A\u51B2\u51FB / \u5377\u56FE\u62BD\u51FB\uFF1A6 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
   intents:
-  - id: prepare
-    displayName: "\u6536\u7D27\u7F06\u7D22"
-    clue: "\u76EE\u6807\u505C\u5728\u539F\u5730\uFF0C\u91CD\u65B0\u6536\u7D27\u624B\u4E2D\u7684\u7F06\u7D22\u3002"
+  - id: chart
+    displayName: "\u9006\u56FE\u8BEF\u5BFC"
+    clue: "\u7A7A\u767D\u6D77\u56FE\u88AB\u5012\u4E3E\uFF0C\u6307\u5317\u5668\u6301\u7EED\u522E\u64E6\u7EB8\u9762\u3002"
+    channel: 1
+    amount: 3
+    isPublic: 0
+    visibleAction: 0
+    interruptible: 1
+    soundSource: "\u6307\u5317\u5668"
+  - id: edge
+    displayName: "\u5377\u56FE\u62BD\u51FB"
+    clue: "\u5377\u8FB9\u6D77\u56FE\u5408\u62E2\u6210\u68CD\u72B6\u3002"
     channel: 0
-    amount: 0
+    amount: 6
     isPublic: 1
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
-  - id: heavy
-    displayName: "\u6C89\u91CD\u6325\u51FB"
-    clue: "\u6B66\u5668\u5DF2\u7ECF\u9AD8\u4E3E\uFF0C\u843D\u70B9\u6B63\u5BF9\u7532\u677F\u3002"
-    channel: 0
-    amount: 10
-    isPublic: 1
-    visibleAction: 1
-    interruptible: 0
-    soundSource: "\u76EE\u6807\u672C\u4F53"
-  presentationPrefab: {fileID: 6536484850760832164, guid: d6e078df63125453e87419a8e7f51e6d, type: 3}
+  presentationPrefab: {fileID: 1741493974097160068, guid: d1d6168fb18634afb94a603e2a2544e5, type: 3}

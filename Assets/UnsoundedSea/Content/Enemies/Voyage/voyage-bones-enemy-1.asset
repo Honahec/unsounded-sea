@@ -14,25 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-bones-enemy-1
   displayName: "\u9AA8\u7B1B\u4F8D\u4ECE"
-  health: 21
-  candidateDescription: "\u6574\u5907\uFF1A\u65E0\u4F24\u5BB3 / \u91CD\u51FB\uFF1A9 \u751F\u547D\u4F24\u5BB3\uFF08\u5747\u516C\u5F00\uFF09"
+  health: 18
+  candidateDescription: "\u9AA8\u7B1B\u4F4E\u9E23\uFF1A3 \u7406\u667A\u51B2\u51FB / \u7B1B\u7AEF\u523A\u51FB\uFF1A6 \u751F\u547D\u4F24\u5BB3"
   intents:
-  - id: prepare
-    displayName: "\u6536\u7D27\u7F06\u7D22"
-    clue: "\u76EE\u6807\u505C\u5728\u539F\u5730\uFF0C\u91CD\u65B0\u6536\u7D27\u624B\u4E2D\u7684\u7F06\u7D22\u3002"
+  - id: flute
+    displayName: "\u9AA8\u7B1B\u4F4E\u9E23"
+    clue: "\u9888\u4FA7\u9AA8\u7BA1\u968F\u5438\u6C14\u4E00\u8D77\u6536\u7D27\u3002"
+    channel: 1
+    amount: 3
+    isPublic: 0
+    visibleAction: 1
+    interruptible: 1
+    soundSource: "\u9AA8\u7B1B"
+  - id: needle
+    displayName: "\u7B1B\u7AEF\u523A\u51FB"
+    clue: "\u9AA8\u7B1B\u6A2A\u63E1\uFF0C\u5C16\u7AEF\u671D\u5411\u7532\u677F\u3002"
     channel: 0
-    amount: 0
-    isPublic: 1
+    amount: 6
+    isPublic: 0
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
-  - id: heavy
-    displayName: "\u6C89\u91CD\u6325\u51FB"
-    clue: "\u6B66\u5668\u5DF2\u7ECF\u9AD8\u4E3E\uFF0C\u843D\u70B9\u6B63\u5BF9\u7532\u677F\u3002"
-    channel: 0
-    amount: 9
-    isPublic: 1
-    visibleAction: 1
-    interruptible: 0
-    soundSource: "\u76EE\u6807\u672C\u4F53"
-  presentationPrefab: {fileID: 6536484850760832164, guid: d6e078df63125453e87419a8e7f51e6d, type: 3}
+  presentationPrefab: {fileID: 1970222537490104710, guid: 5f73d372a2fe44af8998211c6ac67db9, type: 3}

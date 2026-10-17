@@ -16,15 +16,45 @@ namespace UnsoundedSea.Editor
         private const string ScenarioFolder = Root + "/Content/Scenarios/Voyage";
         private const string CatalogPath = Root + "/Resources/VoyageEncounterCatalog.asset";
         private static readonly string[] Regions = { "fog", "bones", "inverted", "fleet", "abyss" };
-        private static readonly string[,] EnemyNames =
-        {
-            { "雾中缆工", "失向水手", "白灯司号", "湿衣引航员" },
-            { "潮骨拾荒者", "骨笛侍从", "盐髓司祭", "空舱敲击者" },
-            { "倒悬测量员", "反写领航员", "镜潮记录员", "铅垂守望者" },
-            { "无旗登船兵", "哑火炮手", "黑帆传令", "弃舰医官" },
-            { "无星窥视者", "深渊听差", "熄灯司钟", "末潮见证者" }
-        };
         private static readonly string[] RegionTitles = { "雾海", "潮骨海", "倒悬海", "无旗舰群", "无星深渊" };
+        private static readonly EnemyPlan[,] Plans =
+        {
+            {
+                Plan("FogRigger", "雾中缆工", 18, I("hook", "收绳甩钩", "湿绳骤然绷直，短钩正朝胸前。", 7, true)),
+                Plan("LostSailor", "失向水手", 20, I("knife", "错身割刺", "身体朝左，持刀手却转向右舷。", 8, false)),
+                Plan("WhiteLampSignaller", "白灯司号", 15, I("lamp", "白灯定向", "乳白灯罩转向你，短号尚未举起。", 4, true), S("horn", "短号惊鸣", "短号抵住唇边，灯罩朝向舷外。", 3, false, true, false, "铜号")),
+                Plan("WetCoatPilot", "湿衣引航员", 17, I("sleeve", "袖下突袭", "双手仍藏在贴身湿袖里，重心突然前移。", 7, false, false, false)),
+                Plan("BarrelThief", "漂桶窃贼", 16, I("barrel", "桶箍冲撞", "破桶压低，铁箍对准膝部。", 6, true), I("hide", "缩桶观望", "双手缩进桶沿，只拖动布袋。", 0, true))
+            },
+            {
+                Plan("TideBoneScavenger", "潮骨拾荒者", 19, I("scrape", "刮骨钩", "短钩从骨筐侧面探出。", 8, true)),
+                Plan("BoneFluteAttendant", "骨笛侍从", 18, S("flute", "骨笛低鸣", "颈侧骨管随吸气一起收紧。", 3, false, true, true, "骨笛"), I("needle", "笛端刺击", "骨笛横握，尖端朝向甲板。", 6, false)),
+                Plan("SaltMarrowPriest", "盐髓司祭", 21, S("cup", "髓盏祷声", "双手托高髓盏，胸前骨板轻响。", 4, true, true, true, "髓盏")),
+                Plan("EmptyHoldKnocker", "空舱敲击者", 17, S("knock", "空箱三敲", "短槌悬在胸前空箱上方。", 3, false, true, true, "胸前木箱"), I("door", "门板推击", "背后舱门板向前倾压。", 7, true)),
+                Plan("BoneNetStitcher", "缝骨拖网客", 20, I("cast", "骨网投掷", "肩网展开，骨片碰撞声来自左侧。", 7, false, false, true, "肩背拖网"), I("stitch", "收针整网", "粗骨针回到网束，暂未朝向目标。", 0, true))
+            },
+            {
+                Plan("InvertedSurveyHand", "倒悬测量员", 20, I("rule", "折尺量切", "折尺完全张开，长臂沿甲板刻度摆正。", 8, true)),
+                Plan("ReverseNavigator", "反写领航员", 19, S("chart", "逆图误导", "空白海图被倒举，指北器持续刮擦纸面。", 3, false, true, false, "指北器"), I("edge", "卷图抽击", "卷边海图合拢成棍状。", 6, true)),
+                Plan("MirrorTideScribe", "镜潮记录员", 18, S("mirror", "镜片凝视", "氧化镜片离开账本，正对你的眼睛。", 4, true, true, false, "面部镜片"), I("book", "账本砸击", "泡水账本被双臂高高抱起。", 7, true)),
+                Plan("PlumbWatcher", "铅垂守望者", 23, I("plumb", "铅坠摆击", "胸前铅坠离开垂线，皮带已经绷紧。", 10, true), I("still", "校准垂线", "铅坠静止，双手只在调整肩带。", 0, true)),
+                Plan("DisplacedWatchman", "错位值更人", 21, I("old-watch", "旧袖擒拿", "褪色旧袖抬起，另一侧仍垂落。", 7, false), I("new-watch", "新袖击打", "较新的袖口后撤蓄力，旧袖贴住胸前。", 9, false))
+            },
+            {
+                Plan("UnflaggedBoarder", "无旗登船兵", 22, I("shield", "缺盾压进", "缺角舷盾封住身前，短刀压在盾后。", 8, true)),
+                Plan("MisfireGunner", "哑火炮手", 20, I("load", "重新装填", "钝口铳朝下，火药筒已经打开。", 0, true), I("shot", "近舷轰击", "短铳抵肩，火门冒出细烟。", 11, true, true, true, "前装铳")),
+                Plan("BlackSailMessenger", "黑帆传令", 18, S("flag", "黑旗传令", "短杆黑旗骤然横展，铜束具发出闷响。", 4, false, true, true, "信号旗"), I("staff", "旗杆横扫", "破旗收拢，短杆降到腰侧。", 7, true)),
+                Plan("AbandonShipMedic", "弃舰医官", 19, I("case", "药箱重击", "锈药箱被单手提至肩高。", 7, true), S("bandage", "敷料低语", "敷料一圈圈松开，声音却来自箱内。", 3, false, true, false, "药箱")),
+                Plan("RustChainEscort", "锈链押运者", 24, I("chain", "短链绞击", "两臂锈链同时收紧，链尾没有拖地。", 9, true), S("buckle", "铁扣震响", "腰间大铁扣反复撞击，双臂没有挥动。", 3, false, true, true, "腰间铁扣"))
+            },
+            {
+                Plan("StarlessPeeker", "无星窥视者", 22, S("hollow", "空面注视", "凹陷面部转向你，双手仍垂在身侧。", 4, true, false, false)),
+                Plan("AbyssRunner", "深渊听差", 19, S("tube", "传声筒回音", "空铜筒口朝向舱门，回声却来自舷外。", 4, false, true, true, "舷外海面"), I("rush", "低头奔撞", "传声筒贴回腰侧，窄肩压低。", 8, true)),
+                Plan("LampOutBellkeeper", "熄灯司钟", 23, S("bell", "罩钟闷鸣", "头部铜钟罩轻颤，无焰提灯保持不动。", 4, true, true, false, "头部钟罩"), I("lantern", "无焰灯击", "提灯向后荡起，钟罩停止震动。", 8, true)),
+                Plan("LastTideWitness", "末潮见证者", 20, S("witness", "无字见证", "腹前双手不动，下摆窄签逆风竖起。", 3, false, true, false, "衣摆布签"), I("reach", "长臂扼击", "收拢的双手分开，长袖直指胸前。", 7, true)),
+                Plan("RailNameTaker", "舷外索名者", 25, S("ask", "舷外索名", "低垂衣领里传来问句，长臂仍搭在身前。", 4, false, true, false, "衣领内"), I("reach", "长臂攫取", "双臂离开身侧，长指贴近甲板。", 10, true))
+            }
+        };
 
         [MenuItem("Unsounded Sea/Content/Setup Voyage Campaign")]
         public static string Setup()
@@ -34,8 +64,7 @@ namespace UnsoundedSea.Editor
             if (stage == null) throw new InvalidOperationException("FogSeaStage prefab is missing BattleStage.");
             if (stage.actorAnchors == null || stage.actorAnchors.Length < 2)
                 throw new InvalidOperationException("FogSeaStage needs at least two actor anchors for voyage encounters.");
-            var prayer = Load<GameObject>(Root + "/Art/Prefabs/Prayer.prefab");
-            var echo = Load<GameObject>(Root + "/Art/Prefabs/Echo.prefab");
+            OrdinaryEnemyStaticSetup.Setup();
             var allTools = new[]
             {
                 Load<ToolDefinition>(Root + "/Content/Tools/lantern.asset"),
@@ -44,22 +73,22 @@ namespace UnsoundedSea.Editor
             };
             var tools = allTools.Take(2).ToArray();
             var deck = StarterDeck();
-            var entries = new List<(string id, BattleScenario scenario)>();
+            var entries = new List<(string id, BattleScenario scenario, string group, bool isBoss)>();
 
             for (var regionIndex = 0; regionIndex < Regions.Length; regionIndex++)
             {
-                var enemies = new EnemyDefinition[4];
-                for (var variant = 0; variant < 4; variant++)
-                    enemies[variant] = CreateEnemy(regionIndex, variant, variant % 2 == 0 ? prayer : echo);
+                var enemies = new EnemyDefinition[5];
+                for (var variant = 0; variant < 5; variant++)
+                    enemies[variant] = CreateEnemy(regionIndex, variant);
 
-                for (var variant = 0; variant < 4; variant++)
+                for (var variant = 0; variant < 5; variant++)
                 {
                     var id = $"voyage-{Regions[regionIndex]}-{variant}";
-                    var members = variant < 2 ? new[] { enemies[variant] } : new[] { enemies[variant], enemies[variant - 2] };
+                    var members = variant == 4 ? new[] { enemies[variant], enemies[2] } : new[] { enemies[variant] };
                     var encounter = Asset<EncounterDefinition>(EncounterFolder, id, value =>
                     {
                         value.id = id;
-                        value.displayName = $"{RegionTitles[regionIndex]} / {EnemyNames[regionIndex, variant]}";
+                        value.displayName = $"{RegionTitles[regionIndex]} / {Plans[regionIndex, variant].DisplayName}";
                         value.objective = ObjectiveKind.Defeat;
                         value.objectiveTarget = 1;
                         value.playerHealth = 60;
@@ -81,21 +110,24 @@ namespace UnsoundedSea.Editor
                         value.enemyHeading = encounter.displayName;
                         value.objectiveHint = "击退登船者。公开行动可直接应对；其余征兆可调查伤害类型、动作或声源。";
                         value.enemyStatus = string.Empty;
-                        value.introduction = variant < 2 ? "单一目标登上甲板。先读出它承诺的行动。" : "两名目标从不同舷侧登船；它们的行动分别结算。";
+                        value.introduction = variant == 4
+                            ? "两名目标从不同舷侧登船：近身压迫与精神威胁同时存在，先决定处置顺序。"
+                            : "单一目标登上甲板。先读出它承诺的行动。";
                         value.objectiveHeading = "守住甲板，击退所有目标。";
                         value.taskLabel = string.Empty;
                         value.victoryText = "甲板恢复安静，航线得以继续。";
                         value.defeatText = "鸦号失去控制，航程在此中断。";
                     });
-                    entries.Add((id, scenario));
+                    entries.Add((id, scenario, RegionTitles[regionIndex], false));
                 }
             }
 
-            AddExisting(entries, "fog-visitors", Root + "/Content/Scenarios/FogVisitors.asset");
-            AddExisting(entries, "m02", Root + "/Content/Scenarios/M02.asset");
-            AddExisting(entries, "m03", Root + "/Content/Scenarios/M03.asset");
-            AddExisting(entries, "m04", Root + "/Content/Scenarios/M04.asset");
-            AddExisting(entries, "m05", Root + "/Content/Scenarios/M05.asset");
+            AddExisting(entries, "fog-visitors", Root + "/Content/Scenarios/FogVisitors.asset", "雾海");
+            AddExisting(entries, "m02", Root + "/Content/Scenarios/M02.asset", "潮骨海");
+            AddExisting(entries, "m03", Root + "/Content/Scenarios/M03.asset", "倒悬海");
+            AddExisting(entries, "m04", Root + "/Content/Scenarios/M04.asset", "无旗舰群");
+            AddExisting(entries, "m05", Root + "/Content/Scenarios/M05.asset", "无星深渊");
+            AddExisting(entries, "drowned-bell", Root + "/Content/Scenarios/DrownedBell.asset", "独立 Boss");
             if (entries.Select(x => x.id).Distinct(StringComparer.Ordinal).Count() != entries.Count)
                 throw new InvalidOperationException("Voyage encounter catalog contains duplicate IDs.");
 
@@ -107,6 +139,8 @@ namespace UnsoundedSea.Editor
             {
                 field.GetArrayElementAtIndex(i).FindPropertyRelative("id").stringValue = entries[i].id;
                 field.GetArrayElementAtIndex(i).FindPropertyRelative("scenario").objectReferenceValue = entries[i].scenario;
+                field.GetArrayElementAtIndex(i).FindPropertyRelative("group").stringValue = entries[i].group;
+                field.GetArrayElementAtIndex(i).FindPropertyRelative("isBoss").boolValue = entries[i].isBoss;
             }
             var toolField = serialized.FindProperty("tools");
             toolField.arraySize = allTools.Length;
@@ -119,53 +153,43 @@ namespace UnsoundedSea.Editor
             return $"Voyage campaign synchronized: {entries.Count} encounter scenarios.";
         }
 
-        private static EnemyDefinition CreateEnemy(int region, int variant, GameObject prefab)
+        private static EnemyDefinition CreateEnemy(int region, int variant)
         {
             var id = $"voyage-{Regions[region]}-enemy-{variant}";
-            var tier = region / 2;
+            var plan = Plans[region, variant];
+            var prefab = OrdinaryEnemyStaticSetup.LoadPrefab(plan.ModelName);
+            if (prefab == null) throw new InvalidOperationException($"Missing normalized static prefab for {plan.ModelName}.");
             return Asset<EnemyDefinition>(EnemyFolder, id, value =>
             {
                 value.id = id;
-                value.displayName = EnemyNames[region, variant];
+                value.displayName = plan.DisplayName;
+                value.health = plan.Health;
+                value.candidateDescription = string.Join(" / ", plan.Intents.Select(intent =>
+                    $"{intent.displayName}：{intent.amount} {(intent.channel == DamageChannel.Sanity ? "理智冲击" : "生命伤害")}{(intent.isPublic ? "（公开）" : string.Empty)}"));
+                value.intents = plan.Intents;
                 value.presentationPrefab = prefab;
-                switch (variant)
-                {
-                    case 0:
-                        value.health = 18 + region;
-                        value.candidateDescription = $"越舷强袭：{7 + tier} 生命伤害（公开）";
-                        value.intents = new[] { Intent("assault", "越舷强袭", "目标压低重心，武器朝向甲板。", DamageChannel.Health, 7 + tier, true) };
-                        break;
-                    case 1:
-                        value.health = 20 + region;
-                        value.candidateDescription = $"整备：无伤害 / 重击：{9 + tier} 生命伤害（均公开）";
-                        value.intents = new[]
-                        {
-                            Intent("prepare", "收紧缆索", "目标停在原地，重新收紧手中的缆索。", DamageChannel.Health, 0, true),
-                            Intent("heavy", "沉重挥击", "武器已经高举，落点正对甲板。", DamageChannel.Health, 9 + tier, true)
-                        };
-                        break;
-                    case 2:
-                        value.health = 12 + tier;
-                        value.candidateDescription = $"同一征兆：{5 + tier} 生命伤害，或至多 {Math.Min(4, 2 + tier)} 理智冲击（可打断）";
-                        value.intents = new[]
-                        {
-                            Intent("feint", "贴舷突刺", "贴住舷墙；手臂藏在湿衣下；传来一次短促敲击。", DamageChannel.Health, 5 + tier, false),
-                            Intent("whisper", "舷外耳语", "贴住舷墙；手臂藏在湿衣下；传来一次短促敲击。", DamageChannel.Sanity, Math.Min(4, 2 + tier), false, true, true, "舷外海面")
-                        };
-                        break;
-                    default:
-                        value.health = 10 + tier;
-                        value.candidateDescription = "短鸣：2 理智冲击（可打断）/ 观望：无伤害 / 推击：3 生命伤害（均公开）";
-                        value.intents = new[]
-                        {
-                            Intent("short-call", "短促呼号", "目标举起号具，呼气动作清晰可见。", DamageChannel.Sanity, 2, true, true),
-                            Intent("idle", "守住舷边", "目标没有进攻，只守住登船位置。", DamageChannel.Health, 0, true),
-                            Intent("shove", "推击", "目标肩部前压，准备把人推离舷边。", DamageChannel.Health, 3, true)
-                        };
-                        break;
-                }
             });
         }
+
+        private sealed class EnemyPlan
+        {
+            public string ModelName;
+            public string DisplayName;
+            public int Health;
+            public IntentData[] Intents;
+        }
+
+        private static EnemyPlan Plan(string model, string displayName, int health, params IntentData[] intents) =>
+            new EnemyPlan { ModelName = model, DisplayName = displayName, Health = health, Intents = intents };
+
+        private static IntentData I(string id, string name, string clue, int amount, bool isPublic,
+            bool interruptible = false, bool visibleAction = true, string soundSource = "目标本体",
+            DamageChannel channel = DamageChannel.Health) =>
+            Intent(id, name, clue, channel, amount, isPublic, interruptible, visibleAction, soundSource);
+        private static IntentData S(string id, string name, string clue, int amount, bool isPublic,
+            bool interruptible = false, bool visibleAction = true, string soundSource = "目标本体") =>
+            Intent(id, name, clue, DamageChannel.Sanity, amount, isPublic, interruptible, visibleAction, soundSource);
+
 
         private static IntentData Intent(string id, string name, string clue, DamageChannel channel, int amount,
             bool isPublic, bool interruptible = false, bool visibleAction = true, string soundSource = "目标本体") =>
@@ -185,12 +209,13 @@ namespace UnsoundedSea.Editor
             }).ToArray();
         }
 
-        private static void AddExisting(ICollection<(string id, BattleScenario scenario)> entries, string id, string path)
+        private static void AddExisting(ICollection<(string id, BattleScenario scenario, string group, bool isBoss)> entries,
+            string id, string path, string group)
         {
             var scenario = Load<BattleScenario>(path);
             if (scenario.encounter == null || scenario.encounter.id != id)
                 throw new InvalidOperationException($"{path} does not contain encounter '{id}'.");
-            entries.Add((id, scenario));
+            entries.Add((id, scenario, group, true));
         }
 
         private static T Load<T>(string path) where T : UnityEngine.Object

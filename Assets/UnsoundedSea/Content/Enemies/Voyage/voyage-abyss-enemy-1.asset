@@ -14,25 +14,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-abyss-enemy-1
   displayName: "\u6DF1\u6E0A\u542C\u5DEE"
-  health: 24
-  candidateDescription: "\u6574\u5907\uFF1A\u65E0\u4F24\u5BB3 / \u91CD\u51FB\uFF1A11 \u751F\u547D\u4F24\u5BB3\uFF08\u5747\u516C\u5F00\uFF09"
+  health: 19
+  candidateDescription: "\u4F20\u58F0\u7B52\u56DE\u97F3\uFF1A4 \u7406\u667A\u51B2\u51FB / \u4F4E\u5934\u5954\u649E\uFF1A8 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
   intents:
-  - id: prepare
-    displayName: "\u6536\u7D27\u7F06\u7D22"
-    clue: "\u76EE\u6807\u505C\u5728\u539F\u5730\uFF0C\u91CD\u65B0\u6536\u7D27\u624B\u4E2D\u7684\u7F06\u7D22\u3002"
+  - id: tube
+    displayName: "\u4F20\u58F0\u7B52\u56DE\u97F3"
+    clue: "\u7A7A\u94DC\u7B52\u53E3\u671D\u5411\u8231\u95E8\uFF0C\u56DE\u58F0\u5374\u6765\u81EA\u8237\u5916\u3002"
+    channel: 1
+    amount: 4
+    isPublic: 0
+    visibleAction: 1
+    interruptible: 1
+    soundSource: "\u8237\u5916\u6D77\u9762"
+  - id: rush
+    displayName: "\u4F4E\u5934\u5954\u649E"
+    clue: "\u4F20\u58F0\u7B52\u8D34\u56DE\u8170\u4FA7\uFF0C\u7A84\u80A9\u538B\u4F4E\u3002"
     channel: 0
-    amount: 0
+    amount: 8
     isPublic: 1
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
-  - id: heavy
-    displayName: "\u6C89\u91CD\u6325\u51FB"
-    clue: "\u6B66\u5668\u5DF2\u7ECF\u9AD8\u4E3E\uFF0C\u843D\u70B9\u6B63\u5BF9\u7532\u677F\u3002"
-    channel: 0
-    amount: 11
-    isPublic: 1
-    visibleAction: 1
-    interruptible: 0
-    soundSource: "\u76EE\u6807\u672C\u4F53"
-  presentationPrefab: {fileID: 6536484850760832164, guid: d6e078df63125453e87419a8e7f51e6d, type: 3}
+  presentationPrefab: {fileID: 1588005630031145667, guid: 4ff2ac0ff2e514810be288631c125f52, type: 3}
