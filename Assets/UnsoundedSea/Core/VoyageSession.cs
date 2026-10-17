@@ -25,7 +25,7 @@ namespace UnsoundedSea.Core
 
     public sealed partial class VoyageSession
     {
-        public const int CheckpointVersion=8;
+        public const int CheckpointVersion=9;
         public const int ActLength=11;
         private const int InitialToolUses=2, MaxHistory=512;
         private static readonly string[] InitialTools={"lantern","listener","shell"};
@@ -131,7 +131,9 @@ namespace UnsoundedSea.Core
             if(used.Any(id=>!carriedItems.Contains(id))||used.GroupBy(x=>x).Any(g=>g.Count()>carriedItems.Count(x=>x==g.Key)||g.Count()>inventory.Count(x=>x==g.Key))||finalWatched<0||finalWatched>3||findings.Any(x=>x==null))return false;
             foreach(var id in used){inventory.Remove(id);carriedItems.Remove(id);}Watched=finalWatched??Watched;markers.Remove("surveyed-beacon");
             if(victory){foreach(var entry in findings.Where(x=>x.Stable)){var stored=entry.Archive(EvidenceScope.Run);runArchive.RemoveAll(x=>x.Key==stored.Key);runArchive.Add(stored);}if(CurrentFull.Kind==RunNodeKind.Boss)foreach(var id in crewIds.Where(id=>CrewRegion(id)==RegionId))trustedCrew.Add(id);}
+            FinishRitualEncounter();
             Health=health; Sanity=sanity;
+            var feedback=new List<string>();if(used.Length>0)feedback.Add("消耗 "+string.Join("、",used.GroupBy(x=>x).Select(x=>SupportCatalog.Item(x.Key).Name+"×"+x.Count())));var archived=victory?findings.Where(x=>x.Stable).Select(x=>x.Key).Distinct(StringComparer.Ordinal).Count():0;if(archived>0)feedback.Add("归档 "+archived+" 条核验");if(feedback.Count>0)log.Add("战后："+string.Join("；",feedback)+"。");
             if(!victory||health==0||sanity==0) phase=VoyagePhase.Failed;
             else if(debug) phase=CurrentFull.Kind==RunNodeKind.Boss?VoyagePhase.Completed:VoyagePhase.Reward;
             else if(CurrentFull.Kind==RunNodeKind.Boss) phase=Act==3?VoyagePhase.Completed:VoyagePhase.ActComplete;

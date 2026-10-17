@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "created": "2026-10-17",
+  "generator": {
+    "tool": "xd://generate_image",
+    "provider": "openai-codex",
+    "requestedModel": "openai-codex/gpt-image-2",
+    "providerModel": "gpt-image-2-codex",
+    "quality": "medium",
+    "aspectRatio": "3:2",
+    "requestedSize": "1536x1024"
+  },
+  "sharedStyle": "Original maritime gothic realistic oil painting; tactile wet timber, oxidized old brass and waxed cloth; sea-ink blue/green, fog gray and salt-white highlights; restrained amber ship light and cool marine rim; readable midtones; pure sea setting.",
+  "sharedConstraints": "No text, letters, numbers, logos, watermark, readable writing, UI, border, frame, land, islands, neon or generic purple magic.",
+  "assets": [
+    {
+      "key": "supply",
+      "file": "Assets/UnsoundedSea/Resources/SupportArt/supply.png",
+      "sha256": "631f102dd761dcacecb52c162e955175619e0f197e867b9a5744018caa45a84f",
+      "bytes": 2955305,
+      "sourceOutput": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a99e0ef249dcb6.webp",
+      "prompt": "Sea mother-ship wet open-deck worktable with rolled medical wraps, salt-stained supply boxes and practical brass investigation instruments; research-vessel rail and dark ocean mist; slightly elevated wide banner composition."
+    },
+    {
+      "key": "rescue",
+      "file": "Assets/UnsoundedSea/Resources/SupportArt/rescue.png",
+      "sha256": "ad700ebad94c651e06f2691db441fe58f005f9364316909e6492ad8ffdb82bae",
+      "bytes": 2802815,
+      "sourceOutput": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a99e44e509dcbb.webp",
+      "prompt": "Weathered rope winch on a research vessel lowering a taut rescue line toward an occupied wooden lifeboat in rough open sea; practical oilskin crew silhouettes; cinematic deck-to-boat action."
+    },
+    {
+      "key": "archive",
+      "file": "Assets/UnsoundedSea/Resources/SupportArt/archive.png",
+      "sha256": "60742b6ee0117ba975793a7ef642e35409ea58e337a8732dcdbb1572986bb590",
+      "bytes": 2938862,
+      "sourceOutput": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a99e7a6449dcc2.webp",
+      "prompt": "Open damp nautical field journal containing only nonlinguistic contour, wave and specimen diagrams, with a sealed ambiguous seawater sample and curved brass listening instrument on a research-vessel table; uncertain reflected sea clue."
+    },
+    {
+      "key": "ritual",
+      "file": "Assets/UnsoundedSea/Resources/SupportArt/ritual.png",
+      "sha256": "8bd5badf3f39addfedfa54b7df2197419876ed01c12168258b99c266df2a7c60",
+      "bytes": 2745395,
+      "sourceOutput": "/var/folders/b5/zc3xh12531bccqdzznhnh40c0000gn/T/omp-image-15a99ea57909dcc6.webp",
+      "prompt": "Small practical salt-and-copper acoustic suppression arrangement on wet ship deck, plain wax seals and compact brass bell muted with dark waxed cloth; subtle physically impossible inward-bending reflection, not a fantasy altar."
+    }
+  ],
+  "inspection": "All four generated outputs were visually inspected at 1536x1024 for requested subject, independent composition, maritime palette, small-banner readability and absence of obvious text, logos, UI frames, land, neon or generic purple magic. PNG files are losslessly converted from provider WebP outputs; no retouching applied."
+}

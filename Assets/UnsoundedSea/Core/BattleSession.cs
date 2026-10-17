@@ -57,7 +57,7 @@ namespace UnsoundedSea.Core
             Seed = seed; deckRandom = new DeterministicRandom(seed); intentRandom = new DeterministicRandom(seed ^ 0x9E3779B9u);
             bossKind = Require.Defined(boss);
             health = definition.InitialHealth; sanity = definition.InitialSanity;
-            watched=definition.Loadout.Watched;beaconAvailable=definition.Loadout.SurveyedBeacon;
+            watched=definition.Loadout.Watched;beaconAvailable=definition.Loadout.SurveyedBeacon;echoRitualAvailable=definition.Loadout.EchoRitual;
             enemies = definition.Enemies.Select(x => new EnemyState { Definition = x, Health = x.Health }).ToList();
             toolUses = definition.Tools.ToDictionary(x => x.Id, x => x.Uses, StringComparer.Ordinal);
             for (var i = 0; i < definition.Deck.Count; i++) draw.Add(new CardView(i + 1, definition.Deck[i]));

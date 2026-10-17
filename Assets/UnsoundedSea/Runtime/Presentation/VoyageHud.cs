@@ -214,8 +214,7 @@ namespace UnsoundedSea.Runtime
                     var choice = Action("route-" + stop.Id, string.Empty, "route-choice",
                         () => Change(() => Session.Select(destination.Id)), string.IsNullOrEmpty(saveError));
                     var chosen = session.Selected?.Id == stop.Id;
-                    choice.tooltip = $"{KindName(stop.Kind)} · {stop.Clue}\n" +
-                        (chosen ? "已选航向；确认启航后出发。" : "预览此航路，确认启航后出发。");
+                    choice.tooltip = $"{KindName(stop.Kind)} · {stop.Clue}\n{PreviewRoute(session, stop)}";
                     var description = Element("route-description");
                     description.Add(Text(stop.Name, "route-name"));
                     description.Add(Text($"{KindName(stop.Kind)}  ·  {stop.Clue}", "route-theme"));
@@ -274,12 +273,15 @@ namespace UnsoundedSea.Runtime
         private void BuildDestination(VisualElement panel, VoyageSession session, VoyageChart chart)
         {
             bool saved = string.IsNullOrEmpty(saveError);
-            panel.Add(Action("voyage-support-manifest","物资 · 船员 · 档案","secondary",()=>{supportOpen=true;Refresh();},saved));
+            if (session.Phase != VoyagePhase.Reward && session.Phase != VoyagePhase.Sailing)
+                panel.Add(Action("voyage-support-manifest", "船上清单", "secondary", () => OpenSupport(0), saved));
             var stop = session.Selected ?? session.Current;
             if (session.Phase == VoyagePhase.ChoosingRoute && session.Selected == null)
             {
                 if (session.CanEditDeck)
+                {
                     panel.Add(Action("open-action-book", "整备行动簿", "primary", () => { deckOpen = true; Refresh(); }));
+                }
                 return;
             }
             if (session.Phase == VoyagePhase.ChoosingRoute && chartOpen)
@@ -295,6 +297,16 @@ namespace UnsoundedSea.Runtime
                 panel.Add(Text(session.Phase == VoyagePhase.Completed
                     ? session.IsDebug ? "本次独立试玩已结束。" : "归航绳已收回，调查记录带离深渊。"
                     : stop.Clue, "destination-clue"));
+            if (session.Phase == VoyagePhase.ChoosingRoute || session.Phase == VoyagePhase.Arrived)
+            {
+                var preview = PreviewRoute(session, stop);
+                if (!string.IsNullOrEmpty(preview))
+                {
+                    var summary = Text(preview.Split('\n')[0], "preparation-summary");
+                    summary.tooltip = preview;
+                    panel.Add(summary);
+                }
+            }
             switch (session.Phase)
             {
                 case VoyagePhase.ChoosingRoute:

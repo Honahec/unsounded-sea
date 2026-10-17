@@ -24,4 +24,22 @@ public static class SupportContentSetup
         }
         AssetDatabase.SaveAssets();return "96 card specifications synchronized; six generated backgrounds imported and verified.";
     }
+    public static string ImportPreparationArt()
+    {
+        if(EditorApplication.isPlayingOrWillChangePlaymode)throw new InvalidOperationException("Stop play mode before importing.");
+        foreach(var id in new[]{"supply","rescue","archive","ritual"})
+        {
+            var path="Assets/UnsoundedSea/Resources/SupportArt/"+id+".png";
+            AssetDatabase.ImportAsset(path,ImportAssetOptions.ForceSynchronousImport);
+            var importer=(TextureImporter)AssetImporter.GetAtPath(path);
+            importer.textureType=TextureImporterType.Default;importer.sRGBTexture=true;
+            importer.alphaSource=TextureImporterAlphaSource.None;importer.npotScale=TextureImporterNPOTScale.None;
+            importer.mipmapEnabled=false;importer.wrapMode=UnityEngine.TextureWrapMode.Clamp;
+            importer.maxTextureSize=2048;importer.textureCompression=TextureImporterCompression.Compressed;
+            importer.SaveAndReimport();
+            var texture=AssetDatabase.LoadAssetAtPath<UnityEngine.Texture2D>(path);
+            if(texture==null||texture.width!=1536||texture.height!=1024)throw new InvalidOperationException("Invalid preparation art: "+path);
+        }
+        return "Four preparation illustrations imported at 1536x1024.";
+    }
 }

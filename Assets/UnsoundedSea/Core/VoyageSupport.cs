@@ -32,21 +32,21 @@ namespace UnsoundedSea.Core
         public IReadOnlyList<VoyageMarker> Markers=>markers.Values.OrderBy(x=>x.Id,StringComparer.Ordinal).ToArray();
         public IReadOnlyList<Evidence> Archive=>runArchive.ToArray();
         public bool ActiveCrew(string id)=>crewIds.Contains(id)&&!injuredCrew.Contains(id);
-        public BattleLoadout Loadout=>new BattleLoadout(carriedItems,equippedItems,markers.ContainsKey("surveyed-beacon"),Watched);
+        public BattleLoadout Loadout=>new BattleLoadout(carriedItems,equippedItems,markers.ContainsKey("surveyed-beacon"),Watched,echoRitualPrepared);
         private bool FreeNavigationUse(){if(!ActiveCrew("cartographer")||freeNavigationUsed)return false;freeNavigationUsed=true;return true;}
         private string ServiceKey(string service)=>Act+":"+CurrentFull.Id+":"+service;
         private bool ServiceAvailable(string service)=>!supportServices.Contains(ServiceKey(service));
         private void SpendService(string service)=>supportServices.Add(ServiceKey(service));
-        private bool AtSupply=>phase==VoyagePhase.Arrived&&CurrentFull.Kind==RunNodeKind.Supply;
+        private bool AtSupply=>(phase==VoyagePhase.Arrived||phase==VoyagePhase.ChoosingRoute&&initialPreparation)&&CurrentFull.Kind==RunNodeKind.Supply;
         private static string CrewRegion(string id)=>id=="medic"||id=="listener"||id=="cook"?"fog":id=="archivist"||id=="decoder"?"bones":id=="cartographer"?"inverted":id=="engineer"||id=="gunsmith"?"fleet":"abyss";
-        private string RecruitCandidate=>SupportCatalog.Crew.Where(x=>!crewIds.Contains(x.Id)).OrderBy(x=>VoyageSeeds.Derive(Seed,"rescue",Act+":"+CurrentFull.Id+":"+x.Id)).Select(x=>x.Id).FirstOrDefault();
+        private string RecruitCandidate=>RecruitCandidateAt(CurrentFull);
+        private string RecruitCandidateAt(VoyageStop stop)=>SupportCatalog.Crew.Where(x=>!crewIds.Contains(x.Id)).OrderBy(x=>VoyageSeeds.Derive(Seed,"rescue",Act+":"+stop.Id+":"+x.Id)).Select(x=>x.Id).FirstOrDefault();
         private IEnumerable<string> RegionItems()
         {
             var common=new[]{"i10","i11","i12","i13","i17","i18","i19","i20","i22","i23"};
             return common.Concat(RegionId=="fog"?new[]{"i14"}:RegionId=="inverted"?new[]{"i06","i16","i24"}:RegionId=="fleet"?new[]{"i08","i15"}:RegionId=="abyss"?new[]{"i07","i09","i15","i21","i25"}:new[]{"i15"});
         }
-        public IReadOnlyList<ItemSpec> ShopItems => AtSupply?RegionItems().Where(id=>SupportCatalog.Item(id).Kind==ItemKind.Consumable||!ownedEquipment.Contains(id)&&!learnedTools.Contains(id))
-            .GroupBy(id=>SupportCatalog.Item(id).Kind).SelectMany(g=>g.OrderBy(id=>VoyageSeeds.Derive(Seed,"shop",Act+":"+CurrentFull.Id+":"+id)).Take(2)).Select(SupportCatalog.Item).ToArray():Array.Empty<ItemSpec>();
+        public IReadOnlyList<ItemSpec> ShopItems => AtSupply?ShopStock(CurrentFull):Array.Empty<ItemSpec>();
         public IReadOnlyList<ItemSpec> RewardItems => phase==VoyagePhase.Reward&&(CurrentFull.Kind==RunNodeKind.Reward||CurrentFull.Kind==RunNodeKind.Boss)?RegionItems().Where(id=>SupportCatalog.Item(id).Kind==ItemKind.Equipment&&!ownedEquipment.Contains(id)).OrderBy(id=>VoyageSeeds.Derive(Seed,"equipment-reward",Act+":"+CurrentFull.Id+":"+id)).Take(1).Select(SupportCatalog.Item).ToArray():Array.Empty<ItemSpec>();
         private bool CanGain(string id,string replace=null)
         {
@@ -70,6 +70,7 @@ namespace UnsoundedSea.Core
         {
             var result=new List<VoyageNodeChoice>();
             void Add(string id,string title,string detail,bool enabled=true)=>result.Add(new VoyageNodeChoice(id,title,detail,enabled));
+            result.AddRange(GetRitualChoices());
             if(CanEditDeck)
             {
                 if(Act==1&&initialPreparation&&!initialEquipmentChosen)
@@ -91,7 +92,7 @@ namespace UnsoundedSea.Core
                     Add("buy:"+item.Id,"购买 · "+item.Name,$"{price}补给，每节点买一次。 "+item.Description,Supplies>=price&&CanGain(item.Id));
                     if(!CanGain(item.Id)&&item.Kind==ItemKind.Consumable)foreach(var old in inventory.Distinct())Add("buy:"+item.Id+"@"+old,"换购 · "+item.Name+"（替换"+SupportCatalog.Item(old).Name+"）",$"明确丢弃一份旧物资并支付{price}补给。",Supplies>=price&&CanGain(item.Id,old));
                 }
-                if(ServiceAvailable("hire"))foreach(var crew in SupportCatalog.Crew.Where(x=>!crewIds.Contains(x.Id)&&(x.Id=="medic"||x.Id=="listener"||CrewRegion(x.Id)==RegionId)))
+                if(ServiceAvailable("hire"))foreach(var crew in CrewStock(CurrentFull))
                 {
                     var replacements=crewIds.Count>=4?crewIds.Cast<string>():new string[]{null};
                     foreach(var old in replacements)Add("hire:"+crew.Id+(old==null?"":"@"+old),"接驳 · "+crew.Name+(old==null?"":"（替换"+SupportCatalog.CrewMember(old).Name+"）"),$"{HirePrice}补给；"+SupportCatalog.CrewDescription(crew.Kind),Supplies>=HirePrice);
@@ -131,6 +132,7 @@ namespace UnsoundedSea.Core
         private string TrustedCard(string id)=>new[]{id=="medic"||id=="cook"?"c093":id=="listener"||id=="archivist"?"c091":id=="gunsmith"?"c092":"c094","c050","c049"}.FirstOrDefault(x=>!learned.Contains(x)&&(x!="c091"||runArchive.Any(e=>e.Rule=="source-v1")));
         public bool ManageSupport(string action,string replacement=null)
         {
+            if(action!=null&&action.StartsWith("ritual:",StringComparison.Ordinal))return replacement==null&&ManageRitual(action);
             if(replacement!=null)action+="@"+replacement;
             var choice=GetSupportChoices().FirstOrDefault(x=>x.Id==action&&x.Enabled);if(choice==null)return false;
             var pair=action.Split('@');var main=pair[0];var old=pair.Length>1?pair[1]:null;var parts=main.Split(':');var verb=parts[0];var id=parts.Length>1?parts[1]:null;

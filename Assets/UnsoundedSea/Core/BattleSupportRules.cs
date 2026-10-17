@@ -79,6 +79,7 @@ namespace UnsoundedSea.Core
         private static bool SupplyRequiresTarget(string id) => new[]{"i06","i07","i08","i09","i13","i15","i16"}.Contains(id);
         private IEnumerable<SupplyActionView> SupplyViews()
         {
+            if(definition.Loadout.EchoRitual)yield return EchoRitualView();
             foreach(var id in definition.Loadout.Consumables.Distinct().Concat(definition.Tools.Where(x=>(int)x.Kind>=3).Select(x=>x.Id)))
             {
                 var item=SupportCatalog.Item(id); var consumable=item.Kind==ItemKind.Consumable;
@@ -91,6 +92,7 @@ namespace UnsoundedSea.Core
         }
         private string UseSupply(string id,string target,bool consumable)
         {
+            if(id=="ritual:echo")return UseEchoRitual(target,consumable);
             var view=SupplyViews().FirstOrDefault(x=>x.Id==id&&x.Consumable==consumable);
             if(view==null||!view.Enabled)return "该物资已耗尽、行动不足或当前没有适用目标。";
             if(view.Targets.Count>0?!view.Targets.Any(x=>x.Id==target&&x.Enabled):target!=null)return "请选择列出的合法物资目标；未扣次数。";

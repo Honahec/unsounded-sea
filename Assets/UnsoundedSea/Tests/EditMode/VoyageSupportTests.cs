@@ -83,5 +83,38 @@ namespace UnsoundedSea.Tests
         {
             for(uint seed=0;seed<30;seed++){var s=VoyageSession.Create(seed);Move(s,4);Assert.That(s.RewardCards.Select(c=>c.Id),Does.Not.Contain("c091"));Assert.That(s.RewardCards.Select(c=>c.Id),Does.Not.Contain("c096"));}
         }
+        [Test] public void PreparationPreviewIsDeterministicAndMatchesStartServices()
+        {
+            var first=VoyageSession.Create(41);var second=VoyageSession.Create(41);
+            Assert.That(first.PreparationBriefing,Is.EqualTo(second.PreparationBriefing));
+            Assert.That(first.PreviewShopItems(first.Current.Id).Select(x=>x.Id),Is.EqualTo(first.ShopItems.Select(x=>x.Id)));
+            Assert.That(first.PreviewCrew(first.Current.Id).Select(x=>x.Id),Is.EqualTo(second.PreviewCrew(second.Current.Id).Select(x=>x.Id)));
+            Assert.Throws<ArgumentException>(()=>first.PreviewStop("a1l9n0"));
+            var start=first.Current.Id;Move(first,1);
+            Assert.That(first.PreviewShopItems(start),Is.Empty);
+        }
+        [Test] public void StartSupplyPurchaseAndRecruitRemainOptionalAndReplayExactly()
+        {
+            var s=VoyageSession.Create(42);var item=s.ShopItems.First(x=>x.Kind==ItemKind.Consumable);var supplies=s.Supplies;
+            Assert.That(s.ManageSupport("buy:"+item.Id),Is.True);Assert.That(s.Supplies,Is.LessThan(supplies));
+            var crew=s.PreviewCrew(s.Current.Id).First();Assert.That(s.ManageSupport("hire:"+crew.Id),Is.True);
+            var copy=RoundTrip(s);Assert.That(copy.Inventory,Is.EqualTo(s.Inventory));Assert.That(copy.OwnedEquipment,Is.EqualTo(s.OwnedEquipment));Assert.That(copy.CrewIds,Is.EqualTo(s.CrewIds));
+        }
+        [Test] public void FinalSupplyGuaranteesActualRandomBossPreparationOutsideRegionPool()
+        {
+            VoyageSession s=null;
+            for(uint seed=0;seed<200;seed++)if(VoyageMapGenerator.BossEncounter(seed,1,"fog")=="m03"){s=VoyageSession.Create(seed);break;}
+            Assert.That(s,Is.Not.Null);Move(s,9);
+            var preview=s.PreviewShopItems(s.Current.Id).Select(x=>x.Id).ToArray();
+            Assert.That(preview,Does.Contain("i06"));Assert.That(preview,Does.Contain("i16"));
+            Assert.That(s.ShopItems.Select(x=>x.Id),Is.EqualTo(preview));
+        }
+        [Test] public void UniqueEquipmentRewardCannotBeClaimedTwiceAndSurvivesResume()
+        {
+            var s=VoyageSession.Create(44);Move(s,4);var item=s.RewardItems.Single();
+            Assert.That(s.ClaimReward("item:"+item.Id),Is.True);Assert.That(s.OwnedEquipment,Does.Contain(item.Id));
+            Assert.That(s.ClaimReward("item:"+item.Id),Is.False);
+            Assert.That(RoundTrip(s).OwnedEquipment,Does.Contain(item.Id));
+        }
     }
 }

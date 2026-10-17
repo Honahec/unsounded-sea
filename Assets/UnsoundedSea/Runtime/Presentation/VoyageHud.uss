@@ -103,3 +103,15 @@
 .action-book-side .modal-actions { flex-grow: 1; flex-direction: column; justify-content: flex-end; }
 .action-book-side .modal-actions .primary, .action-book-side .modal-actions .secondary { width: 100%; margin: 10px 0 0 0; min-height: 42px; -unity-text-align: middle-center; }
 .voyage-hud .action-book-tool, .voyage-hud .modal-actions Button, .voyage-hud .pause-option, .voyage-utilities Button { white-space: nowrap; }
+
+.preparation-summary { margin: 6px 0; color: #ddcc9e; font-size: 13px; text-shadow: 0 2px 5px #040a0c; }
+.support-manifest { width: 850px; border-width: 0; border-left-width: 3px; border-left-color: #9e8755; }
+.support-tabs { flex-direction: row; flex-shrink: 0; margin-bottom: 12px; }
+.voyage-hud .support-tabs Button { flex-grow: 1; margin-right: 6px; padding: 8px 10px; white-space: nowrap; border-width: 0; border-bottom-width: 2px; background-color: transparent; font-size: 17px; letter-spacing: 3px; }
+.voyage-hud .support-tabs Button.selected { color: #efdbab; border-bottom-color: #c2a16d; background-color: rgba(95, 103, 74, 0.18); }
+.support-scroll { flex-grow: 1; flex-shrink: 1; min-height: 0; }
+.support-illustration { position: absolute; left: 0; right: 0; top: 0; bottom: 0; opacity: 0.17; -unity-background-scale-mode: scale-and-crop; }
+.support-entry { padding: 10px 2px; border-bottom-width: 1px; border-bottom-color: rgba(158, 135, 85, 0.3); }
+.support-entry .node-choice-description { margin-top: 6px; font-size: 14px; }
+.voyage-hud .support-entry Button { align-self: flex-start; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 38px; border-width: 0; border-left-width: 2px; border-left-color: #a48b58; background-color: transparent; -unity-text-align: middle-left; }
+.support-manifest > .primary { flex-shrink: 0; align-self: flex-end; margin-top: 12px; }

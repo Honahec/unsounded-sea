@@ -65,8 +65,8 @@ namespace UnsoundedSea.Core
         {
             switch(kind)
             {
-                case CrewSupportKind.Medic:return "恢复7生命；安全休整额外恢复2理智。";
-                case CrewSupportKind.Listener:return "查询新声源并抽1；事件可免费比对录音。";
+                case CrewSupportKind.Medic:return "支付1行动，恢复2生命；安全休整额外恢复2理智。";
+                case CrewSupportKind.Listener:return "支付2行动，查询一个新声源；不抽牌；事件可免费比对录音。";
                 case CrewSupportKind.Engineer:return "获得11格挡；首次维修事件少付1补给。";
                 case CrewSupportKind.Archivist:return "抽2；档案节点增加一项可选奖励。";
                 case CrewSupportKind.Navigator:return "获得5格挡，下一次常驻场景行动少付1；每航程一次额外侦察。";
@@ -89,14 +89,15 @@ namespace UnsoundedSea.Core
         public IReadOnlyList<string> Consumables { get; }
         public IReadOnlyList<string> Equipment { get; }
         public bool SurveyedBeacon { get; }
+        public bool EchoRitual { get; }
         public int Watched { get; }
-        public BattleLoadout(IEnumerable<string> consumables=null,IEnumerable<string> equipment=null,bool surveyedBeacon=false,int watched=0)
+        public BattleLoadout(IEnumerable<string> consumables=null,IEnumerable<string> equipment=null,bool surveyedBeacon=false,int watched=0,bool echoRitual=false)
         {
             Consumables=Require.Copy(consumables??Array.Empty<string>()); Equipment=Require.Copy(equipment??Array.Empty<string>());
             if(Consumables.Count>2||Consumables.Any(id=>SupportCatalog.Item(id).Kind!=ItemKind.Consumable||id=="i12"))throw new ArgumentException("Carry at most two battle consumables.");
             if(Equipment.Count>3||Equipment.Distinct().Count()!=Equipment.Count||Equipment.Any(id=>SupportCatalog.Item(id).Kind!=ItemKind.Equipment)||Equipment.Count(id=>SupportCatalog.Item(id).Engine)>1)throw new ArgumentException("Equip three unique items, at most one engine.");
             if(watched<0||watched>3)throw new ArgumentOutOfRangeException(nameof(watched));
-            SurveyedBeacon=surveyedBeacon; Watched=watched;
+            SurveyedBeacon=surveyedBeacon; Watched=watched; EchoRitual=echoRitual;
         }
     }
 }

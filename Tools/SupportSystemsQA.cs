@@ -30,10 +30,13 @@ public static class SupportSystemsQA
         await Wait(()=>UnityEngine.Object.FindAnyObjectByType<VoyageHud>()!=null&&Root.Q<Button>("voyage-support-manifest")!=null);
         Click("voyage-support-manifest");await Task.Delay(200);
         var sheet=Root.Q(className:"action-book");Check(sheet!=null&&sheet.worldBound.width>500,"Manifest did not lay out.");
+        Click("support-tab-1");
         var choice=VoyageRuntime.Session.GetSupportChoices().First(x=>x.Id.StartsWith("buy:")&&x.Enabled&&SupportCatalog.Item(x.Id.Substring(4)).Kind==ItemKind.Consumable);
         var before=VoyageRuntime.Session.Supplies;Click("support-"+choice.Id);Check(VoyageRuntime.Session.Supplies==before-1,"Purchase did not charge exactly once.");
         Check(!VoyageRuntime.Session.ManageSupport(choice.Id),"Repeated purchase accepted.");
-        Click("support-hire:listener");Check(VoyageRuntime.Session.CrewIds.Count==2&&VoyageRuntime.Session.Supplies==0,"Hiring resources/roster mismatch.");
+        Click("support-tab-2");
+        var hire=VoyageRuntime.Session.GetSupportChoices().First(x=>x.Id.StartsWith("hire:")&&x.Enabled);
+        Click("support-"+hire.Id);Check(VoyageRuntime.Session.CrewIds.Count==2&&VoyageRuntime.Session.Supplies==0,"Hiring resources/roster mismatch.");
         var scroll=Root.Q(className:"action-book").Q<ScrollView>();scroll.scrollOffset=Vector2.zero;
         Check(saved==SaveContents(),"Debug UI changed saved voyage.");
         return new { inventory=VoyageRuntime.Session.Inventory.Count,crew=VoyageRuntime.Session.CrewIds,supplies=VoyageRuntime.Session.Supplies,saveUnchanged=true };
