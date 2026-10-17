@@ -323,7 +323,7 @@ namespace UnsoundedSea.Runtime
         void PresentResolution(BattleView before, BattleView after, BattleCommand command)
         {
             resolvedMotion = true;
-            var waitsForImpact = command.kind == CommandKind.EndTurn && after.BossKind == BossEncounterKind.Watcher &&
+            var waitsForImpact = command.kind == CommandKind.EndTurn && after.BossKind != BossEncounterKind.None &&
                 after.ResolvedEnemyActions.Count > 0;
             if (waitsForImpact)
             {

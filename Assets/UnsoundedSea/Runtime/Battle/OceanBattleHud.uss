@@ -161,6 +161,36 @@
 .salt-measured { border-style: dashed; border-color: #80b5a5; }
 .salt-open { background-color: rgba(25,56,60,.94); }
 
+/* These additions apply only to M02-M04 battle roots. */
+.m02-battle .choir-name { font-size: 15px; color: #eee4c9; }
+.m02-battle .choir-state { font-size: 11px; color: #d7bd82; }
+.m03-battle .salt-coordinate { position: absolute; left: 4px; top: 2px; font-size: 11px; color: #d7bd82; }
+.m03-battle .salt-note { position: absolute; right: 4px; top: 2px; font-size: 16px; color: #f2bc9d; }
+.m04-battle .relay-coordinate { position: absolute; top: 3px; left: 7px; font-size: 12px; color: #d7bd82; }
+.m04-battle .relay-complete { position: absolute; bottom: 4px; font-size: 11px; color: #80b5a5; }
+.m02-battle .mechanism-complete, .m04-battle .mechanism-complete { border-color: #80b5a5; background-color: rgba(25,56,60,.94); }
+.boss-mechanics-battle .boss-mechanism-panel { position: absolute; left: 26px; top: 136px; width: 354px; padding: 12px; border-left-width: 2px; border-left-color: #9e8755; background-color: rgba(5,16,20,.91); }
+.boss-mechanics-battle .mechanism-title { font-size: 19px; color: #eee4c9; margin-bottom: 5px; }
+.boss-mechanics-battle .mechanism-caption { font-size: 12px; color: #d7bd82; margin-bottom: 10px; white-space: normal; }
+.boss-mechanics-battle .mechanism-tile { position: relative; max-width: none; margin: 3px; border-radius: 3px; padding: 5px; align-items: center; justify-content: center; }
+.boss-mechanics-battle .mechanism-footnote { margin-top: 6px; font-size: 11px; color: #a9b6ad; }
+.m02-battle .choir-row { flex-direction: row; }
+.m02-battle .choir-row .mechanism-tile { width: 100px; height: 72px; }
+.m02-battle .choir-name { font-size: 23px; margin-bottom: 5px; }
+.m03-battle .boss-salt-grid { flex-direction: row; flex-wrap: wrap; }
+.m03-battle .boss-salt-grid .salt-cell { width: 75px; height: 75px; min-width: 75px; margin: 3px; }
+.m03-battle .boss-salt-grid .salt-number { font-size: 25px; }
+.m04-battle .boss-relays { margin-bottom: 8px; }
+.m04-battle .boss-relay-column { flex-direction: row; align-items: center; }
+.m04-battle .relay-heading { width: 40px; font-size: 12px; color: #d7bd82; white-space: normal; }
+.m04-battle .boss-relay-column .mechanism-tile { width: 88px; min-width: 70px; height: 46px; flex-shrink: 1; }
+.m04-battle .relay-option { font-size: 13px; color: #eee4c9; }
+.m04-battle .relay-current-note { position: absolute; top: 1px; right: 3px; font-size: 10px; color: #80b5a5; }
+.m04-battle .relay-selected { border-width: 2px; border-color: #80b5a5; background-color: #254b48; }
+.m04-battle .boss-lock-row { min-height: 48px; align-items: flex-start; padding: 5px 8px; }
+.m04-battle .lock-name { font-size: 14px; color: #eee4c9; }
+.m04-battle .lock-condition { font-size: 11px; color: #a9b6ad; white-space: normal; }
+
 .boss-target.mechanism-dial { position: absolute; align-items: center; justify-content: center; }
 .relay-symbol { color: #eee4c9; font-size: 28px; }
 .relay-one { left: 50px; }

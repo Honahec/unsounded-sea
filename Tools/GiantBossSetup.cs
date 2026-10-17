@@ -132,7 +132,7 @@ public static class GiantBossSetup
             body.transform.localPosition=new Vector3(-bounds.center.x,-bounds.min.y,-bounds.center.z)*factor;
             var motion=body.AddComponent<GiantBossMotion>();motion.kind=(BossEncounterKind)(index+1);
             motion.duration=new[]{2.8f,3.1f,2.7f,3.6f}[index];motion.contactTime=motion.duration*.57f;
-            motion.breathPeriod=new[]{7.5f,9f,8.4f,12f}[index];motion.waveAmplitude=new[]{65f,75f,80f,0f}[index];
+            motion.breathPeriod=new[]{7.5f,9f,8.4f,12f}[index];motion.waveAmplitude=new[]{65f,0f,0f,0f}[index];
             motion.effectColor=new[]{new Color(.76f,.8f,.69f),new Color(.53f,.75f,.71f),new Color(.67f,.64f,.49f),new Color(.18f,.6f,1.4f)}[index];
             motion.mistMaterial=AssetDatabase.LoadAssetAtPath<Material>(Root+"/Art/Bosses/GiantMist.mat");
             var bones=body.GetComponentsInChildren<Transform>(true).Where(t=>t.name.StartsWith("GB_")).ToArray();

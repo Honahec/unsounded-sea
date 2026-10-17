@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using UnsoundedSea.Core;
 
 namespace UnsoundedSea.Runtime
 {
@@ -13,11 +14,14 @@ namespace UnsoundedSea.Runtime
         private float age, chargeClock, ambientClock, effectRadius = 14, pulseDuration = 2.1f;
         private bool wideCharge;
         private int serial;
+        private BossWindEffect wind;
+        public int WindReleaseCount => wind == null ? 0 : wind.LaunchCount;
+        public int PoleContactCount { get; private set; }
         // Field initialization also restores valid slots after an Editor domain reload.
         private readonly Pulse[] pulses = { new Pulse(), new Pulse(), new Pulse(), new Pulse() };
         public int ParticleCount => mist == null ? 0 : mist.particleCount;
         public event Action VesselImpact;
-        public bool Busy => Array.Exists(pulses, pulse => pulse.active);
+        public bool Busy => Array.Exists(pulses, pulse => pulse.active) || wind != null && wind.Busy;
         private sealed class Pulse { public Vector3 origin, target; public float time; public bool active; }
         public void Initialize(Material material, Color color, BattleWater surface, Transform vessel, bool bodyWideCharge)
         {
@@ -61,9 +65,29 @@ namespace UnsoundedSea.Runtime
                 Emit(origin+v*10,v*12,2+4*(float)rng.NextDouble(),.8f+1.2f*(float)rng.NextDouble(),new Color(.75f,.76f,.65f,.8f*strength));
             }
         }
-        public void Release(Vector3 origin,bool ritual,bool observing)
+        public void PoleContact(Vector3 point)
+        {
+            PoleContactCount++;
+            for (var i = 0; i < 32; i++)
+            {
+                var angle = i * 2.399963f;
+                var direction = new Vector3(Mathf.Cos(angle), .4f + Mathf.Abs(Mathf.Sin(angle)), Mathf.Sin(angle));
+                Emit(point + direction, direction * 12, 1.1f, .6f, new Color(.75f, .58f, .31f, .8f));
+            }
+            VesselImpact?.Invoke();
+        }
+        public void Release(Vector3 origin,bool ritual,bool observing, BossEncounterKind kind = BossEncounterKind.None)
         {
             var target=boat!=null?boat.position:origin+Vector3.back*200;
+            if (kind == BossEncounterKind.Surveyor && !ritual && !observing)
+            {
+                if (wind == null)
+                {
+                    wind = gameObject.AddComponent<BossWindEffect>();
+                    wind.Contact += () => { Hit(boat != null ? boat.position : target, .6f); VesselImpact?.Invoke(); };
+                }
+                wind.Launch(origin, target); return;
+            }
             var toward=(target-origin).normalized;
             var rng=new System.Random(++serial*7919);
             int count=observing?90:ritual?200:140;
@@ -81,6 +105,7 @@ namespace UnsoundedSea.Runtime
         public void Tick(float dt,Vector3 origin,bool charging,bool retiring)
         {
             if(mist==null)return;
+            wind?.Tick(dt, GameSettings.ReducedMotion);
             age+=dt;chargeClock+=dt;ambientClock+=dt;
             if(charging && chargeClock>.045f)
             {

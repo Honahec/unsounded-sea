@@ -199,6 +199,7 @@ namespace UnsoundedSea.Runtime
             root.Clear(); root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion); nameplates.Clear(); var v = waitingForImpact ? impactView : director.View; if (v == null) return;
             root.focusable = v.PendingChoice == null && inspectedCard == 0 && !bookOpen && !chartOpen && !director.Paused && v.Phase == BattlePhase.PlayerTurn;
             encounterLabels.Clear();
+            PrepareBossMechanisms(v);
             enemyChoices.Clear();
             if (selectedEncounterCard == 0) enemySelection.Reset();
             presentedBoss = v.BossKind;
@@ -259,6 +260,9 @@ namespace UnsoundedSea.Runtime
             objective.pickingMode = PickingMode.Position;
             var objectiveTitle = scenario.encounter.objective == ObjectiveKind.Seal ? "封线" :
                 scenario.encounter.objective == ObjectiveKind.Survive ? "撤离" : "压制";
+            if (v.BossKind == BossEncounterKind.Choirmaster) objectiveTitle = v.BossStage == 1 ? "封匣" : "击破";
+            else if (v.BossKind == BossEncounterKind.Surveyor) objectiveTitle = "封栓";
+            else if (v.BossKind == BossEncounterKind.FlagBearer) objectiveTitle = v.BossStage == 1 ? "接线" : v.BossStage == 2 ? "闸锁" : "击退";
             objective.Add(Text(objectiveTitle, "objective-label"));
             objective.Add(Text($"{v.ObjectiveProgress} / {v.ObjectiveTarget}", "objective-count"));
             objective.tooltip = scenario.objectiveHeading + "：" + v.Objective;
@@ -267,6 +271,8 @@ namespace UnsoundedSea.Runtime
             if (v.BossKind != BossEncounterKind.None)
             {
                 var uniqueStatus = BossStatusWithoutProgress(v.BossStatus, v.ObjectiveProgress, v.ObjectiveTarget);
+                if (v.BossKind == BossEncounterKind.Surveyor && v.Turn != 6) uniqueStatus = "";
+                if (v.BossKind == BossEncounterKind.FlagBearer && v.BossStage == 2) uniqueStatus = uniqueStatus.Split('\n')[0];
                 if (!string.IsNullOrWhiteSpace(uniqueStatus)) root.Add(Text(uniqueStatus, "boss-status"));
                 RenderEncounterTargets(v, active);
             }
@@ -301,10 +307,11 @@ namespace UnsoundedSea.Runtime
                 ? director.View.Hand.Where(c => impactView.Hand.Any(old => old.InstanceId == c.InstanceId)).ToList()
                 : v.Hand.ToList();
             var spacing = HandSpacing(handWidth, handCards.Count);
+            var fanCards = new List<Button>();
             fan.style.width = HandWidth(spacing, handCards.Count);
-            if (handWidth > 0) fan.style.marginLeft = Mathf.Max(0, (handWidth - fan.style.width.value.value) * .5f);
+            if (handWidth > 0) fan.style.marginLeft = Mathf.Max(0, (handWidth - HandPadding - fan.style.width.value.value) * .5f);
             // Squeeze the fan instead of clipping cards when the panel is narrow (4:3, small windows).
-            hand.RegisterCallback<GeometryChangedEvent>(_ =>
+            hand.contentViewport.RegisterCallback<GeometryChangedEvent>(_ =>
             {
                 var width = hand.contentViewport.resolvedStyle.width;
                 var fitted = HandSpacing(width, fan.childCount);
@@ -312,10 +319,11 @@ namespace UnsoundedSea.Runtime
                 {
                     spacing = fitted;
                     var index = 0;
-                    foreach (var card in fan.Children()) card.style.left = index++ * spacing;
+                    // Hover/focus changes stacking order, not the cards' logical slots.
+                    foreach (var card in fanCards) card.style.left = index++ * spacing;
                     fan.style.width = HandWidth(spacing, fan.childCount);
                 }
-                fan.style.marginLeft = Mathf.Max(0, (width - HandWidth(spacing, fan.childCount)) * .5f);
+                fan.style.marginLeft = Mathf.Max(0, (width - HandPadding - HandWidth(spacing, fan.childCount)) * .5f);
             });
             var cardPresentation = new HandCardPresentation(hand);
             var animateDraw = !director.Paused && !chartOpen && v.PendingChoice == null && !GameSettings.ReducedMotion;
@@ -349,6 +357,7 @@ namespace UnsoundedSea.Runtime
                     evt.StopPropagation();
                 });
                 b.tabIndex = cardIndex + 1; b.style.left = cardIndex * spacing;
+                fanCards.Add(b);
                 b.AddToClassList("fan-" + Mathf.Clamp(cardIndex++ - (handCards.Count - 1) / 2, -3, 3));
                 cardPresentation.Add(b);
                 if (animateDraw && !previousHand.Contains(c.InstanceId))
@@ -590,6 +599,7 @@ namespace UnsoundedSea.Runtime
         private void RenderEncounterTargets(BattleView view, bool active)
         {
             if (director.Stage == null) return;
+            if (RenderSpecialBossMechanisms(view, active)) return;
             var anchors = director.Stage.GetComponentsInChildren<BossTargetAnchor>();
             var selected = view.Hand.FirstOrDefault(c => c.InstanceId == selectedEncounterCard);
             if (selected == null && view.BossKind == BossEncounterKind.Watcher) return;
@@ -672,9 +682,10 @@ namespace UnsoundedSea.Runtime
             }
         }
 
-        private const float CardWidth = 180, CardStep = 110, HandPadding = 30;
+        private const float CardWidth = 180, CardStep = 110, HandPadding = 30, HandEdgeSpace = 52;
         private static float HandSpacing(float width, int count) =>
-            count < 2 || float.IsNaN(width) || width <= 0 ? CardStep : Mathf.Clamp((width - HandPadding - CardWidth) / (count - 1), 52, CardStep);
+            count < 2 || float.IsNaN(width) || width <= 0 ? CardStep :
+                Mathf.Clamp((width - HandPadding - HandEdgeSpace * 2 - CardWidth) / (count - 1), 0, CardStep);
         private static float HandWidth(float spacing, int count) => CardWidth + Mathf.Max(0, count - 1) * spacing;
         private static void PileCount(VisualElement parent, string title, int count)
         {
@@ -722,11 +733,11 @@ namespace UnsoundedSea.Runtime
             var state = lines[0];
             var sealedCell = lines.Skip(1).Any(line => line == "封栓");
             button.AddToClassList(state == "?" ? "salt-unknown" : state.StartsWith("测 ", StringComparison.Ordinal) ? "salt-measured" : "salt-open");
-            if (state == "?") button.Add(Text("◇", "salt-symbol"));
+            if (state == "?") button.Add(Text("?", "salt-symbol"));
             else if (state.StartsWith("测 ", StringComparison.Ordinal)) button.Add(Text(state.Substring(2), "salt-number"));
             else if (state == "危险已停用") button.Add(Text("×", "salt-danger"));
             else button.Add(Text(state, "salt-number"));
-            if (sealedCell) button.Add(Text("◆", "salt-seal"));
+            if (sealedCell) button.Add(Text("封", "salt-seal"));
             button.tooltip = target.Name + "：" + (state == "?" ? "未测" : state.StartsWith("测 ", StringComparison.Ordinal) ? "已测，数值 " + state.Substring(2) :
                 state == "危险已停用" ? "已开，危险已停用" : "已开，邻近危险 " + state) + (sealedCell ? "；封栓" : "");
         }

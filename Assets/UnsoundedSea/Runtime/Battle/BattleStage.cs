@@ -95,12 +95,14 @@ namespace UnsoundedSea.Runtime
                 }
             }
             if (water != null) water.Bind(battleCamera);
+            foreach (var target in GetComponentsInChildren<BossTargetAnchor>()) target.Bind(view, owner);
             owner.Resolved += Present; RefreshSelection();
         }
         public void RefreshSelection() { foreach (var actor in actors) actor.Select(actor.EnemyId == director.SelectedEnemy); }
         private void Present(BattleView before, BattleView after, BattleCommand command)
         {
-            var watcherTurn = command.kind == CommandKind.EndTurn && after.BossKind == BossEncounterKind.Watcher;
+            var directedBossTurn = command.kind == CommandKind.EndTurn && after.BossKind != BossEncounterKind.None;
+            foreach (var target in GetComponentsInChildren<BossTargetAnchor>()) target.Present(after);
             for (var i = 0; i < actors.Count; i++)
             {
                 if (after.BossKind != BossEncounterKind.None && actors[i].GiantMotion == null)
@@ -108,8 +110,9 @@ namespace UnsoundedSea.Runtime
                 var action = command.kind == CommandKind.EndTurn
                     ? after.ResolvedEnemyActions.FirstOrDefault(x => x.EnemyId == actors[i].EnemyId) : null;
                 var damaged = after.Enemies[i].Health < before.Enemies[i].Health;
-                actors[i].Feedback(damaged, action != null && !watcherTurn, after.Enemies[i].Health > 0,
-                    action != null && action.Channel == DamageChannel.Sanity, action != null && action.Amount == 0, i * .12f);
+                actors[i].Feedback(damaged, action != null && !directedBossTurn, after.Enemies[i].Health > 0,
+                    action != null && (action.Kind == EnemyActionKind.Ritual || action.Kind == EnemyActionKind.Heal),
+                    action != null && (action.Kind == EnemyActionKind.Summon || action.Kind == EnemyActionKind.Observe), i * .12f);
                 if (actors[i].GiantMotion != null)
                 {
                     if (after.Phase == BattlePhase.Victory && before.Phase != BattlePhase.Victory) actors[i].GiantMotion.Retire();
@@ -118,11 +121,11 @@ namespace UnsoundedSea.Runtime
                 }
                 if (!actors[i].IsSeaActor && damaged) combatTarget = Mathf.Max(combatTarget, .65f);
             }
-            DelaysHudUntilImpact = watcherTurn && after.ResolvedEnemyActions.Count > 0;
+            DelaysHudUntilImpact = directedBossTurn && after.ResolvedEnemyActions.Count > 0;
             if (DelaysHudUntilImpact)
             {
                 if (watcherSequence != null) StopCoroutine(watcherSequence);
-                watcherSequence = StartCoroutine(PresentWatcherActions(after.ResolvedEnemyActions));
+                watcherSequence = StartCoroutine(PresentBossActions(after.ResolvedEnemyActions));
             }
             else if (after.Health < before.Health || after.Sanity < before.Sanity) PlayPlayerImpact(after.Sanity < before.Sanity);
             if (after.ObjectiveProgress > before.ObjectiveProgress && feedback != null && sealCue != null) feedback.PlayOneShot(sealCue);
@@ -138,7 +141,7 @@ namespace UnsoundedSea.Runtime
         {
             vesselImpactSerial++;
         }
-        private IEnumerator PresentWatcherActions(IReadOnlyList<ResolvedEnemyAction> actions)
+        private IEnumerator PresentBossActions(IReadOnlyList<ResolvedEnemyAction> actions)
         {
             foreach (var action in actions)
             {
@@ -147,19 +150,22 @@ namespace UnsoundedSea.Runtime
                 var giant = actor.GiantMotion;
                 var release = giant == null ? 0 : giant.ReleaseCount;
                 var vesselHit = vesselImpactSerial;
-                actor.Feedback(false, true, true, action.Channel == DamageChannel.Sanity);
+                actor.Feedback(false, true, true,
+                    action.Kind == EnemyActionKind.Ritual || action.Kind == EnemyActionKind.Heal,
+                    action.Kind == EnemyActionKind.Summon || action.Kind == EnemyActionKind.Observe);
                 if (giant != null)
                 {
-                    if (action.Channel == DamageChannel.Sanity)
+                    if (action.Kind == EnemyActionKind.Ritual || action.Kind == EnemyActionKind.Attack &&
+                        (director.View.BossKind == BossEncounterKind.Surveyor || director.View.BossKind == BossEncounterKind.FlagBearer))
                         yield return new WaitUntil(() => vesselImpactSerial > vesselHit);
                     else
                         yield return new WaitUntil(() => giant.ReleaseCount > release);
                 }
                 else if (actor.HasPendingDeckMotion)
-                    yield return new WaitUntil(() => actor.DeckActionImpact > 0);
+                    yield return new WaitUntil(() => actor.DeckActionImpact > 0 || !actor.HasPendingDeckMotion);
                 else if (actor.HasPendingGenericAttack)
                     yield return new WaitUntil(() => actor.GenericAttackAtImpact);
-                PlayPlayerImpact(action.Channel == DamageChannel.Sanity);
+                if (action.Amount > 0) PlayPlayerImpact(action.Channel == DamageChannel.Sanity);
                 director.NotifyPresentationImpact(action);
                 yield return new WaitUntil(() => giant != null ? !giant.Busy :
                     !actor.HasPendingDeckMotion && !actor.HasPendingGenericAttack);
