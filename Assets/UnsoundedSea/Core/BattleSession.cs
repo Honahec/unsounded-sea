@@ -51,7 +51,7 @@ namespace UnsoundedSea.Core
             this.objective = objective ?? new EncounterObjective(definition.Objective, definition.ObjectiveTarget);
             Seed = seed; deckRandom = new DeterministicRandom(seed); intentRandom = new DeterministicRandom(seed ^ 0x9E3779B9u);
             bossKind = Require.Defined(boss);
-            health = definition.Health; sanity = definition.Sanity;
+            health = definition.InitialHealth; sanity = definition.InitialSanity;
             enemies = definition.Enemies.Select(x => new EnemyState { Definition = x, Health = x.Health }).ToList();
             toolUses = definition.Tools.ToDictionary(x => x.Id, x => x.Uses, StringComparer.Ordinal);
             for (var i = 0; i < definition.Deck.Count; i++) draw.Add(new CardView(i + 1, definition.Deck[i]));

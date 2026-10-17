@@ -20,12 +20,15 @@ namespace UnsoundedSea.Runtime
         private BattleSession session;
         private float feedbackUntil;
         private bool wasBusy;
+        public BattleReplay CaptureReplay() => session == null ? null : BattleReplay.Capture(session);
 
         private void Start() => Restart();
         public void Restart()
         {
             scenario.ValidatePresentation();
-            session = scenario.CreateSession(seed, usePreparedDeck: true);
+            session = scenario.CreateSession(seed, usePreparedDeck: true,
+                voyage: VoyageRuntime.OwnsEncounter(this) ? VoyageRuntime.Session : null,
+                replay: VoyageRuntime.OwnsEncounter(this) ? VoyageRuntime.PendingReplay : null);
             SelectedEnemy = View.Enemies.FirstOrDefault(x => x.Health > 0 && x.Targetable)?.Id;
             feedbackUntil = 0; wasBusy = false; Paused = false; Notice = scenario.introduction;
             if (Stage != null) { Stage.gameObject.SetActive(false); Destroy(Stage.gameObject); }

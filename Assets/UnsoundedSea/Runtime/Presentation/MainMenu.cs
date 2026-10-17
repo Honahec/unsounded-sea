@@ -114,7 +114,7 @@ namespace UnsoundedSea.Runtime
                 if (hasBoss)
                     entries.Add(Entry("menu-sea-boss", "沉钟海域", () => SceneManager.LoadScene(seaBossScene), Application.CanStreamedLevelBeLoaded(seaBossScene)));
                 entries.Add(Entry("menu-boss-encounters", "禁航海域", () => { bossSelectionOpen = true; Build("menu-BossM02"); }));
-                entries.Add(Entry("menu-collection", "整理行动簿", () => { collectionOpen = true; Build(null); }));
+                entries.Add(Entry("menu-collection", "行动图鉴 / 初始船员", () => { collectionOpen = true; Build(null); }));
                 var settings = Entry("menu-settings", "设置", () => { settingsOpen = true; error = null; Build(null); });
                 settings.EnableInClassList("open", settingsOpen);
                 entries.Add(settings);

@@ -424,8 +424,15 @@ namespace UnsoundedSea.Runtime
             foreach (var entry in entries.Skip(Math.Max(0, entries.Length - 12))) log.Add(Text(entry, "log-line"));
             sheet.Add(log);
             if (!end) sheet.Add(Button("battle-resume", "继续战斗", () => director.SetPaused(false)));
-            if (!end || !VoyageRuntime.OwnsEncounter(director))
+            if (!VoyageRuntime.OwnsEncounter(director))
                 sheet.Add(Button("battle-retry", "重新开始这场遭遇", () => { chartOpen = false; chartWasPaused = false; showSettings = false; director.Restart(); }));
+            if (VoyageRuntime.OwnsEncounter(director))
+            {
+                if (!string.IsNullOrEmpty(VoyageRuntime.EncounterSaveError))
+                    sheet.Add(Text("记录尚未保存：" + VoyageRuntime.EncounterSaveError, "modal-copy"));
+                sheet.Add(Button("battle-voyage", end ? "返回航程 · 结算" : "保存并返回航程",
+                    () => { VoyageRuntime.ReturnToVoyage(); Render(); }));
+            }
             sheet.Add(Button("battle-settings", "设置", () => { showSettings = true; Render(); }));
             sheet.Add(Button("battle-menu", "返回主菜单", () => SceneManager.LoadScene(menuScene)));
         }

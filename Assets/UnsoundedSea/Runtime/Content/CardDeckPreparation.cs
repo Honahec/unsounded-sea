@@ -63,10 +63,10 @@ namespace UnsoundedSea.Runtime
             PlayerPrefs.Save();
         }
 
-        public static BattleDefinition Apply(BattleDefinition source)
+        public static BattleDefinition Apply(BattleDefinition source, VoyageSession voyage = null)
         {
-            var deck = Prepared;
-            var supports = CrewId == "listener"
+            var deck = voyage == null ? Prepared : voyage.DeckIds.Select(CardCatalog.Get).ToArray();
+            var supports = (voyage?.CrewId ?? CrewId) == "listener"
                 ? new[] { new CrewSupportSpec("listener", "听测员", CrewSupportKind.Listener) }
                 : new[] { new CrewSupportSpec("medic", "医护员", CrewSupportKind.Medic) };
             var enemyIds = new HashSet<string>(source.Enemies.Select(enemy => enemy.Id.Split(':')[0]), StringComparer.Ordinal);
@@ -75,8 +75,10 @@ namespace UnsoundedSea.Runtime
                 var separator = item.Key.IndexOf('/');
                 return separator > 0 && enemyIds.Contains(item.Key.Substring(0, separator).Split(':')[0]);
             })).GroupBy(item => item.Key).Select(group => group.Last());
-            return new BattleDefinition(source.Id, deck, source.Enemies, source.Tools, source.Objective,
-                source.ObjectiveTarget, source.Health, source.Sanity, source.Actions, source.DrawCount, supports, archive);
+            var tools = voyage == null ? source.Tools : voyage.ToolIds.Select(VoyageEncounterCatalog.ResolveTool).ToArray();
+            return new BattleDefinition(source.Id, deck, source.Enemies, tools, source.Objective,
+                source.ObjectiveTarget, source.Health, source.Sanity, source.Actions, source.DrawCount, supports, archive,
+                voyage?.Health ?? source.InitialHealth, voyage?.Sanity ?? source.InitialSanity);
         }
 
         private static CardSpec TryGet(string id)

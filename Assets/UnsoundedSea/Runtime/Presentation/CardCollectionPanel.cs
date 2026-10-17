@@ -26,7 +26,7 @@ namespace UnsoundedSea.Runtime
 
             var head = new VisualElement(); head.AddToClassList("collection-head");
             head.Add(Label("行动簿", "collection-title"));
-            head.Add(Label("浏览全部 90 种行动方案；选中 12 张带入下一场战斗。场景工序牌由遭遇另行提供。", "collection-copy"));
+            head.Add(Label("全部 90 种方案用于独立遭遇配牌。三幕远征从固定 12 张起步，途中学习与整备；此处船员选择用于新航程。", "collection-copy"));
             count = Label("", "collection-count"); head.Add(count); Add(head);
 
             var body = new VisualElement(); body.AddToClassList("collection-body");

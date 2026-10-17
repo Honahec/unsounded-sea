@@ -112,6 +112,8 @@ namespace UnsoundedSea.Core
         public string Id { get; }
         public int Health { get; }
         public int Sanity { get; }
+        public int InitialHealth { get; }
+        public int InitialSanity { get; }
         public int Actions { get; }
         public int DrawCount { get; }
         public ObjectiveKind Objective { get; }
@@ -124,12 +126,17 @@ namespace UnsoundedSea.Core
         public BattleDefinition(string id, IEnumerable<CardSpec> deck, IEnumerable<EnemySpec> enemies,
             IEnumerable<ToolSpec> tools, ObjectiveKind objective = ObjectiveKind.Defeat, int objectiveTarget = 4,
             int health = 60, int sanity = 30, int actions = 3, int drawCount = 5,
-            IEnumerable<CrewSupportSpec> supports = null, IEnumerable<Evidence> archive = null)
+            IEnumerable<CrewSupportSpec> supports = null, IEnumerable<Evidence> archive = null,
+            int? initialHealth = null, int? initialSanity = null)
         {
             Id = Require.Id(id); Deck = Require.Copy(deck); Enemies = Require.Copy(enemies); Tools = Require.Copy(tools);
             Supports = Require.Copy(supports ?? Array.Empty<CrewSupportSpec>());
             Archive = Require.Copy(archive ?? Array.Empty<Evidence>());
             Health = Require.Positive(health); Sanity = Require.Positive(sanity); Actions = Require.Positive(actions);
+            InitialHealth = Require.Positive(initialHealth ?? Health);
+            InitialSanity = Require.Positive(initialSanity ?? Sanity);
+            if (InitialHealth > Health || InitialSanity > Sanity)
+                throw new ArgumentOutOfRangeException(nameof(initialHealth), "Initial resources cannot exceed their maximum.");
             DrawCount = Require.Positive(drawCount); Objective = objective; ObjectiveTarget = Require.Positive(objectiveTarget);
             if (!Enum.IsDefined(typeof(ObjectiveKind), objective)) throw new ArgumentException("Unknown objective.");
             if (Deck.Count == 0 || Enemies.Count == 0) throw new ArgumentException("Encounter needs a deck and enemies.");

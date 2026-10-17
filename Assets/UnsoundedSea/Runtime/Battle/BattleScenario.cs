@@ -23,11 +23,19 @@ namespace UnsoundedSea.Runtime
         [TextArea] public string victoryText;
         [TextArea] public string defeatText;
 
-        public BattleSession CreateSession(uint seed, bool usePreparedDeck = false)
+        public BattleSession CreateSession(uint seed, bool usePreparedDeck = false, VoyageSession voyage = null, BattleReplay replay = null)
         {
             if (encounter == null) throw new InvalidOperationException($"{name}: encounter is missing.");
             var definition = encounter.Build();
-            if (usePreparedDeck) definition = CardDeckPreparation.Apply(definition);
+            if (usePreparedDeck || voyage != null) definition = CardDeckPreparation.Apply(definition, voyage);
+            if (replay != null)
+            {
+                var expectedBoss = rules is BossRuleModule module ? module.bossKind : BossEncounterKind.None;
+                if (replay.seed != seed || replay.bossKind != expectedBoss)
+                    throw new InvalidOperationException("战斗记录与当前航程遭遇不匹配。");
+                return replay.Restore(definition, rules == null ? null : rules.CreateEffects(),
+                    rules == null ? null : rules.CreateObjective(definition));
+            }
             return new BattleSession(definition, seed, rules == null ? null : rules.CreateEffects(),
                 rules == null ? null : rules.CreateObjective(definition),
                 rules is BossRuleModule boss ? boss.bossKind : BossEncounterKind.None);

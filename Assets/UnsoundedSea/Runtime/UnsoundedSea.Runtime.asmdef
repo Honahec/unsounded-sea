@@ -3,6 +3,7 @@
   "rootNamespace": "UnsoundedSea.Runtime",
   "references": [
     "UnsoundedSea.Core",
-    "UberWaterPlannerReflection"
+    "UberWaterPlannerReflection",
+    "Unity.Newtonsoft.Json"
   ]
 }

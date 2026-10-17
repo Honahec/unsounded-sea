@@ -51,8 +51,13 @@ public static class VoyageOceanQA
                 if (candidate.Choices.Count == choiceCount) { fixture = candidate; break; }
                 candidate.Select(candidate.Choices.Last().Id); candidate.SetSail(); candidate.Arrive();
                 if (candidate.Current.Kind == RunNodeKind.Battle || candidate.Current.Kind == RunNodeKind.Boss)
-                { candidate.BeginEncounter(); candidate.ResolveEncounter(true); }
-                else candidate.Continue();
+                { candidate.BeginEncounter(); candidate.ResolveEncounter(true, candidate.Health, candidate.Sanity); }
+                else if (candidate.Phase == VoyagePhase.Arrived)
+                {
+                    candidate.ChooseNode(candidate.GetNodeChoices().First(x => x.Enabled).Id);
+                    candidate.Continue();
+                }
+                if (candidate.Phase == VoyagePhase.Reward) candidate.ClaimReward(null);
             }
         }
         Check(fixture != null, "No fixture with requested exits");
@@ -217,9 +222,10 @@ public static class VoyageOceanQA
     }
     static void CheckReleased()
     {
-        Check(UnityEngine.Object.FindObjectsByType<BattleWater>().Length==0,"Voyage water leaked across scene");
-        Check(UnityEngine.Object.FindObjectsByType<PlanarReflectionManager>().Length==0,"Reflection manager leaked");
-        Check(UnityEngine.Object.FindObjectsByType<PlanarReflectionVolume>().Length==0,"Reflection volume leaked");
+        const int expected = 0;
+        Check(UnityEngine.Object.FindObjectsByType<BattleWater>().Length==expected,"Unexpected water after voyage exit");
+        Check(UnityEngine.Object.FindObjectsByType<PlanarReflectionManager>().Length==expected,"Unexpected reflection managers");
+        Check(UnityEngine.Object.FindObjectsByType<PlanarReflectionVolume>().Length==expected,"Unexpected reflection volumes");
         Check(UnityEngine.Object.FindObjectsByType<VoyageSceneView>().Length==0,"Voyage destination leaked across scene");
         Check(!Resources.FindObjectsOfTypeAll<Mesh>().Any(m=>m.name=="Voyage wake (runtime)"),"Wake mesh leaked");
     }
@@ -237,28 +243,22 @@ public static class VoyageOceanQA
             await Until(()=>VoyageRuntime.Session.Phase==VoyagePhase.Arrived);
             Check(VoyageRuntime.Session.LegsSailed==1,"Resumed passage duplicated arrival");
             GameSettings.ReducedMotion=true;
-            while(VoyageRuntime.Session.Current.Kind!=RunNodeKind.Battle&&VoyageRuntime.Session.Current.Kind!=RunNodeKind.Boss)
-            {
-                Click("arrival-continue"); var session=VoyageRuntime.Session;
-                var choice=session.Choices.FirstOrDefault(x=>x.Kind==RunNodeKind.Battle)??session.Choices.Last();
-                Click("route-"+choice.Id);Click("set-sail");await Until(()=>VoyageRuntime.Session.Phase==VoyagePhase.Arrived,3);
-            }
             var expectedSeed=VoyageRuntime.Session.Current.BattleSeed;
             Click("arrival-investigate");await Until(()=>SceneManager.GetActiveScene().name=="OceanBattle");await Task.Delay(250);
             CheckReleased();var director=UnityEngine.Object.FindAnyObjectByType<BattleDirector>();
             Check(director.seed==expectedSeed,"Encounter seed changed");
-            for(int i=0;i<4;i++)
-            {
-                await Until(()=>!director.Busy,5);Click("battle-task");await Until(()=>!director.Busy,5);
-                if(i<3) {Click("battle-end-turn");await Until(()=>!director.Busy,5);}
-            }
-            Check(director.View.Phase==BattlePhase.Victory,"Voyage encounter did not win");
+            await Until(()=>!director.Busy,5);
+            Click("battle-end-turn");await Until(()=>!director.Busy,5);
+            var turn=director.View.Turn;var health=director.View.Health;var sanity=director.View.Sanity;
             int legs=VoyageRuntime.Session.LegsSailed;
-            Click("battle-menu");await Until(()=>SceneManager.GetActiveScene().name=="MainMenu");await Task.Delay(150);
-            Click("menu-continue");await Until(()=>Hud!=null);await Task.Delay(250);
-            Check(VoyageRuntime.Session.LegsSailed==legs&&VoyageRuntime.Session.Phase==VoyagePhase.ChoosingRoute,"Battle return lost voyage checkpoint");
+            Check(VoyageRuntime.TryResume(out var resumeError),resumeError);
+            director.SetPaused(true);Click("battle-voyage");await Until(()=>Hud!=null);await Task.Delay(250);
+            Check(VoyageRuntime.Session.LegsSailed==legs&&VoyageRuntime.Session.Phase==VoyagePhase.Encounter,"Battle return lost pending encounter");
             Check(UnityEngine.Object.FindObjectsByType<PlanarReflectionManager>().Length==1,"Return did not recreate exactly one ocean");
-            return new{saveResume=true,releaseOnMenu=true,releaseOnBattle=true,encounterSeed=expectedSeed,battleVictory=true,legs,returnToVoyage=true};
+            Click("resume-encounter");await Until(()=>SceneManager.GetActiveScene().name=="OceanBattle");await Task.Delay(250);
+            director=UnityEngine.Object.FindAnyObjectByType<BattleDirector>();
+            Check(director.View.Turn==turn&&director.View.Health==health&&director.View.Sanity==sanity,"Mid-battle continuation reset resources");
+            return new{saveResume=true,releaseOnMenu=true,releaseOnBattle=true,encounterSeed=expectedSeed,turn,health,sanity,legs,returnToVoyage=true};
         }
         finally{GameSettings.ReducedMotion=original;}
     }

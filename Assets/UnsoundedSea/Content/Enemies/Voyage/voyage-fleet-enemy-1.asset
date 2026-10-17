@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 704da23baf0814ad2a86fad0cc4954f8, type: 3}
+  m_Name: voyage-fleet-enemy-1
+  m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
+  id: voyage-fleet-enemy-1
+  displayName: "\u54D1\u706B\u70AE\u624B"
+  health: 23
+  candidateDescription: "\u6574\u5907\uFF1A\u65E0\u4F24\u5BB3 / \u91CD\u51FB\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u5747\u516C\u5F00\uFF09"
+  intents:
+  - id: prepare
+    displayName: "\u6536\u7D27\u7F06\u7D22"
+    clue: "\u76EE\u6807\u505C\u5728\u539F\u5730\uFF0C\u91CD\u65B0\u6536\u7D27\u624B\u4E2D\u7684\u7F06\u7D22\u3002"
+    channel: 0
+    amount: 0
+    isPublic: 1
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
+  - id: heavy
+    displayName: "\u6C89\u91CD\u6325\u51FB"
+    clue: "\u6B66\u5668\u5DF2\u7ECF\u9AD8\u4E3E\uFF0C\u843D\u70B9\u6B63\u5BF9\u7532\u677F\u3002"
+    channel: 0
+    amount: 10
+    isPublic: 1
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
+  presentationPrefab: {fileID: 6536484850760832164, guid: d6e078df63125453e87419a8e7f51e6d, type: 3}

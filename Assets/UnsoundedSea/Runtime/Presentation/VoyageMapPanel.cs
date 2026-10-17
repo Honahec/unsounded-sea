@@ -19,9 +19,9 @@ namespace UnsoundedSea.Runtime
 
             var heading = new VisualElement { pickingMode = PickingMode.Ignore };
             heading.AddToClassList("map-heading");
-            var title = new Label("雾海航路图") { pickingMode = PickingMode.Ignore };
+            var title = new Label($"第 {session?.Act ?? 0} 幕 · {RegionName(session?.RegionId)}航路图") { pickingMode = PickingMode.Ignore };
             title.AddToClassList("map-title"); heading.Add(title);
-            var note = new Label("仅绘已知水域") { pickingMode = PickingMode.Ignore };
+            var note = new Label(session == null ? "无远征记录" : $"航点 {session.VisitedThisAct} / {VoyageSession.ActLength} · 仅绘已知水域") { pickingMode = PickingMode.Ignore };
             note.AddToClassList("map-note"); heading.Add(note); Add(heading);
 
             if (session == null)
@@ -45,6 +45,8 @@ namespace UnsoundedSea.Runtime
             var label = new Label(text) { pickingMode = PickingMode.Ignore }; label.AddToClassList("map-legend-label");
             entry.Add(mark); entry.Add(label); legend.Add(entry);
         }
+        private static string RegionName(string id) => id == "fog" ? "灰雾航道" : id == "bones" ? "尸骸之海" :
+            id == "inverted" ? "倒悬潮庭" : id == "fleet" ? "无灯裂海" : id == "abyss" ? "无星深渊" : "远征";
     }
 
     internal sealed class VoyageChart : VisualElement
@@ -87,7 +89,7 @@ namespace UnsoundedSea.Runtime
                 var glyph = new ChartNodeGlyph(stop.Kind) { pickingMode = PickingMode.Ignore }; glyph.AddToClassList("node-glyph"); node.Add(glyph);
                 var title = new Label(stop.Name) { pickingMode = PickingMode.Ignore }; title.AddToClassList("node-name");
                 title.AddToClassList(stop.Y > 78 ? "label-below" : "label-above"); node.Add(title);
-                node.tooltip = StateName(state) + " · " + stop.Name;
+                node.tooltip = $"{StateName(state)} · {KindName(stop.Kind)} · {stop.Name}\n{stop.Clue}";
                 Add(node);
             }
 
@@ -109,6 +111,9 @@ namespace UnsoundedSea.Runtime
         }
 
         private static string StateName(string state) => state == "current" ? "在此" : state == "selected" ? "已选航向" : state == "available" ? "可航行" : state == "visited" ? "已航经" : "已测";
+        private static string KindName(RunNodeKind kind) => kind == RunNodeKind.Battle ? "调查遭遇" :
+            kind == RunNodeKind.Boss ? "区域威胁" : kind == RunNodeKind.Supply ? "安全补给" :
+            kind == RunNodeKind.Archive ? "档案线索" : kind == RunNodeKind.Reward ? "行动收获" : "海上事件";
         private Vector2 Point(float x, float y) => new Vector2(contentRect.width * x / 100, contentRect.height * (100 - y) / 100);
 
         private void Draw(MeshGenerationContext context)

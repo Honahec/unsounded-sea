@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace UnsoundedSea.Core
 {
-    public enum RunNodeKind { Battle, Event, Supply, Archive, Boss }
+    public enum RunNodeKind { Battle, Event, Supply, Archive, Reward, Boss }
 
     public sealed class RunNode
     {
