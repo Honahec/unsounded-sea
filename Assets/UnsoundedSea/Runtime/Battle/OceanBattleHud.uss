@@ -14,6 +14,7 @@
 .clue { margin-top: 3px; font-size: 15px; -unity-text-align: middle-center; text-shadow: 0 1px 2px #020708; }
 .intel-text { margin-top: 3px; color: #80b5a5; font-size: 14px; -unity-text-align: middle-center; }
 .tools { position: absolute; left: 36px; bottom: 192px; width: 260px; }
+.tool-focus { margin-bottom: 7px; color: #d7bd82; font-size: 12px; letter-spacing: 1px; }
 .tool { min-height: 42px; margin: 0 0 8px; padding: 9px 12px; border-radius: 2px; border-width: 1px; border-color: rgba(158,135,85,.35); background-color: rgba(8,19,22,.82); color: #eee4c9; flex-direction: row; align-items: center; justify-content: space-between; }
 .tool:hover { background-color: #263b36; border-color: #b3a482; }
 .tool-name { font-size: 16px; }

@@ -60,6 +60,25 @@ namespace UnsoundedSea.Runtime
             }
             return group;
         }
+        private VisualElement Volume(string id, int value, Action<int> set)
+        {
+            var volume = new VisualElement { pickingMode = PickingMode.Ignore };
+            volume.AddToClassList("volume");
+            volume.Add(Option(id + "-down", "-", "volume-step", () => set(value - 1)));
+            var steps = new VisualElement { pickingMode = PickingMode.Ignore };
+            steps.AddToClassList("volume-steps");
+            for (var i = 0; i < GameSettings.VolumeSteps; i++)
+            {
+                var step = new VisualElement { pickingMode = PickingMode.Ignore };
+                step.AddToClassList("volume-pip");
+                step.EnableInClassList("filled", i < value);
+                steps.Add(step);
+            }
+            volume.Add(steps);
+            volume.Add(Option(id + "-up", "+", "volume-step", () => set(value + 1)));
+            volume.Add(Text(value * 10 + "%", "volume-value"));
+            return volume;
+        }
 
         private void Build(string focus)
         {
@@ -69,25 +88,17 @@ namespace UnsoundedSea.Runtime
             head.Add(Text("设置", "settings-title"));
             Add(head);
 
-            var volume = new VisualElement { pickingMode = PickingMode.Ignore };
-            volume.AddToClassList("volume");
-            volume.Add(Option("volume-down", "-", "volume-step", () => GameSettings.Volume--));
-            var steps = new VisualElement { pickingMode = PickingMode.Ignore };
-            steps.AddToClassList("volume-steps");
-            for (var i = 0; i < GameSettings.VolumeSteps; i++)
-            {
-                var step = new VisualElement { pickingMode = PickingMode.Ignore };
-                step.AddToClassList("volume-pip");
-                step.EnableInClassList("filled", i < GameSettings.Volume);
-                steps.Add(step);
-            }
-            volume.Add(steps);
-            volume.Add(Option("volume-up", "+", "volume-step", () => GameSettings.Volume++));
-            volume.Add(Text(GameSettings.Volume * 10 + "%", "volume-value"));
-            Add(Row("音量", volume));
-            Add(Row("显示", Choice("display", new[] { "全屏", "窗口" }, GameSettings.Fullscreen ? 0 : 1, i => GameSettings.Fullscreen = i == 0)));
-            Add(Row("垂直同步", Choice("vsync", new[] { "开", "关" }, GameSettings.VSync ? 0 : 1, i => GameSettings.VSync = i == 0)));
-            Add(Row("动效", Choice("motion", new[] { "标准", "减少" }, GameSettings.ReducedMotion ? 1 : 0, i => GameSettings.ReducedMotion = i == 1)));
+            var rows = new ScrollView(ScrollViewMode.Vertical) { name = "settings-scroll" };
+            rows.AddToClassList("settings-scroll");
+            Add(rows);
+            ScrollWheel.ForwardFrom(this, rows);
+            rows.Add(Row("总音量", Volume("volume", GameSettings.Volume, value => GameSettings.Volume = value)));
+            rows.Add(Row("音乐", Volume("music-volume", GameSettings.MusicVolume, value => GameSettings.MusicVolume = value)));
+            rows.Add(Row("音效", Volume("effects-volume", GameSettings.EffectsVolume, value => GameSettings.EffectsVolume = value)));
+            rows.Add(Row("分辨率", Choice("resolution", GameSettings.ResolutionLabels, GameSettings.Resolution, i => GameSettings.Resolution = i)));
+            rows.Add(Row("显示", Choice("display", new[] { "全屏", "窗口" }, GameSettings.Fullscreen ? 0 : 1, i => GameSettings.Fullscreen = i == 0)));
+            rows.Add(Row("垂直同步", Choice("vsync", new[] { "开", "关" }, GameSettings.VSync ? 0 : 1, i => GameSettings.VSync = i == 0)));
+            rows.Add(Row("动效", Choice("motion", new[] { "标准", "减少" }, GameSettings.ReducedMotion ? 1 : 0, i => GameSettings.ReducedMotion = i == 1)));
 
             var foot = new VisualElement { pickingMode = PickingMode.Ignore };
             foot.AddToClassList("settings-foot");

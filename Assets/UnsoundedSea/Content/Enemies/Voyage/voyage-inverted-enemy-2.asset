@@ -15,15 +15,16 @@ MonoBehaviour:
   id: voyage-inverted-enemy-2
   displayName: "\u955C\u6F6E\u8BB0\u5F55\u5458"
   health: 30
-  candidateDescription: "\u955C\u7247\u51DD\u89C6\uFF1A5 \u7406\u667A\u51B2\u51FB\uFF08\u516C\u5F00\uFF09 / \u8D26\u672C\u7838\u51FB\uFF1A9 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  candidateDescription: "\u955C\u7247\u51DD\u89C6\uFF1A5 \u7406\u667A\u51B2\u51FB / \u8D26\u672C\u7838\u51FB\uFF1A9 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  intentPolicy: 1
   intents:
   - id: mirror
     displayName: "\u955C\u7247\u51DD\u89C6"
     clue: "\u6C27\u5316\u955C\u7247\u79BB\u5F00\u8D26\u672C\uFF0C\u6B63\u5BF9\u4F60\u7684\u773C\u775B\u3002"
     channel: 1
     amount: 5
-    isPublic: 1
-    visibleAction: 0
+    isPublic: 0
+    visibleAction: 1
     interruptible: 1
     soundSource: "\u9762\u90E8\u955C\u7247"
   - id: book

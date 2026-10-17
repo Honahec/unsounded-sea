@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "\u9AA8\u7B1B\u4F8D\u4ECE"
   health: 30
   candidateDescription: "\u9AA8\u7B1B\u4F4E\u9E23\uFF1A4 \u7406\u667A\u51B2\u51FB / \u7B1B\u7AEF\u523A\u51FB\uFF1A8 \u751F\u547D\u4F24\u5BB3"
+  intentPolicy: 1
   intents:
   - id: flute
     displayName: "\u9AA8\u7B1B\u4F4E\u9E23"

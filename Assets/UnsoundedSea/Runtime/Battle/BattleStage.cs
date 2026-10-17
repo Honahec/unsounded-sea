@@ -58,6 +58,8 @@ namespace UnsoundedSea.Runtime
             cameraPosition = battleCamera.transform.localPosition;
             cameraRotation = battleCamera.transform.localRotation;
             oceanProperties = new MaterialPropertyBlock();
+            GameSettings.ApplyAudioSource(ambience, true);
+            GameSettings.ApplyAudioSource(feedback, false);
             var view = owner.View;
             for (var i = 0; i < view.Enemies.Count; i++)
             {

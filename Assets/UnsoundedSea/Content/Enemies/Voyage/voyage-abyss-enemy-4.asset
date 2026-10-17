@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "\u8237\u5916\u7D22\u540D\u8005"
   health: 34
   candidateDescription: "\u8237\u5916\u7D22\u540D\uFF1A5 \u7406\u667A\u51B2\u51FB / \u957F\u81C2\u652B\u53D6\uFF1A12 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  intentPolicy: 1
   intents:
   - id: ask
     displayName: "\u8237\u5916\u7D22\u540D"
@@ -23,7 +24,7 @@ MonoBehaviour:
     channel: 1
     amount: 5
     isPublic: 0
-    visibleAction: 0
+    visibleAction: 1
     interruptible: 1
     soundSource: "\u8863\u9886\u5185"
   - id: reach

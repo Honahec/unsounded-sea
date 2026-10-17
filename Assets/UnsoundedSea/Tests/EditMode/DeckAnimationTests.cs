@@ -152,12 +152,15 @@ namespace UnsoundedSea.Tests
             Assert.That(session.View.Phase, Is.EqualTo(BattlePhase.Defeat));
             Assert.That(session.View.ResolvedEnemyActions.Select(a => a.EnemyId), Is.EqualTo(new[] { "first" }));
         }
-        [Test] public void ObservationIsReportedAsZeroDamage()
+        [Test] public void ZeroDamageDoesNotPresentAnAttackButRealDamageDoes()
         {
-            var session = new BattleSession(Definition(0), 42);
-            session.Execute(BattleCommand.EndTurn());
-            Assert.That(session.View.ResolvedEnemyActions.Count, Is.EqualTo(2));
-            Assert.That(session.View.ResolvedEnemyActions.All(a => a.Amount == 0), Is.True);
+            var observation = new BattleSession(Definition(0), 42);
+            Assert.That(observation.Execute(BattleCommand.EndTurn()).Success, Is.True);
+            Assert.That(observation.View.ResolvedEnemyActions, Is.Empty);
+
+            var attack = new BattleSession(Definition(3), 42);
+            Assert.That(attack.Execute(BattleCommand.EndTurn()).Success, Is.True);
+            Assert.That(attack.View.ResolvedEnemyActions.Select(a => a.Amount), Is.EqualTo(new[] { 3, 3 }));
         }
     }
 }

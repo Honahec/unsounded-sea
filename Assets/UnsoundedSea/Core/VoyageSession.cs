@@ -22,21 +22,38 @@ namespace UnsoundedSea.Core
         public bool Enabled { get; }
         public VoyageNodeChoice(string id,string title,string description,bool enabled=true) { Id=id; Title=title; Description=description; Enabled=enabled; }
     }
+    public sealed class VoyageSummary
+    {
+        public string Outcome { get; internal set; }
+        public string DeathCause { get; internal set; }
+        public IReadOnlyList<string> Route { get; internal set; }
+        public IReadOnlyList<string> LearnedCards { get; internal set; }
+        public IReadOnlyList<string> SpentItems { get; internal set; }
+        public int SpentSupplies { get; internal set; }
+        public int Health { get; internal set; }
+        public int Sanity { get; internal set; }
+        public int Supplies { get; internal set; }
+        public int ElapsedHours { get; internal set; }
+    }
+
 
     public sealed partial class VoyageSession
     {
-        public const int CheckpointVersion=9;
+        public const int CheckpointVersion=10;
         public const int ActLength=11;
         private const int InitialToolUses=2, MaxHistory=512;
         private static readonly string[] InitialTools={"lantern","listener","shell"};
         private static readonly int[] CommonRewards = { 3, 5, 7, 9, 14, 16, 18, 23, 24, 26, 27, 28, 29, 31, 32, 33, 35, 38, 40, 42, 45, 48, 49, 50, 51, 53, 54 };
-        private static readonly Dictionary<string, int[]> RegionRewards = new Dictionary<string, int[]>
+        private static readonly Dictionary<string, int[]> BossRewards = new Dictionary<string, int[]>
         {
-            ["fog"] = new[] { 6, 11, 16, 25, 32, 36, 47, 48, 58, 64, 70 },
-            ["bones"] = new[] { 4, 8, 13, 15, 34, 46, 56, 61, 62, 68, 78, 88 },
-            ["inverted"] = new[] { 25, 36, 43, 44, 60, 67, 75, 77 },
-            ["fleet"] = new[] { 17, 25, 32, 57, 60, 63, 65, 70, 76, 79, 85 },
-            ["abyss"] = new[] { 4, 8, 10, 13, 34, 46, 52, 62, 66, 69, 75, 81, 82, 84, 88, 90 }
+            ["fog-visitors"] = new[] { 6, 11, 16, 25, 32, 36, 47, 48, 58, 64, 70 },
+            ["drowned-bell"] = new[] { 4, 8, 13, 15, 34, 56, 68, 88 },
+            ["m02"] = new[] { 4, 8, 13, 15, 34, 46, 56, 61, 62, 68, 78, 88 },
+            ["m03"] = new[] { 25, 36, 43, 44, 60, 67, 75, 77 },
+            ["m04"] = new[] { 17, 25, 32, 57, 60, 63, 65, 70, 79, 85 },
+            ["storm-gauntlet"] = new[] { 17, 25, 32, 60, 63, 70, 79, 85 },
+            ["hollow-beacon"] = new[] { 6, 11, 16, 25, 32, 36, 47, 48, 70 },
+            ["m05"] = new[] { 4, 8, 10, 13, 34, 46, 52, 62, 66, 69, 75, 81, 82, 84, 88, 90 }
         };
         private VoyagePlan plan; private Dictionary<string,VoyageStop> byId; private RunMap map;
         private readonly VoyageMapData initialMap; private readonly string initialCrew;
@@ -45,7 +62,7 @@ namespace UnsoundedSea.Core
         private readonly HashSet<string> knownStopIds=new HashSet<string>(StringComparer.Ordinal), knownRouteKeys=new HashSet<string>(StringComparer.Ordinal);
         private readonly List<string> deck=new List<string>(CardCatalog.Starter.Select(card=>card.Id)), learned=new List<string>(CardCatalog.Starter.Select(card=>card.Id));
         private readonly List<string> tools=new List<string>{"lantern","listener"}, learnedTools=new List<string>(InitialTools);
-        private VoyageStop selected; private VoyagePhase phase; private int elapsedHours; private bool nodeResolved; private bool initialPreparation=true;
+        private VoyageStop selected; private VoyagePhase phase; private int elapsedHours, spentSupplies; private bool nodeResolved; private bool initialPreparation=true;
         private string nextRegion;
         private bool debug, restoring;
         private VoyageSession(VoyagePlan first,string crew)
@@ -86,6 +103,15 @@ namespace UnsoundedSea.Core
         public bool CanRevealRoutes=>phase==VoyagePhase.ChoosingRoute&&ChartUses>0&&HasUnknownRoutes(CurrentFull);
         public bool CanScoutAhead=>phase==VoyagePhase.ChoosingRoute&&selected!=null&&LookoutUses>0&&HasUnknownRoutes(selected);
         public bool IsDebug=>debug;
+        public VoyageSummary Summary=>new VoyageSummary
+        {
+            Outcome=phase==VoyagePhase.Completed?"远征完成":phase==VoyagePhase.Failed?"远征失败":"远征进行中",
+            DeathCause=phase!=VoyagePhase.Failed?null:Health==0?"生命耗尽":Sanity==0?"理智崩溃":"战斗失利（未记录致命来源）",
+            Route=log.Where(x=>x.StartsWith("离开",StringComparison.Ordinal)||x.StartsWith("抵达",StringComparison.Ordinal)).ToArray(),
+            LearnedCards=learned.Select(id=>CardCatalog.Get(id).Name).ToArray(),
+            SpentItems=history.Where(x=>x.Kind==VoyageActionKind.ResolveEncounter&&x.Values!=null).SelectMany(x=>x.Values).Select(id=>SupportCatalog.Item(id).Name).ToArray(),
+            SpentSupplies=spentSupplies,Health=Health,Sanity=Sanity,Supplies=Supplies,ElapsedHours=elapsedHours
+        };
 
         public static VoyageSession Create(uint seed,string crewId="medic")=>new VoyageSession(VoyageMapGenerator.Generate(seed),crewId);
         public static VoyageSession CreateDebug(uint seed,string regionId,RunNodeKind kind,string encounterId=null)
@@ -146,7 +172,7 @@ namespace UnsoundedSea.Core
 
         public IReadOnlyList<VoyageNodeChoice> GetNodeChoices()
         {
-            if(phase==VoyagePhase.ActComplete && Act==1) return new[]{new VoyageNodeChoice("bones","尸骸之海","巨型鲸骸与召唤媒介"),new VoyageNodeChoice("inverted","倒悬潮庭","盐格推理与理智压力"),new VoyageNodeChoice("fleet","无灯裂海","舰队装置与承压作业")};
+            if(phase==VoyagePhase.ActComplete && Act==1) return new[]{new VoyageNodeChoice("bones","尸骸之海","鲸骸漂流带与密集接舷"),new VoyageNodeChoice("inverted","倒悬潮庭","逆向潮流与失衡航道"),new VoyageNodeChoice("fleet","无灯裂海","无灯舰群与狭窄水道")};
             if(phase!=VoyagePhase.Arrived||nodeResolved)return Array.Empty<VoyageNodeChoice>();
             if(CurrentFull.Kind==RunNodeKind.Event&&Watched==3&&ServiceAvailable("return-gaze"))return Array.Empty<VoyageNodeChoice>();
             switch(CurrentFull.Kind)
@@ -154,7 +180,7 @@ namespace UnsoundedSea.Core
                 case RunNodeKind.Event:return EventChoices();
                 case RunNodeKind.Archive:
                     var routesAvailable=HasUnknownRoutes(CurrentFull);
-                    return new[]{new VoyageNodeChoice("routes","抄录航路",routesAvailable?"揭示此处全部后续航路，并把海况结论写入日志":"所有后续航路已经记录，没有新航路可抄录",routesAvailable||restoring),new VoyageNodeChoice("briefing","研读威胁简报","记录本海域区域威胁的真实机制线索"),new VoyageNodeChoice("seal","封存记录",Sanity<30?"恢复5理智":"理智已满，无需封存记录",Sanity<30)};
+                    return new[]{new VoyageNodeChoice("routes","抄录航路",routesAvailable?"揭示此处全部后续航路，并把海况结论写入日志":"所有后续航路已经记录，没有新航路可抄录",routesAvailable||restoring),new VoyageNodeChoice("briefing","研读幕末简报","记录本幕实际威胁的真实机制线索"),new VoyageNodeChoice("seal","封存记录",Sanity<30?"恢复5理智":"理智已满，无需封存记录",Sanity<30)};
                 case RunNodeKind.Supply:return new[]{new VoyageNodeChoice("rest","休整",Health<60||Sanity<30?"恢复12生命与5理智":"生命与理智均已恢复至上限",Health<60||Sanity<30),new VoyageNodeChoice("repair","深度治疗",Supplies==0?"补给不足；需要1补给":Health>=60?"生命已满，无需深度治疗":"消耗1补给，恢复24生命",Supplies>0&&Health<60),new VoyageNodeChoice("calm","长期安抚",Supplies==0?"补给不足；需要1补给":Sanity>=30?"理智已满，无需长期安抚":"消耗1补给，恢复11理智",Supplies>0&&Sanity<30),new VoyageNodeChoice("depart","不作整备","继续航行")};
                 default:return Array.Empty<VoyageNodeChoice>();
             }
@@ -187,8 +213,8 @@ namespace UnsoundedSea.Core
                 case "briefing":outcome=RegionBriefing(true);AddKnowledge(outcome);break;
                 case "seal":Sanity=Math.Min(30,Sanity+5);outcome="记录已封存：理智 +5。";break;
                 case "rest":Health=Math.Min(60,Health+12+(ActiveCrew("cook")?3:0));Sanity=Math.Min(30,Sanity+5+(ActiveCrew("medic")?2:0));outcome="完成短时休整与可用船员照护。";break;
-                case "repair":Supplies--;Health=Math.Min(60,Health+24);outcome="消耗1补给完成深度治疗：生命 +24。";break;
-                case "calm":Supplies--;Sanity=Math.Min(30,Sanity+11);outcome="消耗1补给完成长期安抚：理智 +11。";break;
+                case "repair":SpendSupplies(1);Health=Math.Min(60,Health+24);outcome="消耗1补给完成深度治疗：生命 +24。";break;
+                case "calm":SpendSupplies(1);Sanity=Math.Min(30,Sanity+11);outcome="消耗1补给完成长期安抚：理智 +11。";break;
                 case "depart":outcome="未消耗补给，完成整备检查。";break;
                 case "leave":outcome="保持距离离开，资源未变化。";break;
                 default:return false;
@@ -275,15 +301,16 @@ namespace UnsoundedSea.Core
         }
         private IReadOnlyList<CardSpec> BuildRewards()
         {
-            return CardCatalog.All.Where(card=>!learned.Contains(card.Id)&&UsefulInRegion(card))
+            return CardCatalog.All.Where(card=>!learned.Contains(card.Id)&&UsefulForBoss(card))
                 .OrderBy(card=>VoyageSeeds.Derive(Seed,"reward",Act+":"+CurrentFull.Id+":"+card.Id)).Take(CurrentFull.Kind==RunNodeKind.Reward?4:3).ToArray();
         }
-        private bool UsefulInRegion(CardSpec card)
+        private bool UsefulForBoss(CardSpec card)
         {
             var number=CardCatalog.Number(card.Id);
             if(number>=91)return number==91?runArchive.Any(x=>x.Rule=="source-v1"):number==92||number==93||number==94||number==95&&inventory.Any(x=>x!="i12")||number==96&&markers.ContainsKey("surveyed-beacon");
             if ((Act >= 2 || nextRegion != null) && (number == 76 || number == 83)) return true;
-            return Array.IndexOf(CommonRewards, number) >= 0 || Array.IndexOf(RegionRewards[nextRegion??RegionId], number) >= 0;
+            var boss=nextRegion==null?byId[plan.GoalId].EncounterId:VoyageMapGenerator.BossEncounter(Seed,Act+1,nextRegion);
+            return Array.IndexOf(CommonRewards,number)>=0||BossRewards.TryGetValue(boss,out var rewards)&&Array.IndexOf(rewards,number)>=0;
         }
         private string RegionBriefing(bool boss)
         {
@@ -296,9 +323,10 @@ namespace UnsoundedSea.Core
                 encounter=="storm-gauntlet"?"黑潮每回合公开18点生命冲击或9点理智冲击，均可用对应防护或打断反制；撑过五轮即可脱离。":
                 encounter=="hollow-beacon"?"空心航标本体有48生命；公开的10点生命攻击或5点理智冲击均可打断，击破本体获胜。":
                 "先建立撤离绳，再牵引守卫并关闭五座锚点，最后收绞两次归航绳。";
-            return (boss?"区域威胁简报：":"海况结论：")+text;
+            return (boss?"幕末威胁简报：":"海况结论：")+text;
         }
         private void AddKnowledge(string entry){if(!knowledge.Contains(entry))knowledge.Add(entry);}
+        private void SpendSupplies(int amount){Supplies-=amount;spentSupplies+=amount;}
         private void FinishNode(){map.CompleteCurrent();phase=map.IsFinished?VoyagePhase.Completed:VoyagePhase.ChoosingRoute;}
         private void RevealInitialRoutes(){foreach(var id in CurrentFull.Next)RevealRoute(CurrentFull.Id,id);}
         private void RevealDefaultRoutes(VoyageStop stop){foreach(var id in stop.Next.Take(2))RevealRoute(stop.Id,id);}

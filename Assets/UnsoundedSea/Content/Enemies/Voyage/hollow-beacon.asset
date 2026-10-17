@@ -15,7 +15,8 @@ MonoBehaviour:
   id: hollow-beacon
   displayName: "\u7A7A\u5FC3\u822A\u6807"
   health: 48
-  candidateDescription: "\u822A\u6807\u649E\u8237\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\u3001\u53EF\u6253\u65AD\uFF09 / \u7A7A\u8154\u547C\u540D\uFF1A5 \u7406\u667A\u51B2\u51FB\uFF08\u516C\u5F00\u3001\u53EF\u6253\u65AD\uFF09"
+  candidateDescription: "\u822A\u6807\u649E\u8237\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u7A7A\u8154\u547C\u540D\uFF1A5 \u7406\u667A\u51B2\u51FB\uFF08\u516C\u5F00\uFF09"
+  intentPolicy: 1
   intents:
   - id: ram
     displayName: "\u822A\u6807\u649E\u8237"
@@ -24,7 +25,7 @@ MonoBehaviour:
     amount: 10
     isPublic: 1
     visibleAction: 1
-    interruptible: 1
+    interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
   - id: call
     displayName: "\u7A7A\u8154\u547C\u540D"

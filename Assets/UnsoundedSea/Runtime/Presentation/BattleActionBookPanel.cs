@@ -36,6 +36,7 @@ namespace UnsoundedSea.Runtime
             var main = new VisualElement(); main.AddToClassList("battle-action-book-main"); body.Add(main);
             var count = new Label($"{equipped.Count}/12"); count.AddToClassList("collection-count"); main.Add(count);
             var scroll = new ScrollView(ScrollViewMode.Vertical); scroll.AddToClassList("collection-scroll");
+            ScrollWheel.ForwardFrom(sheet, scroll);
             var cards = new VisualElement(); cards.AddToClassList("collection-list"); scroll.Add(cards);
             foreach (var id in ids)
             {

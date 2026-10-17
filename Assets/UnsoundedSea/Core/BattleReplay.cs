@@ -8,7 +8,7 @@ namespace UnsoundedSea.Core
     [Serializable]
     public sealed class BattleReplay
     {
-        public const int CurrentVersion = 9;
+        public const int CurrentVersion = 10;
         public int version;
         public string contentHash;
         public uint seed;
@@ -57,7 +57,7 @@ namespace UnsoundedSea.Core
                     foreach (var enemy in definition.Enemies)
                     {
                         writer.Write(enemy.Id); writer.Write(enemy.Name); writer.Write(enemy.Health); writer.Write(enemy.Candidates);
-                        writer.Write(enemy.Intents.Count);
+                        writer.Write((int)enemy.IntentPolicy); writer.Write(enemy.Intents.Count);
                         foreach (var intent in enemy.Intents)
                         {
                             writer.Write(intent.Id); writer.Write(intent.Name); writer.Write(intent.Clue); writer.Write(intent.SoundSource);

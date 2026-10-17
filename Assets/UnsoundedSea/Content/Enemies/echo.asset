@@ -15,7 +15,8 @@ MonoBehaviour:
   id: echo
   displayName: "\u706F\u5854\u4E0B\u7684\u56DE\u58F0"
   health: 999
-  candidateDescription: "\u6C89\u91CD\u811A\u6B65\uFF1A20 \u751F\u547D\u4F24\u5BB3 / \u65E0\u98CE\u94C3\u9E23\uFF1A10 \u7406\u667A\u51B2\u51FB\uFF1B\u5747\u5728\u672C\u56DE\u5408\u660E\u786E\u9884\u544A\u4E14\u53EF\u6253\u65AD"
+  candidateDescription: "\u6C89\u91CD\u811A\u6B65\uFF1A20 \u751F\u547D\u4F24\u5BB3\uFF08\u4E0D\u53EF\u6253\u65AD\uFF09 / \u65E0\u98CE\u94C3\u9E23\uFF1A10 \u7406\u667A\u51B2\u51FB\uFF08\u53EF\u6253\u65AD\uFF09\uFF1B\u672C\u56DE\u5408\u660E\u786E\u9884\u544A"
+  intentPolicy: 1
   intents:
   - id: approach
     displayName: "\u6C89\u91CD\u811A\u6B65"
@@ -24,7 +25,7 @@ MonoBehaviour:
     amount: 20
     isPublic: 1
     visibleAction: 1
-    interruptible: 1
+    interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
   - id: bells
     displayName: "\u65E0\u98CE\u94C3\u9E23"

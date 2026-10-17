@@ -15,7 +15,8 @@ MonoBehaviour:
   id: voyage-bones-enemy-2
   displayName: "\u76D0\u9AD3\u53F8\u796D"
   health: 30
-  candidateDescription: "\u9AD3\u76CF\u7977\u58F0\uFF1A5 \u7406\u667A\u51B2\u51FB\uFF08\u516C\u5F00\uFF09"
+  candidateDescription: "\u9AD3\u76CF\u7977\u58F0\uFF1A5 \u7406\u667A\u51B2\u51FB\uFF08\u516C\u5F00\uFF09 / \u76D0\u9AA8\u5212\u523A\uFF1A9 \u751F\u547D\u4F24\u5BB3"
+  intentPolicy: 1
   intents:
   - id: cup
     displayName: "\u9AD3\u76CF\u7977\u58F0"
@@ -26,4 +27,13 @@ MonoBehaviour:
     visibleAction: 1
     interruptible: 1
     soundSource: "\u9AD3\u76CF"
+  - id: shard
+    displayName: "\u76D0\u9AA8\u5212\u523A"
+    clue: "\u9AD3\u76CF\u538B\u56DE\u80F8\u524D\uFF0C\u53F3\u624B\u62BD\u51FA\u4E00\u679A\u76D0\u9AA8\u5C16\u7247\u3002"
+    channel: 0
+    amount: 9
+    isPublic: 0
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
   presentationPrefab: {fileID: 2264293776661885800, guid: 79a0c7b27b5f54193811867316f40d3b, type: 3}

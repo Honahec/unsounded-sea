@@ -15,7 +15,8 @@ MonoBehaviour:
   id: voyage-fog-enemy-0
   displayName: "\u96FE\u4E2D\u7F06\u5DE5"
   health: 26
-  candidateDescription: "\u6536\u7EF3\u7529\u94A9\uFF1A8 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  candidateDescription: "\u6536\u7EF3\u7529\u94A9\uFF1A8 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u91CD\u7ED3\u56FA\u7F06\uFF1A0 \u751F\u547D\u4F24\u5BB3"
+  intentPolicy: 1
   intents:
   - id: hook
     displayName: "\u6536\u7EF3\u7529\u94A9"
@@ -23,6 +24,15 @@ MonoBehaviour:
     channel: 0
     amount: 8
     isPublic: 1
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
+  - id: knot
+    displayName: "\u91CD\u7ED3\u56FA\u7F06"
+    clue: "\u77ED\u94A9\u5782\u4E0B\uFF0C\u53CC\u624B\u6B63\u628A\u6E7F\u7EF3\u52D2\u56DE\u6869\u5934\u3002"
+    channel: 0
+    amount: 0
+    isPublic: 0
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"

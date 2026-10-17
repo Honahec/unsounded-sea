@@ -32,6 +32,7 @@ namespace UnsoundedSea.Runtime
 
             Chart = new VoyageChart(session, select, interactive);
             var chartScroll = new ScrollView(ScrollViewMode.Vertical) { name = "voyage-map-scroll" };
+            ScrollWheel.ForwardFrom(this, chartScroll);
             chartScroll.AddToClassList("map-chart-scroll");
             chartScroll.contentContainer.style.alignItems = Align.Stretch;
             chartScroll.Add(Chart);

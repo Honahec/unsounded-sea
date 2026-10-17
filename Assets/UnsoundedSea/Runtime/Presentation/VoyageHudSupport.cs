@@ -58,12 +58,21 @@ namespace UnsoundedSea.Runtime
                 case 1:
                     scroll.Add(Text(Session.CanEditDeck ? "可调整携带 · 每场两份物资" : "配装仅限整备点", "muted"));
                     foreach (var group in Session.Inventory.GroupBy(id => id))
-                        SupportEntry(scroll, SupportCatalog.Item(group.Key).Name + " ×" + group.Count() + " · 带入 " + Session.CarriedItems.Count(id => id == group.Key), SupportCatalog.Item(group.Key).Description);
+                    {
+                        var item = SupportCatalog.Item(group.Key);
+                        SupportEntry(scroll, item.Name + " ×" + group.Count() + " · 带入 " + Session.CarriedItems.Count(id => id == group.Key), item.Description, true);
+                    }
                     foreach (var id in Session.OwnedEquipment)
-                        SupportEntry(scroll, SupportCatalog.Item(id).Name + (Session.Equipment.Contains(id) ? " · 已装备" : " · 未装备"), SupportCatalog.Item(id).Description);
+                    {
+                        var item = SupportCatalog.Item(id);
+                        SupportEntry(scroll, item.Name + (Session.Equipment.Contains(id) ? " · 已装备" : " · 未装备"), item.Description, true);
+                    }
                     foreach (var id in Session.LearnedToolIds)
-                        SupportEntry(scroll, SupportCatalog.Item(id).Name + (Session.ToolIds.Contains(id) ? " · 已装备" : " · 未装备"), SupportCatalog.Item(id).Description);
-                    SupportEntry(scroll, "旧海图 ×" + Session.ChartUses + " · 测绘望远镜 ×" + Session.LookoutUses, "选路时在海图使用；没有新航路不扣次数。每幕恢复。 ");
+                    {
+                        var item = SupportCatalog.Item(id);
+                        SupportEntry(scroll, item.Name + (Session.ToolIds.Contains(id) ? " · 已装备" : " · 未装备"), item.Description, true);
+                    }
+                    SupportEntry(scroll, "旧海图 ×" + Session.ChartUses + " · 测绘望远镜 ×" + Session.LookoutUses, "选路时使用；没有新航路不扣次数，每幕恢复。");
                     scroll.Add(Action("support-tools", Session.CanEditDeck ? "调整调查工具" : "查看调查工具", "secondary", () => { supportOpen = false; deckOpen = true; Refresh(); }));
                     break;
                 case 2:
@@ -97,15 +106,18 @@ namespace UnsoundedSea.Runtime
             {
                 var selected = choice;
                 var row = Element("support-entry");
+                row.tooltip = choice.Description;
                 var button = Action("support-" + choice.Id, choice.Title, "secondary", () => Change(() => Session.ManageSupport(selected.Id), selected.Title), choice.Enabled);
                 button.tooltip = choice.Description;
                 row.Add(button);
-                row.Add(Text(choice.Description, "node-choice-description"));
+                var note = supportTab == 1 ? MaterialChoiceNote(choice) : choice.Description;
+                if (!string.IsNullOrEmpty(note)) row.Add(Text(note, "node-choice-description"));
                 scroll.Add(row);
             }
             if (choices.Length == 0 && supportTab > 0)
                 scroll.Add(Text("此处无可用操作", "muted"));
             sheet.Add(scroll);
+            ScrollWheel.ForwardFrom(sheet, scroll);
             sheet.Add(Action("support-manifest-close", "返回航程 / Esc", "primary", () => { supportOpen = false; Refresh(); }));
             scrim.Add(sheet);
             root.Add(scrim);
@@ -123,12 +135,44 @@ namespace UnsoundedSea.Runtime
             return (enemies.Length > 1 ? "双敌接舷" : "单敌接舷") + " · " + danger + "\n" + preview;
         }
 
-        private static void SupportEntry(VisualElement parent, string title, string detail)
+        private static void SupportEntry(VisualElement parent, string title, string detail, bool tooltipOnly = false)
         {
             var entry = Element("support-entry");
-            entry.Add(Text(title, "node-choice-title"));
-            entry.Add(Text(detail, "node-choice-description"));
+            var heading = Text(title, "node-choice-title");
+            heading.pickingMode = PickingMode.Position;
+            heading.tooltip = detail;
+            entry.Add(heading);
+            if (!tooltipOnly) entry.Add(Text(detail, "node-choice-description"));
             parent.Add(entry);
+        }
+
+        private static string MaterialChoiceNote(VoyageNodeChoice choice)
+        {
+            var verb = choice.Id.Split(':')[0].Split('@')[0];
+            string note;
+            switch (verb)
+            {
+                case "starter": note = "三选一 · 每航程一次"; break;
+                case "equip": note = ""; break;
+                case "pack": note = choice.Description.Split('·')[0].Trim(); break;
+                case "unpack": note = "移回库存"; break;
+                case "buy": note = choice.Description.Split('。')[0]; break;
+                case "tea": note = "消耗 1 份 · 恢复 5 理智"; break;
+                case "gunsmith": note = choice.Description.Split('。')[0]; break;
+                case "repair-boat": note = "支付 1 补给 · 轮机长首次免费"; break;
+                default: note = choice.Description; break;
+            }
+            if (choice.Enabled) return note;
+            switch (verb)
+            {
+                case "equip": return "不可用 · 装备栏已满或引擎冲突";
+                case "pack": return "不可用 · 带入栏已满、库存不足或工具上限";
+                case "buy": return "不可用 · 补给不足或库存已满";
+                case "tea": return "不可用 · 理智已满";
+                case "gunsmith": return "不可用 · 库存已满或次数已达上限";
+                case "repair-boat": return "不可用 · 已取得工具或补给不足";
+                default: return string.IsNullOrEmpty(note) ? "当前不可用" : note + " · 当前不可用";
+            }
         }
 
         private static int SupportChoiceTab(string id)

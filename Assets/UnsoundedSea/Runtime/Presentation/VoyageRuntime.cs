@@ -22,8 +22,23 @@ namespace UnsoundedSea.Runtime
         }
 
         public static VoyageSession Session { get; private set; }
-        public static bool HasSavedVoyage => File.Exists(SavePath);
+        public static bool HasSavedVoyage
+        {
+            get
+            {
+                if (!File.Exists(SavePath)) return false;
+                try
+                {
+                    var phase = VoyageSession.Restore(Load().Voyage).Phase;
+                    if (!Terminal(phase)) return true;
+                    TryArchiveTerminalSave();
+                    return false;
+                }
+                catch { return true; }
+            }
+        }
         public static string SavePath => Path.Combine(Application.persistentDataPath, "voyage.json");
+        private static string FinalSavePath => Path.Combine(Application.persistentDataPath, "voyage-final.json");
         public static bool IsVoyageEncounter => Session != null && Session.Phase == VoyagePhase.Encounter;
         public static string EncounterSaveError { get; private set; }
         public static bool IsDebugSession => Session != null && Session.IsDebug;
@@ -31,15 +46,24 @@ namespace UnsoundedSea.Runtime
         private static BattleScenario pendingScenario;
         private static BattleDirector encounterDirector;
         private static bool unsavedOutcome;
+        private static BattleView pendingOutcome;
 
         internal static bool OwnsEncounter(BattleDirector director) => encounterDirector != null && encounterDirector == director;
 
         public static void StartNew(uint? seed = null)
         {
+            var completedSave = false;
+            if (File.Exists(SavePath))
+            {
+                try { completedSave = Terminal(VoyageSession.Restore(Load().Voyage).Phase); }
+                catch (Exception) { }
+                if (completedSave) ArchiveTerminalSave();
+            }
             var session = VoyageSession.Create(seed ?? NewSeed(), CardDeckPreparation.CrewId);
             Save(new SaveData { Voyage = session.Export() });
             Session = session;
             PendingReplay = null;
+            pendingOutcome = null;
             unsavedOutcome = false;
             EncounterSaveError = null;
         }
@@ -116,6 +140,7 @@ namespace UnsoundedSea.Runtime
             encounterDirector = null;
             pendingScenario = null;
             PendingReplay = null;
+            pendingOutcome = null;
             unsavedOutcome = false;
             EncounterSaveError = null;
         }
@@ -123,6 +148,7 @@ namespace UnsoundedSea.Runtime
         public static void Checkpoint()
         {
             if (Session == null) throw new InvalidOperationException("没有可保存的航程。");
+            ResolvePendingOutcome();
             if (IsDebugSession)
             {
                 unsavedOutcome = false;
@@ -130,6 +156,7 @@ namespace UnsoundedSea.Runtime
                 return;
             }
             Save(new SaveData { Voyage = Session.Export(), Battle = PendingReplay });
+            if (Terminal(Session.Phase)) ArchiveTerminalSave();
             unsavedOutcome = false;
             EncounterSaveError = null;
         }
@@ -195,20 +222,33 @@ namespace UnsoundedSea.Runtime
         private static void RecordEncounterCommand(BattleView before, BattleView after, BattleCommand command)
         {
             if (encounterDirector == null || !IsVoyageEncounter) return;
-            if (after.Phase == BattlePhase.Victory || after.Phase == BattlePhase.Defeat)
-            {
-                if (!Session.ResolveEncounter(after.Phase == BattlePhase.Victory, after.Health, after.Sanity,after.SpentConsumables,after.Watched,after.Evidence))
-                    throw new InvalidOperationException("航程拒绝了战斗结算。");
-                PendingReplay = null;
-            }
-            else PendingReplay = encounterDirector.CaptureReplay();
             unsavedOutcome = true;
-            try { Checkpoint(); }
+            try
+            {
+                if (after.Phase == BattlePhase.Victory || after.Phase == BattlePhase.Defeat)
+                {
+                    pendingOutcome = after;
+                    ResolvePendingOutcome();
+                }
+                else PendingReplay = encounterDirector.CaptureReplay();
+                Checkpoint();
+            }
             catch (Exception exception)
             {
                 EncounterSaveError = exception.Message;
                 Debug.LogError("航程记录尚未保存，请重试保存：" + exception.Message);
             }
+        }
+
+        private static void ResolvePendingOutcome()
+        {
+            if (pendingOutcome == null) return;
+            var outcome = pendingOutcome;
+            if (!Session.ResolveEncounter(outcome.Phase == BattlePhase.Victory, outcome.Health, outcome.Sanity,
+                    outcome.SpentConsumables, outcome.Watched, outcome.Evidence))
+                throw new InvalidOperationException("航程拒绝了战斗结算。");
+            PendingReplay = null;
+            pendingOutcome = null;
         }
 
         private static void ReleaseEncounter(Scene scene)
@@ -217,6 +257,21 @@ namespace UnsoundedSea.Runtime
             SceneManager.sceneUnloaded -= ReleaseEncounter;
             if (encounterDirector != null) encounterDirector.Resolved -= RecordEncounterCommand;
             encounterDirector = null;
+        }
+
+        private static bool Terminal(VoyagePhase phase) => phase == VoyagePhase.Completed || phase == VoyagePhase.Failed;
+
+        private static void TryArchiveTerminalSave()
+        {
+            try { ArchiveTerminalSave(); }
+            catch (Exception exception) { Debug.LogError("终局记录尚未归档：" + exception.Message); }
+        }
+
+        private static void ArchiveTerminalSave()
+        {
+            if (!File.Exists(SavePath)) return;
+            if (File.Exists(FinalSavePath)) File.Delete(FinalSavePath);
+            File.Move(SavePath, FinalSavePath);
         }
 
         private static SaveData Load()

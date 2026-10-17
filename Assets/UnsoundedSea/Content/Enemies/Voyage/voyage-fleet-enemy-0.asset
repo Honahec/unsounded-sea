@@ -15,7 +15,8 @@ MonoBehaviour:
   id: voyage-fleet-enemy-0
   displayName: "\u65E0\u65D7\u767B\u8239\u5175"
   health: 36
-  candidateDescription: "\u7F3A\u76FE\u538B\u8FDB\uFF1A11 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  candidateDescription: "\u7F3A\u76FE\u538B\u8FDB\uFF1A11 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u6536\u76FE\u6362\u6B65\uFF1A0 \u751F\u547D\u4F24\u5BB3"
+  intentPolicy: 1
   intents:
   - id: shield
     displayName: "\u7F3A\u76FE\u538B\u8FDB"
@@ -23,6 +24,15 @@ MonoBehaviour:
     channel: 0
     amount: 11
     isPublic: 1
+    visibleAction: 1
+    interruptible: 0
+    soundSource: "\u76EE\u6807\u672C\u4F53"
+  - id: brace
+    displayName: "\u6536\u76FE\u6362\u6B65"
+    clue: "\u77ED\u5200\u5782\u4E0B\uFF0C\u7F3A\u89D2\u8237\u76FE\u91CD\u65B0\u62B5\u4F4F\u80A9\u7A9D\u3002"
+    channel: 0
+    amount: 0
+    isPublic: 0
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"

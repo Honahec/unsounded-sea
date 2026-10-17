@@ -27,8 +27,9 @@ namespace UnsoundedSea.Runtime
         public string displayName;
         [Min(1)] public int health = 30;
         [TextArea] public string candidateDescription;
+        public IntentPolicy intentPolicy;
         public IntentData[] intents = Array.Empty<IntentData>();
         public GameObject presentationPrefab;
-        public EnemySpec Build(string instanceId) => new EnemySpec(instanceId, displayName, health, candidateDescription, intents.Select(x => x.Build()));
+        public EnemySpec Build(string instanceId) => new EnemySpec(instanceId, displayName, health, candidateDescription, intents.Select(x => x.Build()), intentPolicy);
     }
 }

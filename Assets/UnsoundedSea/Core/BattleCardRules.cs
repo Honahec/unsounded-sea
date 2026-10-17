@@ -78,7 +78,7 @@ namespace UnsoundedSea.Core
                 var result = e.Select(x => Option("enemies:" + x.Definition.Id, x.Definition.Name));
                 return result.Concat(from a in e from b in e where string.CompareOrdinal(a.Definition.Id, b.Definition.Id) < 0 select Option("enemies:" + a.Definition.Id + "," + b.Definition.Id, a.Definition.Name + "、" + b.Definition.Name));
             }
-            if (new[] { 28, 45, 71 }.Contains(n)) return hand.Where(x => x.InstanceId != card.InstanceId && (n != 28 || IsInvestigation(x.Definition))).Select(HandOption);
+            if (new[] { 28, 45, 71 }.Contains(n)) return hand.Where(x => x.InstanceId != card.InstanceId && !x.IsEncounter && (n != 28 || IsInvestigation(x.Definition))).Select(HandOption);
             if (n == 51) return HandSelections(card.InstanceId, 2);
             if (n == 38) return discard.Where(x => IsArmed(x.Definition)).Select(DiscardOption);
             if (n == 47) return discard.Where(x => IsInvestigation(x.Definition) && !x.Definition.Exhaust).Select(DiscardOption);
@@ -287,7 +287,14 @@ namespace UnsoundedSea.Core
                     else Draw(1);
                     break;
                 case 51: Retain(selection); break;
-                case 52: if (bossKind == BossEncounterKind.Watcher) { boss.VerifyGuardAnchor(selection); AddWard(4); } else Draw(1); break;
+                case 52:
+                    if (bossKind != BossEncounterKind.Watcher) Draw(1);
+                    else
+                    {
+                        var alreadyPublic = boss.IsGuardAnchorPublic(selection);
+                        if (boss.VerifyGuardAnchor(selection) && alreadyPublic) AddWard(4);
+                    }
+                    break;
                 case 53: if (selection == null) Draw(2); else foreach (var id in selection.Substring("enemies:".Length).Split(',')) Investigate(id, InvestigationKind.VisibleAction, "现场重建", true); break;
                 case 54: BeginReorder(); break;
             }
@@ -396,7 +403,7 @@ namespace UnsoundedSea.Core
         private void TriggerSceneAction() { if (turnFlags.Remove("block-after-scene")) AddBlock(6); if (turnFlags.Remove("draw-after-scene")) Draw(1); if(turnFlags.Contains("defense-played")&&TriggerEquipment("i19",2))AddBlock(4); }
 
         internal void MarkEnemyDefeated() => turnFlags.Add("enemy-defeated");
-        internal int ConsumeHealthReduction(int amount) { if (nextHealthReduction <= 0) return amount; var reduced = Math.Min(amount, nextHealthReduction); nextHealthReduction = 0; return amount - reduced; }
+        internal int ConsumeHealthReduction(int amount) { if (amount <= 0 || nextHealthReduction <= 0) return amount; var reduced = Math.Min(amount, nextHealthReduction); nextHealthReduction = 0; return amount - reduced; }
         internal int SceneFailureDamage(int amount) { var reduced = Math.Min(amount, sceneFailureReduction); sceneFailureReduction = 0; return amount - reduced; }
         internal void MarkSceneAction() { sceneActionUsed = true; TriggerSceneAction(); }
         internal void MarkCrewSupport() { crewSupportUsed = true; }

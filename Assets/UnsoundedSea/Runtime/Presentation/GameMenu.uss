@@ -54,8 +54,9 @@
 .game-menu .debug-level:focus { background-color: #355248; border-width: 2px; border-color: #fff0c6; }
 .game-menu .debug-close { align-self: flex-end; min-width: 180px; min-height: 48px; margin-top: 14px; padding: 8px 18px; background-color: #263e36; border-width: 1px; border-color: #9e8755; color: #eee4c9; font-size: 16px; }
 .game-menu .debug-close:focus { border-width: 2px; border-color: #fff0c6; }
-.settings { position: absolute; left: 50%; top: 25%; width: 560px; translate: -15% 0; padding: 32px 38px; background-color: rgba(8,19,22,0.97); border-width: 1px; border-color: #9e8755; border-top-width: 3px; border-top-left-radius: 28px; border-bottom-right-radius: 28px; color: #eee4c9; }
-.pause-scrim .settings { left: 50%; top: 25%; translate: -50% 0; }
+.settings { position: absolute; left: 50%; top: 50%; width: 620px; max-width: 94%; max-height: 90%; translate: -50% -50%; padding: 24px 28px; background-color: rgba(8,19,22,0.97); border-width: 1px; border-color: #9e8755; border-top-width: 3px; border-top-left-radius: 28px; border-bottom-right-radius: 28px; color: #eee4c9; }
+.pause-scrim .settings { left: 50%; top: 50%; translate: -50% -50%; }
+.settings-scroll { flex-shrink: 1; min-height: 0; }
 .settings .settings-head { padding-bottom: 20px; margin-bottom: 8px; border-bottom-width: 1px; border-bottom-color: rgba(158,135,85,0.45); }
 .settings .settings-title { font-size: 28px; color: #eee4c9; letter-spacing: 8px; }
 .settings .settings-row { flex-direction: row; justify-content: space-between; align-items: center; min-height: 66px; }
@@ -67,13 +68,13 @@
 .settings .choice-option.selected { background-color: #263e36; color: #eee4c9; border-color: #c6ad71; }
 .settings .choice-option:focus { border-width: 2px; border-color: #e4cc92; }
 .settings .volume { flex-direction: row; align-items: center; flex-shrink: 0; }
-.settings .volume-step { width: 34px; height: 38px; font-size: 22px; color: #eee4c9; border-width: 1px; border-color: #9e8755; }
+.settings .volume-step { width: 34px; min-width: 34px; height: 38px; flex-shrink: 0; font-size: 22px; color: #eee4c9; border-width: 1px; border-color: #9e8755; }
 .settings .volume-step:hover { background-color: #263e36; }
 .settings .volume-step:focus { border-width: 2px; border-color: #e4cc92; }
-.settings .volume-steps { flex-direction: row; margin: 0 8px; }
-.settings .volume-pip { width: 8px; height: 20px; margin: 0 2px; border-width: 1px; border-color: #53645d; }
+.settings .volume-steps { flex-direction: row; flex-shrink: 0; margin: 0 8px; }
+.settings .volume-pip { width: 8px; min-width: 8px; height: 20px; flex-shrink: 0; margin: 0 2px; border-width: 1px; border-color: #53645d; }
 .settings .volume-pip.filled { background-color: #80b5a5; border-color: #80b5a5; }
-.settings .volume-value { font-size: 16px; color: #eee4c9; width: 46px; -unity-text-align: middle-right; }
+.settings .volume-value { font-size: 16px; color: #eee4c9; width: 58px; min-width: 58px; flex-shrink: 0; white-space: nowrap; -unity-text-align: middle-right; }
 .settings .settings-foot { flex-direction: row; justify-content: flex-end; margin-top: 24px; }
 .settings .settings-secondary { padding: 10px 16px; font-size: 16px; color: #a9b6ad; margin-right: 12px; }
 .settings .settings-secondary:hover { color: #eee4c9; }

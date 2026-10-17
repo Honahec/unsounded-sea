@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "\u53CD\u5199\u9886\u822A\u5458"
   health: 32
   candidateDescription: "\u9006\u56FE\u8BEF\u5BFC\uFF1A4 \u7406\u667A\u51B2\u51FB / \u5377\u56FE\u62BD\u51FB\uFF1A8 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  intentPolicy: 1
   intents:
   - id: chart
     displayName: "\u9006\u56FE\u8BEF\u5BFC"
@@ -23,7 +24,7 @@ MonoBehaviour:
     channel: 1
     amount: 4
     isPublic: 0
-    visibleAction: 0
+    visibleAction: 1
     interruptible: 1
     soundSource: "\u6307\u5317\u5668"
   - id: edge

@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "\u5F03\u8230\u533B\u5B98"
   health: 32
   candidateDescription: "\u836F\u7BB1\u91CD\u51FB\uFF1A9 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u6577\u6599\u4F4E\u8BED\uFF1A4 \u7406\u667A\u51B2\u51FB"
+  intentPolicy: 1
   intents:
   - id: case
     displayName: "\u836F\u7BB1\u91CD\u51FB"
@@ -32,7 +33,7 @@ MonoBehaviour:
     channel: 1
     amount: 4
     isPublic: 0
-    visibleAction: 0
+    visibleAction: 1
     interruptible: 1
     soundSource: "\u836F\u7BB1"
   presentationPrefab: {fileID: 9199104559376201783, guid: a18e6b075593e42c9811a5c0264d53e0, type: 3}

@@ -48,6 +48,61 @@ public static class CombatBalanceQA
 
     public static string Main() => Run(Decks);
     public static string NewInvestigation() => Run(Decks.Where(x=>x.Key.StartsWith("cross-examine")));
+    public static string Campaign()
+    {
+        var results = new List<object>();
+        for (uint seed = 0; seed < 12; seed++)
+        {
+            var voyage = VoyageSession.Create(seed);
+            var battles = new List<object>();
+            for (var step = 0; step < 200 && voyage.Phase != VoyagePhase.Completed && voyage.Phase != VoyagePhase.Failed; step++)
+            {
+                bool changed;
+                switch (voyage.Phase)
+                {
+                    case VoyagePhase.ChoosingRoute:
+                        changed = voyage.Select(voyage.Choices[(int)(seed % (uint)voyage.Choices.Count)].Id) && voyage.SetSail();
+                        break;
+                    case VoyagePhase.Sailing: changed = voyage.Arrive(); break;
+                    case VoyagePhase.Arrived:
+                        if (voyage.Current.Kind == RunNodeKind.Battle || voyage.Current.Kind == RunNodeKind.Boss)
+                            changed = voyage.BeginEncounter();
+                        else if (voyage.CanContinue) changed = voyage.Continue();
+                        else
+                        {
+                            var preferred = new[] { voyage.Sanity < 16 ? "calm" : voyage.Health < 30 ? "repair" : "rest", "rest", "seal", "observe", "listen", "tow", "salvage", "depart", "leave", "briefing" };
+                            var choices = voyage.GetNodeChoices();
+                            var choice = preferred.Select(id => choices.FirstOrDefault(c => c.Id == id && c.Enabled)).FirstOrDefault(c => c != null);
+                            changed = choice != null && voyage.ChooseNode(choice.Id);
+                        }
+                        break;
+                    case VoyagePhase.Encounter:
+                        var battle = VoyageEncounterCatalog.Resolve(voyage.Current.EncounterId).CreateSession(voyage.Current.BattleSeed, voyage: voyage);
+                        var policy = new Policy();
+                        var startHealth = battle.View.Health; var startSanity = battle.View.Sanity;
+                        while (battle.View.Phase == BattlePhase.PlayerTurn && battle.View.Turn <= 40)
+                        {
+                            Act(battle, policy);
+                            if (battle.View.Phase == BattlePhase.PlayerTurn) { Must(battle.Execute(BattleCommand.EndTurn())); policy.End(); }
+                        }
+                        var view = battle.View;
+                        if (view.Phase == BattlePhase.PlayerTurn) throw new InvalidOperationException("Campaign policy stalled: " + voyage.Current.EncounterId);
+                        battles.Add(new { voyage.Act, Encounter = voyage.Current.EncounterId, view.Turn, view.Health, view.Sanity, HealthLost = startHealth - view.Health, SanityLost = startSanity - view.Sanity, Outcome = view.Phase.ToString() });
+                        changed = voyage.ResolveEncounter(view.Phase == BattlePhase.Victory, view.Health, view.Sanity, view.SpentConsumables, evidence: view.Evidence);
+                        break;
+                    case VoyagePhase.Reward: changed = voyage.ClaimReward(null); break;
+                    case VoyagePhase.ActComplete: changed = voyage.ChooseNextAct(voyage.Act == 1 ? new[] { "bones", "inverted", "fleet" }[seed % 3] : "abyss"); break;
+                    default: throw new InvalidOperationException("Unexpected campaign phase.");
+                }
+                if (!changed) throw new InvalidOperationException("Campaign transition rejected: " + voyage.Phase);
+            }
+            results.Add(new { Seed = seed, Outcome = voyage.Phase.ToString(), voyage.Act, voyage.Health, voyage.Sanity, voyage.Supplies, Battles = battles });
+        }
+        Directory.CreateDirectory("Logs/CombatBalance");
+        var json = JsonConvert.SerializeObject(results, Formatting.Indented);
+        File.WriteAllText("Logs/CombatBalance/campaign-results.json", json);
+        return json;
+    }
     private static string Run(IEnumerable<KeyValuePair<string,int[]>> decks)
     {
         var rows = new List<Row>();
@@ -131,9 +186,9 @@ public static class CombatBalanceQA
         }
         if (v.BossKind == BossEncounterKind.Surveyor)
         {
-            // Published six-step proof, checked against visible constraints at each step.
-            target = new[] { "C3","D2","D3","B4","C1","C4" }.FirstOrDefault(id => v.EncounterTargets.Any(t => t.Id == id && t.Detail.StartsWith("?")));
-            if (target != null && ProvenSafe(v, target)) cardId="E03-01";
+            // Pick only cells proven safe by the currently published counts; the seeded layout is never inspected.
+            target = v.EncounterTargets.Where(t => t.Detail.StartsWith("?")).Select(t => t.Id).FirstOrDefault(id => ProvenSafe(v, id));
+            if (target != null) cardId="E03-01";
         }
         if (v.BossKind == BossEncounterKind.FlagBearer && v.BossStage < 3)
         {

@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "\u7F1D\u9AA8\u62D6\u7F51\u5BA2"
   health: 28
   candidateDescription: "\u9AA8\u7F51\u6295\u63B7\uFF1A8 \u751F\u547D\u4F24\u5BB3 / \u6536\u9488\u6574\u7F51\uFF1A0 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  intentPolicy: 1
   intents:
   - id: cast
     displayName: "\u9AA8\u7F51\u6295\u63B7"

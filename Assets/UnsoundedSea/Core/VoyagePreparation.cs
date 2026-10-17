@@ -25,7 +25,7 @@ namespace UnsoundedSea.Core
                 var boss = byId[plan.GoalId].EncounterId;
                 if(!BossPreparation.TryGetValue(boss,out var preparation))return "当前调试航点没有完整幕末威胁；按已公开服务整备。";
                 var offers = preparation.Select(id => SupportCatalog.Item(id).Name);
-                return "威胁："+RegionBriefing(true).Replace("区域威胁简报：","")+"\n准备："+string.Join("、", offers)+"（可选）\n基础解法：无需购买或消耗筹备物资。";
+                return "威胁："+RegionBriefing(true).Replace("幕末威胁简报：","")+"\n准备："+string.Join("、", offers)+"（可选）\n基础解法：无需购买或消耗筹备物资。";
             }
         }
 
@@ -83,18 +83,17 @@ namespace UnsoundedSea.Core
         {
             var bossItems = stop.Layer == VoyageMapGenerator.Layers - 2 && BossPreparation.TryGetValue(byId[plan.GoalId].EncounterId,out var preparation) ? preparation : Array.Empty<string>();
             var ordered = RegionItems().Concat(bossItems).Distinct(StringComparer.Ordinal)
+                .Where(id => SupportCatalog.Item(id).Kind == ItemKind.Consumable || !ownedEquipment.Contains(id) && !learnedTools.Contains(id))
                 .OrderBy(id => VoyageSeeds.Derive(Seed, "shop", Act + ":" + stop.Id + ":" + id)).ToList();
             var selected = ordered.GroupBy(id => SupportCatalog.Item(id).Kind).SelectMany(group => group.Take(2)).ToList();
-            foreach(var id in bossItems)if(!selected.Contains(id))selected.Add(id);
-            return selected.Where(id => SupportCatalog.Item(id).Kind == ItemKind.Consumable || !ownedEquipment.Contains(id) && !learnedTools.Contains(id))
-                .Select(SupportCatalog.Item).ToArray();
+            foreach(var id in bossItems)if(ordered.Contains(id)&&!selected.Contains(id))selected.Add(id);
+            return selected.Select(SupportCatalog.Item).ToArray();
         }
 
         private IReadOnlyList<CrewSupportSpec> CrewStock(VoyageStop stop)
         {
-            var ordered=SupportCatalog.Crew.OrderBy(x=>VoyageSeeds.Derive(Seed,"hire",Act+":"+stop.Id+":"+x.Id)).ToList();
-            var selected=ordered.Where(x=>x.Id=="medic"||x.Id=="listener").Concat(ordered.Where(x=>x.Id!="medic"&&x.Id!="listener")).Take(3);
-            return selected.Where(x=>!crewIds.Contains(x.Id)).ToArray();
+            var ordered=SupportCatalog.Crew.Where(x=>!crewIds.Contains(x.Id)).OrderBy(x=>VoyageSeeds.Derive(Seed,"hire",Act+":"+stop.Id+":"+x.Id)).ToList();
+            return ordered.Where(x=>x.Id=="medic"||x.Id=="listener").Concat(ordered.Where(x=>x.Id!="medic"&&x.Id!="listener")).Take(3).ToArray();
         }
     }
 }

@@ -118,7 +118,7 @@ namespace UnsoundedSea.Core
                 Add("specimen","封存漂浮标本","花1补给，获得封存标本；可在档案节点交付。",Supplies>0&&!markers.ContainsKey("sealed-specimen"));
                 Add("repair-boat","修复漂流维修船","支付1补给（轮机长首次免付），获得绝缘钳；放弃其他事件收益。",!learnedTools.Contains("i08")&&(Supplies>0||ActiveCrew("engineer")&&!repairDiscountUsed));
                 if(ActiveCrew("listener"))Add("crew:listen","比对录音","免费核对信号，恢复4理智并记录来源。",Sanity<30);
-                if(ActiveCrew("decoder"))Add("crew:decode","核对值班序列","获得本海域机制简报并揭示后续航路。");
+                if(ActiveCrew("decoder"))Add("crew:decode","核对值班序列","获得本幕实际威胁简报并揭示后续航路。");
                 if(Watched>0)Add("risk:watch","回应异常信号","获得1补给、被注视+1（最高3）；自愿选择。",Supplies<8);
                 foreach(var id in crewIds.Where(x=>!injuredCrew.Contains(x)))Add("risk:"+id,"冒险取回漂箱 · "+SupportCatalog.CrewMember(id).Name,"确定获得2补给；该船员受伤，支援和航程职责暂停，休整需2补给治疗。",Supplies<=6);
             }
@@ -143,22 +143,22 @@ namespace UnsoundedSea.Core
                 case "pack":carriedItems.Add(id);break;
                 case "unpack":carriedItems.Remove(id);break;
                 case "navigate":navigatorUsed=true;RevealAllRoutes(CurrentFull);break;
-                case "buy":Supplies-=SupportCatalog.Item(id).Kind==ItemKind.Consumable?1:2;Gain(id,old);SpendService("shop");break;
-                case "hire":Supplies-=HirePrice;markers.Remove("docking-voucher");if(old!=null)crewIds.Remove(old);crewIds.Add(id);SpendService("hire");break;
+                case "buy":SpendSupplies(SupportCatalog.Item(id).Kind==ItemKind.Consumable?1:2);Gain(id,old);SpendService("shop");break;
+                case "hire":SpendSupplies(HirePrice);markers.Remove("docking-voucher");if(old!=null)crewIds.Remove(old);crewIds.Add(id);SpendService("hire");break;
                 case "tea":inventory.Remove("i12");Sanity=Math.Min(30,Sanity+5);SpendService("tea");break;
-                case "treat":Supplies-=2;injuredCrew.Remove(id);break;
+                case "treat":SpendSupplies(2);injuredCrew.Remove(id);break;
                 case "gunsmith":if(id=="item")Gain("i13");else if(id=="chart")ChartUses++;else LookoutUses++;SpendService("gunsmith");break;
                 case "trust":learned.Add(TrustedCard(id));supportServices.Add("trust:"+id);break;
                 case "survey":AddMarker("surveyed-beacon","下一场战斗结束");RevealAllRoutes(CurrentFull);nodeResolved=true;break;
                 case "archive":if(id=="supply")Supplies++;else learned.Add("c048");nodeResolved=true;break;
                 case "specimen":
-                    if(id==null){Supplies--;AddMarker("sealed-specimen","交付或航程结束");}
+                    if(id==null){SpendSupplies(1);AddMarker("sealed-specimen","交付或航程结束");}
                     else{markers.Remove("sealed-specimen");if(id=="supply")Supplies++;else if(id=="archive"){if(!learned.Contains("c040"))learned.Add("c040");AddKnowledge("来源索引已整理：用对照旧档激活，再以新声源与复核证据核验。");}else AddKnowledge("标本处置建议："+string.Join("、",learned.Where(x=>new[]{"c008","c046","c048","c090","contradiction"}.Contains(x)).Select(x=>CardCatalog.Get(x).Name)));}nodeResolved=true;break;
-                case "rescue":if(!ActiveCrew("diver"))Supplies--;escortedCrew=id;nodeResolved=true;break;
+                case "rescue":if(!ActiveCrew("diver"))SpendSupplies(1);escortedCrew=id;nodeResolved=true;break;
                 case "voucher":AddMarker("docking-voucher","本幕结束或下次成功招聘");nodeResolved=true;break;
-                case "repair-boat":if(ActiveCrew("engineer")&&!repairDiscountUsed)repairDiscountUsed=true;else Supplies--;learnedTools.Add("i08");nodeResolved=true;break;
+                case "repair-boat":if(ActiveCrew("engineer")&&!repairDiscountUsed)repairDiscountUsed=true;else SpendSupplies(1);learnedTools.Add("i08");nodeResolved=true;break;
                 case "crew":if(id=="listen"){Sanity=Math.Min(30,Sanity+4);AddKnowledge("比对录音：重复信号来自自动发报机，未确认其后的实体。");}else{AddKnowledge(RegionBriefing(true));RevealAllRoutes(CurrentFull);}nodeResolved=true;break;
-                case "gaze":if(id=="hide"){Supplies--;Watched=2;}SpendService("return-gaze");break;
+                case "gaze":if(id=="hide"){SpendSupplies(1);Watched=2;}SpendService("return-gaze");break;
                 case "risk":if(id=="watch"){Supplies++;Watched=Math.Min(3,Watched+1);}else{Supplies+=2;injuredCrew.Add(id);}nodeResolved=true;break;
                 case "accept":if(old!=null)crewIds.Remove(old);crewIds.Add(escortedCrew);escortedCrew=null;break;
                 case "escort-decline":escortedCrew=null;break;

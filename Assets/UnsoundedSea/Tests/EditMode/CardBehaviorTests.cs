@@ -187,9 +187,10 @@ namespace UnsoundedSea.Tests
         {
             var session = new BattleSession(BossDefinition(BossEncounterKind.Surveyor, CardCatalog.Get("c044")), 9, boss: BossEncounterKind.Surveyor);
             var open = session.View.Hand.Single(x => x.IsEncounter && x.Definition.Id == "E03-01");
-            Assert.That(session.Execute(BattleCommand.Play(open.InstanceId, "C3")).Success, Is.True);
+            var targets = open.Targets.Where(x => x.Enabled).Take(2).Select(x => x.Id).ToArray();
+            Assert.That(session.Execute(BattleCommand.Play(open.InstanceId, targets[0])).Success, Is.True);
             open = session.View.Hand.Single(x => x.IsEncounter && x.Definition.Id == "E03-01");
-            Assert.That(session.Execute(BattleCommand.Play(open.InstanceId, "D2")).Success, Is.True);
+            Assert.That(session.Execute(BattleCommand.Play(open.InstanceId, targets[1])).Success, Is.True);
             var card = session.View.Hand.First(x => x.Definition.Id == "c044");
             var before = session.View;
             var commands = session.Commands.Count;

@@ -30,11 +30,19 @@ namespace UnsoundedSea.Tests
         private static void End(BattleSession session) => Assert.That(session.Execute(BattleCommand.EndTurn()).Success, Is.True);
         private static void Play(BattleSession session, CardView card, string target = null) => Assert.That(session.Execute(BattleCommand.Play(card.InstanceId, target)).Success, Is.True);
 
+
+        [TestCase("c045")]
+        [TestCase("c071")]
+        public void RetentionCardsNeverTargetEncounterCards(string cardId)
+        {
+            var session = Session(BossEncounterKind.Choirmaster, cardId);
+            Assert.That(Card(session, cardId).Targets.Count, Is.EqualTo(4));
+        }
         [Test] public void C056UsesVerifiedChoirOrderAndSharedAttempt()
         {
             var session = Session(BossEncounterKind.Choirmaster, "c056");
             Assert.That(Card(session, "c056").Targets.All(x => !x.Id.StartsWith("scene:")), Is.True);
-            End(session);
+            Play(session, Encounter(session, "E02-01"));
             var card = Card(session, "c056");
             var scene = card.Targets.Single(x => x.Id.StartsWith("scene:"));
             Play(session, card, scene.Id);
@@ -81,15 +89,21 @@ namespace UnsoundedSea.Tests
             Assert.That(session.View.Enemies.Single(x => x.Id == "b04-flag-soldier").Health, Is.Zero);
         }
 
-        [Test] public void C046DrawsWhenSummonSourceWasPubliclyAnnounced()
+        [Test] public void C046FirstTracksPublicSummonSourceAndOnlyVerifiedRepeatDraws()
         {
             var session = Session(BossEncounterKind.Choirmaster, "c046");
             End(session);
             End(session);
             var card = Card(session, "c046");
+            var target = card.Targets.Single(x => x.Id.Contains("bone-servant")).Id;
             var before = session.View.Hand.Count;
-            Play(session, card, card.Targets.Single(x => x.Id.Contains("bone-servant")).Id);
-            Assert.That(session.View.Hand.Count, Is.EqualTo(before), "Playing C046 removes it, then the known-source branch draws one.");
+            Play(session, card, target);
+            Assert.That(session.View.Hand.Count, Is.EqualTo(before - 1));
+            Assert.That(session.View.Evidence.Single(x => x.Key.Contains("bone-servant/source")).Level, Is.EqualTo(KnowledgeLevel.Verified));
+            card = Card(session, "c046");
+            before = session.View.Hand.Count;
+            Play(session, card, target);
+            Assert.That(session.View.Hand.Count, Is.EqualTo(before), "Rechecking an already verified source replaces C046.");
         }
         private static void EnterLocks(BattleSession session)
         {
@@ -110,6 +124,18 @@ namespace UnsoundedSea.Tests
             Assert.That(delayed.View.Health, Is.EqualTo(baseline.View.Health + 12));
             End(delayed); End(baseline);
             Assert.That(delayed.View.Health, Is.EqualTo(baseline.View.Health));
+        }
+
+        [Test] public void C059CancelsOnlyTheDueAlarmPulse()
+        {
+            var protectedSession = Session(BossEncounterKind.FlagBearer, "c059");
+            var baseline = Session(BossEncounterKind.FlagBearer, "c059");
+            EnterLocks(protectedSession); EnterLocks(baseline);
+            for (var i = 0; i < 4; i++) { End(protectedSession); End(baseline); }
+            var card = Card(protectedSession, "c059");
+            Play(protectedSession, card, card.Targets.Single().Id);
+            End(protectedSession); End(baseline);
+            Assert.That(protectedSession.View.Health, Is.EqualTo(baseline.View.Health + 12), "C059 cancels the alarm pulse but not the soldier's ordinary attack.");
         }
 
         [Test] public void C065ForcesOnlySecondLockWithoutConsumingNormalLockAllowance()

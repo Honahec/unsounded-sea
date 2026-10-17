@@ -22,6 +22,7 @@ namespace UnsoundedSea.Runtime
         private string saveError, loadError, notice;
         private float lastTick;
         private Action actionBookSave;
+        private string selectedReward;
         private VoyageSession Session => VoyageRuntime.Session;
 
         private void OnEnable()
@@ -155,8 +156,10 @@ namespace UnsoundedSea.Runtime
         {
             if (root == null) return;
             var focus = (root.panel?.focusController.focusedElement as VisualElement)?.name;
+            var scrollPositions = root.Query<ScrollView>().ToList().Where(s => !string.IsNullOrEmpty(s.name)).ToDictionary(s => s.name, s => s.scrollOffset);
             sailing?.Pause();
             root.Clear(); root.focusable = true; root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion);
+            if (Session?.Phase != VoyagePhase.Reward) selectedReward = null;
             if (Session?.Phase == VoyagePhase.Reward || Session?.Phase == VoyagePhase.ActComplete) chartOpen = false;
             root.EnableInClassList("chart-open", chartOpen);
             root.EnableInClassList("is-sailing", Session?.Phase == VoyagePhase.Sailing);
@@ -247,6 +250,11 @@ namespace UnsoundedSea.Runtime
             else if (deckOpen) BuildActionBook();
             else if (journalOpen) BuildJournal();
             else if (paused) BuildPause();
+            root.schedule.Execute(() =>
+            {
+                foreach (var scroll in root.Query<ScrollView>().ToList())
+                    if (scrollPositions.TryGetValue(scroll.name, out var offset)) scroll.scrollOffset = offset;
+            });
             if (!string.IsNullOrEmpty(focus)) root.schedule.Execute(() =>
             {
                 var target = root.Q<Button>(focus);
@@ -354,8 +362,25 @@ namespace UnsoundedSea.Runtime
                     BuildActChoice(panel, session, saved); break;
                 case VoyagePhase.Completed:
                 case VoyagePhase.Failed:
+                    BuildVoyageSummary(panel, session);
                     panel.Add(Action("voyage-finish", "返回标题", "primary", () => SceneManager.LoadScene(VoyageRuntime.MainMenuScene))); break;
             }
+        }
+        private static void BuildVoyageSummary(VisualElement panel, VoyageSession session)
+        {
+            var summary = session.Summary;
+            var scroll = new ScrollView(ScrollViewMode.Vertical) { name = "voyage-summary" };
+            ScrollWheel.ForwardFrom(panel, scroll);
+            scroll.AddToClassList("voyage-summary");
+            if (!string.IsNullOrEmpty(summary.DeathCause)) scroll.Add(Text(summary.DeathCause, "body"));
+            scroll.Add(Text($"生命 {summary.Health} · 理智 {summary.Sanity} · 补给 {summary.Supplies}\n航行 {summary.ElapsedHours} 小时 · 使用 {summary.SpentSupplies} 补给", "body"));
+            scroll.Add(Text("航迹", "section-label"));
+            foreach (var stop in summary.Route) scroll.Add(Text(stop, "body"));
+            scroll.Add(Text("学到的行动", "section-label"));
+            scroll.Add(Text(string.Join("、", summary.LearnedCards), "body"));
+            scroll.Add(Text("使用的物资", "section-label"));
+            scroll.Add(Text(summary.SpentItems.Count == 0 ? "无" : string.Join("、", summary.SpentItems), "body"));
+            panel.Add(scroll);
         }
         private void BuildRewards(VisualElement panel, VoyageSession session, bool saved)
         {
@@ -364,16 +389,21 @@ namespace UnsoundedSea.Runtime
             {
                 var card = reward;
                 var button = Action("reward-" + card.Id, string.Empty, "reward-card",
-                    () => Change(() => Session.ClaimReward(card.Id), $"已习得「{card.Name}」；可在整备点编入牌组。"), saved);
+                    () => { selectedReward = card.Id; Refresh(); }, saved);
                 var face = Element("reward-card-face"); IllustratedCard.Apply(face, card); button.Add(face);
+                button.EnableInClassList("selected", selectedReward == card.Id);
                 button.tooltip = card.Name + "：" + card.Description; cards.Add(button);
             }
             panel.Add(cards);
             foreach (var item in session.RewardItems)
             {
                 var id = item.Id;
-                panel.Add(Action("reward-item-" + id, "改选装备 · " + item.Name, "secondary", () => Change(() => Session.ClaimReward("item:" + id)), saved));
+                var itemButton = Action("reward-item-" + id, "改选装备 · " + item.Name, "secondary", () => { selectedReward = "item:" + id; Refresh(); }, saved);
+                itemButton.EnableInClassList("selected", selectedReward == "item:" + id);
+                panel.Add(itemButton);
             }
+            if (selectedReward != null)
+                panel.Add(Action("reward-confirm", "领取", "primary", () => Change(() => Session.ClaimReward(selectedReward)), saved));
             var suppliesFull = session.Supplies >= 8;
             var skip = Action("reward-supplies", suppliesFull ? "放弃：补给已满" : "放弃：获得 1 补给", "secondary",
                 () => Change(() => Session.ClaimReward(null), suppliesFull ? "已跳过奖励；补给已满，没有额外收益。" : "已将所得换为 1 补给。"), saved);
@@ -386,9 +416,9 @@ namespace UnsoundedSea.Runtime
             panel.Add(Text(session.Act == 1 ? "选择第二幕航向" : "驶向最终海域", "destination-title"));
             if (session.Act == 1)
             {
-                AddRegionChoice(panel, "bones", "尸骸之海", "追查召唤物的来源；战斗会出现可追溯的召唤链。", saved);
-                AddRegionChoice(panel, "inverted", "倒悬潮庭", "在盐格中推理安全航路，以调查结果排除危险格。", saved);
-                AddRegionChoice(panel, "fleet", "无灯裂海", "干预舰队装置，在短暂窗口内完成关键行动。", saved);
+                AddRegionChoice(panel, "bones", "尸骸之海", "残骸间的接舷遭遇。", saved);
+                AddRegionChoice(panel, "inverted", "倒悬潮庭", "倒悬潮流中的接舷遭遇。", saved);
+                AddRegionChoice(panel, "fleet", "无灯裂海", "无灯船队间的接舷遭遇。", saved);
             }
             else
                 AddRegionChoice(panel, "abyss", "无星深渊", "终局航向：驶入没有星光回应的洋流。", saved);
@@ -415,6 +445,7 @@ namespace UnsoundedSea.Runtime
             var main = Element("action-book-main"); body.Add(main);
             var count = Text("", "collection-count"); main.Add(count);
             var scroll = new ScrollView(ScrollViewMode.Vertical); scroll.AddToClassList("action-book-scroll");
+            ScrollWheel.ForwardFrom(sheet, scroll);
             var cards = Element("action-book-cards"); scroll.Add(cards); main.Add(scroll);
             Button save = null;
             void UpdateState()
@@ -447,6 +478,8 @@ namespace UnsoundedSea.Runtime
             {
                 var toolId = id;
                 var tool = Action("tool-" + id, ToolName(id), "action-book-tool", null);
+                tool.tooltip = ToolName(id);
+                tool.text = SupportCatalog.Item(id).Name + (id == "shell" ? " · 3 理智" : "");
                 tool.clicked += () =>
                 {
                     if (!editable) return;
@@ -550,6 +583,7 @@ namespace UnsoundedSea.Runtime
             }
             sheet.Add(Text("航迹与观测", "muted"));
             var entries = new ScrollView(); foreach (var entry in Session.Log) entries.Add(Text(entry, "journal-entry")); sheet.Add(entries);
+            ScrollWheel.ForwardFrom(sheet, entries);
             sheet.Add(Action("journal-close", "收起日志 / Esc", "primary", () => { journalOpen = false; Refresh(); }));
             scrim.Add(sheet); root.Add(scrim); root.schedule.Execute(() => root.Q<Button>("journal-close")?.Focus());
         }

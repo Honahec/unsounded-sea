@@ -15,14 +15,15 @@ MonoBehaviour:
   id: voyage-fleet-enemy-1
   displayName: "\u54D1\u706B\u70AE\u624B"
   health: 34
-  candidateDescription: "\u91CD\u65B0\u88C5\u586B\uFF1A0 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u8FD1\u8237\u8F70\u51FB\uFF1A14 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  candidateDescription: "\u91CD\u65B0\u88C5\u586B\uFF1A0 \u751F\u547D\u4F24\u5BB3 / \u8FD1\u8237\u8F70\u51FB\uFF1A14 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  intentPolicy: 1
   intents:
   - id: load
     displayName: "\u91CD\u65B0\u88C5\u586B"
     clue: "\u949D\u53E3\u94F3\u671D\u4E0B\uFF0C\u706B\u836F\u7B52\u5DF2\u7ECF\u6253\u5F00\u3002"
     channel: 0
     amount: 0
-    isPublic: 1
+    isPublic: 0
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"

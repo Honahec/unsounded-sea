@@ -10,7 +10,20 @@ namespace UnsoundedSea.Runtime
     {
         private const string ArchivePreference = "unsounded-sea.verified-archive-v2";
         private const string CrewPreference = "unsounded-sea.prepared-crew";
-        public static string CrewId => PlayerPrefs.GetString(CrewPreference, "medic");
+        public static string CrewId
+        {
+            get
+            {
+                var id = PlayerPrefs.GetString(CrewPreference, "medic");
+                return id == "listener" ? id : "medic";
+            }
+            set
+            {
+                if (value != "medic" && value != "listener") throw new ArgumentException("Unknown initial crew.", nameof(value));
+                PlayerPrefs.SetString(CrewPreference, value);
+                PlayerPrefs.Save();
+            }
+        }
         [Serializable] private sealed class ArchiveData { public ArchiveEntry[] entries = Array.Empty<ArchiveEntry>(); }
         [Serializable] private sealed class ArchiveEntry { public string key; public string text; public string source; public string subjectType; public string question; public string rule; public string fact; }
         public static IReadOnlyList<Evidence> StoredArchive=>LoadArchive().ToArray();

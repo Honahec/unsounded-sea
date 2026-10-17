@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "\u9ED1\u5E06\u4F20\u4EE4\uFF08\u968F\u884C\uFF09"
   health: 20
   candidateDescription: "\u9ED1\u65D7\u4F20\u4EE4\uFF1A4 \u7406\u667A\u51B2\u51FB / \u65D7\u6746\u6A2A\u626B\uFF1A7 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  intentPolicy: 1
   intents:
   - id: flag
     displayName: "\u9ED1\u65D7\u4F20\u4EE4"

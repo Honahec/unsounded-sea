@@ -32,10 +32,12 @@ namespace UnsoundedSea.Tests
             Assert.That(storm.rules, Is.TypeOf<SurvivalRuleModule>());
             Assert.That(stormDefinition.ObjectiveTarget, Is.EqualTo(5));
             Assert.That(stormDefinition.Enemies.Single().Intents.Select(x => x.Amount), Is.EquivalentTo(new[] { 18, 9 }));
-            Assert.That(stormDefinition.Enemies.Single().Intents.All(x => x.IsPublic && x.Interruptible), Is.True);
+            Assert.That(stormDefinition.Enemies.Single().Intents.All(x => x.IsPublic), Is.True);
+            Assert.That(stormDefinition.Enemies.Single().Intents.Select(x => x.Interruptible), Is.EqualTo(new[] { false, true }));
             Assert.That(beacon.rules, Is.Null);
             Assert.That(beaconDefinition.Enemies.Single().Health, Is.EqualTo(48));
-            Assert.That(beaconDefinition.Enemies.Single().Intents.All(x => x.IsPublic && x.Interruptible), Is.True);
+            Assert.That(beaconDefinition.Enemies.Single().Intents.All(x => x.IsPublic), Is.True);
+            Assert.That(beaconDefinition.Enemies.Single().Intents.Select(x => x.Interruptible), Is.EqualTo(new[] { false, true }));
         }
 
         [Test] public void InvalidInvestigationTypeIsRejectedBeforeUse()

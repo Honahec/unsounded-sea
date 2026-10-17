@@ -258,6 +258,22 @@ namespace UnsoundedSea.Runtime
         private static string ToolQuestion(InvestigationKind kind) =>
             kind == InvestigationKind.VisibleAction ? "确认目标的可见动作" :
             kind == InvestigationKind.SoundSource ? "判断声音来自何处" : "判断威胁肉体还是理智";
+        private static string CrewMotif(CrewSupportKind kind)
+        {
+            switch (kind)
+            {
+                case CrewSupportKind.Medic: return "heart";
+                case CrewSupportKind.Listener: return "ear";
+                case CrewSupportKind.Engineer: return "shield";
+                case CrewSupportKind.Archivist: return "scroll";
+                case CrewSupportKind.Navigator:
+                case CrewSupportKind.Cartographer: return "compass";
+                case CrewSupportKind.Gunsmith: return "gun";
+                case CrewSupportKind.Diver: return "shell";
+                case CrewSupportKind.Cook: return "lantern";
+                default: return "eye";
+            }
+        }
 
         // Phase transitions are internal bookkeeping; the HUD shows only what happened to the investigator.
         private static IEnumerable<(string turn, string text)> PlayerLog(BattleView view) =>
@@ -275,6 +291,8 @@ namespace UnsoundedSea.Runtime
             if (selectedCard == 0) enemySelection.Reset();
             var focused = focusOverride ?? (root.panel?.focusController.focusedElement as VisualElement)?.name;
             var handOffset = root.Q<ScrollView>("hand")?.scrollOffset ?? Vector2.zero;
+            var toolOffset = root.Q<ScrollView>(className: "tools")?.scrollOffset ?? Vector2.zero;
+            var journalOffset = root.Q<ScrollView>("journal-entries")?.scrollOffset ?? Vector2.zero;
             var focusIndex = -1;
             if (focused != null && focused.StartsWith("card-") && int.TryParse(focused.Substring(5), out var focusedCard))
                 focusIndex = Array.IndexOf(previousHand, focusedCard);
@@ -340,11 +358,15 @@ namespace UnsoundedSea.Runtime
 
             // Right edge: concise investigation tools retain uses, purpose and price.
             var tools = new ScrollView(ScrollViewMode.Vertical); tools.AddToClassList("tools"); tools.style.maxHeight = new StyleLength(new Length(48, LengthUnit.Percent));
+            var selectedTarget = view.Enemies.FirstOrDefault(enemy => enemy.Id == selectedEnemy);
+            if (selectedTarget != null) tools.Add(Text("聚焦 · " + selectedTarget.Name, "tool-focus"));
             foreach (var tool in view.Tools.Where(x=>(int)x.Definition.Kind<3))
             {
                 var id = tool.Definition.Id;
+                var target = tool.Targets.FirstOrDefault(x => x.Id == selectedEnemy);
                 var spent = tool.RemainingUses == 0;
-                var button = Button("tool-" + id, "", "tool", () => Send(BattleCommand.Investigate(id, selectedEnemy)), !spent && playing);
+                var button = Button("tool-" + id, "", "tool", () => Send(BattleCommand.Investigate(id, selectedEnemy)),
+                    playing && tool.Enabled && target?.Enabled == true);
                 button.EnableInClassList("spent", spent);
                 var art = new SeaUiArt(tool.Definition.Kind == InvestigationKind.SoundSource ? "ear" : tool.Definition.Kind == InvestigationKind.VisibleAction ? "lantern" : "eye");
                 button.Add(art);
@@ -358,7 +380,8 @@ namespace UnsoundedSea.Runtime
                 }
                 foot.Add(Text(spent ? "已用尽" : $"×{tool.RemainingUses}", spent ? "tool-spent" : "tool-uses"));
                 button.Add(foot);
-                button.tooltip = $"{tool.Definition.Name}：{ToolQuestion(tool.Definition.Kind)}。对象为当前目标。";
+                button.tooltip = target != null && target.Enabled ? $"{tool.Definition.Name}：{ToolQuestion(tool.Definition.Kind)}。{target.Detail}" :
+                    target?.Detail ?? tool.DisabledReason;
                 tools.Add(button);
             }
             foreach (var support in view.Supports)
@@ -370,7 +393,7 @@ namespace UnsoundedSea.Runtime
                     else { selectedSupport = selectedSupport == crew.Definition.Id ? null : crew.Definition.Id; selectedCard = 0; Refresh(); }
                 }, playing && crew.Enabled);
                 button.EnableInClassList("spent", crew.Used);
-                button.Add(new SeaUiArt(crew.Definition.Kind == CrewSupportKind.Medic ? "heart" : "ear"));
+                button.Add(new SeaUiArt(CrewMotif(crew.Definition.Kind)));
                 button.Add(Text(crew.Definition.Name, "tool-name"));
                 button.Add(Text(crew.Used ? "本场已用" : $"{crew.Definition.Cost}行动", crew.Used ? "tool-spent" : "tool-uses"));
                 button.tooltip = crew.Enabled ? SupportCatalog.CrewDescription(crew.Definition.Kind) + " 每回合最多一次，每人每场一次。" : crew.DisabledReason;
@@ -632,6 +655,9 @@ namespace UnsoundedSea.Runtime
             hand.schedule.Execute(() =>
             {
                 hand.scrollOffset = handOffset;
+                tools.scrollOffset = toolOffset;
+                var journal = root.Q<ScrollView>("journal-entries");
+                if (journal != null) journal.scrollOffset = journalOffset;
                 Focusable target = null;
                 if (!string.IsNullOrEmpty(focused)) target = root.Q<Button>(focused);
                 if ((target == null || !target.canGrabFocus) && focusIndex >= 0 && handIds.Length > 0)

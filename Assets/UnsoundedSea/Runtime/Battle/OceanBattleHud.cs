@@ -121,6 +121,22 @@ namespace UnsoundedSea.Runtime
         private static Label Text(string text, string cls) { var l = new Label(text) { pickingMode = PickingMode.Ignore }; l.AddToClassList(cls); return l; }
         private static Button Button(string name, string text, Action action, string cls = "sea-button")
         { var b = new Button(action) { name = name, text = text }; b.AddToClassList(cls); return b; }
+        private static string CrewMotif(CrewSupportKind kind)
+        {
+            switch (kind)
+            {
+                case CrewSupportKind.Medic: return "heart";
+                case CrewSupportKind.Listener: return "ear";
+                case CrewSupportKind.Engineer: return "shield";
+                case CrewSupportKind.Archivist: return "scroll";
+                case CrewSupportKind.Navigator:
+                case CrewSupportKind.Cartographer: return "compass";
+                case CrewSupportKind.Gunsmith: return "gun";
+                case CrewSupportKind.Diver: return "shell";
+                case CrewSupportKind.Cook: return "lantern";
+                default: return "eye";
+            }
+        }
         private void Refresh()
         {
             // Finishing an animation changes input availability, not the view contents.
@@ -145,15 +161,18 @@ namespace UnsoundedSea.Runtime
         }
         private void Render()
         {
+            var focused = (root.panel?.focusController.focusedElement as VisualElement)?.name;
             var oldHand = root.Q<ScrollView>("hand");
+            var handOffset = oldHand?.scrollOffset ?? Vector2.zero;
             var handWidth = oldHand?.contentViewport.resolvedStyle.width ?? 0;
+            var toolOffset = root.Q<ScrollView>(className: "tools")?.scrollOffset ?? Vector2.zero;
+            var journalOffset = root.Q<ScrollView>(className: "journal")?.scrollOffset ?? Vector2.zero;
             var oldPositions = nameplates.ToDictionary(p => p.name, p => new Vector2(p.resolvedStyle.left, p.resolvedStyle.top));
             renderedRevision = director.ViewRevision;
             renderedPaused = director.Paused; renderedSelection = director.SelectedEnemy; renderedNotice = director.Notice;
             actionButtons.Clear();
             root.Clear(); root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion); nameplates.Clear(); var v = director.View; if (v == null) return;
             root.focusable = v.PendingChoice == null && inspectedCard == 0 && !bookOpen && !chartOpen && !director.Paused && v.Phase == BattlePhase.PlayerTurn;
-            if (root.focusable) root.Focus();
             encounterLabels.Clear();
             enemyChoices.Clear();
             if (selectedEncounterCard == 0) enemySelection.Reset();
@@ -187,13 +206,16 @@ namespace UnsoundedSea.Runtime
             var selected = v.Enemies.FirstOrDefault(x => x.Id == director.SelectedEnemy);
 
             var tools = new ScrollView(ScrollViewMode.Vertical); tools.AddToClassList("tools"); tools.style.maxHeight = new StyleLength(new Length(48, LengthUnit.Percent)); root.Add(tools);
+            if (selected != null) tools.Add(Text("聚焦 · " + selected.Name, "tool-focus"));
             foreach (var tool in v.Tools.Where(x=>(int)x.Definition.Kind<3))
             {
                 var t = tool; var cost = t.Definition.SanityCost > 0 ? $"{t.Definition.SanityCost}理智" : "无代价";
+                var target = t.Targets.FirstOrDefault(x => x.Id == director.SelectedEnemy);
                 var b = Button("tool-" + t.Definition.Id, "", () => director.Submit(BattleCommand.Investigate(t.Definition.Id, director.SelectedEnemy)), "tool");
                 b.Add(Text(t.Definition.Name, "tool-name")); b.Add(Text($"×{t.RemainingUses}" + (t.Definition.SanityCost > 0 ? $" · {t.Definition.SanityCost} 理智" : ""), "tool-meta"));
-                b.tooltip = $"{t.Definition.Name}：调查当前目标，剩余 {t.RemainingUses} 次，代价 {cost}";
-                ActionButton(b, active && selected != null && t.RemainingUses > 0 && v.Sanity > t.Definition.SanityCost); tools.Add(b);
+                b.tooltip = target != null && target.Enabled ? $"{t.Definition.Name}：{target.Detail}，剩余 {t.RemainingUses} 次，代价 {cost}" :
+                    target?.Detail ?? t.DisabledReason;
+                ActionButton(b, active && t.Enabled && target?.Enabled == true); tools.Add(b);
             }
             foreach (var support in v.Supports)
             {
@@ -203,7 +225,7 @@ namespace UnsoundedSea.Runtime
                     if (crew.Targets.Count == 0) director.Submit(BattleCommand.Support(crew.Definition.Id));
                     else { selectedSupport = selectedSupport == crew.Definition.Id ? null : crew.Definition.Id; selectedEncounterCard = 0; Render(); }
                 }, "tool");
-                button.Add(new SeaUiArt(crew.Definition.Kind == CrewSupportKind.Medic ? "heart" : "ear"));
+                button.Add(new SeaUiArt(CrewMotif(crew.Definition.Kind)));
                 button.Add(Text(crew.Definition.Name, "tool-name"));
                 button.Add(Text(crew.Used ? "本场已用" : $"{crew.Definition.Cost}行动", "tool-meta"));
                 button.tooltip = crew.Enabled ? SupportCatalog.CrewDescription(crew.Definition.Kind) + " 每回合最多一次，每人每场一次" : crew.DisabledReason;
@@ -375,6 +397,16 @@ namespace UnsoundedSea.Runtime
                 foreach (var child in root.Children().ToArray()) child.SetEnabled(false);
                 root.Add(IllustratedCard.Inspection(inspection.Definition, CloseInspection));
             }
+            root.schedule.Execute(() =>
+            {
+                hand.scrollOffset = handOffset;
+                tools.scrollOffset = toolOffset;
+                var journal = root.Q<ScrollView>(className: "journal");
+                if (journal != null) journal.scrollOffset = journalOffset;
+                var target = string.IsNullOrEmpty(focused) ? null : root.Q<VisualElement>(focused);
+                if (root.focusable && target != null && target.canGrabFocus) target.Focus();
+                else if (root.focusable && string.IsNullOrEmpty(focused)) root.Focus();
+            });
         }
         private bool TryPlaySelectedTarget(string enemyId)
         {
@@ -582,9 +614,9 @@ namespace UnsoundedSea.Runtime
                 {
                     var log = new ScrollView(); log.AddToClassList("journal");
                     foreach (var evidence in view.Evidence) log.Add(Text($"[{KnowledgeLabel(evidence.Level)}] {evidence.Text} / {BattleSupplyPanel.EvidenceLabel(evidence, view.Turn)}", "log-line"));
-                    var entries = view.Log.Where(x => !x.Contains("阶段：")).ToArray();
-                    foreach (var entry in entries.Skip(Math.Max(0, entries.Length - 12))) log.Add(Text(entry, "log-line"));
+                    foreach (var entry in view.Log.Where(x => !x.Contains("阶段："))) log.Add(Text(entry, "log-line"));
                     sheet.Add(log);
+                    ScrollWheel.ForwardFrom(sheet, log);
                 }
                 if (!end) sheet.Add(Button("battle-resume", "返回 / J", () => { journalOpen = false; director.SetPaused(false); }));
             }

@@ -21,7 +21,7 @@ namespace UnsoundedSea.Core
 
         private void ApplyEnemyThreat(EnemyState enemy, DamageChannel channel, int amount, string description = null)
         {
-            if (health == 0 || sanity == 0) return;
+            if (health == 0 || sanity == 0 || amount <= 0) return;
             resolvedEnemyActions.Add(new ResolvedEnemyAction(enemy.Definition.Id, channel, amount));
             ApplyThreat(channel, amount, enemy.Definition.Name, description);
         }
@@ -42,7 +42,7 @@ namespace UnsoundedSea.Core
         {
             public int BoundCount => completed.Count(x=>x.EndsWith(":bound",StringComparison.Ordinal));
             public int EvacuationProgress => kind==BossEncounterKind.Watcher&&stage==3?progress:0;
-            public int SafeOpenedCount => kind==BossEncounterKind.Surveyor?completed.Count(x=>!B03Initial.Contains(x)&&!B03Mines.Contains(x)):0;
+            public int SafeOpenedCount => kind == BossEncounterKind.Surveyor ? completed.Count(x => !b03Initial.Contains(x) && !b03Mines.Contains(x)) : 0;
             public IEnumerable<EncounterTargetView> ConnectionTargets() => GuardAnchorOptions().Where(x=>!s.knowledge.Entries.Any(e=>e.Key=="scene/connection/"+SceneId(x.Id)));
             public bool RevealNextConstraint() { if(kind!=BossEncounterKind.Choirmaster||stage!=1||known>=2)return false;known++;s.Record(Constraint(known-1));if(known>=2)RemoveCard("E02-01");return true; }
             private static readonly string[][] Orders =
@@ -51,9 +51,9 @@ namespace UnsoundedSea.Core
                 new[] { "choir-b", "choir-a", "choir-c" }, new[] { "choir-b", "choir-c", "choir-a" },
                 new[] { "choir-c", "choir-a", "choir-b" }, new[] { "choir-c", "choir-b", "choir-a" }
             };
-            private static readonly string[] B03Mines = { "A4", "C2", "D4" };
-            private static readonly string[] B03Initial = { "A1", "A2", "A3", "B1", "B2", "B3", "D1" };
-            private static readonly string[] B03Goals = { "B4", "C1", "C4", "D2" };
+            private static readonly string[] B03MineTemplate = { "A4", "C2", "D4" };
+            private static readonly string[] B03InitialTemplate = { "A1", "A2", "A3", "B1", "B2", "B3", "D1" };
+            private static readonly string[] B03GoalTemplate = { "B4", "C1", "C4", "D2" };
             private static readonly string[] GuardNames = { "anchor", "lamp", "bell", "sail", "eye" };
             private readonly BattleSession s;
             private readonly BossEncounterKind kind;
@@ -63,24 +63,33 @@ namespace UnsoundedSea.Core
             private readonly Dictionary<string, int> ages = new Dictionary<string, int>(StringComparer.Ordinal);
             private readonly Dictionary<string, int> dormantUntil = new Dictionary<string, int>(StringComparer.Ordinal);
             private readonly string[] order;
+            private readonly string[] b03Mines;
+            private readonly string[] b03Initial;
+            private readonly string[] b03Goals;
             private readonly string[] guardOrder;
             private int stage = 1, progress, known, summonStep, alarm = 5, opensThisTurn, flagFinalTurn;
-            private bool victory, primaryUsed, secondaryUsed, initialSpawned, sailBurst, eyeBurst, cardsGranted, stagePending, cancelMainThisTurn, cancelSummon, evacuationJustEntered;
+            private bool victory, primaryUsed, secondaryUsed, initialSpawned, sailBurst, eyeBurst, cardsGranted, stagePending, cancelMainThisTurn, cancelSummon, evacuationJustEntered, suppressAlarm;
             public int Stage => stage;
             public bool IsVictory => victory;
-            public int Progress => progress;
+            public int Progress => kind == BossEncounterKind.FlagBearer && stage == 1
+                ? (Relay("R1") == "positive" ? 1 : 0) + (Relay("R2") == "reverse" ? 1 : 0)
+                : progress;
             private int MainHealth => s.enemies[0].Definition.Health;
-            public int Target => kind == BossEncounterKind.Choirmaster ? (stage == 1 ? 3 : MainHealth) : kind == BossEncounterKind.Surveyor ? 4 : kind == BossEncounterKind.FlagBearer ? (stage == 2 ? 3 : stage == 3 ? MainHealth : 2) : stage == 3 ? 2 : 5;
+            public int Target => kind == BossEncounterKind.Choirmaster ? (stage == 1 ? 3 : MainHealth) : kind == BossEncounterKind.Surveyor ? 4 : kind == BossEncounterKind.FlagBearer ? (stage == 2 ? 3 : stage == 3 ? MainHealth : 2) : stage == 1 ? 1 : stage == 3 ? 2 : 5;
             public string Objective => kind == BossEncounterKind.Choirmaster ? (stage == 1 ? "按序关闭唱诗匣" : "击破发声囊") : kind == BossEncounterKind.Surveyor ? "激活四枚安全封栓" : kind == BossEncounterKind.FlagBearer ? (stage == 1 ? "校正双继电器" : stage == 2 ? "依序释放三段闸锁" : "击退执旗者") : stage == 1 ? "建立撤离绳" : stage == 2 ? "牵引守卫并关闭五座锚点" : "收绞归航绳";
             public string Status => BuildStatus();
             public IReadOnlyList<EncounterTargetView> AllTargets { get { RefreshCards(); return targets.Select(x => new EncounterTargetView(x.Id, x.Name, TargetDetail(x.Id), true)).ToList().AsReadOnly(); } }
 
             public BossEncounterState(BattleSession session, BossEncounterKind encounter, uint seed)
             {
-                s = session; kind = encounter; order = Orders[seed % Orders.Length]; guardOrder = GuardNames.Skip((int)(seed % 5)).Concat(GuardNames.Take((int)(seed % 5))).ToArray(); ValidateSlots();
+                s = session; kind = encounter; order = Orders[seed % Orders.Length]; guardOrder = GuardNames.Skip((int)(seed % 5)).Concat(GuardNames.Take((int)(seed % 5))).ToArray();
+                b03Mines = encounter == BossEncounterKind.Surveyor ? TransformSaltCells(B03MineTemplate, seed) : B03MineTemplate;
+                b03Initial = encounter == BossEncounterKind.Surveyor ? TransformSaltCells(B03InitialTemplate, seed) : B03InitialTemplate;
+                b03Goals = encounter == BossEncounterKind.Surveyor ? TransformSaltCells(B03GoalTemplate, seed) : B03GoalTemplate;
+                ValidateSlots();
                 for (var i = 1; i < s.enemies.Count; i++) s.enemies[i].Health = 0;
                 BuildTargets();
-                if (kind == BossEncounterKind.Surveyor) foreach (var id in B03Initial) completed.Add(id);
+                if (kind == BossEncounterKind.Surveyor) foreach (var id in b03Initial) completed.Add(id);
             }
 
             private void ValidateSlots()
@@ -136,7 +145,7 @@ namespace UnsoundedSea.Core
                 if (stagePending) { stage = 2; progress = 0; stagePending = false; }
                 if (kind == BossEncounterKind.Choirmaster)
                 {
-                    known = Math.Max(known, Math.Min(2, s.turn)); if (known >= 2) RemoveCard("E02-01");
+                    known = Math.Max(known, 1); if (known >= 2) RemoveCard("E02-01");
                     if (stage == 2) SetPublicIntent(s.enemies[0], DamageChannel.Health, 9, "发声囊撞击");
                     else if (s.turn % 3 == 2) SetPublicIntent(s.enemies[0], DamageChannel.Health, 0, s.turn > 6 && s.enemies[2].Health == 0 ? "召唤潮囊信使" : "召唤骨片侍从", true);
                     else SetPublicIntent(s.enemies[0], s.turn % 3 == 0 ? DamageChannel.Sanity : DamageChannel.Health, s.turn % 3 == 0 ? 4 : 6, s.turn % 3 == 0 ? "失谐合唱" : "骨潮冲击");
@@ -190,7 +199,7 @@ namespace UnsoundedSea.Core
             {
                 if (id == "E02-01") { known++; s.Record(Constraint(known - 1)); if (known >= 2) RemoveCard(id); return; }
                 if (id == "E02-02") { primaryUsed = true; if (target == order[progress]) { completed.Add(target); progress++; s.Record("唱诗匣永久关闭。"); if (progress == 3) { stage = 2; cancelSummon = true; progress = MainHealth - s.enemies[0].Health; RemoveCard(id); s.Record("护持解除；尚未发生的新召唤取消。"); } } else { s.ApplyThreat(DamageChannel.Sanity, 4, "错误唱序"); } return; }
-                if (id == "E03-01") { opensThisTurn++; completed.Add(target); if (B03Mines.Contains(target)) s.ApplyThreat(DamageChannel.Health, s.SceneFailureDamage(6), "危险盐格"); if (B03Mines.Contains(target)) s.ApplyThreat(DamageChannel.Sanity, 2, "危险盐格"); if (B03Goals.Contains(target)) progress++; if (progress == 4) { victory = true; RemoveCard("E03-01"); RemoveCard("E03-02"); } return; }
+                if (id == "E03-01") { opensThisTurn++; completed.Add(target); if (b03Mines.Contains(target)) s.ApplyThreat(DamageChannel.Health, s.SceneFailureDamage(6), "危险盐格"); if (b03Mines.Contains(target)) s.ApplyThreat(DamageChannel.Sanity, 2, "危险盐格"); if (b03Goals.Contains(target)) progress++; if (progress == 4) { victory = true; RemoveCard("E03-01"); RemoveCard("E03-02"); } return; }
                 if (id == "E03-02") { read.Add(target); s.Record($"{target} 相邻危险数：{AdjacentMines(target)}。"); return; }
                 if (id == "E04-01") { primaryUsed = true; var p = target.Split(':'); completed.Remove(p[0] + ":off"); completed.Remove(p[0] + ":positive"); completed.Remove(p[0] + ":reverse"); completed.Add(target); if (stage == 1 && Relay("R1") == "positive" && Relay("R2") == "reverse") { stagePending = true; s.Record("双继电器完成；下一玩家回合进入闸锁阶段。"); } return; }
                 if (id == "E04-02") { secondaryUsed = true; progress++; if (progress == 3) { stage = 3; flagFinalTurn = 0; cancelMainThisTurn = true; progress = MainHealth - s.enemies[0].Health; RemoveCard("E04-01"); RemoveCard("E04-02"); s.Record("第三锁完成；警报与本体理智攻击取消，护持解除。"); } return; }
@@ -236,7 +245,7 @@ namespace UnsoundedSea.Core
                     else s.ApplyEnemyThreat(main, main.ActualIntent.Channel, main.ActualIntent.Amount);
                 }
                 cancelSummon = false;
-                foreach (var e in activeSummons.Where(x => !x.Interrupted)) { if (e.Definition.Id == s.enemies[2].Definition.Id) { s.resolvedEnemyActions.Add(new ResolvedEnemyAction(e.Definition.Id, DamageChannel.Sanity, 0)); main.Health = Math.Min(main.Definition.Health, main.Health + 6); s.Record("潮囊信使令发声囊恢复 6。"); } else s.ApplyEnemyThreat(e, DamageChannel.Health, 3); }
+                foreach (var e in activeSummons.Where(x => !x.Interrupted)) { if (e.Definition.Id == s.enemies[2].Definition.Id) { main.Health = Math.Min(main.Definition.Health, main.Health + 6); if (stage == 2) progress = MainHealth - main.Health; s.Record("潮囊信使令发声囊恢复 6。"); } else s.ApplyEnemyThreat(e, DamageChannel.Health, 3); }
             }
             private void SpawnB02()
             {
@@ -264,7 +273,8 @@ namespace UnsoundedSea.Core
                 if (s.turn == 2 && s.enemies[1].Health == 0 && !cancelSummon) { s.enemies[1].Health = s.enemies[1].Definition.Health; RevealSummonSource(s.enemies[1]); }
                 cancelSummon = false;
                 if (soldierWasActive && s.enemies[1].Health > 0 && !s.enemies[1].Interrupted) s.ApplyEnemyThreat(s.enemies[1], DamageChannel.Health, s.enemies[1].ActualIntent.Amount);
-                if (stage == 2 && --alarm == 0) { s.ApplyThreat(DamageChannel.Health, 12, "闸廊警报"); alarm = 3; }
+                if (stage == 2 && --alarm == 0) { if (!suppressAlarm) s.ApplyThreat(DamageChannel.Health, 12, "闸廊警报"); alarm = 3; }
+                suppressAlarm = false;
             }
 
             private void BeginWatcherTurn()
@@ -319,16 +329,17 @@ namespace UnsoundedSea.Core
             private static string BaseId(string id) { var suffix = id.LastIndexOf(':'); return suffix < 0 ? id : id.Substring(0, suffix); }
             private string Slot(string baseId) => s.enemies.First(x => BaseId(x.Definition.Id) == baseId).Definition.Id;
             private bool LockReady(int index) => index == 0 ? Relay("R1") == "off" && Relay("R2") == "reverse" : index == 1 ? Relay("R1") == "positive" && Relay("R2") == "reverse" : Relay("R1") == "positive" && Relay("R2") == "off";
-            private int AdjacentMines(string id) { char r = id[0], c = id[1]; return B03Mines.Count(m => m != id && Math.Abs(m[0] - r) <= 1 && Math.Abs(m[1] - c) <= 1); }
+            private int AdjacentMines(string id) { char r = id[0], c = id[1]; return b03Mines.Count(m => m != id && Math.Abs(m[0] - r) <= 1 && Math.Abs(m[1] - c) <= 1); }
+            private static string[] TransformSaltCells(IEnumerable<string> cells, uint seed) => cells.Select(id => TransformSaltCell(id, (int)(seed % 8))).ToArray();
+            private static string TransformSaltCell(string id, int transform) { var row = id[0] - 'A'; var column = id[1] - '1'; if (transform >= 4) column = 3 - column; for (var i = 0; i < transform % 4; i++) { var oldRow = row; row = column; column = 3 - oldRow; } return $"{(char)('A' + row)}{(char)('1' + column)}"; }
             private static void SetPublicIntent(EnemyState e, DamageChannel channel, int amount, string name, bool interruptible = false) { e.ActualIntent = new IntentSpec("boss", name, name, channel, amount, true, true, interruptible: interruptible); e.Confirmed = true; e.Interrupted = false; }
             private string Constraint(int index) => $"{ChoirLabel(order[index])}在{ChoirLabel(order[index + 1])}前";
             private static string ChoirLabel(string id) => id == "choir-a" ? "潮匣" : id == "choir-b" ? "骨匣" : "息匣";
             private void RevealSummonSource(EnemyState enemy)
             {
-                // Visual cue for an actual summon, not the next turn's intent.
+                // Spawning exposes the source, but verification remains a player action.
                 if (!s.resolvedEnemyActions.Any(a => a.EnemyId == s.enemies[0].Definition.Id))
                     s.resolvedEnemyActions.Add(new ResolvedEnemyAction(s.enemies[0].Definition.Id, DamageChannel.Sanity, 0));
-                completed.Add(enemy.Definition.Id + ":source");
                 s.knowledge.Record(new Evidence(enemy.Definition.Id + "/source", "召唤来源已公开", "场景召唤", KnowledgeLevel.Observed));
             }
             private void RemoveCard(string id) => s.hand.RemoveAll(x => x.IsEncounter && x.Definition.Id == id);
@@ -364,7 +375,7 @@ namespace UnsoundedSea.Core
             }
             private string TargetDetail(string id)
             {
-                if (kind == BossEncounterKind.Surveyor) return (completed.Contains(id) ? (B03Mines.Contains(id) ? "危险已停用" : AdjacentMines(id).ToString()) : read.Contains(id) ? $"测 {AdjacentMines(id)}" : "?") + (B03Goals.Contains(id) ? "\n封栓" : "");
+                if (kind == BossEncounterKind.Surveyor) return (completed.Contains(id) ? (b03Mines.Contains(id) ? "危险已停用" : AdjacentMines(id).ToString()) : read.Contains(id) ? $"测 {AdjacentMines(id)}" : "?") + (b03Goals.Contains(id) ? "\n封栓" : "");
                 if (kind == BossEncounterKind.Choirmaster) return completed.Contains(id) ? "已关闭" : "未关闭";
                 if (kind == BossEncounterKind.FlagBearer) return id.Contains(":") ? (Relay(id.Split(':')[0]) == id.Split(':')[1] ? "当前极性" : "可调校") : id == "lock-I" ? "条件：R1 断电，R2 反接" : id == "lock-II" ? "条件：I 已开，R1 正接，R2 反接" : "条件：II 已开，R1 正接，R2 断电";
                 if (kind == BossEncounterKind.Watcher && id.Contains("|")) { var name = BaseId(id.Split('|')[0]).Replace("b05-guard-", ""); return $"{GuardLabel(name)}公开对应{AnchorLabel(name)}"; }
@@ -389,13 +400,14 @@ namespace UnsoundedSea.Core
             {
                 if (card == 43) return kind == BossEncounterKind.Surveyor ? targets.Where(x => !completed.Contains(x.Id) && !read.Contains(x.Id)).Select(x => T("scene:" + x.Id, x.Name, "未测读")) : EmptyTargets;
                 if (card == 44 || card == 67) return kind == BossEncounterKind.Surveyor && (card != 44 || opensThisTurn < 2) ? ProvenSafeCells().Select(id => T("scene:" + id, id, "由公开约束证明安全")) : EmptyTargets;
-                if (card == 46) return s.enemies.Skip(1).Where(x => x.Health > 0).Select(x => T("enemy:" + x.Definition.Id, x.Definition.Name, completed.Contains(x.Definition.Id + ":source") ? "来源已公开：抽 1" : "验证召唤来源"));
-                if (card == 42 || card == 52 || card == 66) return GuardAnchorOptions();
+                if (card == 46) return s.enemies.Skip(1).Where(x => x.Health > 0).Select(x => T("enemy:" + x.Definition.Id, x.Definition.Name, IsVerifiedSource(x.Definition.Id) ? "来源已验证：抽 1" : "验证召唤来源"));
+                if (card == 42 || card == 52) return GuardAnchorOptions();
+                if (card == 66) return GuardAnchorOptions().Where(x => IsVerifiedSource(SceneId(x.Id).Split('|')[0]));
                 if (card == 82) return GuardAnchorOptions().Where(x => !s.knowledge.Entries.Any(e => e.Key == SceneId(x.Id).Split('|')[0] + "/anchor" && e.Level == KnowledgeLevel.Verified));
                 if (card == 56) return kind == BossEncounterKind.Choirmaster && stage == 1 && known >= 2 && !primaryUsed && progress < order.Length
                     ? new[] { T("scene:" + order[progress], ChoirLabel(order[progress]), "当前顺位已验证") } : EmptyTargets;
                 if (card == 57 || card == 60) return kind == BossEncounterKind.FlagBearer && stage == 2 ? new[] { T("scene:alarm", "闸廊警报", $"剩余 {alarm}") } : EmptyTargets;
-                if (card == 59) return EmptyTargets;
+                if (card == 59) return kind == BossEncounterKind.FlagBearer && stage == 2 && alarm == 1 ? new[] { T("scene:alarm", "闸廊警报", "取消本回合额外警报") } : EmptyTargets;
                 if (card == 61) return s.enemies.Where(x => x.Health > 0 && x.Confirmed && IsSummonAction(x) && x.ActualIntent.Interruptible).Select(x => T("enemy:" + x.Definition.Id, x.Definition.Name));
                 if (card == 78) { var ordinary = s.enemies.Where(x => x.Health > 0 && x.Confirmed && IsSummonAction(x)).Select(x => T("enemy:" + x.Definition.Id, x.Definition.Name)); return ScheduledSoldierAvailable ? ordinary.Concat(new[] { T("scene:scheduled-soldier", "空甲执旗兵召唤") }) : ordinary; }
                 if (card == 62) return s.enemies.Skip(1).Where(IsBindableAttack).Select(x => T("enemy:" + x.Definition.Id, x.Definition.Name));
@@ -416,10 +428,11 @@ namespace UnsoundedSea.Core
             public bool HasCardMechanic(int card)
             {
                 if (card == 43 || card == 44 || card == 67) return kind == BossEncounterKind.Surveyor;
-                if (card == 42 || card == 52 || card == 66 || card == 69) return kind == BossEncounterKind.Watcher;
+                if (card == 42 || card == 52 || card == 69) return kind == BossEncounterKind.Watcher;
+                if (card == 66) return kind == BossEncounterKind.Watcher && CardTargets(66).Any();
                 if (card == 56 || card == 68) return kind == BossEncounterKind.Choirmaster;
                 if (card == 57 || card == 60 || card == 63 || card == 65 || card == 86) return kind == BossEncounterKind.FlagBearer;
-                if (card == 59) return false;
+                if (card == 59) return kind == BossEncounterKind.FlagBearer && stage == 2 && alarm == 1;
                 return true;
             }
 
@@ -441,7 +454,7 @@ namespace UnsoundedSea.Core
             {
                 var id = SceneId(selection);
                 if (card == 57 || card == 60) { if (kind != BossEncounterKind.FlagBearer || stage != 2) return false; alarm++; return true; }
-                if (card == 59) return false;
+                if (card == 59) { if (kind != BossEncounterKind.FlagBearer || stage != 2 || alarm != 1) return false; suppressAlarm = true; s.MarkSceneAction(); return true; }
                 if (card == 61 || card == 78) return CancelSummon(selection, card == 61);
                 if (card == 62) return BindThreat(id, null);
                 if (card == 63)
@@ -450,7 +463,7 @@ namespace UnsoundedSea.Core
                     Apply("E04-01", id); s.MarkSceneAction(); return true;
                 }
                 if (card == 65) { if (kind != BossEncounterKind.FlagBearer || stage != 2 || progress != 1 || s.health <= 4) return false; s.PayHealth(4); progress++; s.MarkSceneAction(); return true; }
-                if (card == 66) { if (!VerifyGuardAnchor(selection)) return false; completed.Add(SceneId(selection).Split('|')[0] + ":bound"); s.AddBlock(4); s.MarkSceneAction();return true; }
+                if (card == 66) { var subject = SceneId(selection)?.Split('|')[0]; if (!IsVerifiedSource(subject) || !GuardAnchorOptions().Any(x => SceneId(x.Id) == SceneId(selection))) return false; completed.Add(subject + ":bound"); s.AddBlock(4); s.MarkSceneAction(); return true; }
                 if (card == 67) return OpenProvenSafe(selection, false);
                 if (card == 68) { if (kind != BossEncounterKind.Choirmaster || stage != 1 || known < 2 || primaryUsed || id != order[progress]) return false; Apply("E02-02", id); s.AddBlock(6); s.MarkSceneAction(); return true; }
                 if (card == 69) { if (kind != BossEncounterKind.Watcher || stage != 3 || progress >= 2) return false; if (++progress >= 2) victory = true; s.MarkSceneAction(); return true; }
@@ -460,6 +473,7 @@ namespace UnsoundedSea.Core
                 return false;
             }
             public bool InspectConnection(string selection) { var id=SceneId(selection);if(kind!=BossEncounterKind.Watcher||!GuardAnchorOptions().Any(x=>SceneId(x.Id)==id))return false;var subject=id.Split('|')[0];s.knowledge.Record(new Evidence("scene/connection/"+id,"该物件存在可调查连接","查验潮痕",KnowledgeLevel.Observed,EvidenceScope.Encounter,subject,SubjectType(subject),"Connection",s.definition.Id,s.turn));return true; }
+            public bool IsGuardAnchorPublic(string selection) => GuardAnchorOptions().Any(x => SceneId(x.Id) == SceneId(selection));
             public bool MeasureCell(string selection) { var id = SceneId(selection); if (kind != BossEncounterKind.Surveyor || !targets.Any(x => x.Id == id) || completed.Contains(id) || read.Contains(id)) return false; read.Add(id); s.Record($"{id} 相邻危险数：{AdjacentMines(id)}。"); return true; }
             private IEnumerable<string> ProvenSafeCells()
             {
@@ -468,7 +482,7 @@ namespace UnsoundedSea.Core
                 foreach (var mines in Choose(targets.Select(x => x.Id).ToList(), 3, 0, new List<string>()))
                 {
                     var set = new HashSet<string>(mines);
-                    if (completed.Any(x => B03Mines.Contains(x) != set.Contains(x)) || completed.Where(x => !B03Mines.Contains(x)).Any(x => AdjacentCount(set, x) != AdjacentMines(x)) || read.Any(x => AdjacentCount(set, x) != AdjacentMines(x))) continue;
+                    if (completed.Any(x => b03Mines.Contains(x) != set.Contains(x)) || completed.Where(x => !b03Mines.Contains(x)).Any(x => AdjacentCount(set, x) != AdjacentMines(x)) || read.Any(x => AdjacentCount(set, x) != AdjacentMines(x))) continue;
                     possible.Add(set);
                 }
                 foreach (var id in targets.Select(x => x.Id).Where(x => !completed.Contains(x))) if (possible.Count > 0 && possible.All(x => !x.Contains(id))) yield return id;
@@ -482,7 +496,7 @@ namespace UnsoundedSea.Core
             public bool OpenProvenSafe(string selection, bool countsQuota)
             {
                 var id = SceneId(selection); if (kind != BossEncounterKind.Surveyor || !ProvenSafeCells().Contains(id) || countsQuota && opensThisTurn >= 2) return false;
-                if (countsQuota) opensThisTurn++; completed.Add(id); if (B03Goals.Contains(id)) progress++; if (progress == 4) victory = true; s.MarkSceneAction(); return true;
+                if (countsQuota) opensThisTurn++; completed.Add(id); if (b03Goals.Contains(id)) progress++; if (progress == 4) victory = true; s.MarkSceneAction(); return true;
             }
             public bool VerifySummonSource(string id) { var e=s.Find(id);if(e==null||e.Health==0||s.enemies.IndexOf(e)==0)return false;var fresh=completed.Add(id+":source");s.knowledge.Record(new Evidence(id+"/source","召唤来源已验证","追踪召唤",KnowledgeLevel.Verified,EvidenceScope.Encounter,id,SubjectType(id),"Source",s.definition.Id,s.turn,"source-v1",e.ActualIntent?.SoundSource??e.Definition.Name));return fresh; }
             public bool VerifyGuardAnchor(string selection)

@@ -24,6 +24,7 @@ namespace UnsoundedSea.Runtime
             var body = new VisualElement(); body.AddToClassList("collection-body");
             var browser = new VisualElement(); browser.AddToClassList("collection-browser");
             var cardScroll = new ScrollView(ScrollViewMode.Vertical); cardScroll.AddToClassList("collection-scroll");
+            ScrollWheel.ForwardFrom(browser, cardScroll);
             list = new VisualElement(); list.AddToClassList("collection-list"); cardScroll.Add(list); browser.Add(cardScroll);
             var pages = new VisualElement(); pages.AddToClassList("collection-pages");
             pages.Add(new Button(() => ChangePage(-1)) { name = "collection-previous", text = "上一页" });

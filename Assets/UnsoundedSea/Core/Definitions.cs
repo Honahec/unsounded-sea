@@ -51,6 +51,8 @@ namespace UnsoundedSea.Core
         }
     }
 
+    public enum IntentPolicy { Random, Cycle }
+
     public sealed class IntentSpec
     {
         public string Id { get; }
@@ -78,10 +80,12 @@ namespace UnsoundedSea.Core
         public int Health { get; }
         public string Candidates { get; }
         public IReadOnlyList<IntentSpec> Intents { get; }
-        public EnemySpec(string id, string name, int health, string candidates, IEnumerable<IntentSpec> intents)
+        public IntentPolicy IntentPolicy { get; }
+        public EnemySpec(string id, string name, int health, string candidates, IEnumerable<IntentSpec> intents,
+            IntentPolicy intentPolicy = IntentPolicy.Random)
         {
             Id = Require.Id(id); Name = Require.Id(name); Health = Require.Positive(health);
-            Candidates = Require.Id(candidates); Intents = Require.Copy(intents);
+            Candidates = Require.Id(candidates); Intents = Require.Copy(intents); IntentPolicy = Require.Defined(intentPolicy);
             if (Intents.Count == 0 || Intents.Select(x => x.Id).Distinct().Count() != Intents.Count)
                 throw new ArgumentException("Enemy needs unique intents.");
         }

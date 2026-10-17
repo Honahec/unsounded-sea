@@ -87,7 +87,7 @@ namespace UnsoundedSea.Core
                     ObjectiveTarget = boss?.Target ?? objective.Target, CanAdvanceObjective = boss == null && phase == BattlePhase.PlayerTurn && objective.AllowsTaskAction && !taskUsed && actions >= Math.Max(0, objective.ActionCost - sceneDiscount),
                     Hand = hand.Select(x => x.Snapshot()).ToList().AsReadOnly(),
                     Enemies = enemies.Select(BossEnemyView).ToList().AsReadOnly(),
-                    Tools = definition.Tools.Select(t => new ToolView(t, toolUses[t.Id])).ToList().AsReadOnly(),
+                    Tools = definition.Tools.Select(BuildToolView).ToList().AsReadOnly(),
                     Supports = definition.Supports.Select(BuildSupportView).ToList().AsReadOnly(),
                     SupplyActions=SupplyViews().ToList().AsReadOnly(),SpentConsumables=spentConsumables.ToList().AsReadOnly(),Equipment=definition.Loadout.Equipment,SurveyedBeacon=beaconAvailable,
                     
@@ -143,12 +143,10 @@ namespace UnsoundedSea.Core
                     break;
                 case CommandKind.UseTool:
                     var tool = definition.Tools.FirstOrDefault(x => x.Id == command.toolId);
-                    if (tool == null || toolUses[tool.Id] <= 0) return Reject("道具不可用。");
-                    if ((int)tool.Kind>=3) { var error=UseSupply(tool.Id,command.targetId,false);if(error!=null)return Reject(error);break; }
-                    if (!IsLiving(command.targetId)) return Reject("请选择存活目标。");
-                    if (sanity <= tool.SanityCost) return Reject("理智不足以支付代价。");
-                    if (tool.Kind == InvestigationKind.SoundSource && directionalListeningBlocked) return Reject("耳棉阻止了定向听取；未消耗次数。");
-                    if (!CanInvestigate(command.targetId, tool.Kind)) return Reject("该问题已回答，或道具无法观察这一动作；未消耗次数。");
+                    if (tool == null) return Reject("道具不可用。");
+                    if ((int)tool.Kind>=3) { if (toolUses[tool.Id] <= 0) return Reject("道具不可用。"); var error=UseSupply(tool.Id,command.targetId,false);if(error!=null)return Reject(error);break; }
+                    var investigationError = InvestigationError(tool, command.targetId);
+                    if (investigationError != null) return Reject(investigationError);
                     toolUses[tool.Id]--; sanity -= tool.SanityCost;
                     ActiveSanityEquipment(tool.SanityCost);turnFlags.Add("tool-new-answer");
                     Record($"使用 {tool.Name}；支付 {tool.SanityCost} 理智。");
@@ -214,7 +212,10 @@ namespace UnsoundedSea.Core
             foreach (var enemy in enemies.Where(x => x.Health > 0))
             {
                 if (boss != null) continue;
-                enemy.ActualIntent = enemy.Definition.Intents[intentRandom.Next(enemy.Definition.Intents.Count)];
+                var intentIndex = enemy.Definition.IntentPolicy == IntentPolicy.Cycle
+                    ? (turn - 1) % enemy.Definition.Intents.Count
+                    : intentRandom.Next(enemy.Definition.Intents.Count);
+                enemy.ActualIntent = enemy.Definition.Intents[intentIndex];
                 enemy.Confirmed = enemy.ActualIntent.IsPublic || enemy.Definition.Intents.Count == 1; enemy.Interrupted = false;
                 Record($"{enemy.Definition.Name}：{enemy.ActualIntent.Clue}");
             }
@@ -290,6 +291,34 @@ namespace UnsoundedSea.Core
             knowledge.Record(new Evidence($"{id}/{turn}/clue", enemy.ActualIntent.Clue, "观察笔记", KnowledgeLevel.Observed));
             Record("记录当前可见征兆。");
         }
+        private ToolView BuildToolView(ToolSpec tool)
+        {
+            if ((int)tool.Kind >= 3)
+                return new ToolView(tool, toolUses[tool.Id], toolUses[tool.Id] > 0,
+                    toolUses[tool.Id] > 0 ? "" : "道具不可用。", new List<EncounterTargetView>().AsReadOnly());
+            var targets = enemies.Where(x => x.Health > 0).Select(x =>
+            {
+                var error = InvestigationError(tool, x.Definition.Id);
+                return new EncounterTargetView(x.Definition.Id, x.Definition.Name, error ?? "可调查", error == null);
+            }).ToList().AsReadOnly();
+            var firstError = phase != BattlePhase.PlayerTurn ? "战斗已结束或尚未进入玩家回合。"
+                : pendingReorder != null || pendingRetain ? "必须先完成卡牌选择。"
+                : toolUses[tool.Id] <= 0 ? "道具不可用。"
+                : sanity <= tool.SanityCost ? "理智不足以支付代价。"
+                : tool.Kind == InvestigationKind.SoundSource && directionalListeningBlocked ? "耳棉阻止了定向听取；未消耗次数。"
+                : targets.Any(x => x.Enabled) ? "" : "当前没有可调查的新信息。";
+            return new ToolView(tool, toolUses[tool.Id], firstError.Length == 0, firstError, targets);
+        }
+
+        private string InvestigationError(ToolSpec tool, string id)
+        {
+            if (toolUses[tool.Id] <= 0) return "道具不可用。";
+            if (!IsLiving(id)) return "请选择存活目标。";
+            if (sanity <= tool.SanityCost) return "理智不足以支付代价。";
+            if (tool.Kind == InvestigationKind.SoundSource && directionalListeningBlocked) return "耳棉阻止了定向听取；未消耗次数。";
+            return CanInvestigate(id, tool.Kind) ? null : "该问题已回答，或道具无法观察这一动作；未消耗次数。";
+        }
+
         private string EvidenceKey(string id, InvestigationKind kind) => $"{id}/{turn}/{kind}";
         private bool CanInvestigate(string id, InvestigationKind kind)
         {

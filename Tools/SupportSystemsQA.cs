@@ -31,6 +31,14 @@ public static class SupportSystemsQA
         Click("voyage-support-manifest");await Task.Delay(200);
         var sheet=Root.Q(className:"action-book");Check(sheet!=null&&sheet.worldBound.width>500,"Manifest did not lay out.");
         Click("support-tab-1");
+        await Task.Delay(200);
+        sheet=Root.Q(className:"action-book");
+        var materialScroll=Root.Q<ScrollView>("support-scroll");
+        Check(materialScroll.verticalScroller.highValue>0,"Material list must overflow for wheel verification.");
+        using(var wheel=WheelEvent.GetPooled(new Event{type=EventType.ScrollWheel,delta=new Vector2(0,3)}))
+        {wheel.target=sheet;sheet.SendEvent(wheel);}
+        Check(materialScroll.scrollOffset.y>0,"Wheel over manifest padding did not scroll its content.");
+        materialScroll.scrollOffset=Vector2.zero;
         var choice=VoyageRuntime.Session.GetSupportChoices().First(x=>x.Id.StartsWith("buy:")&&x.Enabled&&SupportCatalog.Item(x.Id.Substring(4)).Kind==ItemKind.Consumable);
         var before=VoyageRuntime.Session.Supplies;Click("support-"+choice.Id);Check(VoyageRuntime.Session.Supplies==before-1,"Purchase did not charge exactly once.");
         Check(!VoyageRuntime.Session.ManageSupport(choice.Id),"Repeated purchase accepted.");

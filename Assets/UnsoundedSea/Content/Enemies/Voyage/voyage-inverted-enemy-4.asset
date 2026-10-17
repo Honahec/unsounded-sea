@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: "\u9519\u4F4D\u503C\u66F4\u4EBA"
   health: 28
   candidateDescription: "\u65E7\u8896\u64D2\u62FF\uFF1A8 \u751F\u547D\u4F24\u5BB3 / \u65B0\u8896\u51FB\u6253\uFF1A10 \u751F\u547D\u4F24\u5BB3"
+  intentPolicy: 1
   intents:
   - id: old-watch
     displayName: "\u65E7\u8896\u64D2\u62FF"

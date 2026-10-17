@@ -32,7 +32,8 @@ namespace UnsoundedSea.Tests
             Assert.That(s.View.Hand.Take(5).All(x => !x.IsEncounter), Is.True);
             Assert.That(s.View.Hand.Skip(5).Select(x => x.Definition.Id), Is.EqualTo(new[] { "E02-01", "E02-02" }));
             s.Execute(BattleCommand.EndTurn());
-            Assert.That(s.View.Hand.Count(x => x.IsEncounter), Is.EqualTo(1), "Automatically completed listening card is removed.");
+            Assert.That(s.View.Hand.Count(x => x.IsEncounter), Is.EqualTo(2), "Listening remains available until the player requests the second constraint.");
+            Assert.That(s.View.Hand.Single(x => x.Definition.Id == "E02-01").Enabled, Is.True);
             Assert.That(s.View.DrawCount + s.View.DiscardCount + s.View.ExhaustCount + s.View.Hand.Count(x => !x.IsEncounter), Is.EqualTo(20));
         }
 
@@ -54,9 +55,9 @@ namespace UnsoundedSea.Tests
             Assert.That(result.Success, Is.False); Assert.That(s.View.Actions, Is.EqualTo(2)); Assert.That(s.Commands.Count, Is.EqualTo(commands));
         }
 
-        [Test] public void SurveyorHasHiddenStableMinesAndCanonicalSixStepVictory()
+        [Test] public void SurveyorHasHiddenSeededMinesAndCanonicalSixStepVictory()
         {
-            var s = new BattleSession(Definition(BossEncounterKind.Surveyor), 9, boss: BossEncounterKind.Surveyor);
+            var s = new BattleSession(Definition(BossEncounterKind.Surveyor), 0, boss: BossEncounterKind.Surveyor);
             Assert.That(s.View.BossStatus, Does.Not.Contain("A4")); Assert.That(s.View.Enemies[0].Targetable, Is.False);
             foreach (var cell in new[] { "C3", "D2" }) Play(s, "E03-01", cell); s.Execute(BattleCommand.EndTurn());
             foreach (var cell in new[] { "D3", "B4" }) Play(s, "E03-01", cell); s.Execute(BattleCommand.EndTurn());
@@ -66,7 +67,7 @@ namespace UnsoundedSea.Tests
 
         [Test] public void SurveyorMineDamageAndDuplicateValidationAreAtomic()
         {
-            var s = new BattleSession(Definition(BossEncounterKind.Surveyor), 1, boss: BossEncounterKind.Surveyor);
+            var s = new BattleSession(Definition(BossEncounterKind.Surveyor), 0, boss: BossEncounterKind.Surveyor);
             Play(s, "E03-02", "A4"); Assert.That(s.View.Health, Is.EqualTo(100));
             Assert.That(s.View.EncounterTargets.Single(x => x.Id == "A4").Detail, Does.Contain("0"), "A mine does not count itself as adjacent.");
             var actions = s.View.Actions; var count = s.Commands.Count;
@@ -92,6 +93,20 @@ namespace UnsoundedSea.Tests
             Assert.That(s.View.Health, Is.EqualTo(health - 12 - 4), "The first full phase-three turn deals 12 health plus the existing soldier.");
             Assert.That(s.View.Sanity, Is.EqualTo(sanity));
             Shoot(s, "b04-flag-bearer"); Assert.That(s.View.Phase, Is.EqualTo(BattlePhase.Victory));
+        }
+
+        [Test] public void StageOneObjectiveProgressMatchesRelayAndRopeState()
+        {
+            var flag = new BattleSession(Definition(BossEncounterKind.FlagBearer), 1, boss: BossEncounterKind.FlagBearer);
+            Assert.That(flag.View.ObjectiveProgress, Is.Zero);
+            Assert.That(flag.View.ObjectiveTarget, Is.EqualTo(2));
+            Play(flag, "E04-01", "R1:positive");
+            Assert.That(flag.View.ObjectiveProgress, Is.EqualTo(1));
+
+            var watcher = new BattleSession(Definition(BossEncounterKind.Watcher), 1, boss: BossEncounterKind.Watcher);
+            Assert.That(watcher.View.ObjectiveTarget, Is.EqualTo(1));
+            Play(watcher, "E05-01", "winch");
+            Assert.That(watcher.View.BossStage, Is.EqualTo(2));
         }
 
         [Test] public void WatcherRequiresCorrectPairsRespawnsUnboundAndCapsActiveSlots()

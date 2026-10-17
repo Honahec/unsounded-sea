@@ -111,9 +111,11 @@ namespace UnsoundedSea.Runtime
             else
             {
                 entries.Add(Entry("menu-start", "启航", StartGame, canStart));
+                entries.Add(Entry("menu-crew", CardDeckPreparation.CrewId == "medic" ? "开局船员：林岚 · 医师" : "开局船员：祝遥 · 听音员", ToggleCrew));
                 if (VoyageRuntime.HasSavedVoyage)
                     entries.Add(Entry("menu-continue", "继续航程", ContinueGame));
-                entries.Add(Entry("menu-debug", "调试选关", () => { debugSelectionOpen = true; error = null; Build(null); }));
+                if (Debug.isDebugBuild)
+                    entries.Add(Entry("menu-debug", "调试选关", () => { debugSelectionOpen = true; error = null; Build(null); }));
                 entries.Add(Entry("menu-collection", "卡牌图鉴", () => { collectionOpen = true; Build(null); }));
                 var settings = Entry("menu-settings", "设置", () => { settingsOpen = true; error = null; Build(null); });
                 settings.EnableInClassList("open", settingsOpen);
@@ -245,6 +247,12 @@ namespace UnsoundedSea.Runtime
             if (entry.id.StartsWith("m03", StringComparison.Ordinal) || entry.id.StartsWith("voyage-inverted-", StringComparison.Ordinal)) return "inverted";
             if (entry.id.StartsWith("m04", StringComparison.Ordinal) || entry.id.StartsWith("voyage-fleet-", StringComparison.Ordinal)) return "fleet";
             return "abyss";
+        }
+
+        private void ToggleCrew()
+        {
+            CardDeckPreparation.CrewId = CardDeckPreparation.CrewId == "medic" ? "listener" : "medic";
+            Build("menu-crew");
         }
 
         private void StartGame()

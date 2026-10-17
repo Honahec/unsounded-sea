@@ -77,7 +77,7 @@ namespace UnsoundedSea.Core
 
     public static class VoyageMapGenerator
     {
-        public const int Version = 6;
+        public const int Version = 7;
         public const int Layers = 11;
         private static readonly string[] RegionalBosses =
         {
@@ -171,9 +171,8 @@ namespace UnsoundedSea.Core
                     stop.Next.Distinct(StringComparer.Ordinal).Count() != stop.Next.Length)
                     throw Invalid("Invalid stop fields.");
                 if (stop.Kind != Schedule[stop.Layer]) throw Invalid("Invalid act schedule.");
-                var index = ParseIndex(stop.Id);
                 var expectedEncounter = stop.Kind == RunNodeKind.Battle
-                    ? "voyage-" + data.RegionId + "-" + EncounterVariant(data.Seed, data.Act, data.RegionId, stop.Layer, index)
+                    ? "voyage-" + data.RegionId + "-" + EncounterVariant(data.Seed,data.Act,data.RegionId,stop.Layer,ParseIndex(stop.Id))
                     : stop.Kind == RunNodeKind.Boss ? BossEncounter(data.Seed, data.Act, data.RegionId) : "";
                 if (stop.EncounterId != expectedEncounter ||
                     stop.BattleSeed != VoyageSeeds.Derive(data.Seed, "battle", stop.Id + ":" + data.RegionId))
@@ -225,11 +224,11 @@ namespace UnsoundedSea.Core
             var roll = VoyageSeeds.Derive(seed, "topology", act + ":" + region + ":" + layer + ":" + index) % 100u;
             return roll < 40u ? 1 : roll < 82u ? 2 : 3;
         }
-        private static int EncounterVariant(uint seed, int act, string region, int layer, int index)
+        private static int EncounterVariant(uint seed,int act,string region,int layer,int index)
         {
-            var offset = VoyageSeeds.Derive(seed, "encounter", act + ":" + region) % 5u;
-            var battleOrdinal = layer == 1 ? 0u : layer == 3 ? 1u : layer == 6 ? 2u : 3u;
-            return (int)((offset + battleOrdinal) % 5u);
+            var offset=VoyageSeeds.Derive(seed,"encounter",act+":"+region)%5u;
+            var battleOrdinal=layer==1?0u:layer==3?1u:layer==6?2u:3u;
+            return (int)((offset+battleOrdinal+(uint)index)%5u);
         }
         private static float SlotX(int count, int index) => count == 1 ? 50f : count == 2 ? 38f + 24f * index : 34f + 16f * index;
         private static int ParseIndex(string id) => int.Parse(id.Substring(id.LastIndexOf('n') + 1));

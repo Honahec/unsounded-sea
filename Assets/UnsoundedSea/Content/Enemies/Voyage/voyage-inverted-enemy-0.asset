@@ -15,7 +15,8 @@ MonoBehaviour:
   id: voyage-inverted-enemy-0
   displayName: "\u5012\u60AC\u6D4B\u91CF\u5458"
   health: 34
-  candidateDescription: "\u6298\u5C3A\u91CF\u5207\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09"
+  candidateDescription: "\u6298\u5C3A\u91CF\u5207\uFF1A10 \u751F\u547D\u4F24\u5BB3\uFF08\u516C\u5F00\uFF09 / \u9006\u523B\u6807\u8BB0\uFF1A4 \u7406\u667A\u51B2\u51FB"
+  intentPolicy: 1
   intents:
   - id: rule
     displayName: "\u6298\u5C3A\u91CF\u5207"
@@ -26,4 +27,13 @@ MonoBehaviour:
     visibleAction: 1
     interruptible: 0
     soundSource: "\u76EE\u6807\u672C\u4F53"
+  - id: mark
+    displayName: "\u9006\u523B\u6807\u8BB0"
+    clue: "\u6298\u5C3A\u6536\u62E2\uFF0C\u70AD\u7B14\u5728\u7532\u677F\u523B\u4E0B\u5012\u7F6E\u65B9\u4F4D\u3002"
+    channel: 1
+    amount: 4
+    isPublic: 0
+    visibleAction: 1
+    interruptible: 1
+    soundSource: "\u70AD\u7B14"
   presentationPrefab: {fileID: 2852307033803140218, guid: f55b49c56f4cf476b8355f53f5d62019, type: 3}

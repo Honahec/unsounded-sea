@@ -49,7 +49,14 @@ namespace UnsoundedSea.Core
     {
         public ToolSpec Definition { get; }
         public int RemainingUses { get; }
-        internal ToolView(ToolSpec definition, int uses) { Definition = definition; RemainingUses = uses; }
+        public bool Enabled { get; }
+        public string DisabledReason { get; }
+        public IReadOnlyList<EncounterTargetView> Targets { get; }
+        internal ToolView(ToolSpec definition, int uses, bool enabled, string reason, IReadOnlyList<EncounterTargetView> targets)
+        {
+            Definition = definition; RemainingUses = uses; Enabled = enabled;
+            DisabledReason = reason ?? ""; Targets = targets;
+        }
     }
     public sealed class CrewSupportView
     {
