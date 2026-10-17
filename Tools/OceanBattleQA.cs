@@ -31,6 +31,76 @@ public static class OceanBattleQA
         throw new Exception("Feedback lock did not release.");
     }
     static void Check(bool condition,string message) {if(!condition)throw new Exception(message);}
+    public static async Task<object> HudFlow()
+    {
+        var d = UnityEngine.Object.FindAnyObjectByType<BattleDirector>(); d.Restart();
+        await Task.Delay(250); await Ready();
+        VisualElement Root() => d.GetComponent<UIDocument>().rootVisualElement;
+        void Values()
+        {
+            Check(Root().Q<Label>("battle-health").text == $"{d.View.Health} / {d.scenario.encounter.playerHealth}", "Incorrect health");
+            Check(Root().Q<Label>("battle-sanity").text == $"{d.View.Sanity} / {d.scenario.encounter.playerSanity}", "Incorrect sanity");
+            Check(Root().Q<Label>("battle-actions").text == $"{d.View.Actions} / {d.scenario.encounter.actionsPerTurn}", "Incorrect actions");
+        }
+        Values();
+        var hand = Root().Q<ScrollView>("hand").worldBound;
+        foreach (var cls in new[] { "battle-vitals", "tools", "turn-controls" })
+        {
+            var rect = Root().Q(className: cls).worldBound;
+            Check(!rect.Overlaps(hand), "HUD overlaps hand: " + cls);
+            Check(rect.xMin >= 0 && rect.yMin >= 0 && rect.xMax <= Root().worldBound.xMax + 1 && rect.yMax <= Root().worldBound.yMax + 1, "HUD outside view: " + cls);
+        }
+        foreach (var cls in new[] { "tool", "end-turn", "task-button", "sea-button" })
+            foreach (var button in Root().Query<Button>(className: cls).ToList())
+            {
+                Check(button.worldBound.height >= 34, "Small HUD target: " + button.name);
+                var picked = Root().panel.Pick(button.worldBound.center);
+                Check(picked == button || button.Contains(picked), "HUD target occluded: " + button.name);
+            }
+        var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        System.IO.Directory.CreateDirectory("Logs/BattleUi");
+        ScreenCapture.CaptureScreenshot(System.IO.Path.GetFullPath($"Logs/BattleUi/{scene}-{Screen.width}x{Screen.height}.png"));
+        await Task.Delay(100);
+        Click("battle-pause"); await Task.Delay(80);
+        Check(d.Paused && Root().Q(className: "pile-summary") != null, "Journal missing pile totals");
+        var stageAge = typeof(BattleStage).GetField("age", BindingFlags.Instance | BindingFlags.NonPublic);
+        float SeaTime() => d.Stage.water != null ? d.Stage.water.SeaTime : (float)stageAge.GetValue(d.Stage);
+        float seaTime = SeaTime(); await Task.Delay(150);
+        Check(SeaTime() == seaTime, "Pause did not freeze environment");
+        Click("battle-settings"); await Task.Delay(80);
+        Check(Root().Q<Button>("settings-back") != null, "Settings unavailable");
+        Click("settings-back"); Click("battle-resume");
+        Check(!d.Paused, "Resume failed");
+        Click("battle-chart-toggle"); await Task.Delay(80); Check(d.Paused, "Chart did not pause");
+        Click("battle-chart-close"); Check(!d.Paused, "Chart did not resume");
+        var target = d.View.Enemies.First(x => x.Health > 0); Click("actor-" + target.Id);
+        var tool = d.View.Tools.FirstOrDefault(x => x.RemainingUses > 0 && x.Definition.SanityCost < d.View.Sanity);
+        if (tool != null)
+        {
+            int uses = tool.RemainingUses; Click("tool-" + tool.Definition.Id); await Ready();
+            Check(d.View.Tools.First(x => x.Definition.Id == tool.Definition.Id).RemainingUses == uses - 1, "Tool did not consume once");
+        }
+        var protection = d.View.Hand.FirstOrDefault(x => x.Definition.Effects.Any(e => e.Id == "block" || e.Id == "ward") && x.Definition.Cost <= d.View.Actions);
+        if (protection != null)
+        {
+            Click("card-" + protection.InstanceId); await Ready(); Values();
+            Check(d.View.Block > 0 || d.View.Ward > 0, "Protection not applied");
+            Check(Root().Q<Label>("battle-health-guard").text == (d.View.Block > 0 ? $"格挡  {d.View.Block}" : ""), "Incorrect block label");
+            Check(Root().Q<Label>("battle-sanity-guard").text == (d.View.Ward > 0 ? $"防护  {d.View.Ward}" : ""), "Incorrect ward label");
+        }
+        bool hasTask = Root().Q<Button>("battle-task") != null;
+        if (hasTask)
+        {
+            int progress = d.View.ObjectiveProgress; Click("battle-task"); await Ready();
+            Check(d.View.ObjectiveProgress == progress + 1 && !Root().Q<Button>("battle-task").enabledInHierarchy, "Task not once per turn");
+        }
+        Values(); await Task.Delay(100);
+        ScreenCapture.CaptureScreenshot(System.IO.Path.GetFullPath($"Logs/BattleUi/{scene}-protection-{Screen.width}.png"));
+        await Task.Delay(80);
+        int turn = d.View.Turn; Click("battle-end-turn"); await Ready();
+        Check(d.View.Turn == turn + 1, "End turn did not advance once"); Values();
+        return new { scene, screen = Screen.width + "x" + Screen.height, hasTask, hitTargets = true, stats = true, pauseSettingsChart = true, tool = tool?.Definition.Id, protection = protection?.Definition.Id, turn = d.View.Turn };
+    }
     public static async Task<object> VictoryFlow()
     {
         var d=UnityEngine.Object.FindAnyObjectByType<BattleDirector>();await Ready();

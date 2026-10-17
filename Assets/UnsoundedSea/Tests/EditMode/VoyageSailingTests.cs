@@ -27,7 +27,41 @@ namespace UnsoundedSea.Tests
             path.Evaluate(0.5f, out var middle, out var steering);
             Assert.That(Vector3.Cross(middle, destination).magnitude, Is.GreaterThan(10), "Path is a straight slide instead of a turn");
             Assert.That(Vector3.Dot(steering, destination.normalized), Is.GreaterThan(0));
-            Assert.That(path.Duration, Is.GreaterThanOrEqualTo(12));
+            Assert.That(path.Duration, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void DestinationsRemainHiddenUntilTheLastTwoSeconds()
+        {
+            foreach (float progress in new[] { -1f, 0f, 0.3f, 0.599f, 0.6f })
+                Assert.That(VoyageDestinationPresentation.ArrivalVisibility(progress), Is.Zero);
+            Assert.That(VoyageDestinationPresentation.ArrivalVisibility(0.8f), Is.EqualTo(0.5f).Within(0.0001f));
+            Assert.That(VoyageDestinationPresentation.ArrivalVisibility(1f), Is.EqualTo(1));
+            Assert.That(VoyageDestinationPresentation.ArrivalVisibility(2f), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void EveryGeneratedLocationHasADistinctSceneRegardlessOfEncounterKind()
+        {
+            var catalog = AssetDatabase.LoadAssetAtPath<VoyageSceneCatalog>("Assets/UnsoundedSea/Art/Voyage/Nodes/VoyageScenes.asset");
+            Assert.That(catalog, Is.Not.Null);
+            var names = Enumerable.Range(0, 128).SelectMany(seed => UnsoundedSea.Core.VoyageMapGenerator.Generate((uint)seed).Stops).Select(stop => stop.Name).Distinct().ToArray();
+            Assert.That(names.Length, Is.EqualTo(14));
+            Assert.That(catalog.entries.Select(x => x.location), Is.EquivalentTo(names));
+            Assert.That(catalog.entries.Select(x => x.prefab).Distinct().Count(), Is.EqualTo(14));
+            foreach (var name in names)
+            {
+                var entry = catalog.Find(name);
+                Assert.That(entry.prefab, Is.Not.Null, name);
+                Assert.That(entry.offset.magnitude, Is.GreaterThan(12), "Landmark overlaps player: " + name);
+                foreach (var renderer in entry.prefab.GetComponentsInChildren<Renderer>())
+                    foreach (var material in renderer.sharedMaterials)
+                    {
+                        Assert.That(material, Is.Not.Null, name);
+                        Assert.That(material.shader.name, Is.EqualTo("UnsoundedSea/Voyage Landmark"), "Cannot fade " + name);
+                    }
+            }
+            Assert.That(catalog.Find("unregistered future location"), Is.Null, "Do not silently substitute another location");
         }
 
         [Test]
@@ -54,6 +88,8 @@ namespace UnsoundedSea.Tests
                 }
                 Assert.That(sailing, Is.Not.Null);
                 Assert.That(sailing.Vessel, Is.Not.Null);
+                Assert.That(sailing.Destinations, Is.Not.Null);
+                Assert.That(sailing.Destinations.catalog.entries.Length, Is.EqualTo(14));
                 Assert.That(sailing.VoyageCamera.transform.IsChildOf(sailing.Vessel), Is.False);
                 Assert.That(sailing.Water.surface.sharedMaterial.shader.name, Is.EqualTo("UberStylizedWater"));
                 Assert.That(AssetDatabase.GetAssetPath(sailing.Water.surface.sharedMaterial), Does.Contain("Art/Voyage/"));

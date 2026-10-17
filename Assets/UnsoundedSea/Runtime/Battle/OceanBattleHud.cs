@@ -91,8 +91,10 @@ namespace UnsoundedSea.Runtime
                 }
             }); root.Add(surface);
             var top = Box("sea-top"); root.Add(top);
-            top.Add(Button("battle-chart-toggle", "海图 M", ToggleChart));
-            top.Add(Button("battle-pause", "日志 / 设置", () => director.SetPaused(true)));
+            top.Add(Button("battle-chart-toggle", "海图", ToggleChart));
+            top.Add(Button("battle-pause", "日志", () => director.SetPaused(true)));
+            top.Q<Button>("battle-chart-toggle").tooltip = "海图 / M";
+            top.Q<Button>("battle-pause").tooltip = "航海日志、设置与暂停 / Esc";
 
             var selected = v.Enemies.FirstOrDefault(x => x.Id == director.SelectedEnemy);
 
@@ -101,37 +103,40 @@ namespace UnsoundedSea.Runtime
             {
                 var t = tool; var cost = t.Definition.SanityCost > 0 ? $"{t.Definition.SanityCost}理智" : "无代价";
                 var b = Button("tool-" + t.Definition.Id, "", () => director.Submit(BattleCommand.Investigate(t.Definition.Id, director.SelectedEnemy)), "tool");
-                b.Add(new SeaUiArt(t.Definition.Kind == InvestigationKind.SoundSource ? "ear" : t.Definition.Kind == InvestigationKind.VisibleAction ? "lantern" : "eye"));
-                b.Add(Text(t.Definition.Name, "tool-name")); b.Add(Text(t.RemainingUses + (t.Definition.SanityCost > 0 ? $" · {t.Definition.SanityCost}理智" : ""), "tool-meta"));
+                b.Add(Text(t.Definition.Name, "tool-name")); b.Add(Text($"×{t.RemainingUses}" + (t.Definition.SanityCost > 0 ? $" · {t.Definition.SanityCost} 理智" : ""), "tool-meta"));
                 b.tooltip = $"{t.Definition.Name}：调查当前目标，剩余 {t.RemainingUses} 次，代价 {cost}";
                 b.SetEnabled(active && selected != null && t.RemainingUses > 0 && v.Sanity > t.Definition.SanityCost); tools.Add(b);
             }
 
-            var right = Box("objective-seal"); root.Add(right);
-            right.Add(new SeaUiArt("seal"));
-            right.Add(Text(v.BossKind != BossEncounterKind.None ? "进度" : scenario.encounter.objective == ObjectiveKind.Seal ? "封线" : scenario.encounter.objective == ObjectiveKind.Survive ? "撤离" : "压制", "objective-label"));
-            right.Add(Text($"{v.ObjectiveProgress}/{v.ObjectiveTarget}", "objective-count"));
-            right.tooltip = scenario.objectiveHeading + "：" + v.Objective;
-            var seals = Box("seal-row"); seals.EnableInClassList("survival-progress", scenario.encounter.objective == ObjectiveKind.Survive); right.Add(seals);
-            for (var i = 0; i < v.ObjectiveTarget; i++) { var s = Box("seal"); s.EnableInClassList("complete", i < v.ObjectiveProgress); seals.Add(s); }
+            var objective = Box("battle-objective"); root.Add(objective);
+            objective.pickingMode = PickingMode.Position;
+            objective.Add(Text(v.BossKind != BossEncounterKind.None ? "进度" : scenario.encounter.objective == ObjectiveKind.Seal ? "封线" : scenario.encounter.objective == ObjectiveKind.Survive ? "撤离" : "压制", "objective-label"));
+            objective.Add(Text($"{v.ObjectiveProgress} / {v.ObjectiveTarget}", "objective-count"));
+            objective.tooltip = scenario.objectiveHeading + "：" + v.Objective;
+
+            var controls = Box("turn-controls"); root.Add(controls);
             if (!string.IsNullOrWhiteSpace(scenario.taskLabel))
             {
-                var task = Button("battle-task", scenario.taskLabel + "\n1行动", () => director.Submit(BattleCommand.Task()), "task-button");
-                task.SetEnabled(active && v.CanAdvanceObjective && v.Actions > 0); root.Add(task);
+                var task = Button("battle-task", "", () => director.Submit(BattleCommand.Task()), "task-button");
+                task.Add(Text(scenario.taskLabel, "task-label"));
+                task.Add(Text("1 行动", "task-cost"));
+                task.tooltip = "每回合一次，消耗 1 行动推进任务。";
+                task.SetEnabled(active && v.CanAdvanceObjective && v.Actions > 0); controls.Add(task);
             }
             if (v.BossKind != BossEncounterKind.None)
             {
                 root.Add(Text(v.BossStatus, "boss-status"));
                 RenderEncounterTargets(v, active);
             }
+            controls.Add(Text($"第 {v.Turn} 回合", "turn-number"));
+            var action = Box("action-budget");
+            action.Add(Text("行动", "action-label"));
+            var actionValue = Text($"{v.Actions} / {scenario.encounter.actionsPerTurn}", "action-value");
+            actionValue.name = "battle-actions"; action.Add(actionValue); controls.Add(action);
 
-            var instruments = Box("instruments"); root.Add(instruments);
-            Vital(instruments, "生命", v.Health, scenario.encounter.playerHealth, "health", "heart");
-            Vital(instruments, "理智", v.Sanity, scenario.encounter.playerSanity, "sanity", "eye");
-            var action = Box("action-instrument"); action.Add(new SeaUiArt("compass"));
-            action.Add(Text($"{v.Actions}/{scenario.encounter.actionsPerTurn}", "instrument-value"));
-            action.Add(Text("行动", "instrument-label")); instruments.Add(action);
-            instruments.Add(Text($"格挡 {v.Block} · 防护 {v.Ward}\n牌库 {v.DrawCount} · 弃牌 {v.DiscardCount} · 消耗 {v.ExhaustCount}", "resource-note"));
+            var vitals = Box("battle-vitals"); root.Add(vitals);
+            Vital(vitals, "生命", v.Health, scenario.encounter.playerHealth, "health", v.Block, "格挡");
+            Vital(vitals, "理智", v.Sanity, scenario.encounter.playerSanity, "sanity", v.Ward, "防护");
 
             var hand = new ScrollView(ScrollViewMode.Horizontal); hand.name = "hand"; hand.AddToClassList("hand");
             // Ignore the full built-in scroll shell, including the content/vertical-scroll wrapper.
@@ -172,8 +177,8 @@ namespace UnsoundedSea.Runtime
                 b.Add(face); b.tooltip = def.Name + "：" + def.Description + (c.IsEncounter && !c.Enabled ? "\n" + c.DisabledReason : "");
                 b.SetEnabled(active && c.Enabled && def.Cost <= v.Actions && def.SanityCost < v.Sanity); fan.Add(b);
             }
-            var end = Button("battle-end-turn", "", () => director.Submit(BattleCommand.EndTurn()), "end-turn");
-            end.Add(new SeaUiArt("seal")); end.Add(Text("结束\n回合", "end-label")); end.SetEnabled(active); root.Add(end);
+            var end = Button("battle-end-turn", "结束回合", () => director.Submit(BattleCommand.EndTurn()), "end-turn");
+            end.SetEnabled(active); controls.Add(end);
             if (!string.IsNullOrWhiteSpace(director.Notice) && director.Notice != scenario.introduction)
                 root.Add(Text(director.Notice, "battle-notice"));
             if (director.Stage != null)
@@ -269,11 +274,17 @@ namespace UnsoundedSea.Runtime
             }
         }
 
-        private static void Vital(VisualElement parent, string title, int value, int max, string cls, string motif)
+        private static void Vital(VisualElement parent, string title, int value, int max, string cls, int guard, string guardName)
         {
-            var el = Box("vital"); el.AddToClassList(cls); el.Add(new SeaUiArt(motif));
-            el.Add(Text(value.ToString("00"), "instrument-value")); el.Add(Text(title + " / " + max, "instrument-label"));
-            var track = Box("vital-track"); var fill = Box("vital-fill"); fill.style.width = Length.Percent((float)value / max * 100); track.Add(fill); el.Add(track); parent.Add(el);
+            var el = Box("vital"); el.AddToClassList(cls);
+            var row = Box("vital-heading"); row.Add(Text(title, "vital-label"));
+            var number = Text($"{value} / {max}", "vital-value"); number.name = "battle-" + cls; row.Add(number); el.Add(row);
+            var track = Box("vital-track"); var fill = Box("vital-fill");
+            fill.style.width = Length.Percent(max > 0 ? Mathf.Clamp01((float)value / max) * 100 : 0);
+            track.Add(fill); el.Add(track);
+            var protection = Text(guard > 0 ? $"{guardName}  {guard}" : string.Empty, "vital-protection");
+            protection.name = "battle-" + cls + "-guard"; el.Add(protection);
+            parent.Add(el);
         }
         private void ChartOverlay()
         {
@@ -290,12 +301,13 @@ namespace UnsoundedSea.Runtime
             bool end = view.Phase == BattlePhase.Victory || view.Phase == BattlePhase.Defeat;
             sheet.Add(Text(end ? (view.Phase == BattlePhase.Victory ? "海面重新沉默" : "无人回应的呼号") : "航海日志", "modal-title"));
             sheet.Add(Text(end ? (view.Phase == BattlePhase.Victory ? director.scenario.victoryText : director.scenario.defeatText) : "你听见海水拍打船舷。", "modal-copy"));
+            sheet.Add(Text($"牌库 {view.DrawCount}  ·  弃牌 {view.DiscardCount}  ·  消耗 {view.ExhaustCount}", "pile-summary"));
             var log = new ScrollView(); log.AddToClassList("journal");
             foreach (var evidence in view.Evidence) log.Add(Text($"[{KnowledgeLabel(evidence.Level)}] {evidence.Text} / {evidence.Source}", "log-line"));
             var entries = view.Log.Where(x => !x.Contains("阶段：")).ToArray();
             foreach (var entry in entries.Skip(Math.Max(0, entries.Length - 12))) log.Add(Text(entry, "log-line"));
             sheet.Add(log);
-            if (!end) sheet.Add(Button("battle-resume", "继续航行", () => director.SetPaused(false)));
+            if (!end) sheet.Add(Button("battle-resume", "继续战斗", () => director.SetPaused(false)));
             if (!end || !VoyageRuntime.OwnsEncounter(director))
                 sheet.Add(Button("battle-retry", "重新开始这场遭遇", () => { chartOpen = false; chartWasPaused = false; showSettings = false; director.Restart(); }));
             sheet.Add(Button("battle-settings", "设置", () => { showSettings = true; Render(); }));
