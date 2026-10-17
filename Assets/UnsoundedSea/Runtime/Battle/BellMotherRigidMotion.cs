@@ -22,6 +22,11 @@ namespace UnsoundedSea.Runtime
         public string ActiveAction { get; private set; } = "Idle";
         public float ActionElapsed { get; private set; }
         public float ActionImpact { get; private set; }
+        public bool IsRetiring => sequence == Sequence.Death;
+        public bool HasPendingRetirement => defeat != null && defeat.Busy;
+        public float RetirementProgress => defeat?.Progress ?? 0;
+        public event System.Action<Vector3, float> CollapseImpact;
+        private SeaBossDefeatMotion defeat;
 
         private Vector3 bodyPosition, crownPosition;
         private Quaternion bodyRotation, crownRotation;
@@ -77,6 +82,7 @@ namespace UnsoundedSea.Runtime
             RemoveHitOffset();
             hitElapsed = 2f; hitLoad = hitStartLoad = 0;
             sequence = Sequence.Idle;
+            defeat = null;
             ActiveAction = "Idle";
             ActionElapsed = 0;
             ActionImpact = 0;
@@ -86,6 +92,7 @@ namespace UnsoundedSea.Runtime
 
         public void PlayAttack()
         {
+            if (IsRetiring) return;
             // Capture the attachments relative to the body's starting pose. The imported transform
             // origins are not anatomical joints, so rotate about the baked root
             // and compensate translation instead of lifting the whole part.
@@ -136,12 +143,20 @@ namespace UnsoundedSea.Runtime
             if (sequence == Sequence.Idle) ActiveAction = "Hit";
         }
 
-        public void PlayDeath()
+        public void PlayDeath(bool withdrawal = false)
         {
-            RemoveHitOffset();
+            if (IsRetiring) return;
+            // The current hit/attack pose becomes the starting pose, including its offset.
+            // Removing it here would visibly snap the dying body back upright.
+            hitOffsetApplied = false;
             hitElapsed = 2f; hitLoad = 0;
+            defeat = new SeaBossDefeatMotion(transform, UnsoundedSea.Core.BossEncounterKind.None,
+                withdrawal, SurfaceHeight, (point, amplitude) => CollapseImpact?.Invoke(point, amplitude));
+            if (tentacles != null && tentacleRoots != null && tentacleTips != null)
+                for (int i = 0; i < tentacles.Length; i++)
+                    defeat.AddTentacle(tentacles[i], tentacleRoots[i], tentacleTips[i], i);
             sequence = Sequence.Death;
-            ActiveAction = "Death";
+            ActiveAction = withdrawal ? "Withdraw" : "Death";
             ActionElapsed = 0;
             ActionImpact = 0;
         }
@@ -155,6 +170,12 @@ namespace UnsoundedSea.Runtime
         public void Tick(float delta)
         {
             if (paused) return;
+            if (IsRetiring)
+            {
+                ActionElapsed += Mathf.Min(Mathf.Max(0, delta), .1f);
+                defeat.Tick(delta, GameSettings.ReducedMotion);
+                return;
+            }
             RemoveHitOffset();
             delta = Mathf.Max(0, delta);
             ActionElapsed += delta;
@@ -163,7 +184,6 @@ namespace UnsoundedSea.Runtime
             {
                 case Sequence.Idle: UpdateIdle(delta); break;
                 case Sequence.Attack: UpdateAttack(); break;
-                case Sequence.Death: UpdateDeath(); break;
             }
             UpdateHitOffset(delta);
             if (sequence == Sequence.Idle) ActiveAction = hitElapsed < 1.8f ? "Hit" : "Idle";
@@ -281,14 +301,6 @@ namespace UnsoundedSea.Runtime
                 ? hitPivot + rotation * (part.localPosition - hitPivot - hitTranslation)
                 : hitPivot + rotation * (part.localPosition - hitPivot) + hitTranslation;
             part.localRotation = rotation * part.localRotation;
-        }
-
-        private void UpdateDeath()
-        {
-            var u = Mathf.Clamp01(ActionElapsed / 0.9f);
-            var eased = Smooth(u);
-            ApplyPose(Mathf.Lerp(0, 22f, eased), Mathf.Lerp(0, -8f, eased), Mathf.Lerp(0, -18f, eased),
-                Mathf.Lerp(0, 30f, eased), Mathf.Lerp(0, -18f, eased), Mathf.Lerp(0, -12f, eased), Mathf.Lerp(0, -1.2f, eased));
         }
 
         private void ApplyPose(float bodyPitch, float bodyYaw, float bodyRoll,

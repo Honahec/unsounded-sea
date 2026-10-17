@@ -31,7 +31,7 @@ namespace UnsoundedSea.Runtime
         private readonly List<BellMotherRigidMotion> seaMotions = new List<BellMotherRigidMotion>();
         private readonly VesselWaveResponse vesselResponse = new VesselWaveResponse();
         public bool HasPendingSeaAttack => seaMotions.Exists(m => m != null && m.ActiveAction == "Attack") ||
-            actors.Exists(a => a != null && (a.IsEmerging || a.GiantMotion != null && a.GiantMotion.Busy));
+            actors.Exists(a => a != null && (a.IsEmerging || a.HasPendingRetirement || a.GiantMotion != null && a.GiantMotion.Busy));
         private BattleDirector director;
         private Vector3 shipPosition, cameraPosition;
         private Quaternion shipRotation, cameraRotation;
@@ -92,6 +92,7 @@ namespace UnsoundedSea.Runtime
                 {
                     motion.SurfaceHeight = water.SurfaceHeight;
                     motion.SurfaceStruck += OnSurfaceStruck;
+                    motion.CollapseImpact += OnGiantRelease;
                     seaMotions.Add(motion);
                 }
             }
@@ -118,10 +119,11 @@ namespace UnsoundedSea.Runtime
                     action != null && (action.Kind == EnemyActionKind.Summon || action.Kind == EnemyActionKind.Observe), i * .12f);
                 if (actors[i].GiantMotion != null)
                 {
-                    if (after.Phase == BattlePhase.Victory && before.Phase != BattlePhase.Victory) actors[i].GiantMotion.Retire();
-                    else if (!after.Enemies[i].Targetable && after.ObjectiveProgress > before.ObjectiveProgress)
+                    if (!after.Enemies[i].Targetable && after.ObjectiveProgress > before.ObjectiveProgress)
                         actors[i].GiantMotion.PlayHit(.65f);
                 }
+                if (after.Phase == BattlePhase.Victory && before.Phase != BattlePhase.Victory && actors[i].IsSeaActor)
+                    actors[i].Retire(after.Enemies[i].Health > 0);
                 if (!actors[i].IsSeaActor && damaged) combatTarget = Mathf.Max(combatTarget, .65f);
             }
             DelaysHudUntilImpact = directedBossTurn && after.ResolvedEnemyActions.Count > 0;
@@ -213,7 +215,7 @@ namespace UnsoundedSea.Runtime
             {
                 var threat = Vector4.zero;
                 foreach (var actor in actors)
-                    if (actor.IsSeaActor && actor.Alive) { var p = actor.transform.position; threat = new Vector4(p.x, p.z, actor.WaterRadius, reduced ? 0 : shake); break; }
+                    if (actor.IsSeaActor && (actor.Alive || actor.RetirementProgress < 1)) { var p = actor.transform.position; threat = new Vector4(p.x, p.z, actor.WaterRadius * (1 - actor.RetirementProgress), reduced ? 0 : shake); break; }
                 if (water != null) water.Tick(Time.unscaledDeltaTime, false, reduced, threat);
                 else
                 {
@@ -297,7 +299,7 @@ namespace UnsoundedSea.Runtime
         {
             if (director != null) director.Resolved -= Present;
             foreach (var motion in seaMotions)
-                if (motion != null) { motion.SurfaceStruck -= OnSurfaceStruck; motion.SurfaceHeight = null; }
+                if (motion != null) { motion.SurfaceStruck -= OnSurfaceStruck; motion.CollapseImpact -= OnGiantRelease; motion.SurfaceHeight = null; }
             seaMotions.Clear();
             foreach(var actor in actors) if(actor != null && actor.GiantMotion != null) { actor.GiantMotion.SurfaceReleased -= OnGiantRelease; actor.GiantMotion.VesselImpact -= OnVesselImpact; }
             foreach(var actor in actors)if(actor!=null)actor.BrokeSurface-=OnBrokeSurface;

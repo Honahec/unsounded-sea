@@ -21,7 +21,7 @@ namespace UnsoundedSea.Runtime
         Transform hips;
         Vector3 restPosition;
         Quaternion restRotation;
-        float age, previousHit;
+        float age, previousHit, previousDefeatLoad;
         int release;
         Mesh chains;
         Vector3[] vertices, normals;
@@ -76,18 +76,20 @@ namespace UnsoundedSea.Runtime
             age += delta;
             float phase = motion.ActionTime < 0 ? 0 : motion.ActionTime/motion.duration;
             float drive = motion.ActionTime < 0 ? 0 : motion.follow.Evaluate(phase);
+            drive = Mathf.Max(drive, motion.DefeatLoad * 1.4f);
             float amount = reduced ? 0 : 1;
             Roll = (.18f*Mathf.Sin(age*.31f)+drive*.65f+motion.HitWeight*.22f)*amount;
-            hull.localPosition = restPosition + Vector3.up*((.45f*Mathf.Sin(age*.24f)+.18f*Mathf.Sin(age*.53f))*amount);
+            hull.localPosition = restPosition + Vector3.up*((.45f*Mathf.Sin(age*.24f)+.18f*Mathf.Sin(age*.53f)-motion.DefeatLoad*1.8f)*amount);
             hull.localRotation = restRotation*Quaternion.Euler(-drive*.35f*amount,0,Roll);
-            WardStrength = Mathf.MoveTowards(WardStrength,director.View.BossStage >= 3 ? 0 : 1,delta*1.5f);
+            WardStrength = Mathf.MoveTowards(WardStrength,motion.IsRetiring || director.View.BossStage >= 3 ? 0 : 1,delta*1.5f);
             foreach (var renderer in wardRings)
             {
                 renderer.GetPropertyBlock(properties);
                 properties.SetColor("_EmissionColor",new Color(.12f,.3f,.27f)*WardStrength);
                 renderer.SetPropertyBlock(properties);
             }
-            if (release != motion.ReleaseCount || motion.HitWeight > .7f && previousHit <= .7f)
+            if (release != motion.ReleaseCount || motion.HitWeight > .7f && previousHit <= .7f ||
+                motion.DefeatLoad > .65f && previousDefeatLoad <= .65f)
             {
                 release = motion.ReleaseCount; StressBursts++;
                 for (int i=0;i<(reduced?8:40);i++)
@@ -100,6 +102,7 @@ namespace UnsoundedSea.Runtime
                 }
             }
             previousHit = motion.HitWeight; dust.Simulate(delta,false,false,true);
+            previousDefeatLoad = motion.DefeatLoad;
         }
         void LateUpdate() { if (motion != null && !director.Paused) UpdateChains(); }
         void UpdateChains()
@@ -110,6 +113,7 @@ namespace UnsoundedSea.Runtime
                 // Attachment coordinates are in the normalized actor space, not the imported bone basis.
                 var to = hips.position + motion.transform.TransformVector(bodyAttachments[c]);
                 float tension = motion.ActionTime < 0 ? 0 : Mathf.Clamp01(motion.poleDrive.Evaluate(motion.ActionTime/motion.duration));
+                tension = Mathf.Max(tension, motion.DefeatLoad);
                 float sag = Mathf.Lerp(4,.5f,tension), length=Vector3.Distance(from,to);
                 for(int l=0;l<Links;l++)
                 {

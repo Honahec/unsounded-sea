@@ -38,12 +38,16 @@ namespace UnsoundedSea.Runtime
         public float Age { get; private set; }
         public float ActionTime { get; private set; } = -1;
         public float HitWeight { get; private set; }
-        public bool Busy => ActionTime >= 0 || effects != null && effects.Busy || retiring && retirement < 1;
+        public bool Busy => ActionTime >= 0 || effects != null && effects.Busy || defeat != null && defeat.Busy;
+        public bool IsRetiring => retiring;
+        public float DefeatLoad => defeat?.Load ?? 0;
+        public float RetirementProgress => defeat?.Progress ?? 0;
         public int ReleaseCount { get; private set; }
         public event Action<Vector3,float> SurfaceReleased;
         public event Action VesselImpact;
         private bool initialized, paused, released, ritual, observing, retiring;
-        private float hitTime = -1, hitStart, retirement, hitScale = 1;
+        private float hitTime = -1, hitStart, hitScale = 1;
+        private SeaBossDefeatMotion defeat;
         private GiantBossEffects effects;
         private BattleWater water;
         private Transform vessel;
@@ -83,9 +87,13 @@ namespace UnsoundedSea.Runtime
             hitStart=HitWeight; hitScale=Mathf.Clamp(strength,.35f,1.4f); hitTime=0;
             effects?.Hit(Origin, hitScale);
         }
-        public void Retire()
+        public void Retire(bool withdrawal = false)
         {
             Initialize(); if (retiring) return;
+            defeat = new SeaBossDefeatMotion(transform, kind, withdrawal,
+                water == null ? (Func<Vector3,float>)null : water.SurfaceHeight,
+                (point, amplitude) => SurfaceReleased?.Invoke(point, amplitude));
+            foreach (var joint in joints) defeat.AddJoint(joint);
             retiring=true; ActionTime=-1; hitTime=-1; HitWeight=0;
         }
         public Vector3 Origin => effectOrigin != null ? effectOrigin.position : transform.position;
@@ -94,6 +102,12 @@ namespace UnsoundedSea.Runtime
         {
             Initialize(); if (paused || dt<=0) return;
             dt=Mathf.Min(dt,.1f); Age+=dt;
+            if (retiring)
+            {
+                defeat.Tick(dt, GameSettings.ReducedMotion);
+                effects?.Tick(dt, Origin, false, true);
+                return;
+            }
             if (ActionTime>=0) ActionTime+=dt;
             if (hitTime>=0)
             {
@@ -101,7 +115,6 @@ namespace UnsoundedSea.Runtime
                 HitWeight=hitTime<.28f ? Mathf.Lerp(hitStart,hitScale,Mathf.SmoothStep(0,1,hitTime/.28f)) : recoil.Evaluate(hitTime)*hitScale;
                 if (hitTime>=1.9f) { hitTime=-1; HitWeight=0; }
             }
-            if (retiring) retirement=Mathf.Min(1,retirement+dt/4);
             var reduced=GameSettings.ReducedMotion ? .22f : 1f;
             foreach (var j in joints)
             {
@@ -132,8 +145,6 @@ namespace UnsoundedSea.Runtime
                 var parentBasis=j.bone.parent==null ? Quaternion.identity : Quaternion.Inverse(transform.rotation)*j.bone.parent.rotation;
                 j.bone.localPosition=j.position+Quaternion.Inverse(parentBasis)*displacement;
                 j.bone.localScale=Vector3.Scale(j.scale,Vector3.one+j.breathScale*((idle*.5f+.5f+(distinct?action*2:Mathf.Max(0,-action)*power))*reduced));
-                if (retiring && j.bone.name=="GB_Body")
-                    j.bone.localPosition+=Quaternion.Inverse(parentBasis)*Vector3.down*(Mathf.SmoothStep(0,1,retirement)*.7f);
             }
             if (kind == BossEncounterKind.FlagBearer && !ritual && !observing && ActionTime >= 0 && vessel != null && !GameSettings.ReducedMotion)
                 ApplyPoleThrust();

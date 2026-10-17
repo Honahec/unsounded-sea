@@ -2,6 +2,12 @@
 
 各节分别记录日期、环境和验证范围；历史通过不代表后续改动通过。旧 HUD 的逐轮记录保留在 Git 历史，不重复维护。
 
+## 巨兽死亡与存活退场
+
+2026-10-18，macOS / Unity 6000.6.5f1 / Unity CLI 1.0.0-beta.13。`SeaBossDefeatTests` 7 项、`BellMotherAnimationTests` 7 项、`GiantBossAnimationTests` 13 项通过；覆盖死亡首帧连续、刚性冠部／触手连接、体积不缩放、暂停、减少动效、重复死亡通知、完整沉没、单次水面接触、执旗者髋部固定以及存活退场不侧翻。
+
+`Tools/SeaBossDefeatQA.Start` 在隔离会话中实机采样沉钟／黑潮与 M02–M05，复查[退场关键帧](ArtReferences/giant-defeat-review.jpg)。其中 M03 的死亡为直接表现调用，用于检查通用能力，不代表解谜胜利杀死本体；M05 验证存活退场。真实致命卡以脱离航程契约的内存 1 HP 遭遇副本验证 Victory 等待、暂停与解锁；随后使用**原版**黑潮配置完成五轮 EndTurn，确认末次拍击之后才进入存活 Withdraw，等待完成后返回。最终这一轮没有新增运行错误，入水水声触发计数同步增加。未改正式存档、模型或规则数值，未进行独立 Player／设备性能验收。
+
 ## 黑潮压舱者外观
 
 2026-10-18，macOS / Unity 6000.6.5f1 / Unity CLI 1.0.0-beta.13。隔离会话从标题进入 `storm-gauntlet`，复查调整前后同机位及最终 HUD：[实际画面](ArtReferences/storm-gauntlet-material-review.jpg)。12 个材质槽的颜色／法线／金属粗糙度贴图均与 BANG 源资产引用一致；显式天空、环境光及反射已生效。实机帧数从 936 前进到 2337，提交结束回合后进入第 2 回合并解除 Busy；最终 Editor Console 零错误、零警告，编译通过。共享外观同步影响沉钟之母；未重生成模型、改动动作或进行独立 Player／性能验收。

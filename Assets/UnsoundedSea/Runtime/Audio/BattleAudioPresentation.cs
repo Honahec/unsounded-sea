@@ -42,6 +42,14 @@ namespace UnsoundedSea.Runtime
                 {
                     Action<Vector3> splash=p=>Splash(Pan(captured));
                     bell.SurfaceStruck+=splash;unsubscribe.Add(()=>{if(bell!=null)bell.SurfaceStruck-=splash;});
+                    Action<Vector3,float> collapse=(p,a)=>Splash(Pan(captured));
+                    bell.CollapseImpact+=collapse;unsubscribe.Add(()=>{if(bell!=null)bell.CollapseImpact-=collapse;});
+                }
+                var giant=actor.GiantMotion;
+                if(giant!=null)
+                {
+                    Action<Vector3,float> collapse=(p,a)=>{if(giant.IsRetiring)Splash(Pan(captured));};
+                    giant.SurfaceReleased+=collapse;unsubscribe.Add(()=>{if(giant!=null)giant.SurfaceReleased-=collapse;});
                 }
             }
             SeaAudio.Play("card",.5f);
@@ -100,7 +108,7 @@ namespace UnsoundedSea.Runtime
                     var old=before.Enemies.FirstOrDefault(e=>e.Id==enemy.Id);if(old==null)continue;
                     var actor=stage.Actors.FirstOrDefault(a=>a.EnemyId==enemy.Id);
                     if(enemy.Health<old.Health)SeaAudio.Play(HitMaterial(actor,enemy),.7f,Pan(actor),2);
-                    if(old.Health>0 && enemy.Health<=0)SeaAudio.Play("cloth",.6f,Pan(actor));
+                    if(old.Health>0 && enemy.Health<=0 && (actor==null || !actor.IsSeaActor))SeaAudio.Play("cloth",.6f,Pan(actor));
                     if(!old.IntentConfirmed && enemy.IntentConfirmed)SeaAudio.Play("confirm",.7f,0,2);
                 }
                 if(after.ObjectiveProgress>before.ObjectiveProgress && initialCue!="seal")SeaAudio.Play("seal",.65f,0,2);

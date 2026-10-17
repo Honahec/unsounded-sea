@@ -49,7 +49,7 @@ namespace UnsoundedSea.Runtime
             {
                 NoticeIsError = false; Notice = ""; Changed?.Invoke();
             }
-            if (wasBusy && !Busy)
+            if (wasBusy && !Busy && !Paused)
             {
                 GetComponent<BattleAudioPresentation>()?.Complete();
                 wasBusy = false;

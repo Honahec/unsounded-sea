@@ -28,6 +28,9 @@ namespace UnsoundedSea.Runtime
         private DeckActorMotion deckMotion;
         public GiantBossMotion GiantMotion { get; private set; }
         public bool HasPendingDeckMotion => deckMotion != null && deckMotion.Busy;
+        public bool HasPendingRetirement => withdrawalPending || rigidMotion != null && rigidMotion.HasPendingRetirement;
+        public float RetirementProgress => GiantMotion != null ? GiantMotion.RetirementProgress : rigidMotion != null ? rigidMotion.RetirementProgress : 0;
+        private bool withdrawalPending;
         public float DeckActionImpact => deckMotion == null ? 0 : deckMotion.ActionImpact;
         internal bool HasPendingGenericAttack => GiantMotion == null && deckMotion == null && !skeletalPresentation && !rigidPresentation && attack > 0;
         internal bool GenericAttackAtImpact => attack <= .5f;
@@ -184,6 +187,13 @@ namespace UnsoundedSea.Runtime
             impulse = damaged ? 1 : 0; attack = attacking ? 1 : 0;
         }
 
+        public void Retire(bool withdrawal)
+        {
+            if (withdrawal) { withdrawalPending = true; return; }
+            GiantMotion?.Retire();
+            rigidMotion?.PlayDeath();
+        }
+
         private System.Collections.IEnumerator PlayAttack()
         {
             yield return PlayAction("BellMother_Telegraph", false);
@@ -207,11 +217,20 @@ namespace UnsoundedSea.Runtime
         private void Update()
         {
             if (body == null || director == null) return;
+            if (withdrawalPending && !director.Paused &&
+                (GiantMotion == null || !GiantMotion.Busy) && (rigidMotion == null || rigidMotion.ActiveAction != "Attack"))
+            {
+                withdrawalPending = false;
+                GiantMotion?.Retire(true); rigidMotion?.PlayDeath(true);
+            }
             if (deckMotion != null) deckMotion.Tick(Time.unscaledDeltaTime, director.Paused, GameSettings.ReducedMotion);
             if (animator != null) animator.speed = director.Paused ? 0 : 1;
             if (rigidMotion != null) rigidMotion.SetPaused(director.Paused);
             if (GiantMotion != null) { GiantMotion.SetPaused(director.Paused); GiantMotion.Tick(Time.unscaledDeltaTime); }
             if (director.Paused) return;
+            // Retirement owns the model root, including water drag and pivot compensation.
+            // Do not add the old one-second linear sink on top or reset it every frame.
+            if (GiantMotion != null && GiantMotion.IsRetiring || rigidMotion != null && rigidMotion.IsRetiring) return;
             var dt = Time.unscaledDeltaTime; age += dt;
             if (emergence < 1) emergence = Mathf.Min(1, emergence + dt / Mathf.Max(.1f, placement.emergeDuration));
             emergenceOffset = placement == null ? 0 : -placement.emergeDepth * (1 - Mathf.SmoothStep(0, 1, emergence));

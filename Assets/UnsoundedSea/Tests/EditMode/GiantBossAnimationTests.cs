@@ -147,7 +147,7 @@ namespace UnsoundedSea.Tests
                 for (int i = 0; i < 50; i++) motion.Tick(.1f);
                 Assert.That(waves, Is.EqualTo(before), "Rituals and summon cues must not launch physical waves");
                 motion.Retire(); motion.PlayAttack();
-                for (int i = 0; i < 50; i++) motion.Tick(.1f);
+                for (int i = 0; i < 110; i++) motion.Tick(.1f);
                 Assert.That(motion.Busy, Is.False);
                 Assert.That(waves, Is.EqualTo(before));
             }
