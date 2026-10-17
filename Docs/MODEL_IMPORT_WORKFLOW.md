@@ -91,6 +91,8 @@ unity status --project-path "$UNITY_PROJECT_PATH" --format json
 
 glTFast 将 GLB 导入为模型 Prefab 与网格、材质、纹理子资产。另建表现 Prefab 处理尺度、原点和附件，不修改原模型来迁就场景。约定 1 单位 = 1 米、脚底 y=0、正面 +Z；本例身高 1.8 / 2.1 米，审阅场景实例转 Y=180° 面向位于 -Z 的相机。
 
+运行时纹理优化由 [`RuntimeTextureSetup.cs`](../Tools/RuntimeTextureSetup.cs) 负责：先用 `ConvertModel(path)` 做船体／角色样例，再用 `ConvertUsedModels` 处理构建场景与遭遇资源实际依赖的模型。PNG 从 GLB 无损提取并按哈希去重，保持原尺寸、mip 链及 sRGB／线性色彩空间；Standalone 使用 BC7、质量 100，法线仍是 glTF RGB，不改为 Unity 法线贴图类型。GLB 保留 GUID 和模型路径，外部材质引用经 Editor API 重映射；ArtSource 母版不变。`CompactExternalizedBuffers` 在 `Logs/Performance/ModelBackups` 校验备份后，只清除已外置、无引用且 PNG 哈希匹配的缓冲区，保留缓冲区逐段校验；`Verify` 复核模型／PNG 哈希、尺寸、压缩格式和资源依赖。派生关系与唯一规格记录见 [运行时纹理 manifest](../ArtSource/RuntimeTextures/manifest.json)。重新生成运行时 GLB 后须重跑此流程；外部 PNG 与 `.meta` 必须随模型一同提交，不能只复制 GLB。
+
 本例材质为 `Shader Graphs/glTF-pbrMetallicRoughness`，当前 URP 可用。glTF metallic/roughness 通道由导入器解释；换 Shader 时另验色彩空间、法线方向和 smoothness 转换，不能直接把 roughness 当 smoothness。
 
 ### 复现现有 Prayer / Echo 样例
@@ -191,10 +193,10 @@ git lfs fsck
 | Echo | 800,000 → 90,000 | Unity 材质、2.1 m、脚底、Prefab 引用、战斗场景 | 更明显的空壳塌陷、独立铜铃、大幅动作、全视角与目标设备验收 |
 | BellMother | 1,500,000 → 119,992 | BANG 12 部件、6 触手 pivot、32 m、独立海面锚点、Unity 刚性战斗反馈 | 主体贴图平台压缩、LOD1/2、最终部件动画与性能验收 |
 | SurveyVessel | 800,000 → 80,000 | Agent 参考制作、保留 UV 减面、18 m 船体、开放甲板、战斗舞台 | 平台贴图压缩、LOD1/2、驾驶玩法 |
-| M02–M05 Boss 候选 | 具体规格见各自 manifest | BANG 分件、解剖蒙皮、idle／攻击／受击、四场镜头与浪／雾反馈 | 美术定稿、完整多视角、大幅动作精修、纹理平台压缩与性能验收 |
+| M02–M05 Boss 候选 | 具体规格见各自 manifest | BANG 分件、解剖蒙皮、idle／攻击／受击、四场镜头与浪／雾反馈、Standalone 纹理压缩 | 美术定稿、完整多视角、大幅动作精修、目标设备性能验收 |
 | M05 五守卫 | 规格只见各自 manifest | Anchor 高模与真实 BANG 高模已归档；其余四份生产中 | 全部导入、Prefab 引用、六槽构图、水下上升、精神脉冲与目标设备验收 |
 
-Prayer 与 Echo 原静态源各 1 网格/材质、3 张 4K 纹理；当前 Prefab 已改用归档绑定生成的蒙皮副本。新副本来源、哈希与 UV 恢复检查集中在 [DeckRigs manifest](../ArtSource/Characters/DeckRigs-manifest.json)，复现使用 `PrepareHyper3DRigs.py`（`skip_preview` 可省去诊断渲染）；祷告者再用 `PrayerSkirtRig.py` 添加独立的八组裙摆骨骼和渐变权重，最后执行 `DeckAnimationSetup.Apply`。未改原始 GLB；尚无 LOD1/2 或 LODGroup。内嵌纹理为 ARGB32、13 级 mip，两角色完整纹理链理论约 512 MiB（非 Profiler 实测），尚未 GPU 压缩。后续需提取/重映射为可配置 TextureImporter 资产，按平台选择压缩与尺寸后复核；普通纹理平台覆写不能直接套用到这些内嵌子资产。
+Prayer 与 Echo 原静态源各 1 网格/材质、3 张 4K 纹理；当前 Prefab 已改用归档绑定生成的蒙皮副本。绑定来源与 UV 恢复检查集中在 [DeckRigs manifest](../ArtSource/Characters/DeckRigs-manifest.json)，复现使用 `PrepareHyper3DRigs.py`（`skip_preview` 可省去诊断渲染）；祷告者再用 `PrayerSkirtRig.py` 添加独立的八组裙摆骨骼和渐变权重，最后执行 `DeckAnimationSetup.Apply`。ArtSource 原始 GLB 不变，当前运行时 GLB 是上述纹理外置派生版，哈希与贴图规格由运行时纹理 manifest 维护；尚无 LOD1/2 或 LODGroup。目标设备显存、帧耗及非 Standalone 平台压缩仍需另验。
 
 Prayer／Echo 的首轮 Hyper3D 自动绑定审阅分别记录于 [Prayer 候选 manifest](../ArtSource/Characters/Prayer_Rigging-manifest.json) 和 [Echo 候选 manifest](../ArtSource/Characters/Echo_Rigging-manifest.json)；[Prayer 三姿势](ArtReferences/prayer-rigging-review.jpg)／[Echo 三姿势](ArtReferences/echo-rigging-review.jpg) 是当时的 Blender 诊断，不是当前战斗验收。服务重展 UV 后，通过重合三角面角点恢复原 UV／材质。Prayer 的大幅弯臂曾牵拉袍身，因此当前保持藏手，以专用裙摆骨骼的妖风强摆表达攻击，胸背只作小幅跟随；Echo 使用较慢的前压与受击回稳。当前动作曲线见[机制文档](ASSET_MECHANICS_DESIGN.md#甲板敌人的战斗动作设计与当前实现)，Unity 证据见[验证记录](FRAMEWORK_VALIDATION.md#甲板敌人战斗动画与普通战海面)。大幅肢体动作、头盔／领圈刚性、多视角与目标设备性能仍需另验。
 
