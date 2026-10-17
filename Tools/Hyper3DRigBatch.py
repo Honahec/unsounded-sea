@@ -55,6 +55,8 @@ def run(name, source):
     if state and state['source_sha256'] != sha:
         raise ValueError(f'{name}: source changed; explicit revision required')
     target = RAW / (name + '_Raw.glb')
+    if not state and target.exists():
+        raise RuntimeError(f'{name}: archived rig exists; recover private task state or use the public manifest, do not resubmit')
     if state.get('download_sha256') and target.exists():
         if hashlib.sha256(target.read_bytes()).hexdigest() != state['download_sha256']:
             raise ValueError(f'{name}: downloaded result hash mismatch')

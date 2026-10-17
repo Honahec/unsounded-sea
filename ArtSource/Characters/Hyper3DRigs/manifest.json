@@ -38,10 +38,14 @@
       "failed": 0
     },
     "remote_lfs_readback": {
-      "raw_revision": "35cdefbbcad9893a3e52de847d946d9ec75bd3c9",
+      "date": "2026-10-17",
+      "revision": "7a3f24267cbea6c5b49a1e657081a39e52545f53",
+      "method": "Independent remote clone without shared local LFS storage; explicit git lfs pull; SHA-256 compared with manifest",
       "raw_count": 25,
-      "raw_sha256_match": true,
-      "prepared": "pending"
+      "prepared_count": 25,
+      "all_sha256_match": true,
+      "prefabs_and_meta_match": true,
+      "overview_and_unity_evidence_match": true
     },
     "unity": "25/25 imported with 73 valid bones, zero AnimationClips, supported materials, target height and grounded feet, reversible 3-degree chest deformation."
   },
