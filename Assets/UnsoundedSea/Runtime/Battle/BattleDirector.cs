@@ -64,6 +64,11 @@ namespace UnsoundedSea.Runtime
             SelectedEnemy = id; Stage.RefreshSelection(); Changed?.Invoke();
         }
         public void SetPaused(bool value) { Paused = value; Changed?.Invoke(); }
+        public void ShowInputNotice(string message)
+        {
+            Notice = string.IsNullOrWhiteSpace(message) ? "当前无法使用这张牌。" : message;
+            NoticeIsError = true; noticeUntil = Time.unscaledTime + 2.5f; Changed?.Invoke();
+        }
         public CommandResult Submit(BattleCommand command)
         {
             if (session == null || Paused || Busy) return new CommandResult(false, "请等待当前动作结束。");

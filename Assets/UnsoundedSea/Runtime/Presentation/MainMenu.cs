@@ -75,6 +75,8 @@ namespace UnsoundedSea.Runtime
 
         private void Build(string focus)
         {
+            UiMotion.BeforeBuild(root);
+            root.schedule.Execute(() => UiMotion.AfterBuild(root));
             root.Clear();
             root.EnableInClassList("reduced-motion", GameSettings.ReducedMotion);
             var apparition = new SeaUiArt("tentacle");

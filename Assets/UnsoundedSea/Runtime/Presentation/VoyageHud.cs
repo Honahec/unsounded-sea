@@ -155,6 +155,8 @@ namespace UnsoundedSea.Runtime
         private void Refresh()
         {
             if (root == null) return;
+            UiMotion.BeforeBuild(root);
+            root.schedule.Execute(() => UiMotion.AfterBuild(root));
             var focus = (root.panel?.focusController.focusedElement as VisualElement)?.name;
             var scrollPositions = root.Query<ScrollView>().ToList().Where(s => !string.IsNullOrEmpty(s.name)).ToDictionary(s => s.name, s => s.scrollOffset);
             sailing?.Pause();
