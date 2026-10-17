@@ -85,6 +85,7 @@ namespace UnsoundedSea.Core
         public IReadOnlyList<EncounterTargetView> Options { get; }
         internal PendingCardChoiceView(string prompt, IReadOnlyList<EncounterTargetView> options) { Prompt = prompt; Options = options; }
     }
+    public enum EnemyActionKind { Attack, Ritual, Summon, Heal, Observe }
     public sealed class ResolvedEnemyAction
     {
         public string EnemyId { get; }
@@ -94,10 +95,12 @@ namespace UnsoundedSea.Core
         public int Sanity { get; }
         public int Block { get; }
         public int Ward { get; }
-        public ResolvedEnemyAction(string enemyId, DamageChannel channel, int amount, int health = 0, int sanity = 0, int block = 0, int ward = 0)
+        public EnemyActionKind Kind { get; }
+        public ResolvedEnemyAction(string enemyId, DamageChannel channel, int amount, int health = 0, int sanity = 0, int block = 0, int ward = 0, EnemyActionKind? kind = null)
         {
             EnemyId = enemyId; Channel = channel; Amount = amount;
             Health = health; Sanity = sanity; Block = block; Ward = ward;
+            Kind = kind ?? (amount == 0 ? EnemyActionKind.Observe : channel == DamageChannel.Sanity ? EnemyActionKind.Ritual : EnemyActionKind.Attack);
         }
     }
     public sealed class BattleView

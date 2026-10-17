@@ -41,9 +41,115 @@ namespace UnsoundedSea.Tests
             Assert.That(s.View.Hand.Take(5).All(x => !x.IsEncounter), Is.True);
             Assert.That(s.View.Hand.Skip(5).Select(x => x.Definition.Id), Is.EqualTo(new[] { "E02-01", "E02-02" }));
             s.Execute(BattleCommand.EndTurn());
-            Assert.That(s.View.Hand.Count(x => x.IsEncounter), Is.EqualTo(2), "Listening remains available until the player requests the second constraint.");
-            Assert.That(s.View.Hand.Single(x => x.Definition.Id == "E02-01").Enabled, Is.True);
+            Assert.That(s.View.Hand.Where(x => x.IsEncounter).Select(x => x.Definition.Id), Is.EqualTo(new[] { "E02-02" }), "Turn two automatically completes the public order.");
             Assert.That(s.View.DrawCount + s.View.DiscardCount + s.View.ExhaustCount + s.View.Hand.Count(x => !x.IsEncounter), Is.EqualTo(20));
+        }
+
+        [Test] public void AllChoirOrdersCanBeSolvedFromFreePublicConstraintsAndReplay()
+        {
+            var labels = new[] { "潮匣", "骨匣", "息匣" };
+            var ids = new[] { "choir-a", "choir-b", "choir-c" };
+            for (uint seed = 0; seed < 6; seed++)
+            {
+                var definition = Definition(BossEncounterKind.Choirmaster);
+                var s = new BattleSession(definition, seed, boss: BossEncounterKind.Choirmaster);
+                Assert.That(s.View.BossStatus.Split('；').Length, Is.EqualTo(1));
+                s.Execute(BattleCommand.EndTurn());
+                var status = s.View.BossStatus;
+                var orders = (from a in Enumerable.Range(0, 3) from b in Enumerable.Range(0, 3) from c in Enumerable.Range(0, 3)
+                    where a != b && a != c && b != c
+                    where status.Contains(labels[a] + "在" + labels[b] + "前") && status.Contains(labels[b] + "在" + labels[c] + "前")
+                    select new[] { a, b, c }).ToArray();
+                Assert.That(orders.Length, Is.EqualTo(1), status);
+                foreach (var index in orders.Single())
+                {
+                    Play(s, "E02-02", ids[index]);
+                    if (s.View.BossStage == 1) s.Execute(BattleCommand.EndTurn());
+                }
+                Assert.That(s.View.BossStage, Is.EqualTo(2));
+                var restored = BattleReplay.Capture(s).Restore(definition);
+                Assert.That(restored.View.Log, Is.EqualTo(s.View.Log));
+                Assert.That(restored.View.Enemies.Select(e => e.Health), Is.EqualTo(s.View.Enemies.Select(e => e.Health)));
+            }
+        }
+
+        [Test] public void EarlyListeningDoesNotRepeatOrChargeWhenTurnTwoRevealsInformation()
+        {
+            var s = new BattleSession(Definition(BossEncounterKind.Choirmaster), 4, boss: BossEncounterKind.Choirmaster);
+            Play(s, "E02-01"); var status = s.View.BossStatus;
+            Assert.That(s.View.Actions, Is.EqualTo(2));
+            s.Execute(BattleCommand.EndTurn());
+            Assert.That(s.View.BossStatus, Is.EqualTo(status));
+            Assert.That(s.View.Actions, Is.EqualTo(3));
+            Assert.That(s.View.Hand.Any(c => c.Definition.Id == "E02-01"), Is.False);
+        }
+
+        [Test] public void MessengerHealingProducesAResolvedCueOnlyAfterItsSummonTurn()
+        {
+            var s = new BattleSession(Definition(BossEncounterKind.Choirmaster), 0, boss: BossEncounterKind.Choirmaster);
+            Shoot(s, "b02-choirmaster");
+            while (s.View.Turn < 9) s.Execute(BattleCommand.EndTurn());
+            Assert.That(s.View.Enemies[2].Health, Is.GreaterThan(0));
+            Assert.That(s.View.ResolvedEnemyActions.Any(a => a.Kind == EnemyActionKind.Heal), Is.False);
+            var health = s.View.Enemies[0].Health;
+            s.Execute(BattleCommand.EndTurn());
+            Assert.That(s.View.Enemies[0].Health, Is.EqualTo(health + 6));
+            var cue = s.View.ResolvedEnemyActions.Single(a => a.Kind == EnemyActionKind.Heal);
+            Assert.That(cue.EnemyId, Is.EqualTo("b02-tide-messenger"));
+            Assert.That(cue.Amount, Is.Zero, "Healing cues are not player damage.");
+        }
+
+        [Test] public void RelayRequirementsAndCompletedLocksArePublicWithoutInspectingTheAnswer()
+        {
+            var s = new BattleSession(Definition(BossEncounterKind.FlagBearer), 0, boss: BossEncounterKind.FlagBearer);
+            Assert.That(s.View.BossStatus, Does.Contain("R1 正接").And.Contain("R2 反接"));
+            Assert.That(s.View.EncounterTargets.Single(t => t.Id == "R1:off").Detail, Does.Contain("铭牌要求正接"));
+            Play(s, "E04-01", "R1:positive"); s.Execute(BattleCommand.EndTurn());
+            Play(s, "E04-01", "R2:reverse");
+            Assert.That(s.View.BossStatus, Does.Contain("下回合"));
+            s.Execute(BattleCommand.EndTurn());
+            Play(s, "E04-01", "R1:off"); Play(s, "E04-02", "lock-I");
+            var opened = s.View.EncounterTargets.Single(t => t.Id == "lock-I");
+            Assert.That(opened.State, Is.EqualTo(MechanismState.Open));
+            Assert.That(opened.Detail, Is.EqualTo("已释放"));
+            Assert.That(s.View.BossStatus, Does.Contain("允许强开").And.Contain("警报 5"));
+        }
+
+        [TestCase(BossEncounterKind.Surveyor, 100, 1)]
+        [TestCase(BossEncounterKind.FlagBearer, 12, 100)]
+        public void FatalMainAttackStopsTheScheduledSummon(BossEncounterKind kind, int health, int sanity)
+        {
+            var s = new BattleSession(Definition(kind, health, sanity), 0, boss: kind);
+            s.Execute(BattleCommand.EndTurn());
+            Assert.That(s.View.Phase, Is.EqualTo(BattlePhase.PlayerTurn));
+            s.Execute(BattleCommand.EndTurn());
+            Assert.That(s.View.Phase, Is.EqualTo(BattlePhase.Defeat));
+            Assert.That(s.View.Enemies.Skip(1).All(e => e.Health == 0), Is.True);
+            Assert.That(s.View.ResolvedEnemyActions.Count, Is.EqualTo(1));
+        }
+
+        [Test] public void EverySaltSymmetryHasAThreeTurnRouteProvenOnlyByPublicNumbers()
+        {
+            for (uint seed = 0; seed < 8; seed++)
+            {
+                var s = new BattleSession(Definition(BossEncounterKind.Surveyor), seed, boss: BossEncounterKind.Surveyor);
+                for (var step = 0; step < 6 && s.View.Phase == BattlePhase.PlayerTurn; step++)
+                {
+                    var cells = s.View.EncounterTargets.ToArray();
+                    var layouts = (from a in Enumerable.Range(0, 14) from b in Enumerable.Range(a + 1, 15 - a)
+                        from c in Enumerable.Range(b + 1, 15 - b) select new[] { a, b, c }).Where(mines =>
+                        cells.Select((cell, index) => new { cell, index }).All(x =>
+                            (x.cell.State != MechanismState.Open || !mines.Contains(x.index)) &&
+                            (!x.cell.MeasuredValue.HasValue || mines.Count(m => m != x.index && Math.Abs(m / 4 - x.index / 4) <= 1 && Math.Abs(m % 4 - x.index % 4) <= 1) == x.cell.MeasuredValue.Value))).ToArray();
+                    Assert.That(layouts, Is.Not.Empty);
+                    var safe = cells.Select((cell, index) => new { cell, index }).Where(x => x.cell.State == MechanismState.Unmeasured && layouts.All(m => !m.Contains(x.index)))
+                        .OrderByDescending(x => x.cell.IsSeal).First();
+                    Play(s, "E03-01", safe.cell.Id);
+                    if (step % 2 == 1 && s.View.Phase == BattlePhase.PlayerTurn) s.Execute(BattleCommand.EndTurn());
+                }
+                Assert.That(s.View.Phase, Is.EqualTo(BattlePhase.Victory), "seed " + seed);
+                Assert.That(s.View.Turn, Is.EqualTo(3));
+            }
         }
 
         [Test] public void ChoirmasterCanonicalRouteProtectsHealthThenWinsBeforeAttacks()

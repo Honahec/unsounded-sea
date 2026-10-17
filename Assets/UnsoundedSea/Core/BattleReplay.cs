@@ -43,6 +43,9 @@ namespace UnsoundedSea.Core
                 using (var writer = new BinaryWriter(stream, System.Text.Encoding.UTF8, true))
                 {
                     writer.Write(CurrentVersion); writer.Write((int)boss); writer.Write(definition.Id); writer.Write(definition.Health);
+                    // Keep other encounters compatible while revising the M02-M04 rule contract.
+                    if (boss == BossEncounterKind.Choirmaster || boss == BossEncounterKind.Surveyor || boss == BossEncounterKind.FlagBearer)
+                        writer.Write("boss-public-contract-v1");
                     writer.Write(definition.Sanity); writer.Write(definition.Actions); writer.Write(definition.DrawCount);
                     writer.Write(definition.InitialHealth); writer.Write(definition.InitialSanity);
                     writer.Write((int)definition.Objective); writer.Write(definition.ObjectiveTarget);
