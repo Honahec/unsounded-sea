@@ -61,6 +61,9 @@ jobs:
           unity --version
           editor_version=$(awk '/^m_EditorVersion:/ {print $2}' ProjectSettings/ProjectVersion.txt | tr -d '\r')
           test -n "$editor_version"
+          # Fresh hosted runners do not have Hub's Editor directory yet.
+          # install-path requires an existing directory writable by the runner.
+          sudo install -d -o "$(id -un)" -g "$(id -gn)" /Applications/Unity/Hub/Editor
           unity install-path --set /Applications/Unity/Hub/Editor
           unity install "$editor_version" --module windows-mono --yes --accept-eula
           # GameCI activation resolves the Editor through the Hub install layout.
