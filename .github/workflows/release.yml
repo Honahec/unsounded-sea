@@ -69,11 +69,34 @@ jobs:
           # GameCI activation resolves the Editor through the Hub install layout.
           unity hub install
 
-      # This release supports Personal activation with email/password directly.
-      # Older GameCI versions require a legacy .ulf or a paid serial instead.
-      - uses: game-ci/cli@v0.1.72
-        with:
-          version: v0.1.72
+      # v0.1.72 supports Personal accounts, but its composite action tries to
+      # execute a non-executable install.sh. Install the verified release archive.
+      - name: Install GameCI CLI
+        env:
+          GAME_CI_VERSION: v0.1.72
+        run: |
+          case "$(uname -m)" in
+            arm64) gameci_arch=arm64 ;;
+            x86_64) gameci_arch=x64 ;;
+            *) echo '::error::Unsupported macOS runner architecture'; exit 1 ;;
+          esac
+          archive="game-ci-macos-$gameci_arch.tar.gz"
+          release_url="https://github.com/game-ci/cli/releases/download/$GAME_CI_VERSION"
+          install_dir="$RUNNER_TEMP/game-ci"
+          mkdir -p "$install_dir"
+          cd "$install_dir"
+          curl --fail --silent --show-error --location --retry 3 "$release_url/$archive" -o "$archive"
+          curl --fail --silent --show-error --location --retry 3 "$release_url/checksums.txt" -o checksums.txt
+          awk -v file="$archive" '$2 == file {print}' checksums.txt > archive.sha256
+          test "$(wc -l < archive.sha256 | tr -d ' ')" = 1
+          shasum -a 256 -c archive.sha256
+          # Include dist/: the CLI's activation scripts are not embedded in the binary.
+          tar -xzf "$archive"
+          test -x "$install_dir/game-ci"
+          test -f "$install_dir/dist/platforms/mac/steps/activate.sh"
+          test -f "$install_dir/dist/platforms/mac/steps/return_license.sh"
+          "$install_dir/game-ci" --help
+          echo "$install_dir" >> "$GITHUB_PATH"
 
       - name: Activate Unity Personal
         id: activate
