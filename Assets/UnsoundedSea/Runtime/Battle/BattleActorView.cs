@@ -13,6 +13,7 @@ namespace UnsoundedSea.Runtime
         public bool IsSeaActor => placement != null && placement.environment == BattleEnvironment.Sea;
         public float WaterRadius => IsSeaActor ? placement.waterRadius : 0;
         private Transform body;
+        private BoxCollider hit;
         private LineRenderer ring;
         internal bool HasSelectionRing => ring != null;
         private float ringRadius;
@@ -74,7 +75,7 @@ namespace UnsoundedSea.Runtime
                 + (placement == null ? new Vector3(0, 0.28f, 0) : placement.labelOffset);
             // Bounds are measured in actor space, so a 30 m sea creature is selectable across its body,
             // and rotating/scaling its anchor does not accidentally scale a world-space collider twice.
-            var hit = gameObject.AddComponent<BoxCollider>();
+            hit = gameObject.AddComponent<BoxCollider>();
             hit.center = bounds.center; hit.size = Vector3.Max(bounds.size, Vector3.one * 0.1f);
             if (placement != null && !placement.showSelectionRing) return;
             ring = new GameObject("Target sigil").AddComponent<LineRenderer>(); ring.transform.SetParent(transform, false);
@@ -150,6 +151,8 @@ namespace UnsoundedSea.Runtime
         {
             var newlyAlive = alive && !Alive;
             Alive = alive;
+            if (hit != null) hit.enabled = alive;
+            if (!alive) Select(false);
             if (newlyAlive && placement != null && placement.emergeDepth > 0)
             {
                 emergence = 0; surfaceBroken = false;
@@ -165,6 +168,12 @@ namespace UnsoundedSea.Runtime
             if (deckMotion != null)
             {
                 deckMotion.SetAlive(alive);
+                if (newlyAlive)
+                {
+                    // Keep the actor slot for summons/revival, but reset its hidden body before reuse.
+                    deckMotion.Tick(0, false, GameSettings.ReducedMotion);
+                    body.gameObject.SetActive(true);
+                }
                 if (damaged) deckMotion.PlayHit();
                 if (attacking) deckMotion.PlayAttack(ritual, observing, delay);
                 return;
@@ -223,7 +232,7 @@ namespace UnsoundedSea.Runtime
                 withdrawalPending = false;
                 GiantMotion?.Retire(true); rigidMotion?.PlayDeath(true);
             }
-            if (deckMotion != null) deckMotion.Tick(Time.unscaledDeltaTime, director.Paused, GameSettings.ReducedMotion);
+            TickDeckMotion(Time.unscaledDeltaTime, director.Paused, GameSettings.ReducedMotion);
             if (animator != null) animator.speed = director.Paused ? 0 : 1;
             if (rigidMotion != null) rigidMotion.SetPaused(director.Paused);
             if (GiantMotion != null) { GiantMotion.SetPaused(director.Paused); GiantMotion.Tick(Time.unscaledDeltaTime); }
@@ -263,6 +272,15 @@ namespace UnsoundedSea.Runtime
                 body.localPosition = bodyPosition + new Vector3(0, -fall * height * 0.55f, reduced ? 0 : impulse * 0.12f - Mathf.Sin(attack * Mathf.PI) * 0.3f);
                 body.localRotation = bodyRotation * Quaternion.Euler(-fall * 65 - (reduced ? 0 : impulse * 8), 0, reduced ? 0 : Mathf.Sin(age * 0.8f + transform.position.x) * 0.45f);
             }
+        }
+
+        private void TickDeckMotion(float delta, bool paused, bool reduced)
+        {
+            if (deckMotion == null) return;
+            deckMotion.Tick(delta, paused, reduced);
+            // Deck poses do not sink the root. Explicitly retire the model after its death pose.
+            // Leave this actor active so later snapshots can reuse the same enemy slot.
+            if (deckMotion.DeathComplete) body.gameObject.SetActive(false);
         }
     }
 }

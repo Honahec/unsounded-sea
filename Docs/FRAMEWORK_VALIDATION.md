@@ -2,6 +2,10 @@
 
 各节分别记录日期、环境和验证范围；历史通过不代表后续改动通过。旧 HUD 的逐轮记录保留在 Git 历史，不重复维护。
 
+## 双敌场小怪死亡清理
+
+2026-10-18，macOS / Unity 6000.6.5f1 / Unity CLI 1.0.0-beta.13。`DeckAnimationTests` **12 项通过**，包含左右槽位、暂停、减少动效、重复死亡通知及槽位复用后再次死亡。`Tools/DeckAnimationQA.DeathCleanup` 使用隔离会话与内存 1 HP 副本，在 `voyage-fog-4` 分别用真实致命卡击杀左右敌人；已查看前后画面，确认死亡模型／选中环消失、碰撞关闭、存活敌人仍可选择并在下一回合行动，后续快照不会重新显示尸体。**0 运行错误，正式存档逐字节不变**；未验证独立 Player。
+
 ## 巨兽死亡与存活退场
 
 2026-10-18，macOS / Unity 6000.6.5f1 / Unity CLI 1.0.0-beta.13。`SeaBossDefeatTests` 7 项、`BellMotherAnimationTests` 7 项、`GiantBossAnimationTests` 13 项通过；覆盖死亡首帧连续、刚性冠部／触手连接、体积不缩放、暂停、减少动效、重复死亡通知、完整沉没、单次水面接触、执旗者髋部固定以及存活退场不侧翻。合并远端 main 后全量 EditMode **332 通过／0 失败**；同步两处旧航路提示断言到 main 的现行文案。

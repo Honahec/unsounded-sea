@@ -26,6 +26,73 @@ public static class DeckAnimationQA
         var bytes=(byte[])type.GetMethod("EncodeScreenToPng",BindingFlags.Static|BindingFlags.Public|BindingFlags.NonPublic).Invoke(null,new object[]{Screen.width,Screen.height});
         File.WriteAllBytes("Logs/UiExperience/DeckMotion/"+name+".png",bytes);
     }
+    public static async Task<object> DeathCleanup()
+    {
+        Check(Application.isPlaying,"Enter Play first.");
+        const string dir="Logs/UiExperience/DeckMotion";Directory.CreateDirectory(dir);
+        var background=Application.runInBackground;Application.runInBackground=true;
+        var hadReduced=PlayerPrefs.HasKey("settings.reducedMotion");var reduced=GameSettings.ReducedMotion;
+        var formal=Directory.GetFiles(Application.persistentDataPath,"voyage*.json*").ToDictionary(p=>p,File.ReadAllBytes);
+        var clones=new List<UnityEngine.Object>();var results=new List<object>();var errors=new List<string>();
+        Application.LogCallback log=(m,s,t)=>{if(t==LogType.Error||t==LogType.Exception||t==LogType.Assert)errors.Add(m);};
+        Application.logMessageReceived+=log;
+        VoyageRuntime.BeginValidation(Path.GetFullPath(dir+"/death-save"));
+        try
+        {
+            await Wait(()=>!GameSceneLoader.IsLoading);
+            VoyageRuntime.StartDebugEncounter("voyage-fog-4","fog",false);
+            await Wait(()=>!GameSceneLoader.IsLoading&&UnityEngine.Object.FindAnyObjectByType<BattleDirector>()?.Stage!=null);
+            var d=UnityEngine.Object.FindAnyObjectByType<BattleDirector>();
+            Check(d.View.Enemies.Count==2,"Expected paired encounter.");
+            // Detach from the voyage contract; change only runtime copies to guarantee a lethal shot.
+            VoyageRuntime.BeginValidation(Path.GetFullPath(dir+"/death-save"));
+            var scenario=UnityEngine.Object.Instantiate(d.scenario);clones.Add(scenario);
+            scenario.encounter=UnityEngine.Object.Instantiate(scenario.encounter);clones.Add(scenario.encounter);
+            scenario.encounter.enemies=scenario.encounter.enemies.Select(e=>UnityEngine.Object.Instantiate(e)).ToArray();
+            clones.AddRange(scenario.encounter.enemies);scenario.encounter.playerHealth=1000;d.scenario=scenario;
+            for(int deadSlot=0;deadSlot<2;deadSlot++)
+            {
+                GameSettings.ReducedMotion=deadSlot==1;
+                for(int i=0;i<2;i++)scenario.encounter.enemies[i].health=i==deadSlot?1:100;
+                d.seed=Enumerable.Range(0,100).Select(i=>(uint)i).First(seed=>scenario.CreateSession(seed,true).View.Hand.Any(c=>c.Definition.Id=="revolver"));
+                d.Restart();await Task.Delay(200);await Wait(()=>!d.Busy);
+                var dead=d.Stage.Actors[deadSlot];var survivor=d.Stage.Actors[1-deadSlot];
+                var body=dead.GetComponentInChildren<DeckActorMotion>();var survivorMotion=survivor.GetComponentInChildren<DeckActorMotion>();
+                CaptureLive("death-"+deadSlot+"-before");var frame=Time.frameCount;
+                var card=d.View.Hand.First(c=>c.Definition.Id=="revolver");
+                var target=card.Targets.First(t=>t.Enabled&&(t.Id==dead.EnemyId||t.Id=="enemy:"+dead.EnemyId));
+                Check(d.Submit(BattleCommand.Play(card.InstanceId,target.Id)).Success,"Lethal shot rejected.");
+                Check(d.View.Enemies[deadSlot].Health==0&&!dead.Alive&&d.Busy,"Shot did not kill and hold death lock.");
+                Check(!dead.GetComponent<BoxCollider>().enabled,"Dead target still blocks raycasts.");
+                d.SetPaused(true);await Task.Delay(250);
+                Check(body.gameObject.activeInHierarchy&&d.Busy,"Paused death disappeared or unlocked.");d.SetPaused(false);
+                await Wait(()=>!d.Busy);await Task.Delay(100);
+                Check(!body.gameObject.activeInHierarchy&&survivorMotion.gameObject.activeInHierarchy,"Only the dead model should disappear.");
+                Check(Time.frameCount>frame,"Player loop was frozen.");
+                d.Select(survivor.EnemyId);Check(d.SelectedEnemy==survivor.EnemyId,"Survivor cannot be selected.");
+                d.Select(dead.EnemyId);Check(d.SelectedEnemy==survivor.EnemyId,"Dead actor became selectable.");
+                var age=survivorMotion.Age;
+                Check(d.Submit(BattleCommand.EndTurn()).Success,"Next turn was blocked.");await Wait(()=>!d.Busy);await Task.Delay(100);
+                Check(survivorMotion.Age>age&&survivor.Alive,"Survivor stopped updating.");
+                Check(d.View.ResolvedEnemyActions.Any(a=>a.EnemyId==survivor.EnemyId)&&d.View.ResolvedEnemyActions.All(a=>a.EnemyId!=dead.EnemyId),"Next turn did not isolate surviving enemy actions.");
+                Check(!body.gameObject.activeInHierarchy,"Later snapshot resurrected the corpse.");
+                CaptureLive("death-"+deadSlot+"-after");
+                results.Add(new{deadSlot,reduced=GameSettings.ReducedMotion,frameAdvance=Time.frameCount-frame,hidden=true,survivorActs=true,pauseChecked=true});
+            }
+            Check(errors.Count==0,string.Join("; ",errors));
+            var after=Directory.GetFiles(Application.persistentDataPath,"voyage*.json*").ToDictionary(p=>p,File.ReadAllBytes);
+            Check(formal.Count==after.Count&&formal.All(p=>after.TryGetValue(p.Key,out var bytes)&&p.Value.SequenceEqual(bytes)),"Formal saves changed.");
+            var report=new{success=true,results,runtimeErrors=errors.Count,formalSavesUnchanged=true};
+            File.WriteAllText(dir+"/death-result.json",JsonConvert.SerializeObject(report,Formatting.Indented));return report;
+        }
+        finally
+        {
+            VoyageRuntime.EndValidation();GameSettings.ReducedMotion=reduced;
+            if(!hadReduced){PlayerPrefs.DeleteKey("settings.reducedMotion");PlayerPrefs.Save();}
+            Application.runInBackground=background;Application.logMessageReceived-=log;
+            SceneManager.LoadScene("MainMenu");foreach(var clone in clones)UnityEngine.Object.Destroy(clone);
+        }
+    }
     public static async Task<object> Readability(string encounterOnly = null)
     {
         Check(Application.isPlaying,"Enter Play first.");const string dir="Logs/UiExperience/DeckMotion";Directory.CreateDirectory(dir);

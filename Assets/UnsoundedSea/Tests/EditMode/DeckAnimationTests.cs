@@ -27,6 +27,60 @@ namespace UnsoundedSea.Tests
             }
         }
 
+        private static void TickActor(BattleActorView actor, float delta, bool paused, bool reduced) =>
+            typeof(BattleActorView).GetMethod("TickDeckMotion", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(actor, new object[] { delta, paused, reduced });
+
+        [TestCase(0, false)] [TestCase(1, false)]
+        [TestCase(0, true)] [TestCase(1, true)]
+        public void DeadDeckEnemyDisappearsWithoutHidingItsPartnerAndCanBeReused(int deadSlot, bool reduced)
+        {
+            var parent = new GameObject("Paired deck enemies");
+            try
+            {
+                var actors = new[] { "Prayer", "Echo" }.Select((name, i) =>
+                {
+                    var actor = new GameObject(name).AddComponent<BattleActorView>();
+                    actor.transform.SetParent(parent.transform, false);
+                    actor.Bind(null, "enemy:" + i, AssetDatabase.LoadAssetAtPath<GameObject>(
+                        "Assets/UnsoundedSea/Art/Prefabs/" + name + ".prefab"), null);
+                    return actor;
+                }).ToArray();
+                var dead = actors[deadSlot]; var survivor = actors[1 - deadSlot];
+                var body = dead.GetComponentInChildren<DeckActorMotion>().gameObject;
+                dead.Select(true);
+                dead.Feedback(true, false, false);
+                Assert.That(dead.GetComponent<BoxCollider>().enabled, Is.False);
+                Assert.That(dead.GetComponentInChildren<LineRenderer>().enabled, Is.False);
+                Assert.That(dead.HasPendingDeckMotion, Is.True, "Death must hold the presentation lock");
+                TickActor(dead, 2, true, reduced);
+                Assert.That(body.activeSelf, Is.True, "Pause must not finish death");
+                Assert.That(dead.HasPendingDeckMotion, Is.True);
+                for (int frame = 0; frame < 12; frame++)
+                {
+                    dead.Feedback(false, false, false); // Repeated snapshots must not restart death.
+                    TickActor(dead, .1f, false, reduced);
+                    TickActor(survivor, .1f, false, reduced);
+                }
+                Assert.That(body.activeSelf, Is.False);
+                Assert.That(dead.GetComponentsInChildren<SkinnedMeshRenderer>(), Is.Empty);
+                Assert.That(dead.HasPendingDeckMotion, Is.False);
+                Assert.That(dead.gameObject.activeSelf, Is.True, "Keep the reusable actor slot");
+                Assert.That(survivor.GetComponentInChildren<SkinnedMeshRenderer>(), Is.Not.Null);
+                Assert.That(survivor.GetComponent<BoxCollider>().enabled, Is.True);
+                survivor.Feedback(false, true, true);
+                Assert.That(survivor.HasPendingDeckMotion, Is.True);
+                dead.Feedback(false, false, true);
+                Assert.That(body.activeSelf, Is.True);
+                Assert.That(dead.GetComponent<BoxCollider>().enabled, Is.True);
+                Assert.That(dead.HasPendingDeckMotion, Is.False);
+                dead.Feedback(true, false, false);
+                TickActor(dead, 1, false, reduced);
+                Assert.That(body.activeSelf, Is.False, "Reused slot must still retire on its next death");
+            }
+            finally { Object.DestroyImmediate(parent); }
+        }
+
         [Test] public void AllSkinsDeformWithoutFootSlidingAndRecoverUnderRotatedScaledParents()
         {
             foreach (var path in Prefabs)

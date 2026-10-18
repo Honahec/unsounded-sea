@@ -24,7 +24,8 @@ namespace UnsoundedSea.Runtime
         private float age, phase, actionTime = -1, hitTime = -1, delay, strength, hitWeight, death;
         private bool ritual, observing, alive = true, initialized;
         private PrayerSkirtMotion skirt;
-        public bool Busy => alive && (actionTime >= 0 || hitTime >= 0);
+        public bool DeathComplete => !alive && death >= 1;
+        public bool Busy => alive ? actionTime >= 0 || hitTime >= 0 : !DeathComplete;
         public bool Attacking => alive && actionTime >= 0;
         public float ActionImpact { get; private set; }
         public float Age => age;
