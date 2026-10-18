@@ -77,7 +77,7 @@ UnsoundedSea.Tests.EditMode   NUnit 行为测试（引用 Core / Runtime）
 
 | 资源 | 用途 | 来源 | 授权 | 位置 |
 | --- | --- | --- | --- | --- |
-| 香萃积雪宋（XIANGCUIJIXUESONG）Version 1.000 | 全部界面中文文字 | 香萃字体 | **待确认**：仓库内未保存授权文件，提交前须核实其商用／再分发许可并附上许可证明 | `Assets/Fonts/default_zh.ttf` |
+| 香萃积雪宋（XIANGCUIJIXUESONG）Version 1.000 | 全部界面中文文字 | 香萃字体 | SIL Open Font License 1.1：可免费商用、嵌入游戏并随游戏分发；不得单独售卖字体文件，分发时须附带版权声明与许可证全文 | `Assets/Fonts/default_zh.ttf`（游戏内使用由其生成的字形图集 `default_zh.asset`） |
 
 ### 2.4 AI 生成工具及其产出
 
@@ -94,5 +94,5 @@ UnsoundedSea.Tests.EditMode   NUnit 行为测试（引用 Core / Runtime）
 
 ### 2.5 待确认事项
 
-1. 中文字体“香萃积雪宋”的授权范围与许可证明。
+1. 将香萃积雪宋的 OFL-1.1 许可证全文（`OFL.txt`）放入 `Assets/Fonts/` 并随发布包附带。
 2. Hyper3D Rodin、OpenAI、Canva 当前账号套餐下生成内容的商用与署名要求。
