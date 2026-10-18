@@ -229,7 +229,7 @@ namespace UnsoundedSea.Runtime
             top.Add(KeyBadge.Attach(Button("battle-chart-toggle", "海图", ToggleChart), "M"));
             top.Add(KeyBadge.Attach(Button("battle-action-book", "行动簿", ToggleActionBook), "B"));
 
-            var tools = new ScrollView(ScrollViewMode.Vertical); tools.AddToClassList("tools"); tools.style.maxHeight = new StyleLength(new Length(48, LengthUnit.Percent)); root.Add(tools);
+            var tools = new ScrollView(ScrollViewMode.Vertical); tools.AddToClassList("tools"); tools.style.maxHeight = new StyleLength(new Length(v.BossKind == BossEncounterKind.Watcher ? 34 : 48, LengthUnit.Percent)); root.Add(tools);
             foreach (var tool in v.Tools.Where(x=>(int)x.Definition.Kind<3))
             {
                 var t = tool; var cost = t.Definition.SanityCost > 0 ? $"{t.Definition.SanityCost}理智" : "无代价";
@@ -249,13 +249,14 @@ namespace UnsoundedSea.Runtime
                     else { selectedSupport = selectedSupport == crew.Definition.Id ? null : crew.Definition.Id; selectedEncounterCard = 0; Render(); }
                 }, "tool");
                 button.Add(new SeaUiArt(CrewMotif(crew.Definition.Kind)));
-                button.Add(Text(crew.Definition.Name, "tool-name"));
+                // M05 packs crew into a narrow grid; the full title stays in the tooltip.
+                button.Add(Text(v.BossKind == BossEncounterKind.Watcher ? crew.Definition.Name.Split('·')[0].Trim() : crew.Definition.Name, "tool-name"));
                 button.Add(Text(crew.Used ? "本场已用" : $"{crew.Definition.Cost}行动", "tool-meta"));
-                button.tooltip = crew.Enabled ? SupportCatalog.CrewDescription(crew.Definition.Kind) + " 每回合最多一次，每人每场一次" : crew.DisabledReason;
+                button.tooltip = crew.Definition.Name + "：" + (crew.Enabled ? SupportCatalog.CrewDescription(crew.Definition.Kind) + " 每回合最多一次，每人每场一次" : crew.DisabledReason);
                 ActionButton(button, active && crew.Enabled); tools.Add(button);
             }
 
-            tools.Add(BattleSupplyPanel.Build(v,command=>director.Submit(command),active,ActionButton));
+            var supplies = BattleSupplyPanel.Build(v,command=>director.Submit(command),active,ActionButton); supplies.AddToClassList("tool-supplies"); tools.Add(supplies);
             var objective = Box("battle-objective"); root.Add(objective);
             objective.pickingMode = PickingMode.Position;
             var objectiveTitle = scenario.encounter.objective == ObjectiveKind.Seal ? "封线" :

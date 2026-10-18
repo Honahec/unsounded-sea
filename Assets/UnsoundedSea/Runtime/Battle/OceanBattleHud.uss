@@ -190,6 +190,14 @@
 .m04-battle .boss-lock-row { min-height: 48px; align-items: flex-start; padding: 5px 8px; }
 .m04-battle .lock-name { font-size: 14px; color: #eee4c9; }
 .m04-battle .lock-condition { font-size: 11px; color: #a9b6ad; white-space: normal; }
+/* M05 raises its lamp guard in the lower-left; tools and crew use the empty upper-left sky as a compact grid. */
+.m05-battle .tools { top: 104px; bottom: auto; width: 312px; }
+.m05-battle .tools .unity-scroll-view__content-container { flex-direction: row; flex-wrap: wrap; }
+.m05-battle .tools .tool { width: 148px; min-height: 38px; margin: 0 6px 6px 0; padding: 6px 8px; }
+.m05-battle .tools .tool SeaUiArt { width: 20px; height: 20px; margin-right: 5px; }
+.m05-battle .tools .tool-name { font-size: 14px; }
+.m05-battle .tools .tool-meta { margin-left: 4px; font-size: 12px; }
+.m05-battle .tool-supplies { width: 100%; }
 
 .boss-target.mechanism-dial { position: absolute; align-items: center; justify-content: center; }
 .relay-symbol { color: #eee4c9; font-size: 28px; }

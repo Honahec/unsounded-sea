@@ -17,6 +17,7 @@ namespace UnsoundedSea.Runtime
             root.EnableInClassList("m02-battle", view.BossKind == BossEncounterKind.Choirmaster);
             root.EnableInClassList("m03-battle", view.BossKind == BossEncounterKind.Surveyor);
             root.EnableInClassList("m04-battle", view.BossKind == BossEncounterKind.FlagBearer);
+            root.EnableInClassList("m05-battle", view.BossKind == BossEncounterKind.Watcher);
             root.EnableInClassList("boss-mechanics-battle", view.BossKind == BossEncounterKind.Choirmaster || view.BossKind == BossEncounterKind.Surveyor || view.BossKind == BossEncounterKind.FlagBearer);
             if (notedStage != director.Stage) { saltNotes.Clear(); notedStage = director.Stage; }
         }
