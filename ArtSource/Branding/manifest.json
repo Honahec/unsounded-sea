@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "key": "game-icon",
+      "file": "ArtSource/Branding/game-icon.png",
+      "created": "2026-10-18",
+      "generator": {
+        "tool": "image_gen.imagegen",
+        "mode": "built-in"
+      },
+      "generationPrompt": "Use case: logo-brand.\nAsset type: ONE finished 1:1 square minimalist game icon for THE UNSOUNDED SEA / 《未测之海》, a nautical cosmic-horror investigation roguelike.\nUser corrections: the first detailed lantern-and-eye illustration was too complex and the eye was unwanted. The second simple gold boat with two waves was too generic and lacked Cthulhu atmosphere. This design must combine MINIMALISM with unmistakable COSMIC OCEAN HORROR. No eye imagery.\n\nDesign a bold, highly professional two-color graphic emblem: one TINY vulnerable antique research ship sits near the upper third of a single ENORMOUS curling cephalopod tentacle that rises out of the sea and arches menacingly around the ship. The ship is dwarfed by the tentacle, about one quarter of its scale. The single tentacle doubles as one huge curling ocean wave and forms an asymmetric incomplete ring / abyssal vortex around the small ship; its tapered tip hooks inward overhead. Just four or five large simple circular negative-space suction-cup cutouts on the inner curve make it UNMISTAKABLY a monstrous tentacle rather than an ordinary decorative wave. The dark open center is the bottomless unknown sea. The ship and tentacle should read as ONE unified, compact, ominous icon, not two disconnected cliparts. Use confident thick shapes, elegant controlled curves, deliberate negative space and a sharply recognizable silhouette. A sense of an incomprehensibly large thing just beneath the surface. Sinister, quiet, ancient, not cute or adventurous.\n\nStyle: clean FLAT silhouette logo, exceptionally simple, only two solid colors. Matte aged brass-gold #B78C55 emblem on uninterrupted deep sea-ink blue #172B32 background. No gradients, no distressed texture, no shading, no realism, no illustration brushwork, no metallic reflections or 3D. The whole emblem fills about 72% of the square with balanced generous margins. Clear at 32px and 64px. Ship has only hull, compact cabin and short mast; no tiny rigging or windows.\n\nConstraints: no eyes, no pupils, no face, no skull, no lantern, no compass, no stars, no moon, no pentagram, no runes, no text, no letters, no title, no numbers, no watermarks, no decorative borders, no badge rim, no rounded-square tile, no mockup, no variations grid. Exactly one small ship and ONE massive recognizably suction-cupped tentacle-wave, no other objects. Opaque square background. Deliver the actual icon artwork.",
+      "sha256": "a6a844c78577ff349a1d8c856cce52794000a9bfc754ee5cc53b166cb8d9019a",
+      "bytes": 1344195,
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "inspection": "User selected the original tentacle-wave and small ship design on 2026-10-18. Visually checked against the exact selected source image: ornate curling wave base, large arched tentacle with negative-space suction cups, tiny ship, gold on sea-blue, no eyes or title. PNG dimensions and SHA-256 verified; file copied unchanged.",
+      "integrationStatus": "Source artwork only; not assigned in Unity Player Settings."
+    }
+  ]
+}
