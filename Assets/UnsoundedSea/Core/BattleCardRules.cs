@@ -38,6 +38,7 @@ namespace UnsoundedSea.Core
                 card.Enabled = phase == BattlePhase.PlayerTurn && objective.AllowsTaskAction && !taskUsed && actions >= cost;
                 card.DisabledReason = card.Enabled ? "" : "任务行动不可用（每回合一次，行动不足）。";
             }
+            boss?.RefreshCards();
         }
 
         private IEnumerable<EncounterTargetView> BuildCardTargets(CardView card)

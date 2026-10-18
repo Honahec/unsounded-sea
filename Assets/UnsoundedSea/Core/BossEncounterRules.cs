@@ -377,12 +377,13 @@ namespace UnsoundedSea.Core
             }
             private void RemoveCard(string id) => s.hand.RemoveAll(x => x.IsEncounter && x.Definition.Id == id);
 
-            private void RefreshCards()
+            public void RefreshCards()
             {
                 foreach (var card in s.hand.Where(x => x.IsEncounter))
                 {
                     card.ActionCost = Math.Max(0, card.Definition.Cost - s.sceneDiscount);
-                    var reason = ValidateAvailability(card.Definition.Id); card.Enabled = reason == null; card.DisabledReason = reason ?? "";
+                    var reason = ValidateAvailability(card.Definition.Id) ?? (s.actions < card.ActionCost ? "行动点不足。" : null);
+                    card.Enabled = reason == null; card.DisabledReason = reason ?? "";
                     card.Targets = card.Definition.Id == "E02-01" || card.Definition.Id == "E05-01" ? EmptyTargets : targets
                         .Where(x => card.Definition.Id == "E04-01" ? x.Id.Contains(":") : card.Definition.Id == "E04-02" ? x.Id.StartsWith("lock-", StringComparison.Ordinal) : true)
                         .Select(x => new EncounterTargetView(x.Id, x.Name, TargetDetail(x.Id), TargetEnabled(card.Definition.Id, x.Id))).ToList().AsReadOnly();
