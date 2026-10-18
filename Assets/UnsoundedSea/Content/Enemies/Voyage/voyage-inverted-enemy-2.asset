@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-inverted-enemy-2
   displayName: "\u955C\u6F6E\u8BB0\u5F55\u5458"
-  health: 30
-  candidateDescription: "\u8D26\u672C\u7838\u51FB\uFF1A12 \u751F\u547D\u4F24\u5BB3 / \u955C\u7247\u51DD\u89C6\uFF1A5 \u7406\u667A\u51B2\u51FB"
+  health: 44
+  candidateDescription: "\u8D26\u672C\u7838\u51FB\uFF1A14 \u751F\u547D\u4F24\u5BB3 / \u955C\u7247\u51DD\u89C6\uFF1A6 \u7406\u667A\u51B2\u51FB"
   intentPolicy: 0
   intents:
   - id: book
     displayName: "\u8D26\u672C\u7838\u51FB"
     clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 0
-    amount: 12
+    amount: 14
     isPublic: 0
     visibleAction: 1
     interruptible: 0
@@ -31,7 +31,7 @@ MonoBehaviour:
     displayName: "\u955C\u7247\u51DD\u89C6"
     clue: "\u59FF\u6001\u4E0E\u58F0\u54CD\u4E92\u76F8\u77DB\u76FE\uFF0C\u5C1A\u4E0D\u80FD\u5224\u65AD\u5B83\u4F1A\u4F24\u53CA\u8EAB\u4F53\u8FD8\u662F\u7406\u667A\u3002"
     channel: 1
-    amount: 5
+    amount: 6
     isPublic: 0
     visibleAction: 1
     interruptible: 1

@@ -164,7 +164,7 @@ namespace UnsoundedSea.Core
                     var replacements=crewIds.Count>=4?crewIds.Cast<string>():new string[]{null};
                     foreach(var old in replacements)Add("hire:"+crew.Id+(old==null?"":"@"+old),"接驳 · "+crew.Name+(old==null?"":"（替换"+SupportCatalog.CrewMember(old).Name+"）"),$"{HirePrice}补给；"+SupportCatalog.CrewDescription(crew.Kind),Supplies>=HirePrice);
                 }
-                if(inventory.Contains("i12")&&ServiceAvailable("tea"))Add("tea","饮用干燥药茶","消耗1份，恢复5理智，每节点一次。",Sanity<GameBalance.MaxSanity);
+                if(inventory.Contains("i12")&&ServiceAvailable("tea"))Add("tea","饮用干燥药茶",$"消耗1份，恢复{GameBalance.TeaSanity}理智，每节点一次。",Sanity<GameBalance.MaxSanity);
                 foreach(var id in crewIds.Where(injuredCrew.Contains))Add("treat:"+id,"治疗 · "+SupportCatalog.CrewMember(id).Name,"花2补给治好伤势，恢复支援和航程能力。",Supplies>=2);
                 if(ActiveCrew("gunsmith")&&ServiceAvailable("gunsmith")){Add("gunsmith:item","修械补给","获得1份备用弹匣，与恢复工具二选一。",CanGain("i13"));Add("gunsmith:chart","修复海图","恢复1次，不超过2次。",ChartUses<2);Add("gunsmith:lookout","修复望远镜","恢复1次，不超过2次。",LookoutUses<2);}
                 foreach(var id in crewIds.Where(x=>trustedCrew.Contains(x)&&!injuredCrew.Contains(x)&&!supportServices.Contains("trust:"+x)))Add("trust:"+id,"个人交谈 · "+SupportCatalog.CrewMember(id).Name,"学习1张新行动；每人每航程一次。",TrustedCard(id)!=null);
@@ -184,7 +184,7 @@ namespace UnsoundedSea.Core
                 Add("voucher","接引遇险接驳船","获得接驳凭证；下次成功招聘少付1补给，幕末过期。");
                 Add("specimen","封存漂浮标本","花1补给，获得封存标本；可在档案节点交付。",Supplies>0&&!markers.ContainsKey("sealed-specimen"));
                 Add("repair-boat","修复漂流维修船","支付1补给（轮机长首次免付），获得绝缘钳；放弃其他事件收益。",!learnedTools.Contains("i08")&&(Supplies>0||ActiveCrew("engineer")&&!repairDiscountUsed));
-                if(ActiveCrew("listener"))Add("crew:listen","比对录音","免费核对信号，恢复4理智并记录来源。",Sanity<GameBalance.MaxSanity);
+                if(ActiveCrew("listener"))Add("crew:listen","比对录音",$"免费核对信号，恢复{GameBalance.EventSanity}理智并记录来源。",Sanity<GameBalance.MaxSanity);
                 if(ActiveCrew("decoder"))Add("crew:decode","核对值班序列","查明本幕威胁，揭示后续航路。");
                 if(Watched>0)Add("risk:watch","回应异常信号","获得1补给，被注视+1（最高3）。",Supplies<GameBalance.MaxSupplies);
                 foreach(var id in crewIds.Where(x=>!injuredCrew.Contains(x)))Add("risk:"+id,"冒险取回漂箱 · "+SupportCatalog.CrewMember(id).Name,"获得2补给；该船员受伤，暂停支援和航程能力。可在补给船花2补给治疗。",Supplies<=GameBalance.MaxSupplies-2);
@@ -212,7 +212,7 @@ namespace UnsoundedSea.Core
                 case "navigate":navigatorUsed=true;RevealAllRoutes(CurrentFull);break;
                 case "buy":SpendSupplies(SupportCatalog.Item(id).Kind==ItemKind.Consumable?1:2);Gain(id,old);SpendService("shop");break;
                 case "hire":SpendSupplies(HirePrice);markers.Remove("docking-voucher");if(old!=null)crewIds.Remove(old);crewIds.Add(id);SpendService("hire");break;
-                case "tea":inventory.Remove("i12");Sanity=Math.Min(GameBalance.MaxSanity,Sanity+5);SpendService("tea");break;
+                case "tea":inventory.Remove("i12");Sanity=Math.Min(GameBalance.MaxSanity,Sanity+GameBalance.TeaSanity);SpendService("tea");break;
                 case "treat":SpendSupplies(2);injuredCrew.Remove(id);break;
                 case "gunsmith":if(id=="item")Gain("i13");else if(id=="chart")ChartUses++;else LookoutUses++;SpendService("gunsmith");break;
                 case "trust":learned.Add(TrustedCard(id));supportServices.Add("trust:"+id);break;
@@ -224,7 +224,7 @@ namespace UnsoundedSea.Core
                 case "rescue":if(!ActiveCrew("diver"))SpendSupplies(1);escortedCrew=id;nodeResolved=true;break;
                 case "voucher":AddMarker("docking-voucher","本幕结束或下次成功招聘");nodeResolved=true;break;
                 case "repair-boat":if(ActiveCrew("engineer")&&!repairDiscountUsed)repairDiscountUsed=true;else SpendSupplies(1);learnedTools.Add("i08");nodeResolved=true;break;
-                case "crew":if(id=="listen"){Sanity=Math.Min(GameBalance.MaxSanity,Sanity+4);AddKnowledge("比对录音：重复信号来自自动发报机，未确认其后的实体。");}else{AddKnowledge(RegionBriefing(true));RevealAllRoutes(CurrentFull);}nodeResolved=true;break;
+                case "crew":if(id=="listen"){Sanity=Math.Min(GameBalance.MaxSanity,Sanity+GameBalance.EventSanity);AddKnowledge("比对录音：重复信号来自自动发报机，未确认其后的实体。");}else{AddKnowledge(RegionBriefing(true));RevealAllRoutes(CurrentFull);}nodeResolved=true;break;
                 case "gaze":if(id=="hide"){SpendSupplies(1);Watched=2;}SpendService("return-gaze");break;
                 case "risk":if(id=="watch"){Supplies++;Watched=Math.Min(3,Watched+1);}else{Supplies+=2;injuredCrew.Add(id);}nodeResolved=true;break;
                 case "accept":if(old!=null)crewIds.Remove(old);crewIds.Add(escortedCrew);escortedCrew=null;break;
