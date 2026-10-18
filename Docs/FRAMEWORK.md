@@ -2,6 +2,8 @@
 
 适用版本：Unity 6000.6.5f1 / URP。需求依据为 [概念设计](DESIGN_DOC_v0_1.md)。本文描述已实现的战斗基础、局外航海、扩展接口和存档契约；新增机制提案见 [机制与素材设计](ASSET_MECHANICS_DESIGN.md)。
 
+查阅当前卡牌、物品、船员、状态和遭遇的具体效果，见 [游戏元素图鉴](GAMEPLAY_REFERENCE.md)；本文保留架构与扩展契约，不把旧设计数值当作当前规则。
+
 ## 快速运行
 
 Editor 点击 Play 默认从 `Assets/UnsoundedSea/Scenes/MainMenu.unity` 启动，再选择「启航」或「继续航程」进入 `Voyage.unity`；有效未完航程需确认覆盖，终局记录不显示继续。`PlayModeEntry` 配置 `playModeStartScene`，不覆盖当前编辑场景；调试单场景时取消菜单 `Unsounded Sea > Play From Main Menu`，该偏好按本机项目保存。开局可选择医师或听音员，记住设备偏好。统一「调试选关」仅在 Editor／Development Build 显示，覆盖 25 个普通遭遇、八个 Boss／目标战与非战斗节点。旧 `Battle.unity` 与 `SampleScene.unity` 已退出构建，旧 HUD 组件及生成入口已清理；`ModelImportReview.unity` 仅供美术审阅；绑定资产保留集见[模型流程](MODEL_IMPORT_WORKFLOW.md)。
