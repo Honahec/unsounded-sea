@@ -1,0 +1,158 @@
+name: Build and release desktop players
+
+on:
+  push:
+    tags:
+      - '**'
+
+permissions:
+  contents: read
+
+# One Personal seat is shared by both builds. Do not cancel an active build.
+concurrency:
+  group: unity-personal-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event.deleted == false
+    runs-on: macos-15
+    timeout-minutes: 180
+    defaults:
+      run:
+        shell: bash
+    env:
+      UNITY_NON_INTERACTIVE: '1'
+      UNITY_NO_PAGER: '1'
+
+    steps:
+      - name: Check Personal account secrets
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          if [[ -z "$UNITY_EMAIL" || -z "$UNITY_PASSWORD" ]]; then
+            echo '::error::Set UNITY_EMAIL and UNITY_PASSWORD in repository Actions secrets for Unity Personal activation.'
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          # ArtSource masters are not needed by the player build.
+          sparse-checkout: |
+            Assets
+            Packages
+            ProjectSettings
+          lfs: false
+
+      - name: Fetch runtime LFS assets
+        run: git lfs pull --include='Assets/**' --exclude=''
+
+      - name: Install Unity CLI
+        env:
+          UNITY_CLI_HOME: ${{ runner.temp }}/unity-cli
+        run: |
+          curl --fail --silent --show-error --location https://unity.com/install.sh -o "$RUNNER_TEMP/install-unity.sh"
+          bash "$RUNNER_TEMP/install-unity.sh"
+          echo "$UNITY_CLI_HOME/bin" >> "$GITHUB_PATH"
+
+      - name: Install project Editor and Windows cross-build support
+        run: |
+          unity --version
+          editor_version=$(awk '/^m_EditorVersion:/ {print $2}' ProjectSettings/ProjectVersion.txt | tr -d '\r')
+          test -n "$editor_version"
+          unity install-path --set /Applications/Unity/Hub/Editor
+          unity install "$editor_version" --module windows-mono --yes --accept-eula
+          # GameCI activation resolves the Editor through the Hub install layout.
+          unity hub install
+
+      # This release supports Personal activation with email/password directly.
+      # Older GameCI versions require a legacy .ulf or a paid serial instead.
+      - uses: game-ci/cli@v0.1.72
+        with:
+          version: v0.1.72
+
+      - name: Activate Unity Personal
+        id: activate
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: game-ci activate . --unity-licensing-method personal
+
+      - name: Build Windows x64
+        run: |
+          unity build . --target StandaloneWindows64 \
+            --output-path Build/Windows/UnsoundedSea.exe \
+            --log-file Logs/build-windows.log --timeout 2700
+          test -s Build/Windows/UnsoundedSea.exe
+          test -d Build/Windows/UnsoundedSea_Data
+
+      - name: Build macOS
+        run: |
+          unity build . --target StandaloneOSX \
+            --output-path Build/macOS/UnsoundedSea.app \
+            --log-file Logs/build-macos.log --timeout 2700
+          app_executable=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' Build/macOS/UnsoundedSea.app/Contents/Info.plist)
+          test -x "Build/macOS/UnsoundedSea.app/Contents/MacOS/$app_executable"
+
+      - name: Return Unity Personal seat
+        if: always() && steps.activate.outcome != 'skipped'
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: game-ci return-license . --unity-licensing-method personal
+
+      - name: Package players
+        run: |
+          mkdir -p Build/Archives
+          ditto -c -k --keepParent Build/Windows Build/Archives/UnsoundedSea-Windows-x64.zip
+          # Preserve app bundle symlinks and executable permissions before artifact upload.
+          ditto -c -k --sequesterRsrc --keepParent Build/macOS/UnsoundedSea.app Build/Archives/UnsoundedSea-macOS.zip
+          unzip -tq Build/Archives/UnsoundedSea-Windows-x64.zip
+          unzip -tq Build/Archives/UnsoundedSea-macOS.zip
+
+      - name: Upload release packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-players
+          path: Build/Archives/*.zip
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-diagnostics
+          path: |
+            Logs/build-*.log
+            Build/**/*.provenance.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: desktop-players
+          path: packages
+
+      - name: Publish both platforms to the tag release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          test -s packages/UnsoundedSea-Windows-x64.zip
+          test -s packages/UnsoundedSea-macOS.zip
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --draft --generate-notes --title "$RELEASE_TAG"
+          fi
+          gh release upload "$RELEASE_TAG" packages/*.zip --clobber
+          gh release edit "$RELEASE_TAG" --draft=false

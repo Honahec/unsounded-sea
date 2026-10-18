@@ -281,6 +281,21 @@ Editor 验收脚本 `Tools/UiExperienceQA.cs` 通过 `VoyageRuntime.BeginValidat
 
 `Application.persistentDataPath/voyage.json` 使用版本 **1** 包装，组合航海检查点和可选的未结算 `BattleReplay`。每次成功局内操作保存回放；返回航海或标题后继续，恢复同一战斗状态，不重掷开场。胜负结算后清掉局内回放，进入奖励或失败；整局终结后归档到 `voyage-final.json`，主菜单不再提供继续该终局。结算或保存异常保留待结算数据和错误，可重试，不中断 HUD 的 `Changed` 通知。航行中恢复重播该段过场、不重复计段。文件原子替换并保留 `.bak`，旧格式或损坏文件明确报错，不自动覆盖；用户确认后仍可开始新航程。跨版本迁移尚未提供。
 
+## Tag 构建与发布
+
+[发布工作流](../.github/workflows/release.yml) 只响应 tag 的 push（任意 tag 名）；推送 `main`、其他分支或 PR 不执行。Windows x64（当前 Mono 后端）和 macOS 均在 GitHub 托管的 `macos-15` 机器上由 Unity CLI 构建，Windows 使用 `windows-mono` 交叉构建模块。Editor 版本读取 `ProjectSettings/ProjectVersion.txt`，场景沿用 Build Settings 的启用列表，不重建场景。
+
+首次使用需在仓库 **Settings → Secrets and variables → Actions** 配置 `UNITY_EMAIL`、`UNITY_PASSWORD`，对应已开通 Personal 的 Unity 账号。授权使用固定的 [GameCI CLI v0.1.72 Personal 激活实现](https://github.com/game-ci/cli/blob/v0.1.72/dist/platforms/mac/steps/activate.sh)，无需 `UNITY_SERIAL` 或旧 `.ulf`；该实现通过 Unity Licensing Client 申请 Personal 席位。账号必须有可用席位，账号验证／双因素认证要求可能阻止无人值守登录，实际是否可用以首次云端激活结果为准。不要把密码提交到仓库或贴进日志。
+
+两个平台顺序构建，共用一次 Personal 激活；结束或失败后尝试归还席位。不同 tag 共用并发组，不取消正在运行的构建；GitHub 并发组只保留一个待运行任务，连续发布多个 tag 时需等待前一版本完成。
+
+```sh
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+两个构建及 ZIP 完整性检查通过后，发布对应 GitHub Release，附带 `UnsoundedSea-Windows-x64.zip` 与 `UnsoundedSea-macOS.zip`；新 Release 在附件上传完成前保持草稿，重跑可替换同名附件。Windows ZIP 包含整个运行目录；macOS ZIP 保留 `.app` 的权限与符号链接，当前未配置 Developer ID 签名／公证。构建日志另存为 Actions artifact，保留七天。Unity Personal 免费不等于 GitHub Actions、存储或 LFS 无限免费，额度按仓库计划计算。
+
 ## 验证与后续工作
 
 Unity 菜单 **Unsounded Sea → Validate All Encounters** 可检查配置与未知效果；Test Runner 的 EditMode 中运行 `UnsoundedSea.Tests`。
