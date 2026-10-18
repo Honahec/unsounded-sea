@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-fog-enemy-1
   displayName: "\u5931\u5411\u6C34\u624B"
-  health: 28
-  candidateDescription: "\u9519\u8EAB\u5272\u523A\uFF1A9 \u751F\u547D\u4F24\u5BB3 / \u8FA8\u8BA4\u8237\u5411"
+  health: 45
+  candidateDescription: "\u9519\u8EAB\u5272\u523A\uFF1A14 \u751F\u547D\u4F24\u5BB3 / \u8FA8\u8BA4\u8237\u5411"
   intentPolicy: 1
   intents:
   - id: knife
     displayName: "\u9519\u8EAB\u5272\u523A"
     clue: "\u8EAB\u4F53\u671D\u5DE6\uFF0C\u6301\u5200\u624B\u5374\u8F6C\u5411\u53F3\u8237\u3002"
     channel: 0
-    amount: 9
+    amount: 14
     isPublic: 0
     visibleAction: 1
     interruptible: 0

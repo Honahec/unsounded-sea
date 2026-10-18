@@ -224,6 +224,8 @@ namespace UnsoundedSea.Tests
             Play(s, "E05-01"); Play(control, "E05-01");
             Assert.That(s.View.Enemies.Select(x => x.Health), Is.EqualTo(control.View.Enemies.Select(x => x.Health)), "Rejected targets must not consume summon RNG.");
             Play(s, "E05-01"); Play(s, "E05-01");
+            Assert.That(s.View.Actions, Is.Zero);
+            Assert.That(Encounter(s, "E05-01").Enabled, Is.False, "Unaffordable scene cards must not look playable.");
             s.Execute(BattleCommand.EndTurn());
             Play(s, "E05-01"); Play(s, "E05-01");
             Assert.That(s.View.Enemies.Count(x => x.Id.Contains("guard") && x.Health > 0), Is.EqualTo(5));

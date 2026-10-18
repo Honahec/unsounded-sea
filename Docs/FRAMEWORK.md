@@ -2,6 +2,8 @@
 
 适用版本：Unity 6000.6.5f1 / URP。需求依据为 [概念设计](DESIGN_DOC_v0_1.md)。本文描述已实现的战斗基础、局外航海、扩展接口和存档契约；新增机制提案见 [机制与素材设计](ASSET_MECHANICS_DESIGN.md)。
 
+查阅当前卡牌、物品、船员、状态和遭遇的具体效果，见 [游戏元素图鉴](GAMEPLAY_REFERENCE.md)；本文保留架构与扩展契约，不把旧设计数值当作当前规则。
+
 ## 快速运行
 
 Editor 点击 Play 默认从 `Assets/UnsoundedSea/Scenes/MainMenu.unity` 启动，再选择「启航」或「继续航程」进入 `Voyage.unity`；有效未完航程需确认覆盖，终局记录不显示继续。`PlayModeEntry` 配置 `playModeStartScene`，不覆盖当前编辑场景；调试单场景时取消菜单 `Unsounded Sea > Play From Main Menu`，该偏好按本机项目保存。开局可选择医师或听音员，记住设备偏好。统一「调试选关」仅在 Editor／Development Build 显示，覆盖 25 个普通遭遇、八个 Boss／目标战与非战斗节点。旧 `Battle.unity` 与 `SampleScene.unity` 已退出构建，旧 HUD 组件及生成入口已清理；`ModelImportReview.unity` 仅供美术审阅；绑定资产保留集见[模型流程](MODEL_IMPORT_WORKFLOW.md)。
@@ -21,9 +23,9 @@ Editor 点击 Play 默认从 `Assets/UnsoundedSea/Scenes/MainMenu.unity` 启动�
 - **航行工具**：旧海图、测绘望远镜各每幕两次，分别补齐当前未知出口、侦察选定目的地再往前一段。无新信息或状态不允许时不扣次数；不占战斗槽、不因进入战斗刷新、不改地图与遭遇。
 - **交互与动效**：默认中央为海面，右下航路列表显示地点、方向与耗时；选中后显示征兆和启航按钮，选择只预览，确认才出航。旧海图与远望收在海图下方，以文字和余次呈现；右上角文字按钮直接显示 M 海图、J 日志、B 行动簿、Esc 菜单，快捷键在根节点捕获，焦点位于按钮或滚动内容时仍可用，弹窗与文本输入保留各自限制。保留破损装饰字体，移除底部罗盘、航向针、圆形工具、启航印记与重复状态小字；累计小时和航段只在展开海图时显示。航图使用海流底纹、地点符号与弯曲虚线航路，不画隐藏拓扑；节点层间距以加长画布呈现，原生纵向 ScrollView 只滚动航图内容，打开时定位到当前航点，标题、图例、航行工具和关闭控件留在固定区域。调查船按所选目的地沿曲线实际转向、加速和减速；镜头从后斜侧跟随，滞后平滑转向且不随船体横滚。每段约 5 秒：前段出发地隐入浓雾，最后 2 秒目的地逐渐显现，抵达保留新位置与地点场景。减少动效改为约 0.25 秒淡化，在完全遮蔽时定位到终点；也支持途中开启。航行时收图；暂停／日志／设置冻结航段、海浪、船体、镜头和反射，展开海图也冻结环境，抵达只结算一次。
 - **奖励与构筑**：新局固定 12 张不同牌；普通战后三选一、独立奖励四选一、险航两次三选一。公共／实际 Boss 奖励池保持机制过滤，普通次目标开放对应任务牌。`ClaimReward(cardId, replaceDeckCardId = null)` 可仅学习，或原位替换当前牌组一张；非法替换零修改，换出牌仍为已学。每次领取和替换写入历史；险航剩余次数与第二次候选通过回放恢复。幕末按下一幕实际 Boss 发奖，领奖后换幕；终幕直接结算。可放弃换 1 补给，无刷新。C076／C083 从第二幕池起投放。
-- **事件、信息与资源**：`GameBalance` 统一生命 60、理智 30、补给上限 8，初始补给保留 3。五海域各三种事件模板，`EventTitle` 返回当前标题；航点名称与描述按类型匹配。医师 1 行动恢复 3 生命并获得 3 格挡；听音员 2 行动取得新声源后抽 1；罗盘匠在普通战查验可观察连接。船员同回合共享一次支援限制，查询不计调查牌新答案。档案、简报和跨战资源仍随历史恢复。
+- **事件、信息与资源**：`GameBalance` 统一生命 60、理智 30、补给上限 8，初始补给保留 3，并集中维护战外恢复量（休整、治疗、安定心神费用、事件／档案／药茶理智），数值口径见[理智与船员设计 5.1](SANITY_AND_CREW_DESIGN.md#51-恢复渠道)。五海域各三种事件模板，`EventTitle` 返回当前标题；航点名称与描述按类型匹配。医师 1 行动恢复 3 生命并获得 3 格挡；听音员 2 行动取得新声源后抽 1；罗盘匠在普通战查验可观察连接。船员同回合共享一次支援限制，查询不计调查牌新答案。档案、简报和跨战资源仍随历史恢复。
 - **决策反馈与历史**：治疗只检查实际资源并显示禁用原因；没有新航路时禁止消耗抄录或标记。补给已满时放弃奖励明确无额外收益。相同整备配置不写历史，连续牌组／工具调整和航向预览合并为最终选择；出航、侦察或节点结算形成历史边界。终局显示资源、航迹、已学行动、消耗品和补给支出；死因仅使用已记录事实，不虚构致命攻击来源。
-- **战斗边界**：目录解析 25 个普通遭遇和八场 Boss。普通航路按层分配单敌 variant 0–3，第 6 层险航分支使用 variant 4 双敌。非灰雾每海域两种节奏、三种隐匿；variant 3 的普通撤离／封线次目标允许击退或任务获胜。仅用 `VoyageCampaignSetup.SyncCombatBalance` 同步 `Plan(...)` 和现有敌人／遭遇数据，保留模型、场景与牌组引用，不运行 `Setup()`。`CardDeckPreparation.Apply` 注入真实航程资源和配装，Director 成功命令保存回放。
+- **战斗边界**：目录解析 25 个普通遭遇和八场 Boss。普通航路按层分配单敌 variant 0–3，第 6 层险航分支使用 variant 4 双敌。非灰雾每海域两种节奏、三种隐匿；variant 3 的普通撤离／封线次目标允许击退或任务获胜。单敌普通战（variant 0–3）在 `Plan(...)` 基础上按海域乘 `OrdinaryHealthScale／OrdinaryDamageScale／OrdinarySanityScale`，险航双敌与随行者保持原值。仅用 `VoyageCampaignSetup.SyncCombatBalance` 同步 `Plan(...)` 和现有敌人／遭遇数据，保留模型、场景与牌组引用，不运行 `Setup()`。`CardDeckPreparation.Apply` 注入真实航程资源和配装，Director 成功命令保存回放。
 - **调试边界**：`VoyageSession.CreateDebug` 创建独立内存航点，禁止 `Export`；`VoyageRuntime.StartDebugEncounter / StartDebugNode` 复用真实战斗或航海 UI，`Checkpoint` 不写正式存档，胜利也不写永久证据档案。进入调试前若正式战斗有未保存进度，必须先成功保存；失败时保留原会话与错误，不能清空待保存记录。普通调试战仍有三选一结算，Boss 调试战直接结束，返回标题后可继续原正式航程。目录包含全部八场 Boss；`storm-gauntlet` 与 `hollow-beacon` 是新增规则通关入口，任意正常航程种子用于验证前两幕不重复分配。
 
 `VoyageMapGenerator`／`VoyageSession` 属于纯 C# 航海规则；`VoyageRuntime` 负责场景边界与文件；`VoyageHud`／`VoyageSailingPresentation` 只负责交互和航行表现。`Voyage.unity` 已使用调查船与 Uber 海面，场景组合位于 `Art/Voyage/VoyageSeaStage.prefab`：嵌套引用 `SurveyVessel.prefab`，复用海面网格、天空和调色；独立 `VoyageOcean.mat` 降低常态浪强度，不传入巨兽扰流。船体采样同一 `BattleWater` 波形，限制俯仰／横滚；`VoyageWake` 在世界坐标保留弯曲尾流，并随波形更新、逐渐消散。
@@ -104,7 +106,7 @@ BattleScenario（遭遇 + 场景 Prefab + 角色覆写 + 规则模块）
 
 共享 `UiMotion` 为主菜单、图鉴、设置、航海清单、奖励、战斗行动簿和主要弹窗提供约 0.2 秒入场、0.12 秒退场淡化；退场元素不接收指针与焦点，按钮有悬停／按下过渡。动画完成只调整表现属性，不重建业务状态。减少动效跳过这些过渡；既有航行及骨骼动画继续由各自时钟管理。
 
-敌人信息按战斗相机视口和 UI 根节点换算，不依赖反射渲染期间的 `Screen` 尺寸；普通双敌按屏幕左右位置，将姓名、生命与意图分别放在两侧外缘，避开模型，以无边框 UI 同时显示。单敌信息放在左侧；Boss 本体与封线目标战放在上方中央偏左的留白区域；唱诗匣、盐格与继电器占用左侧时（M02–M04），召唤单位统一列在右侧。随三维锚点移动的机关标签会被限制在屏幕内并互相错开。共享 `EnemyIntentDetails` 将征兆按分号换行，省去“可能行动”等标题，生命伤害与理智冲击使用心脏／眼睛图标，数值不带“点”，“可打断”显示为小标签；已确认不攻击（含 M05 守卫召唤当回合、空转回合）不显示意图，未确认候选中的不攻击行动只显示名称；未确认的多候选仍显示全部可能行为，不提前泄露真实分支。仅有一个可能意图的敌人从锁定起即视为已确认，条件伤害、抽牌与已确认目标规则共享这一状态。历史调查按需查日志。
+敌人信息按战斗相机视口和 UI 根节点换算，不依赖反射渲染期间的 `Screen` 尺寸；普通双敌按屏幕左右位置，将姓名、生命与意图分别放在两侧外缘，避开模型，以无边框 UI 同时显示。单敌信息放在左侧；Boss 本体与封线目标战放在上方中央偏左的留白区域；唱诗匣、盐格与继电器占用左侧时（M02–M04），召唤单位统一列在右侧。M05 的灯守卫从左下升起，根节点加 `m05-battle` 后工具／船员／物资栏改到左上空天区，以两列紧凑格排列（船员只显示人名，全称与说明在提示中，高度上限 34% 可滚动），四名船员时也不遮挡守卫及其信息。随三维锚点移动的机关标签会被限制在屏幕内并互相错开。共享 `EnemyIntentDetails` 将征兆按分号换行，省去“可能行动”等标题，生命伤害与理智冲击使用心脏／眼睛图标，数值不带“点”，“可打断”显示为小标签；已确认不攻击（含 M05 守卫召唤当回合、空转回合）不显示意图，未确认候选中的不攻击行动只显示名称；未确认的多候选仍显示全部可能行为，不提前泄露真实分支。仅有一个可能意图的敌人从锁定起即视为已确认，条件伤害、抽牌与已确认目标规则共享这一状态。历史调查按需查日志。
 
 `BattleDirector.ViewRevision` 仅在规则成功结算或重开时递增；动作解锁只刷新按钮可操作性，不重建 HUD、不闪烁禁用色。状态重建保留可恢复焦点与手牌、工具、日志滚动位置。日志可滚动查看完整可见历史，不再截断为最后 12 条。调查工具使用规则快照 `ToolView.Enabled / DisabledReason / Targets`，工具区域短句标明聚焦目标，已回答问题直接禁用。
 
@@ -275,7 +277,7 @@ C039／C041／C050 的调查接力共享每回合一次行动返还；C092 需�
 
 文件存储先写临时文件并 flush，再原子替换已有文件，保留旧 `.bak`；读失败不会自动覆盖或清空。默认实现面向桌面文件系统，WebGL/云存档需另实现 `IBattleSaveStore`。
 
-航海用 `VoyageCheckpoint` 保存首幕地图、初始船员和成功命令历史，重建三幕路径、知识、奖励、配装、资源与阶段。地图版本 **9**、检查点版本 **14**；`Perilous` 进入地图校验，领奖替换通过 ClaimReward 历史的单个 `Values` 元素记录；多次收获、幕末已选海域未领奖、小结承伤与待确认过场均可重放。旧地图与旧检查点直接拒绝，不覆盖原文件，需明确开始新航程。
+航海用 `VoyageCheckpoint` 保存首幕地图、初始船员和成功命令历史，重建三幕路径、知识、奖励、配装、资源与阶段。地图版本 **9**、检查点版本 **15**（恢复数值改变后旧历史不再重放）；`Perilous` 进入地图校验，领奖替换通过 ClaimReward 历史的单个 `Values` 元素记录；多次收获、幕末已选海域未领奖、小结承伤与待确认过场均可重放。旧地图与旧检查点直接拒绝，不覆盖原文件，需明确开始新航程。
 
 Editor 验收脚本 `Tools/UiExperienceQA.cs` 通过 `VoyageRuntime.BeginValidation` 将航程文件限定在项目 `Logs/UiExperience/`，验证会话不写永久证据偏好；真实战斗与命令规则保持不变。截图前实际调整 Game View，分别记录三比例原生像素与 UI 根尺寸。真实航程入口只通过合法命令推进，不直接设置胜利；结束时比较正式存档哈希并恢复减少动效偏好。
 
@@ -285,7 +287,7 @@ Editor 验收脚本 `Tools/UiExperienceQA.cs` 通过 `VoyageRuntime.BeginValidat
 
 [发布工作流](../.github/workflows/release.yml) 只响应 tag 的 push（任意 tag 名）；推送 `main`、其他分支或 PR 不执行。Windows x64（当前 Mono 后端）和 macOS 均在 GitHub 托管的 `macos-15` 机器上由 Unity CLI 构建，Windows 使用 `windows-mono` 交叉构建模块。Editor 版本读取 `ProjectSettings/ProjectVersion.txt`，场景沿用 Build Settings 的启用列表，不重建场景。
 
-首次使用需在仓库 **Settings → Secrets and variables → Actions** 配置 `UNITY_EMAIL`、`UNITY_PASSWORD`，对应已开通 Personal 的 Unity 账号。授权使用固定的 [GameCI CLI v0.1.72 Personal 激活实现](https://github.com/game-ci/cli/blob/v0.1.72/dist/platforms/mac/steps/activate.sh)，无需 `UNITY_SERIAL` 或旧 `.ulf`；该实现通过 Unity Licensing Client 申请 Personal 席位。账号必须有可用席位，账号验证／双因素认证要求可能阻止无人值守登录，实际是否可用以首次云端激活结果为准。不要把密码提交到仓库或贴进日志。
+首次使用需在仓库 **Settings → Secrets and variables → Actions** 配置 `UNITY_EMAIL`、`UNITY_PASSWORD`，对应已开通 Personal 的 Unity 账号。授权使用固定的 [GameCI CLI v0.1.72 Personal 激活实现](https://github.com/game-ci/cli/blob/v0.1.72/dist/platforms/mac/steps/activate.sh)，从官方 Release 下载完整 CLI 包并验证 SHA-256，绕过该版本 Action 的安装脚本执行权限问题。无需 `UNITY_SERIAL` 或旧 `.ulf`；该实现通过 Unity Licensing Client 申请 Personal 席位。账号必须有可用席位，账号验证／双因素认证要求可能阻止无人值守登录，实际是否可用以首次云端激活结果为准。不要把密码提交到仓库或贴进日志。
 
 两个平台顺序构建，共用一次 Personal 激活；结束或失败后尝试归还席位。不同 tag 共用并发组，不取消正在运行的构建；GitHub 并发组只保留一个待运行任务，连续发布多个 tag 时需等待前一版本完成。
 

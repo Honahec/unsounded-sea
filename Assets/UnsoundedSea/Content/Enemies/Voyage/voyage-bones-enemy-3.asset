@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-bones-enemy-3
   displayName: "\u7A7A\u8231\u6572\u51FB\u8005"
-  health: 32
-  candidateDescription: "\u95E8\u677F\u63A8\u51FB\uFF1A9 \u751F\u547D\u4F24\u5BB3 / \u7A7A\u7BB1\u4E09\u6572\uFF1A4 \u7406\u667A\u51B2\u51FB"
+  health: 46
+  candidateDescription: "\u95E8\u677F\u63A8\u51FB\uFF1A11 \u751F\u547D\u4F24\u5BB3 / \u7A7A\u7BB1\u4E09\u6572\uFF1A5 \u7406\u667A\u51B2\u51FB"
   intentPolicy: 1
   intents:
   - id: knock
     displayName: "\u7A7A\u7BB1\u4E09\u6572"
     clue: "\u77ED\u69CC\u60AC\u5728\u80F8\u524D\u7A7A\u7BB1\u4E0A\u65B9\u3002"
     channel: 1
-    amount: 4
+    amount: 5
     isPublic: 1
     visibleAction: 1
     interruptible: 1
@@ -31,7 +31,7 @@ MonoBehaviour:
     displayName: "\u95E8\u677F\u63A8\u51FB"
     clue: "\u80CC\u540E\u8231\u95E8\u677F\u5411\u524D\u503E\u538B\u3002"
     channel: 0
-    amount: 9
+    amount: 11
     isPublic: 1
     visibleAction: 1
     interruptible: 0

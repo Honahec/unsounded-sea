@@ -17,6 +17,10 @@ namespace UnsoundedSea.Editor
         private const string CatalogPath = Root + "/Resources/VoyageEncounterCatalog.asset";
         private static readonly string[] Regions = { "fog", "bones", "inverted", "fleet", "abyss" };
         private static readonly string[] RegionTitles = { "灰雾航道", "尸骸之海", "倒悬潮庭", "无灯裂海", "无星深渊" };
+        // Single-enemy encounters (variants 0-3) per region; perilous doubles keep their authored numbers.
+        private static readonly float[] OrdinaryHealthScale = { 1.6f, 1.45f, 1.45f, 1.45f, 1.6f };
+        private static readonly float[] OrdinaryDamageScale = { 1.5f, 1.2f, 1.2f, 1.2f, 1.4f };
+        private static readonly float[] OrdinarySanityScale = { 1.2f, 1.15f, 1.15f, 1.15f, 1.2f };
         private static readonly EnemyPlan[,] Plans =
         {
             {
@@ -247,9 +251,12 @@ namespace UnsoundedSea.Editor
                 var intents = region == 0 ? plan.Intents : style == EnemyStyle.Rhythm
                     ? RhythmIntents(plan.Intents) : HiddenIntents(plan.Intents, variant == 1);
                 if (region == 2 && variant == 4) intents[0].amount = 8;
+                if (variant < 4)
+                    intents = intents.Select(intent => CombatBalanceSetup.CopyIntent(intent, (int)Math.Round(intent.amount *
+                        (intent.channel == DamageChannel.Sanity ? OrdinarySanityScale : OrdinaryDamageScale)[region], MidpointRounding.AwayFromZero))).ToArray();
                 value.id = id;
                 value.displayName = plan.DisplayName;
-                value.health = plan.Health;
+                value.health = variant < 4 ? (int)Math.Round(plan.Health * OrdinaryHealthScale[region], MidpointRounding.AwayFromZero) : plan.Health;
                 value.candidateDescription = DescribeIntents(intents);
                 value.intentPolicy = style == EnemyStyle.Hidden ? IntentPolicy.Random : IntentPolicy.Cycle;
                 value.intents = intents;

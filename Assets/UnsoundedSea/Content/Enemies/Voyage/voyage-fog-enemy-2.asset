@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnsoundedSea.Runtime::UnsoundedSea.Runtime.EnemyDefinition
   id: voyage-fog-enemy-2
   displayName: "\u767D\u706F\u53F8\u53F7"
-  health: 22
-  candidateDescription: "\u767D\u706F\u5B9A\u5411\uFF1A5 \u751F\u547D\u4F24\u5BB3 / \u77ED\u53F7\u60CA\u9E23\uFF1A4 \u7406\u667A\u51B2\u51FB"
+  health: 35
+  candidateDescription: "\u767D\u706F\u5B9A\u5411\uFF1A8 \u751F\u547D\u4F24\u5BB3 / \u77ED\u53F7\u60CA\u9E23\uFF1A5 \u7406\u667A\u51B2\u51FB"
   intentPolicy: 1
   intents:
   - id: lamp
     displayName: "\u767D\u706F\u5B9A\u5411"
     clue: "\u4E73\u767D\u706F\u7F69\u8F6C\u5411\u4F60\uFF0C\u77ED\u53F7\u5C1A\u672A\u4E3E\u8D77\u3002"
     channel: 0
-    amount: 5
+    amount: 8
     isPublic: 1
     visibleAction: 1
     interruptible: 0
@@ -31,7 +31,7 @@ MonoBehaviour:
     displayName: "\u77ED\u53F7\u60CA\u9E23"
     clue: "\u77ED\u53F7\u62B5\u4F4F\u5507\u8FB9\uFF0C\u706F\u7F69\u671D\u5411\u8237\u5916\u3002"
     channel: 1
-    amount: 4
+    amount: 5
     isPublic: 0
     visibleAction: 1
     interruptible: 1
